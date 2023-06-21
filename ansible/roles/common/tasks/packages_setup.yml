@@ -5,7 +5,7 @@
     name: "{{ system_packages_deb }}"
     update_cache: true
   register: result
-  retries: 20
+  retries: 60
   delay: 5
   until: result is success
   when: ansible_facts['os_family'] == "Debian"
@@ -54,7 +54,7 @@
     name: "{{ system_packages_rhel }}"
     update_cache: true
   register: result
-  retries: 20
+  retries: 60
   delay: 5
   until: result is success
   when: ansible_facts['os_family'] == 'RedHat'

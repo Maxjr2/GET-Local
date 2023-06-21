@@ -3,7 +3,7 @@
     name: "*"
     state: latest
   register: result
-  retries: 5
+  retries: 60
   delay: 5
   until: result is success
   when: system_packages_upgrade | bool
@@ -24,7 +24,7 @@
     - name: Run Automatic Security Upgrades directly (Ubuntu / Debian)
       command: unattended-upgrade
       register: result
-      retries: 5
+      retries: 60
       delay: 5
       until: result is success
   when:
@@ -61,7 +61,7 @@
     - name: Run Automatic Security Upgrades directly (RHEL)
       command: dnf-automatic
       register: result
-      retries: 5
+      retries: 60
       delay: 5
       until: result is success
   when:
@@ -94,7 +94,7 @@
     - name: Run Automatic Security Upgrades directly (RHEL - Amazon Linux 2)
       command: yum update --security -y
       register: result
-      retries: 5
+      retries: 60
       delay: 5
       until: result is success
   when:
