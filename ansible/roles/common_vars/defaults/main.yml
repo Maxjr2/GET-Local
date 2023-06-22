@@ -124,6 +124,7 @@ gitlab_object_storage_packages_bucket: "{{ gitlab_object_storage_prefix }}-packa
 gitlab_object_storage_terraform_state_bucket: "{{ gitlab_object_storage_prefix }}-terraform-state"
 gitlab_object_storage_uploads_bucket: "{{ gitlab_object_storage_prefix }}-uploads"
 gitlab_object_storage_registry_bucket: "{{ gitlab_object_storage_prefix }}-registry"
+gitlab_object_storage_registry_chunksize_mb: "{{ '10' if cloud_provider == 'aws' else '5' }}"
 
 # Container Registry Settings
 container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gcp') and external_url_ssl and external_ssl_source != '' }}"
