@@ -3,4 +3,4 @@ s3:
   use_iam_profile: true
   region: {{ aws_region }}
   v4auth: true
-  chunksize: {{ gitlab_object_storage_registry_chunksize_mb*1024*1024 }}
+  chunksize: {{ (gitlab_object_storage_registry_chunksize_mb | int) * 1024 * 1024 }}
