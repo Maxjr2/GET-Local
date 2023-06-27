@@ -1,0 +1,61 @@
+---
+- hosts: all:!gitlab_cluster:!ungrouped
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Clear any previous unneeded NFS mounts from nodes
+      block:
+        - name: Get existing NFS mount details
+          shell: "findmnt --nocanonicalize -o SOURCE -n {{ gitlab_nfs_path }} || echo ''"
+          register: existing_mount
+
+        - name: Unmount any old NFS mounts
+          command: "umount -f -l {{ gitlab_nfs_path }}"
+          when: gitlab_nfs_path in existing_mount.stdout
+
+        - name: Remove any old NFS mount config
+          mount:
+            path: "{{ gitlab_nfs_path }}"
+            state: absent
+          when: gitlab_nfs_path in existing_mount.stdout
+      when: (('gitlab_rails' not in group_names or 'sidekiq' not in group_names) if 'gitlab_nfs' in groups else true)
+
+    - name: Remove old NFS server setups on Rails or Gitaly nodes
+      block:
+        - name: Populate service facts
+          service_facts:
+
+        - name: Stop and disable NFS Server service if present
+          service:
+            name: "{{ 'nfs-kernel-server' if ansible_facts['os_family'] == 'Debian' else 'nfs-server' }}"
+            state: stopped
+            enabled: false
+          when: ('nfs-kernel-server' in services or 'nfs-server' in services )
+
+        - name: Uninstall NFS Server (Debian)
+          apt:
+            name: nfs-kernel-server
+            state: absent
+          register: nfs_server_uninstall
+          when:
+            - ('nfs-kernel-server' in services)
+            - ansible_facts['os_family'] == 'Debian'
+
+        - name: Remove old NFS exports file
+          file:
+            path: "/etc/exports"
+            state: absent
+
+        - name: Check if old NFS server path exists
+          stat:
+            path: "{{ gitlab_nfs_path }}"
+          register: old_mnt_path
+
+        - name: Remove file if exists incorrectly at mount path
+          file:
+            path: "{{ gitlab_nfs_path }}"
+            state: absent
+          when: old_mnt_path.stat.exists
+      when: ('gitaly_primary' in group_names or 'gitlab_rails_primary' in group_names)

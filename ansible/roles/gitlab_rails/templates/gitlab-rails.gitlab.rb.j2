@@ -25,7 +25,7 @@ gitlab_sshd['enable'] = true
 gitlab_sshd['listen_address'] ="[::]:{{ gitlab_shell_ssh_port }}"
 {% endif %}
 
-# Ensure UIDs and GIDs match between servers for permissions via NFS
+# Ensure UIDs and GIDs match between servers for permissions
 user['uid'] = 9000
 user['gid'] = 9000
 web_server['uid'] = 9001
@@ -111,7 +111,7 @@ gitlab_rails['backup_upload_connection'] = {
   {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
 }
 gitlab_rails['backup_upload_remote_directory'] = "{{ gitlab_object_storage_backups_bucket }}"
-{% elif gitlab_object_storage_type == 'nfs'%}
+{% elif 'gitlab_nfs' in groups and gitlab_object_storage_type == 'nfs' %}
 
 ## NFS - Objects
 gitlab_rails['uploads_directory'] = '{{ gitlab_nfs_path }}/uploads'

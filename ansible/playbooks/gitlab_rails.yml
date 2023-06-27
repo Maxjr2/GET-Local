@@ -1,16 +1,7 @@
 ---
-# Setup and gather vars on all hosts
-- hosts: all:!gitlab_cluster:!ungrouped
-  gather_facts: false
-  tasks:
-    - name: Gather Facts
-      gather_facts:
-      when: ansible_fqdn is not defined
-      tags: always
+- import_playbook: playbook_prep.yml
 
-- hosts:
-    - gitlab_rails_primary
-    - gitlab_rails_secondary
+- hosts: gitlab_rails
+  become: true
   roles:
     - gitlab_rails
-  become: true

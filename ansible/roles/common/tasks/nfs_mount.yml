@@ -19,44 +19,6 @@
         - gitlab_nfs_path in existing_mount.stdout
         - gitlab_nfs_int_addr not in existing_mount.stdout
 
-- name: Setup NFS Server
-  block:
-    - name: Configure Node Exporter if dedicated NFS server
-      include_role:
-        name: geerlingguy.node_exporter
-      when: "'gitlab_nfs' in group_names"
-
-    - name: Install NFS Server
-      package:
-        name: "{{ 'nfs-kernel-server' if ansible_facts['os_family'] == 'Debian' else 'nfs-utils' }}"
-      register: result
-      retries: 2
-      delay: 3
-      until: result is success
-
-    - name: Disable NFS Server Delegation
-      shell: |
-        echo 0 > /proc/sys/fs/leases-enable
-        sysctl -w fs.leases-enable=0
-
-    - name: Create GitLab NFS path
-      file:
-        path: "{{ gitlab_nfs_path }}"
-        state: directory
-        mode: '0777'
-
-    - name: Create /etc/exports
-      template:
-        src: templates/nfs_exports.j2
-        dest: /etc/exports
-
-    - name: Restart nfs server
-      service:
-        name: "{{ 'nfs-server' if ansible_facts['os_family'] == 'RedHat' else 'nfs-kernel-server' }}"
-        state: restarted
-        enabled: true
-  when: gitlab_nfs_int_addr == ansible_default_ipv4.address or gitlab_nfs_int_addr == (private_dns_name if cloud_provider == 'aws' else ansible_fqdn)
-
 - name: Clear any files incorrectly at mount location
   block:
     - name: Check if file exists incorrectly at mount path
@@ -77,6 +39,3 @@
     state: mounted
     src: "{{ gitlab_nfs_int_addr }}:{{ gitlab_nfs_path }}"
     path: "{{ gitlab_nfs_path }}"
-  when:
-    - not (gitlab_nfs_int_addr == ansible_default_ipv4.address or gitlab_nfs_int_addr == (private_dns_name if cloud_provider == 'aws' else ansible_fqdn))
-    - omnibus_node

@@ -202,9 +202,6 @@ module "gitlab_ref_arch_aws" {
   praefect_postgres_node_count = 1
   praefect_postgres_instance_type = "c5.large"
 
-  gitlab_nfs_node_count = 1
-  gitlab_nfs_instance_type = "c5.xlarge"
-
   gitlab_rails_node_count = 3
   gitlab_rails_instance_type = "c5.9xlarge"
 

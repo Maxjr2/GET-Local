@@ -98,9 +98,6 @@ module "gitlab_ref_arch_gcp" {
   praefect_postgres_node_count   = 1
   praefect_postgres_machine_type = "n1-highcpu-2"
 
-  gitlab_nfs_node_count   = 1
-  gitlab_nfs_machine_type = "n1-highcpu-4"
-
   haproxy_internal_node_count   = 1
   haproxy_internal_machine_type = "n1-highcpu-2"
 
@@ -186,9 +183,6 @@ module "gitlab_ref_arch_aws" {
 
   praefect_postgres_node_count    = 1
   praefect_postgres_instance_type = "c5.large"
-
-  gitlab_nfs_node_count    = 1
-  gitlab_nfs_instance_type = "c5.xlarge"
 
   haproxy_internal_node_count    = 1
   haproxy_internal_instance_type = "c5.large"

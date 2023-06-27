@@ -24,9 +24,6 @@ module "gitlab_ref_arch_aws" {
   praefect_node_count    = 3
   praefect_instance_type = "c5.large"
 
-  gitlab_nfs_node_count    = 1
-  gitlab_nfs_instance_type = "c5.xlarge"
-
   # 10k - AWS RDS
   rds_postgres_instance_type = "m5.2xlarge"
   rds_postgres_password      = "<rds_password>"

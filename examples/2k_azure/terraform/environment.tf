@@ -13,9 +13,6 @@ module "gitlab_ref_arch_azure" {
   gitaly_node_count = 1
   gitaly_size       = "Standard_D4s_v3"
 
-  gitlab_nfs_node_count = 1
-  gitlab_nfs_size       = "Standard_F4s_v2"
-
   gitlab_rails_node_count = 2
   gitlab_rails_size       = "Standard_F8s_v2"
 
