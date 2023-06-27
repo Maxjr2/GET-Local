@@ -1,7 +1,7 @@
 exclude_paths:
   - ${HOME}/.ansible/roles/
   - playbooks/error-search.yml
-  - playbooks/test.yml
+  - playbooks/test*.yml
   - environments/
 skip_list:
   - experimental
@@ -25,4 +25,5 @@ skip_list:
   - galaxy[no-changelog] # Collection changelog missing - Optional in Ansible
   - galaxy[no-runtime] # Collection runtime config file missing - Optional in Ansible
   - key-order[task] # You can improve the task key order to: name, when, block - Optional in Ansible
+  - var-naming[no-role-prefix] # Variables names from within roles should use role_name_ as a prefix - Optional in Ansible, subjective.
 offline: true

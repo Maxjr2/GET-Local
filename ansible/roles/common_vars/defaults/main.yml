@@ -265,10 +265,8 @@ sidekiq_max_concurrency: 20
 ################################################################################
 
 # GitLab NFS
-gitlab_nfs_target_group: "{{ 'gitlab_nfs' if 'gitlab_nfs' in groups else (groups.keys() | select('match', 'gitaly_primary|gitlab_rails_primary') | first) }}"
-gitlab_nfs_int_addr: "{{ groups[gitlab_nfs_target_group] | map('extract', hostvars, internal_addr_lookup) | join('') }}"
+gitlab_nfs_int_addr: "{{ groups['gitlab_nfs'] | map('extract', hostvars, internal_addr_lookup) | join('') }}"
 gitlab_nfs_path: "{{ '/mnt/gitlab-nfs' if cloud_provider != 'azure' else '/srv/gitlab-nfs' }}"
-gitlab_nfs_setup: true
 
 # Search
 elasticsearch_clean_install: "{{ lookup('env','ELASTICSEARCH_CLEAN_INSTALL') | default('false', true) }}"
@@ -424,11 +422,6 @@ geo_secondary_postgres_host: ""
 geo_secondary_praefect_postgres_host: ""
 
 geo_secondary_skip_hybrid_redeploy: false
-
-geo_primary_gitlab_nfs_target_group: "{{ (geo_primary_site_group_name + '_gitlab_nfs' if geo_primary_site_group_name + '_gitlab_nfs' in groups else (groups.keys() | select('match', geo_primary_site_group_name + '(_gitaly_primary|_gitlab_rails_primary)') | first)) if geo_primary_site_group_name in group_names else '' }}"
-geo_primary_gitlab_nfs_int_ip: "{{ groups[geo_primary_gitlab_nfs_target_group] | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('') if geo_primary_site_group_name in group_names else '' }}"
-geo_secondary_gitlab_nfs_target_group: "{{ (geo_secondary_site_group_name + '_gitlab_nfs' if geo_secondary_site_group_name + '_gitlab_nfs' in groups else (groups.keys() | select('match', geo_secondary_site_group_name + '(_gitaly_primary|_gitlab_rails_primary)') | first)) if geo_secondary_site_group_name in group_names else '' }}"
-geo_secondary_gitlab_nfs_int_ip: "{{ groups[geo_secondary_gitlab_nfs_target_group] | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('') if geo_secondary_site_group_name in group_names else '' }}"
 
 geo_disable_secondary_proxying: false
 geo_enable_object_storage_replication: true

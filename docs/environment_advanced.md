@@ -515,21 +515,28 @@ The Toolkit can also optionally upgrade all packages and clean up unneeded packa
 - `system_packages_upgrade`: Configures the Toolkit to upgrade all packages on nodes. Default is `false`. Can also be set as via the environment variable `SYSTEM_PACKAGES_UPGRADE`.
 - `system_packages_autoremove`: Configures the Toolkit to autoremove any old or unneeded packages on nodes. Default is `false`. Can also be set as via the environment variable `SYSTEM_PACKAGES_AUTOREMOVE`.
 
-## NFS Options
+## NFS for Object Data
 
-How NFS is used by either both GitLab or the Toolkit is nuanced.
+You can optionally provision and configure a [NFS server if desired to handle Object Data](https://docs.gitlab.com/ee/administration/nfs.html). This is not recommended however with [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) instead preferable in all cases. To configure this some steps are required in Terraform and Ansible.
 
-The various ways it's used are as follows:
+In Terraform, you'll need to provision a `gitlab_nfs` node in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file. For example in AWS:
 
-- Toolkit - Requires NFS to propagate select config and SSH keys.
-- GitLab - Can be optionally used to store data, but this isn't recommended over [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html).
-  - Note this does **not** include Git repository data, which is [deprecated](https://docs.gitlab.com/ee/administration/nfs.html#gitaly-and-nfs-deprecation).
+```tf
+module "gitlab_ref_arch_aws" {
+  source = "../../modules/gitlab_ref_arch_aws"
 
-As such, the Toolkit will always configure a NFS server for its own use only by default on a select node depending on what's available - NFS, Gitaly or Rails in that order. This happens seamlessly in the background and the server is only used during Toolkit runs.
+  [...]
 
-:information_source:&nbsp; It's recommended you still deploy a separate NFS server as a best practice. This is to reduce blast radius and to avoid any issues with NFS, which tends to not handle any server issues well.
+  gitlab_nfs_node_count    = 1
+  gitlab_nfs_instance_type = "c5.xlarge"
+}
+```
 
-It's possible to also use this NFS server to also store GitLab object data by setting the Ansible variable `gitlab_object_storage_type` to `nfs`. A dedicated GitLab NFS node would be required in this setup, however do note this is generally unrecommended over [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html).
+Then in Ansible you need to configure the `gitlab_object_storage_type` variable to `nfs` in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
+
+```yml
+gitlab_object_storage_type: 'nfs'
+```
 
 ## External Git SSH Port Options
 

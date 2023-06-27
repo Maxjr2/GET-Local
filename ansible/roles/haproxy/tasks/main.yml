@@ -20,24 +20,6 @@
     state: directory
   tags: reconfigure
 
-# To be removed in 3.0
-- name: Remove NFS mount if configured
-  block:
-    - name: Get existing mount details
-      shell: "findmnt --nocanonicalize -o SOURCE -n {{ gitlab_nfs_path }} || echo ''"
-      register: existing_mount
-
-    - name: Unmount existing if not correct server
-      command: "umount -f -l {{ gitlab_nfs_path }}"
-      when: gitlab_nfs_path in existing_mount.stdout
-
-    - name: Remove existing mount config if not correct server
-      mount:
-        path: "{{ gitlab_nfs_path }}"
-        state: absent
-      when: gitlab_nfs_path in existing_mount.stdout
-  when: "'haproxy_external' in group_names"
-
 - name: Configure External SSL
   block:
     - name: Configure Let's Encrypt certificates

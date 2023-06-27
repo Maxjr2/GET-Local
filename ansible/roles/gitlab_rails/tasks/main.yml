@@ -1,4 +1,11 @@
 ---
+- name: Mount NFS if configured
+  include_role:
+    name: gitlab_nfs
+    tasks_from: nfs_mount
+  when:
+    - "'gitlab_nfs' in groups"
+
 - name: Propagate Secrets if existing
   include_role:
     name: common

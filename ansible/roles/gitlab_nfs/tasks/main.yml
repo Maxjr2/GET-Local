@@ -1,0 +1,30 @@
+---
+- name: Install NFS Server
+  package:
+    name: "{{ 'nfs-kernel-server' if ansible_facts['os_family'] == 'Debian' else 'nfs-utils' }}"
+  register: result
+  retries: 2
+  delay: 3
+  until: result is success
+
+- name: Disable NFS Server Delegation
+  shell: |
+    echo 0 > /proc/sys/fs/leases-enable
+    sysctl -w fs.leases-enable=0
+
+- name: Create GitLab NFS path
+  file:
+    path: "{{ gitlab_nfs_path }}"
+    state: directory
+    mode: '0777'
+
+- name: Create /etc/exports
+  template:
+    src: templates/nfs_exports.j2
+    dest: /etc/exports
+
+- name: Restart nfs server
+  service:
+    name: "{{ 'nfs-server' if ansible_facts['os_family'] == 'RedHat' else 'nfs-kernel-server' }}"
+    state: restarted
+    enabled: true

@@ -1,0 +1,19 @@
+---
+# For individual playbooks against specific hosts that require information from others
+- hosts: all:!gitlab_cluster:!ungrouped
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Load Secrets if existing
+      include_role:
+        name: common
+        tasks_from: secrets
+      vars:
+        gitlab_secrets_write: false
+      when:
+        - hostvars['localhost'].gitlab_secrets_json is not defined
+        - omnibus_node
+        - gitlab_secrets_setup
+      tags: reconfigure

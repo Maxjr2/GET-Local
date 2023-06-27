@@ -12,6 +12,7 @@ system_packages_auto_security_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_AUTO_SE
 # Python packages must target Python 3.6 for OS compatibility
 python_packages: [requests==2.27.1, google-auth==2.14.0, netaddr==0.8.0, openshift==0.13.1, PyYAML==6.0, docker==5.0.3, pexpect==4.8.0, psycopg2==2.9.5]
 
+gitlab_secrets_write: true
 gitlab_secrets_reconfigure: false
 
 # Data Disks

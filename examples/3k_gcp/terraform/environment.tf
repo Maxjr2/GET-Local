@@ -17,9 +17,6 @@ module "gitlab_ref_arch_gcp" {
   praefect_postgres_node_count   = 1
   praefect_postgres_machine_type = "n1-highcpu-2"
 
-  gitlab_nfs_node_count   = 1
-  gitlab_nfs_machine_type = "n1-highcpu-4"
-
   gitlab_rails_node_count   = 3
   gitlab_rails_machine_type = "n1-highcpu-8"
 

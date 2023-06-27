@@ -39,7 +39,6 @@ The requirements for the Toolkit are as follows:
   - Admin access to the OS is also required by GET to install various dependencies
   - ARM based hardware is supported for Omnibus environments
 - Types of environment: The Toolkit is designed to deploy the official GitLab [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures) (Standard or Cloud Native Hybrid) as environments.
-  - The Toolkit requires [NFS to propagate certain files](docs/environment_advanced.md#nfs-options). This can be on a dedicated node, or it will dynamically set this up on other nodes as required.
 
 ## Documentation
 
