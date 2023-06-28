@@ -203,6 +203,10 @@ variable "gitaly_disk_size" {
   type    = string
   default = "500"
 }
+variable "gitaly_disk_iops" {
+  type    = number
+  default = 8000
+}
 variable "gitaly_disk_encrypt" {
   type    = bool
   default = null
