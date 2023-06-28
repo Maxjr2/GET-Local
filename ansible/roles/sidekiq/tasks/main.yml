@@ -2,7 +2,7 @@
 - name: Mount NFS if configured
   include_role:
     name: gitlab_nfs
-    tasks_from: client_mount
+    tasks_from: nfs_mount
   when:
     - "'gitlab_nfs' in groups"
 
