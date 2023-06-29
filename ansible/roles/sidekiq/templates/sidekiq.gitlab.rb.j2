@@ -149,8 +149,14 @@ gitlab_rails['db_load_balancing'] = { 'hosts' => {{ postgres_load_balancing_host
 {% endif %}
 
 {% elif 'postgres' in groups %}
+
+{% if 'pgbouncer' not in groups %}
+gitlab_rails['db_host'] = '{{ postgres_host }}'
+gitlab_rails['db_port'] = '{{ postgres_port }}'
+{% else %}
 gitlab_rails['db_host'] = '{{ internal_lb_host }}'
 gitlab_rails['db_port'] = 6432
+{% endif %}
 gitlab_rails['db_password'] = '{{ postgres_password }}'
 
 {% if groups['postgres'] | length > 1 %}
