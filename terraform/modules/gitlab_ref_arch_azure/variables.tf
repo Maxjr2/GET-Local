@@ -94,23 +94,6 @@ variable "consul_disk_size" {
   default = null
 }
 
-variable "elastic_node_count" {
-  type    = number
-  default = 0
-}
-variable "elastic_size" {
-  type    = string
-  default = ""
-}
-variable "elastic_storage_account_type" {
-  type    = string
-  default = "Premium_LRS"
-}
-variable "elastic_disk_size" {
-  type    = string
-  default = "4095"
-}
-
 variable "gitaly_node_count" {
   type    = number
   default = 0

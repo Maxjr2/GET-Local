@@ -1,4 +1,0 @@
----
-dependencies:
-  - role: common
-  - role: geerlingguy.node_exporter

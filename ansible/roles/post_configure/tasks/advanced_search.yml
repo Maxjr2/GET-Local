@@ -35,6 +35,7 @@
             - delete_result.rc != 0
             - '"no address" not in delete_result.stderr'
             - '"Net::OpenTimeout" not in delete_result.stderr'
+            - '"Failed to open TCP connection" not in delete_result.stderr'
           when:
             - toolbox_pod is defined
             - "'gitlab_rails' not in groups"
@@ -70,7 +71,7 @@
     - name: Pause for 60 secs for old Advanced Search index to clear
       wait_for:
         timeout: 60
-  when: elasticsearch_clean_install | bool
+  when: advanced_search_clean_install | bool
 
 - name: Get and save Environment Settings
   block:
@@ -117,10 +118,10 @@
       delegate_to: "{{ groups['gitlab_rails'][0] }}"
       delegate_facts: true
       become: true
-      register: elasticsearch_status_result
+      register: advanced_search_status_result
       retries: 5
       delay: 5
-      until: elasticsearch_status_result is success
+      until: advanced_search_status_result is success
       when: "'gitlab_rails' in groups"
 
     - name: Enable GitLab Advanced Search indexing setting via GitLab Toolbox pod
@@ -132,10 +133,10 @@
             ApplicationSetting.last.update(elasticsearch_url: \"{{ advanced_search_hosts | join(',') }}\")
             ApplicationSetting.last.update(elasticsearch_indexing: true)
           "
-      register: elasticsearch_status_result
+      register: advanced_search_status_result
       retries: 5
       delay: 5
-      until: elasticsearch_status_result is success
+      until: advanced_search_status_result is success
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"

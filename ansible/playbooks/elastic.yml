@@ -1,7 +1,0 @@
----
-- import_playbook: playbook_prep.yml
-
-- hosts: elastic
-  roles:
-    - elastic
-  become: true

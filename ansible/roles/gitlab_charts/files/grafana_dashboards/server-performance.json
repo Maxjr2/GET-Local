@@ -197,7 +197,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(node_memory_MemTotal_bytes{job=~\"node|omnibus_node|non_omnibus_node\"} - node_memory_MemAvailable_bytes{job=~\"node|omnibus_node|non_omnibus_node\"}) * on(instance) group_left(nodename) (node_uname_info{nodename!~\".*elastic.*\", job=~\"node|omnibus_node|non_omnibus_node\"})",
+          "expr": "(node_memory_MemTotal_bytes{job=~\"node|omnibus_node|non_omnibus_node\"} - node_memory_MemAvailable_bytes{job=~\"node|omnibus_node|non_omnibus_node\"}) * on(instance) group_left(nodename) (node_uname_info{nodename!~\".*opensearch.*\", job=~\"node|omnibus_node|non_omnibus_node\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
