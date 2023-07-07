@@ -235,19 +235,17 @@ The Toolkit supports setting up both of these setups. This is controlled simply 
 
 ## Advanced Search
 
-The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes provisioning and configuring OpenSearch or Elasticsearch nodes to be a cluster as well as configuring GitLab to use it.
+The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes provisioning and configuring [OpenSearch](https://opensearch.org/) nodes to be a cluster as well as configuring GitLab to use it.
 
 :information_source:&nbsp; Note that to be able to enable Advanced Search you'll require at least a GitLab Premium License.
 
-:warning:&nbsp; [Elastic changed the licensing for Elasticsearch](https://www.elastic.co/pricing/faq/licensing) in 2021. The license has restrictions in place for providing that application as a _service_. Due to this the Toolkit is configured to only provision the last version of Elasticsearch on the previous licence, `7.10.x`, and we recommend [OpenSearch](https://opensearch.org/) in its place, which has a compatible license.
-
-Due to the nature of OpenSearch / Elasticsearch it's difficult to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration). As a starting point sizing similar to Gitaly seems to work well in most cases.
+Due to the nature of OpenSearch it's difficult to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance for Elasticsearch that also applies to OpenSearch can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration). As a starting point sizing similar to Gitaly seems to work well in most cases.
 
 Enabling Advanced Search on your environment is designed to be as easy possible and can be done as follows:
 
-- OpenSearch / Elasticsearch nodes should be provisioned as normal via Terraform.
-- Once the nodes are available Ansible will automatically configure them, downloading and setting up the OpenSearch or Elasticsearch Docker image.
-  - At the time of writing the versions deployed for each service is `2.x` for OpenSearch and `7.10.2` for Elasticsearch. To deploy a different version you can set the `opensearch_version` or `elastic_version` variables in Ansible accordingly.
+- OpenSearch nodes should be provisioned as normal via Terraform.
+- Once the nodes are available Ansible will automatically configure them, downloading and setting up the OpenSearch Docker image.
+  - To deploy a specific version you can set the `opensearch_version` variable in Ansible accordingly. Otherwise the Toolkit deploys the latest supported version.
 - Ansible will then configure the GitLab environment near the end of its run to enable Advanced Search against those nodes and perform the first index.
 
 ## Container Registry (GCP, AWS)
@@ -445,23 +443,23 @@ all:
               ansible_host: <REDIS-3-ADDRESS>
 ```
 
-For environments with Elasticsearch nodes, static inventory should have Elasticsearch hosts information:
+For environments with OpenSearch nodes, the static inventory should have OpenSearch hosts information:
 
 ```yml
 all:
   children:
-    elastic:
+    opensearch:
       children:
-        elastic_primary:
+        opensearch_primary:
           hosts:
-            gitlab-elastic-1:
-              ansible_host: <ELASTIC-1-ADDRESS>
-        elastic_secondary:
+            gitlab-opensearch-1:
+              ansible_host: <OPENSEARCH-1-ADDRESS>
+        opensearch_secondary:
           hosts:
-            gitlab-elastic-2:
-              ansible_host: <ELASTIC-2-ADDRESS>
-            gitlab-elastic-3:
-              ansible_host: <ELASTIC-3-ADDRESS>
+            gitlab-opensearch-2:
+              ansible_host: <OPENSEARCH-2-ADDRESS>
+            gitlab-opensearch-3:
+              ansible_host: <OPENSEARCH-3-ADDRESS>
 ```
 
 ### Environment Config

@@ -524,19 +524,19 @@ After Ansible is finished running your environment will now be ready.
 
 ## Advanced Search
 
-The Toolkit supports provisioning and / or configuring an alternative search backend (Elasticsearch or OpenSearch) for [GitLab Advanced Search](https://docs.gitlab.com/ee/user/search/advanced_search.html).
+The Toolkit supports provisioning and / or configuring an alternative search backend for [GitLab Advanced Search](https://docs.gitlab.com/ee/user/search/advanced_search.html).
 
 :information_source:&nbsp; The Reference Architectures [don't proffer guidance on sizing Search backends at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#configure-advanced-search). This is due to search backend requirements varying notably depending on data shape and search index design. However, as a general guidance in testing we've found that sizing the Search backends similarly to the Gitaly nodes looks to be a good starting point that you can then adjust accordingly.
 
 When using an alternative search backend the following changes apply when deploying via the Toolkit:
 
-- Elasticsearch doesn't need to be provisioned in Terraform.
+- OpenSearch doesn't need to be provisioned in Terraform.
 
 Head to the relevant section(s) below for details on how to provision and/or configure.
 
 ### Provisioning with Terraform
 
-Provisioning an alternative search backend via a cloud service differs slightly but has been designed in the Toolkit to be as similar as possible to deploying Elasticsearch via Omnibus. As such, it only requires some different config in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`).
+Provisioning an alternative search backend via a cloud service differs slightly but has been designed in the Toolkit to be as similar as possible to deploying OpenSearch directly via the Toolkit. As such, it only requires some different config in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`).
 
 Like the main provisioning docs there are sections for each supported provider on how to achieve this. Follow the section for your selected provider and then move onto the next step.
 
@@ -548,12 +548,12 @@ The Toolkit supports provisioning an [AWS OpenSearch](https://aws.amazon.com/ope
 
 :information_source:&nbsp; [AWS OpenSearch](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html) specifically only supports 1, 2 or 3 Availability Zones.
 
-The variables for this service start with the prefix `opensearch_*` and should replace any previous `elastic_*` variables in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). The available variables are as follows:
+The variables for this service start with the prefix `opensearch_*` and should replace any previous `opensearch_vm_*` variables in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). The available variables are as follows:
 
 - `opensearch_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. This should be set to at least `2` or higher and should match the number of intended subnets. **Required**.
 - `opensearch_instance_type`- The [AWS Instance Type](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html) for the OpenSearch domain to use without the `.search` suffix. For example, to use a `c5.4xlarge` OpenSearch instance type, the value of this variable should be `c5.4xlarge`. **Required**.
 - `opensearch_engine_version` - The [engine and version](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version) of the OpenSearch domain. Should only be changed to versions that are supported by GitLab. The setting should be given in the format `<ENGINE_VERSION>`, e.g. `OpenSearch_1.1`. If not set will use the AWS default. Optional.
-  - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher. For versions lower Elasticsearch 7.10 should be used.
+  - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher.
 - `opensearch_volume_size` - The volume size per data node. Optional, default is `500`.
 - `opensearch_volume_type` - The type of storage to use per data node. Optional, default is `io1`.
 - `opensearch_volume_iops` - The amount of provisioned IOPS per data node. Setting this requires a storage_type of `io1`. Optional, default is `1000`.

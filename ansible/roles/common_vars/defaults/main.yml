@@ -269,16 +269,12 @@ gitlab_nfs_int_addr: "{{ groups['gitlab_nfs'] | map('extract', hostvars, interna
 gitlab_nfs_path: "{{ '/mnt/gitlab-nfs' if cloud_provider != 'azure' else '/srv/gitlab-nfs' }}"
 
 # Search
-elasticsearch_clean_install: "{{ lookup('env','ELASTICSEARCH_CLEAN_INSTALL') | default('false', true) }}"
-elastic_primary_int_addr: "{{ (groups['elastic_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'elastic_primary' in groups else '' }}"
-elastic_int_addrs: "{{ (groups['elastic'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'elastic' in groups else [] }}"
-elasticsearch_urls: "{{ (elastic_int_addrs | map('regex_replace', '^(.*)$', 'http://\\1:9200') | list) if elastic_int_addrs | length > 0 else [] }}"
-
 opensearch_int_addrs: "{{ (groups['opensearch'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'opensearch' in groups else [] }}"
 opensearch_urls: "{{ (opensearch_int_addrs | map('regex_replace', '^(.*)$', 'http://\\1:9200') | list) if opensearch_int_addrs | length > 0 else [] }}"
 
-advanced_search_hosts: "{{ opensearch_urls if 'opensearch' in groups else elasticsearch_urls }}"
-advanced_search_external: "{{ 'elastic' not in groups and advanced_search_hosts != [] }}"
+advanced_search_hosts: "{{ opensearch_urls }}"
+advanced_search_external: "{{ 'opensearch' not in groups and advanced_search_hosts != [] }}"
+advanced_search_clean_install: "{{ lookup('env','ADVANCED_SEARCH_CLEAN_INSTALL') | default('false', true) }}"
 
 ################################################################################
 ## GitLab Cloud Native Hybrid Settings (Helm)

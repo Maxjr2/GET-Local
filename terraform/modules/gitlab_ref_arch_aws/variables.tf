@@ -150,43 +150,6 @@ variable "consul_iam_instance_policy_arns" {
   default = []
 }
 
-variable "elastic_node_count" {
-  type    = number
-  default = 0
-}
-variable "elastic_instance_type" {
-  type    = string
-  default = ""
-}
-variable "elastic_disk_type" {
-  type    = string
-  default = null
-}
-variable "elastic_disk_size" {
-  type    = string
-  default = "500"
-}
-variable "elastic_disk_encrypt" {
-  type    = bool
-  default = null
-}
-variable "elastic_disk_delete_on_termination" {
-  type    = bool
-  default = true
-}
-variable "elastic_disk_kms_key_arn" {
-  type    = string
-  default = null
-}
-variable "elastic_data_disks" {
-  type    = any
-  default = []
-}
-variable "elastic_iam_instance_policy_arns" {
-  type    = list(string)
-  default = []
-}
-
 variable "gitaly_node_count" {
   type    = number
   default = 0

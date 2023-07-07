@@ -1,9 +1,0 @@
----
-
-elastic_version: 7.10.2
-
-elasticsearch_docker_image: docker.elastic.co/elasticsearch/elasticsearch
-elasticsearch_heap_size: "{{ (ansible_memtotal_mb * 0.5) | round | int }}"
-
-kibana_setup: false
-kibana_docker_image: docker.elastic.co/kibana/kibana

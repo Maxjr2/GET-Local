@@ -1,10 +1,10 @@
-{% if 'haproxy_external' in groups or 'haproxy_internal' in groups or 'opensearch' in groups or 'elastic' in groups or 'gitlab_nfs' in groups %}
+{% if 'haproxy_external' in groups or 'haproxy_internal' in groups or 'opensearch' in groups or 'gitlab_nfs' in groups %}
 # Node (Non Omnibus)
 {
   'job_name': 'non_omnibus_node',
   'static_configs': [
     'targets': [
-{% for ip in ([haproxy_external_int_addr] + [haproxy_internal_int_addr] + opensearch_int_addrs + elastic_int_addrs) if ip != '' %}
+{% for ip in ([haproxy_external_int_addr] + [haproxy_internal_int_addr] + opensearch_int_addrs) if ip != '' %}
       "{{ ip }}:9100",
 {% endfor %}
 {% if 'gitlab_nfs' in groups %}

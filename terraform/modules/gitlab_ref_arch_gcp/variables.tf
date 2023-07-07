@@ -83,27 +83,6 @@ variable "consul_disks" {
   default = []
 }
 
-variable "elastic_node_count" {
-  type    = number
-  default = 0
-}
-variable "elastic_machine_type" {
-  type    = string
-  default = ""
-}
-variable "elastic_disk_type" {
-  type    = string
-  default = "pd-ssd"
-}
-variable "elastic_disk_size" {
-  type    = string
-  default = "500"
-}
-variable "elastic_disks" {
-  type    = list(any)
-  default = []
-}
-
 variable "gitaly_node_count" {
   type    = number
   default = 0

@@ -209,7 +209,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(node_memory_MemTotal_bytes{job!='prometheus'} - node_memory_MemAvailable_bytes{job!='prometheus'}) * on(instance) group_left(nodename) (node_uname_info{nodename!~\".*elastic.*\"})",
+          "expr": "(node_memory_MemTotal_bytes{job!='prometheus'} - node_memory_MemAvailable_bytes{job!='prometheus'}) * on(instance) group_left(nodename) (node_uname_info{nodename!~\".*opensearch.*\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
