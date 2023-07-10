@@ -11,6 +11,10 @@
 - name: Remove packages that are no longer required if configured
   package:
     autoremove: true
+  register: result
+  retries: 60
+  delay: 5
+  until: result is success
   when: system_packages_autoremove | bool
 
 # Automated Security Upgrades
