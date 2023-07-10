@@ -239,6 +239,21 @@
       no_log: true
       when: "'gitlab_rails_secondary' in group_names"
 
+    - name: Remove temp folder
+      file:
+        path: "{{ ssh_temp_folder.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      run_once: true
+  when: "groups['gitlab_rails'] | length > 1"
+  tags:
+    - reconfigure
+    - secrets
+    - ssh_keys
+
+- name: Configure SSH
+  block:
     - name: Configure SSH Fast Lookup if OpenSSH service being used
       blockinfile:
         path: /etc/ssh/sshd_config
@@ -255,14 +270,6 @@
         name: "{{ 'sshd' if ansible_facts['os_family'] == 'RedHat' else 'ssh' }}"
         state: reloaded
       when: gitlab_shell_ssh_daemon == 'openssh'
-
-    - name: Remove temp folder
-      file:
-        path: "{{ ssh_temp_folder.path }}"
-        state: absent
-      delegate_to: localhost
-      become: false
-      run_once: true
   tags:
     - reconfigure
     - secrets
