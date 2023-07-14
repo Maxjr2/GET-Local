@@ -180,27 +180,6 @@
     - charts
     - charts_version
 
-# To set Chart values based on GitLab app version to align with 16.0 deprecations
-# To be removed after 16.0 is released
-- name: Get GitLab App version if version is not specified
-  block:
-    - name: Get all GitLab Charts versions
-      command: helm search repo gitlab/gitlab -l -o json
-      register: gitlab_charts_versions
-
-    - name: Get latest GitLab app version from Charts
-      set_fact:
-        gitlab_version: "{{ (gitlab_charts_versions.stdout | from_json | selectattr('name', 'equalto', 'gitlab/gitlab'))[0].app_version | regex_replace('^v', '') }}"
-
-    - name: Show GitLab app version
-      debug:
-        msg: "GitLab version is {{ gitlab_version }}"
-  when: gitlab_version == ""
-  tags:
-    - reconfigure
-    - charts
-    - charts_version
-
 - name: Lookup GitLab Chart values
   set_fact:
     gitlab_charts_values: "{{ lookup('template', 'templates/gitlab.yml.j2') | from_yaml }}"
