@@ -33,7 +33,7 @@
     restart_policy: always
     state: started
     env:
-      ES_JAVA_OPTS: "-Xms{{ opensearch_heap_size }}m -Xmx{{ opensearch_heap_size }}m"
+      OPENSEARCH_JAVA_OPTS: "-Xms{{ opensearch_heap_size }}m -Xmx{{ opensearch_heap_size }}m"
       bootstrap.memory_lock: 'true'
       cluster.initial_master_nodes: "{{ groups['opensearch'] | join(',') }}"
       discovery.seed_hosts: "{{ opensearch_int_addrs | join(',') }}"
