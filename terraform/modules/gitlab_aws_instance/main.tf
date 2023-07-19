@@ -34,6 +34,14 @@ resource "aws_instance" "gitlab" {
     }, var.additional_tags)
   }
 
+  # Enforce IMDSv2 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "enabled"
+  }
+
   tags = merge({
     Name                  = "${var.prefix}-${var.node_type}-${count.index + 1}"
     gitlab_node_prefix    = var.prefix

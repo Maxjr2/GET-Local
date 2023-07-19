@@ -1,9 +1,5 @@
 gitlab:
   webservice:
-{% if geo_disable_secondary_proxying %}
-    extraEnv:
-      GEO_SECONDARY_PROXY: "0"
-{% endif %}
     maxReplicas: "{{ gitlab_charts_webservice_max_replicas if gitlab_charts_webservice_max_replicas != '' else webservice_replicas }}"
     minReplicas: "{{ gitlab_charts_webservice_min_replicas if gitlab_charts_webservice_min_replicas != '' else (webservice_replicas | int * gitlab_charts_webservice_min_replicas_scaler) | int }}"
     hpa:
@@ -24,6 +20,11 @@ gitlab:
       proxyBodySize: 0  # Bigger file uploads, e.g. imports
     nodeSelector:
       workload: webservice
+{% if cloud_provider == 'aws' %}
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-webservice-role" 
+{% endif %}
     metrics:
       enabled: true
       serviceMonitor:
@@ -37,6 +38,10 @@ gitlab:
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
       enabled: false
+{% endif %}
+{% if geo_disable_secondary_proxying %}
+    extraEnv:
+      GEO_SECONDARY_PROXY: "0"
 {% endif %}
   sidekiq:
     maxReplicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else sidekiq_replicas }}"
@@ -55,12 +60,17 @@ gitlab:
       requests:
         cpu: "{{ gitlab_charts_sidekiq_requests_cpu }}"
         memory: "{{ gitlab_charts_sidekiq_requests_memory_gb }}G"
+    nodeSelector:
+      workload: sidekiq
+{% if cloud_provider == 'aws' %}
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
+{% endif %}
     metrics:
       enabled: true
       podMonitor:
         enabled: true
-    nodeSelector:
-      workload: sidekiq
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
@@ -71,6 +81,11 @@ gitlab:
     backups:
       objectStorage:
         {{ lookup('template', 'object_storage/task_runner_backups_object_storage.' + cloud_provider + '.yml.j2') | indent(width=8) }}
+{% endif %}
+{% if cloud_provider == 'aws' %}
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
@@ -107,6 +122,8 @@ global:
   # Deploy pods to Supporting node pool by default unless otherwise configured
   nodeSelector:
     workload: "support"
+  serviceAccount:
+    enabled: true
   appConfig:
 {% if cloud_provider != 'none' %}
     object_store:
@@ -385,6 +402,11 @@ registry:
   storage:
     secret: gitlab-container-registry-object-storage-key
     key: config
+{% if cloud_provider == 'aws' %}
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
+{% endif %}
 {% if cloud_provider == 'gcp' %}
     extraKey: key.json
 {% endif %}

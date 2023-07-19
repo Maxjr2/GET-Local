@@ -50,19 +50,15 @@ resource "aws_s3_bucket_public_access_block" "gitlab_object_storage_buckets" {
 # IAM Policies
 locals {
   gitlab_s3_policy_create          = length(var.object_storage_buckets) > 0
+  gitlab_s3_backups_policy_create  = length(var.object_storage_buckets) > 0 && contains(var.object_storage_buckets, "backups")
   gitlab_s3_registry_policy_create = length(var.object_storage_buckets) > 0 && contains(var.object_storage_buckets, "registry")
   gitlab_s3_kms_policy_create      = length(var.object_storage_buckets) > 0 && (var.object_storage_kms_key_arn != null || var.default_kms_key_arn != null)
   # Special permission required for Geo to process HEAD requests
   # https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
   gitlab_s3_list_bucket_permission = var.geo_site != null ? ["s3:ListBucket"] : []
-
-  gitlab_s3_policy_arns = flatten([
-    local.gitlab_s3_policy_create ? [aws_iam_policy.gitlab_s3_policy[0].arn] : [],
-    local.gitlab_s3_registry_policy_create ? [aws_iam_policy.gitlab_s3_registry_policy[0].arn] : [],
-    local.gitlab_s3_kms_policy_create ? [aws_iam_policy.gitlab_s3_kms_policy[0].arn] : []
-  ])
 }
 
+## S3 access policy for all buckets except registry and backups (covered by separate policies)
 resource "aws_iam_policy" "gitlab_s3_policy" {
   count = local.gitlab_s3_policy_create ? 1 : 0
   name  = "${var.prefix}-s3-policy"
@@ -81,12 +77,35 @@ resource "aws_iam_policy" "gitlab_s3_policy" {
           local.gitlab_s3_list_bucket_permission,
         )
         Effect   = "Allow"
-        Resource = concat([for bucket in aws_s3_bucket.gitlab_object_storage_buckets : bucket.arn], [for bucket in aws_s3_bucket.gitlab_object_storage_buckets : "${bucket.arn}/*"])
+        Resource = concat([for k, v in aws_s3_bucket.gitlab_object_storage_buckets : v.arn if !contains(["registry", "backups"], k)], [for k, v in aws_s3_bucket.gitlab_object_storage_buckets : "${v.arn}/*" if !contains(["registry", "backups"], k)])
       }
     ]
   })
 }
 
+## S3 access policy for backups bucket
+resource "aws_iam_policy" "gitlab_s3_backups_policy" {
+  count = local.gitlab_s3_backups_policy_create ? 1 : 0
+  name  = "${var.prefix}-s3-backups-policy"
+  path  = var.default_iam_identifier_path
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+        ]
+        Effect   = "Allow"
+        Resource = [aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn, "${aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn}/*"]
+      }
+    ]
+  })
+}
+
+## S3 access policy for registry bucket
 resource "aws_iam_policy" "gitlab_s3_registry_policy" {
   count = local.gitlab_s3_registry_policy_create ? 1 : 0
   name  = "${var.prefix}-s3-registry-policy"
@@ -99,14 +118,6 @@ resource "aws_iam_policy" "gitlab_s3_registry_policy" {
       # https://docs.docker.com/registry/storage-drivers/s3/#s3-permission-scopes
       {
         Action = [
-          "s3:ListMultipartUploadParts",
-          "s3:AbortMultipartUpload",
-        ]
-        Effect   = "Allow"
-        Resource = "${aws_s3_bucket.gitlab_object_storage_buckets["registry"].arn}/*"
-      },
-      {
-        Action = [
           "s3:ListBucket",
           "s3:GetBucketLocation",
           "s3:ListBucketMultipartUploads",
@@ -114,10 +125,22 @@ resource "aws_iam_policy" "gitlab_s3_registry_policy" {
         Effect   = "Allow"
         Resource = aws_s3_bucket.gitlab_object_storage_buckets["registry"].arn
       },
+      {
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListMultipartUploadParts",
+          "s3:AbortMultipartUpload"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_s3_bucket.gitlab_object_storage_buckets["registry"].arn}/*"
+      },
     ]
   })
 }
 
+## S3 access policy for KMS usage with buckets if specified
 resource "aws_iam_policy" "gitlab_s3_kms_policy" {
   count = local.gitlab_s3_kms_policy_create ? 1 : 0
   name  = "${var.prefix}-s3-kms-policy"

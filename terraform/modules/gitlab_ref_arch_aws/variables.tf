@@ -747,7 +747,6 @@ variable "eks_node_group_ami_release_version" {
   type    = string
   default = null
 }
-
 variable "eks_kube_proxy_version" {
   type    = string
   default = null
@@ -763,6 +762,12 @@ variable "eks_vpc_cni_version" {
 variable "eks_ebs_csi_driver_version" {
   type    = string
   default = null
+}
+
+## Namespaces
+variable "eks_gitlab_charts_namespace" {
+  type    = string
+  default = "default"
 }
 
 ## Secrets Envelope Encryption (Optional)
@@ -786,7 +791,7 @@ variable "webservice_node_pool_instance_type" {
 }
 variable "webservice_node_pool_disk_size" {
   type    = string
-  default = "100"
+  default = null
 }
 ## Cluster Autoscaling (Optional)
 variable "webservice_node_pool_max_count" {
@@ -809,7 +814,7 @@ variable "sidekiq_node_pool_instance_type" {
 }
 variable "sidekiq_node_pool_disk_size" {
   type    = string
-  default = "100"
+  default = null
 }
 ## Cluster Autoscaling (Optional)
 variable "sidekiq_node_pool_max_count" {

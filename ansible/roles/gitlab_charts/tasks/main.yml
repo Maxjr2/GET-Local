@@ -30,6 +30,16 @@
     - charts
     - secrets
 
+- name: Run any Cloud Provider prep tasks
+  block:
+    - name: Run AWS EKS prep tasks
+      import_tasks: cloud_provider_prep/aws_eks.yml
+      when: cloud_provider == 'aws'
+  tags:
+    - reconfigure
+    - charts
+    - cloud_provider_prep
+
 - name: Gather facts for Omnibus Postgres cluster
   block:
     - name: Get latest Postgres Leader
@@ -239,61 +249,6 @@
     - reconfigure
     - charts
     - kube-prometheus-stack
-
-- name: Configure AWS EKS components
-  block:
-    # Comes as default in GCP, needs to be specifically added in AWS
-    - name: Add Metrics server for AWS EKS
-      block:
-        - name: Download metrics-server manifest
-          ansible.builtin.get_url:
-            url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-            dest: /tmp/metrics-server.yaml
-            mode: '0664'
-
-        - name: Apply metrics-server manifest to the cluster
-          kubernetes.core.k8s:
-            state: present
-            src: /tmp/metrics-server.yaml
-
-        - name: Clean up metrics-server manifest
-          file:
-            path: /tmp/metrics-server.yaml
-            state: absent
-      tags: metrics-server
-
-    - name: Configure Cluster Autoscaler for AWS EKS
-      block:
-        - name: Get Kubernetes Cluster Info
-          kubernetes.core.k8s_cluster_info:
-          register: cluster_info
-          tags: info
-
-        - name: Add Autoscaler repo
-          kubernetes.core.helm_repository:
-            name: autoscaler
-            repo_url: "https://kubernetes.github.io/autoscaler"
-
-        - name: Setup Cluster Autoscaler (AWS)
-          kubernetes.core.helm:
-            name: gitlab-cluster-autoscaler
-            chart_ref: autoscaler/cluster-autoscaler
-            chart_version: ^9
-            update_repo_cache: true
-            release_namespace: "kube-system"
-            values:
-              fullnameOverride: "gitlab-cluster-autoscaler"
-              image:
-                tag: "v{{ cluster_info.version.server.kubernetes.major }}.{{ cluster_info.version.server.kubernetes.minor | regex_search('[0-9]+') }}.0"
-              autoDiscovery:
-                clusterName: "{{ prefix }}"
-              awsRegion: "{{ aws_region }}"
-      when: cloud_native_hybrid_cluster_autoscaler_setup
-      tags: cluster-autoscaler
-  when: cloud_provider == 'aws'
-  tags:
-    - reconfigure
-    - charts
 
 - name: Run Custom Tasks
   block:

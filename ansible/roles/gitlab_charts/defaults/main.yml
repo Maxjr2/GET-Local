@@ -22,3 +22,7 @@ sidekiq_default_replica_counts:
     '24': 8
     '12': 8
     '4': 4
+
+# Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
+cluster_autoscaler_image_tag:
+    '1.26': 'v1.26.2'
