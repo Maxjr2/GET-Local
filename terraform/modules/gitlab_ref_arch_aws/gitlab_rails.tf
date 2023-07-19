@@ -17,7 +17,10 @@ module "gitlab_rails" {
   subnet_ids                 = local.backend_subnet_ids
 
   iam_instance_policy_arns = flatten([
-    local.gitlab_s3_policy_arns,
+    local.gitlab_s3_policy_create ? [aws_iam_policy.gitlab_s3_policy[0].arn] : [],
+    local.gitlab_s3_backups_policy_create ? [aws_iam_policy.gitlab_s3_backups_policy[0].arn] : [],
+    local.gitlab_s3_registry_policy_create ? [aws_iam_policy.gitlab_s3_registry_policy[0].arn] : [],
+    local.gitlab_s3_kms_policy_create ? [aws_iam_policy.gitlab_s3_kms_policy[0].arn] : [],
     var.default_iam_instance_policy_arns,
     var.gitlab_rails_iam_instance_policy_arns
   ])

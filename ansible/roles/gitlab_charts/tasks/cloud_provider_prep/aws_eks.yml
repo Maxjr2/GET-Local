@@ -1,0 +1,70 @@
+---
+- name: Save AWS Caller Info
+  amazon.aws.aws_caller_info:
+  register: aws_caller_info
+  tags: cluster-autoscaler
+
+- name: Get AWS IAM ARN prefix  # AWS ARN Prefix can change, such as on GovCloud regions - https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/using-govcloud-arns.html
+  set_fact:
+    aws_caller_arn_prefix: "{{ aws_caller_info.arn | regex_search('^.+::[0-9]+') }}"
+  tags: cluster-autoscaler
+
+- name: Add Metrics server (AWS EKS)
+  block:
+    - name: Download metrics-server manifest
+      ansible.builtin.get_url:
+        url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        dest: /tmp/metrics-server.yaml
+        mode: '0664'
+
+    - name: Apply metrics-server manifest to the cluster
+      kubernetes.core.k8s:
+        state: present
+        src: /tmp/metrics-server.yaml
+
+    - name: Clean up metrics-server manifest
+      file:
+        path: /tmp/metrics-server.yaml
+        state: absent
+  tags: metrics-server
+
+- name: Configure Cluster Autoscaler (AWS EKS)
+  block:
+    - name: Get Kubernetes Cluster Info
+      kubernetes.core.k8s_cluster_info:
+      register: cluster_info
+      tags: info
+
+    - name: Get Cluster version
+      set_fact:
+        cluster_version: "{{ cluster_info.version.server.kubernetes.major + '.' + (cluster_info.version.server.kubernetes.minor | regex_search('[0-9]+')) }}"
+
+    - name: Add Autoscaler repo
+      kubernetes.core.helm_repository:
+        name: autoscaler
+        repo_url: "https://kubernetes.github.io/autoscaler"
+
+    - name: Setup Cluster Autoscaler (AWS)
+      kubernetes.core.helm:
+        name: gitlab-cluster-autoscaler
+        chart_ref: autoscaler/cluster-autoscaler
+        chart_version: ^9
+        update_repo_cache: true
+        release_namespace: "kube-system"
+        values:
+          fullnameOverride: "gitlab-cluster-autoscaler"
+          image:
+            tag: "{{ cluster_autoscaler_image_tag[cluster_version] | default('v' + cluster_version + '.0') }}"
+          autoDiscovery:
+            clusterName: "{{ prefix }}"
+          awsRegion: "{{ aws_region }}"
+          rbac:
+            serviceAccount:
+              annotations:
+                eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-cluster-autoscaler-role"
+          extraArgs:  # https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
+            balance-similar-node-groups: true
+            skip-nodes-with-system-pods: false
+            skip-nodes-with-local-storage: false
+  when: cloud_native_hybrid_cluster_autoscaler_setup
+  tags: cluster-autoscaler
