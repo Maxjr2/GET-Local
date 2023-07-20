@@ -274,19 +274,17 @@ Typically, this is due to a misconfiguration, specifically that the pods have fa
 
 If the issue is still not found after the above steps, [further debugging guidance can be found in the Charts documentation](https://docs.gitlab.com/charts/troubleshooting/index.html#application-containers-constantly-initializin).
 
-### `Could not match supplied host pattern, ignoring: gitlab_cluster` Warning
+### `Could not match supplied host pattern, ignoring: gitlab_*_node_pool` Warning
 
 Depending on the Toolkit version you may see the following warning being thrown by Ansible at the beginning of its run:
 
 ```sh
-[WARNING]: Could not match supplied host pattern, ignoring: gitlab_cluster
+[WARNING]: Could not match supplied host pattern, ignoring: gitlab_*_node_pool
 ```
 
 [This warning is due to an Ansible quirk](https://github.com/ansible/ansible/issues/40030) and can be ignored.
 
 For some background, GKE / EKS will set up VMs to be the Nodes in the Kubernetes cluster. These VMs show up in normal lists and can appear in Ansible Inventories as a result. Ansible can't configure these nodes directly that are instead managed by GKE / EKS, which Ansible configures later via Helm. As such, depending on cloud provider, Ansible is configured to ignore these machines directly and this can sometimes result in the above warning.
-
-From GitLab Environment Toolkit version `2.4.0` onwards this warning is disabled by default as it's expected.
 
 ### Data missing in environment after successful deploy
 

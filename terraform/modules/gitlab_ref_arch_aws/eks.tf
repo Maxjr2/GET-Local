@@ -118,9 +118,9 @@ resource "aws_launch_template" "gitlab_webservice" {
     resource_type = "instance"
 
     tags = merge({
-      Name               = "${var.prefix}-webservice-pool"
+      Name               = "${var.prefix}-webservice-node-pool"
       gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "webservice-pool"
+      gitlab_node_type   = "gitlab-webservice-node-pool"
     }, var.additional_tags)
   }
 
@@ -162,7 +162,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
 
   tags = merge({
     gitlab_node_prefix = var.prefix
-    gitlab_node_type   = "webservice-pool"
+    gitlab_node_type   = "gitlab-webservice-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
@@ -215,9 +215,9 @@ resource "aws_launch_template" "gitlab_sidekiq" {
     resource_type = "instance"
 
     tags = merge({
-      Name               = "${var.prefix}-sidekiq-pool"
+      Name               = "${var.prefix}-sidekiq-node-pool"
       gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "sidekiq-pool"
+      gitlab_node_type   = "gitlab-sidekiq-node-pool"
     }, var.additional_tags)
   }
 
@@ -259,7 +259,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
 
   tags = merge({
     gitlab_node_prefix = var.prefix
-    gitlab_node_type   = "sidekiq-pool"
+    gitlab_node_type   = "gitlab-sidekiq-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
@@ -312,9 +312,9 @@ resource "aws_launch_template" "gitlab_supporting" {
     resource_type = "instance"
 
     tags = merge({
-      Name               = "${var.prefix}-supporting-pool"
+      Name               = "${var.prefix}-supporting-node-pool"
       gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "supporting-pool"
+      gitlab_node_type   = "gitlab-supporting-node-pool"
     }, var.additional_tags)
   }
 
@@ -356,7 +356,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
 
   tags = merge({
     gitlab_node_prefix = var.prefix
-    gitlab_node_type   = "supporting-pool"
+    gitlab_node_type   = "gitlab-supporting-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"

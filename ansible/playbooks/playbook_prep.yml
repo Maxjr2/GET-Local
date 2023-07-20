@@ -1,6 +1,6 @@
 ---
 # For individual playbooks against specific hosts that require information from others
-- hosts: all:!gitlab_cluster:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   order: sorted
   roles:

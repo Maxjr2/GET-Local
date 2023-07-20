@@ -103,6 +103,11 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
     labels = {
       workload = "webservice"
     }
+
+    resource_labels = {
+      gitlab_node_prefix = var.prefix
+      gitlab_node_type   = "gitlab-webservice-node-pool"
+    }
   }
 
   lifecycle {
@@ -169,6 +174,11 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
     labels = {
       workload = "sidekiq"
     }
+
+    resource_labels = {
+      gitlab_node_prefix = var.prefix
+      gitlab_node_type   = "gitlab-sidekiq-node-pool"
+    }
   }
 
   lifecycle {
@@ -234,6 +244,11 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 
     labels = {
       workload = "support"
+    }
+
+    resource_labels = {
+      gitlab_node_prefix = var.prefix
+      gitlab_node_type   = "gitlab-supporting-node-pool"
     }
   }
 
