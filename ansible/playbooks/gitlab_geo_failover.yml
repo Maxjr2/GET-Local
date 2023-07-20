@@ -1,5 +1,5 @@
 ---
-- hosts: all:!gitlab_cluster:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   any_errors_fatal: false
   ignore_unreachable: true
@@ -16,7 +16,7 @@
         tasks_from: failover-disable-primary
       tags: disable-primary
 
-- hosts: all:!gitlab_cluster:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   ignore_unreachable: true
 
