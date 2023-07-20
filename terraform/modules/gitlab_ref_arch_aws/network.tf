@@ -123,7 +123,7 @@ resource "aws_subnet" "gitlab_vpc_sn_priv" {
 resource "aws_eip" "gitlab_vpc_sn_priv_ng_ip" {
   count = local.create_network ? min(var.subnet_pub_count, var.subnet_priv_count) : 0
 
-  vpc = true
+  domain = "vpc"
 }
 
 resource "aws_nat_gateway" "gitlab_vpc_sn_priv_ng" {

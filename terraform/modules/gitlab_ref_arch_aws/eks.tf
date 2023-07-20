@@ -15,7 +15,8 @@ locals {
   eks_cluster_subnet_ids      = !local.default_network ? local.all_subnet_ids : local.eks_default_subnet_ids
   eks_backend_node_subnet_ids = !local.default_network ? local.backend_subnet_ids : local.eks_default_subnet_ids
 
-  eks_node_group_image_id = var.eks_ami_id == null ? (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_ami_recommended_image_id[0].value) : null) : var.eks_ami_id
+  eks_node_group_ami_id   = var.eks_ami_id != null ? var.eks_ami_id : (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_ami_recommended_image_id[0].value) : null)
+  eks_node_group_ami_type = var.eks_ami_id != null ? "CUSTOM" : null
 }
 
 # Cluster
@@ -92,7 +93,7 @@ resource "aws_launch_template" "gitlab_webservice" {
   count = min(var.webservice_node_pool_count + var.webservice_node_pool_max_count, 1)
 
   name     = "${var.prefix}-eks-webservice-launch-template"
-  image_id = local.eks_node_group_image_id
+  image_id = local.eks_node_group_ami_id
 
   instance_type = var.webservice_node_pool_instance_type
 
@@ -134,7 +135,7 @@ resource "aws_launch_template" "gitlab_webservice" {
 
   update_default_version = true
 
-  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
+  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
 }
 
 resource "aws_eks_node_group" "gitlab_webservice_pool" {
@@ -149,6 +150,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     id      = aws_launch_template.gitlab_webservice[0].id
     version = aws_launch_template.gitlab_webservice[0].latest_version
   }
+  ami_type = local.eks_node_group_ami_type
 
   scaling_config {
     desired_size = local.webservice_node_pool_autoscaling ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
@@ -189,7 +191,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
   count = min(var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count, 1)
 
   name     = "${var.prefix}-eks-sidekiq-launch-template"
-  image_id = local.eks_node_group_image_id
+  image_id = local.eks_node_group_ami_id
 
   instance_type = var.sidekiq_node_pool_instance_type
 
@@ -231,7 +233,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
 
   update_default_version = true
 
-  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
+  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
 }
 
 resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
@@ -246,6 +248,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     id      = aws_launch_template.gitlab_sidekiq[0].id
     version = aws_launch_template.gitlab_sidekiq[0].latest_version
   }
+  ami_type = local.eks_node_group_ami_type
 
   scaling_config {
     desired_size = local.sidekiq_node_pool_autoscaling ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
@@ -286,7 +289,7 @@ resource "aws_launch_template" "gitlab_supporting" {
   count = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
 
   name     = "${var.prefix}-eks-supporting-launch-template"
-  image_id = local.eks_node_group_image_id
+  image_id = local.eks_node_group_ami_id
 
   instance_type = var.supporting_node_pool_instance_type
 
@@ -328,7 +331,7 @@ resource "aws_launch_template" "gitlab_supporting" {
 
   update_default_version = true
 
-  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
+  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
 }
 
 resource "aws_eks_node_group" "gitlab_supporting_pool" {
@@ -343,6 +346,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     id      = aws_launch_template.gitlab_supporting[0].id
     version = aws_launch_template.gitlab_supporting[0].latest_version
   }
+  ami_type = local.eks_node_group_ami_type
 
   scaling_config {
     desired_size = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
@@ -391,10 +395,11 @@ data "aws_eks_addon_version" "kube_proxy" {
 resource "aws_eks_addon" "kube_proxy" {
   count = min(local.total_node_pool_count, 1)
 
-  cluster_name      = aws_eks_cluster.gitlab_cluster[0].name
-  addon_name        = "kube-proxy"
-  addon_version     = var.eks_kube_proxy_version == "latest" ? data.aws_eks_addon_version.kube_proxy[0].version : var.eks_kube_proxy_version
-  resolve_conflicts = "OVERWRITE"
+  cluster_name  = aws_eks_cluster.gitlab_cluster[0].name
+  addon_name    = "kube-proxy"
+  addon_version = var.eks_kube_proxy_version == "latest" ? data.aws_eks_addon_version.kube_proxy[0].version : var.eks_kube_proxy_version
+
+  resolve_conflicts_on_update = "OVERWRITE"
 }
 
 ## coredns
@@ -409,10 +414,11 @@ data "aws_eks_addon_version" "coredns" {
 resource "aws_eks_addon" "coredns" {
   count = min(local.total_node_pool_count, 1)
 
-  cluster_name      = aws_eks_cluster.gitlab_cluster[0].name
-  addon_name        = "coredns"
-  addon_version     = var.eks_coredns_version == "latest" ? data.aws_eks_addon_version.coredns[0].version : var.eks_coredns_version
-  resolve_conflicts = "OVERWRITE"
+  cluster_name  = aws_eks_cluster.gitlab_cluster[0].name
+  addon_name    = "coredns"
+  addon_version = var.eks_coredns_version == "latest" ? data.aws_eks_addon_version.coredns[0].version : var.eks_coredns_version
+
+  resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that Nodes are created beforehand as required by addon
   depends_on = [
@@ -438,7 +444,8 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_name               = "vpc-cni"
   addon_version            = var.eks_vpc_cni_version == "latest" ? data.aws_eks_addon_version.vpc_cni[0].version : var.eks_vpc_cni_version
   service_account_role_arn = aws_iam_role.gitlab_addon_vpc_cni_role[count.index].arn
-  resolve_conflicts        = "OVERWRITE"
+
+  resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that Kube Proxy addon and OpenID provider are created beforehand as required by addon
   depends_on = [
@@ -463,7 +470,8 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = var.eks_ebs_csi_driver_version == "latest" ? data.aws_eks_addon_version.ebs_csi_driver[0].version : var.eks_ebs_csi_driver_version
   service_account_role_arn = aws_iam_role.gitlab_addon_ebs_csi_driver_role[count.index].arn
-  resolve_conflicts        = "OVERWRITE"
+
+  resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that OpenID provider is created beforehand as required by addon
   depends_on = [
