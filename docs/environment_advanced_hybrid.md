@@ -144,6 +144,18 @@ The Toolkit will attempt to manage this for you and try to honour the target nod
 
 It's recommended that in any environment where multiple Zones are to be used that you match the parity of Node Pool counts, i.e. all Zone and Node Pool counts should be either even or odd.
 
+#### GCP Toolbox Backups - Service Account Key
+
+With a Cloud Native Hybrid environment, [GitLab backups are taken via the Charts Toolbox pod](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
+
+When running on GCP an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
+
+The Service Account requires the `roles/storage.objectAdmin` role to be given for each of the Object Storage Buckets to be used. The Toolkit creates a role for this purpose already with the suffix `--gke-supporting` so creating the account is not required. However, as Service Account keys are sensitive credential files the Toolkit doesn't generate the key specifically. As such, one manual step that is required is to [generate a key](https://cloud.google.com/iam/docs/keys-create-delete) for this account and download it accordingly to the node running Ansible. Once done the key file can be passed to the Toolkit via the following variable in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`):
+
+`gcp_backups_service_account_key_file` - Full file path to a GCP Service Account key file on the host running Ansible to be used by the Charts Toolbox pod for performing Backups. The Service Account must have the `roles/storage.objectAdmin` role attached for each Object Storage bucket GitLab uses. If not set, backups will be disabled on the environment. Optional, default is `''`.
+
+Note that you can also create a separate Service Account and key if desired as long as it has the correct permissions as given above.
+
 ### Amazon Web Services (AWS)
 
 ```tf
@@ -374,7 +386,6 @@ all:
     cloud_provider: "gcp"
     gcp_project: "<gcp_project_id>"
     gcp_zone: "<gcp_project_zone>"
-    gcp_service_account_host_file: "<gcp_service_account_host_file_path>"
 
     # General Settings
     prefix: "<environment_prefix>"

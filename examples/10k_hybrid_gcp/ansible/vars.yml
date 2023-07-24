@@ -8,7 +8,8 @@ all:
     cloud_provider: "gcp"
     gcp_project: "<gcp_project_id>"
     gcp_zone: "<gcp_zone>"
-    gcp_service_account_host_file: "<gcp_service_account_host_file_path>"
+    ## Optional Service Account key for Backups
+    gcp_backups_service_account_key_file: <gcp_backups_service_account_key_file_path>
 
     # General Settings
     prefix: "<environment_prefix>"

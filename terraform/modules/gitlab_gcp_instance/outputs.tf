@@ -19,3 +19,10 @@ output "self_links" {
 output "data_disk_device_names" {
   value = flatten(google_compute_instance.gitlab[*].attached_disk[*].device_name)
 }
+
+output "service_account" {
+  value = {
+    "name"  = try(google_service_account.gitlab[0].name, "")
+    "email" = try(google_service_account.gitlab[0].email, "")
+  }
+}

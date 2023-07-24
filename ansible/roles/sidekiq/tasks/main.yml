@@ -77,17 +77,6 @@
     - secrets
     - gitlab-secrets
 
-- name: Copy GCP service account file
-  copy:
-    src: "{{ gcp_service_account_host_file }}"
-    dest: "{{ gcp_service_account_target_file }}"
-    mode: "0755"
-  tags:
-    - reconfigure
-    - secrets
-  when:
-    - cloud_provider == 'gcp'
-
 - name: Reconfigure Sidekiq
   command: gitlab-ctl reconfigure
   register: result

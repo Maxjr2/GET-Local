@@ -32,6 +32,16 @@ variable "project" {
   default = null
 }
 
+variable "service_account_prefix" {
+  type    = string
+  default = "gl"
+
+  validation {
+    condition     = length(var.service_account_prefix) <= 5 && can(regex("[a-z]([-a-z0-9]*[a-z0-9])", var.service_account_prefix))
+    error_message = "service_account_prefix must be 5 characters or less and only contain lowercase alphanumeric characters and dashes."
+  }
+}
+
 # Object Storage
 variable "object_storage_buckets" {
   type    = list(string)

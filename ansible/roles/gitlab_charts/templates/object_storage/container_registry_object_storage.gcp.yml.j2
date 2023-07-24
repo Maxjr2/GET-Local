@@ -1,4 +1,4 @@
 gcs:
   bucket: {{ gitlab_object_storage_registry_bucket }}
-  keyfile: /etc/docker/registry/storage/key.json
   chunksize: {{ (gitlab_object_storage_registry_chunksize_mb | int) * 1024 * 1024 }}
+  google_application_default: true
