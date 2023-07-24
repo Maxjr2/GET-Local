@@ -320,7 +320,7 @@ all:
 
     # GCP only settings
     gcp_project: "<gcp_project_id>"
-    gcp_service_account_host_file: "<gcp_service_account_host_file_path>"
+
 
     # AWS only settings
     aws_region: "<aws_region>"
@@ -361,7 +361,6 @@ Cloud settings are specific config relating to the cloud provider is running on.
 
 - `cloud_provider` - Toolkit specific variable, used to dynamically configure cloud provider specific areas such as Object Storage. Should be set to `gcp`, `aws` or `azure`.
 - `gcp_project` **_GCP only_** - ID of the GCP project. Note this must be the Project's unique ID and not just the name
-- `gcp_service_account_host_file` **_GCP only_** - Local path to the Service Account file. This is the same one created in [Setup Provider Authentication - Service Account](environment_prep.md#3-setup-provider-authentication-gcp-service-account). The Toolkit uses this to configure GitLab's Object Storage access.
 - `aws_region`  **_AWS only_** - AWS region the environment will run in.
 - `storage_account_name` **_Azure only_** - The name of the storage account previously created in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
 - `storage_access_key` **_Azure only_** - The access key of the storage account previously obtained in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.

@@ -7,7 +7,6 @@ all:
     # Cloud Settings
     cloud_provider: "gcp"
     gcp_project: "<gcp_project_id>"
-    gcp_service_account_host_file: "<gcp_service_account_host_file_path>"
 
     # General Settings
     prefix: "<environment_prefix>"

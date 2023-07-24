@@ -76,7 +76,8 @@ To create a Service Account, you need to have `admin` permissions in the GCP pro
    - `Compute Admin`
    - `Kubernetes Engine Admin`
    - `Storage Admin` (Note - Not `Compute Storage Admin`)
-   - `Service Account User` (Service Accounts)
+   - `Service Account Admin`
+   - `Service Account User`
 
 After the account is created, proceed to create a key file:
 

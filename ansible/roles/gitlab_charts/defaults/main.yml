@@ -4,8 +4,7 @@ gitlab_charts_repo_url: "https://charts.gitlab.io/"
 
 gitlab_charts_show_values: false
 
-gcp_object_storage_key: "{{ (lookup('file', gcp_service_account_host_file) | string) if cloud_provider == 'gcp' else '' }}"
-aws_object_storage_key: "{{ lookup('template', 'object_storage/backup_object_storage_key.aws.s3cfg.j2') if cloud_provider == 'aws' else '' }}"
+gcp_backups_service_account_key_file: ""
 
 # Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 webservice_default_replica_counts:

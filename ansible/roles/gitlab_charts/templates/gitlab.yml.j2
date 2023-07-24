@@ -77,7 +77,7 @@ gitlab:
       enabled: false
 {% endif %}
   "{{ 'task-runner' if ((gitlab_version != '') and (gitlab_version is version('14.5', '<'))) else 'toolbox' }}":
-{% if cloud_provider != 'none' %}
+{% if cloud_provider == 'aws' or (cloud_provider == 'gcp' and gcp_backups_service_account_key_file != '') %}
     backups:
       objectStorage:
         {{ lookup('template', 'object_storage/task_runner_backups_object_storage.' + cloud_provider + '.yml.j2') | indent(width=8) }}
@@ -133,8 +133,6 @@ global:
         key: key
     artifacts:
       bucket: "{{ gitlab_object_storage_artifacts_bucket }}"
-    backups:
-      bucket: "{{ gitlab_object_storage_backups_bucket }}"
     dependencyProxy:
       bucket: "{{ gitlab_object_storage_dependency_proxy_bucket }}"
     externalDiffs:
@@ -148,6 +146,10 @@ global:
       bucket: "{{ gitlab_object_storage_terraform_state_bucket }}"
     uploads:
       bucket: "{{ gitlab_object_storage_uploads_bucket }}"
+{% if cloud_provider == 'aws' or (cloud_provider == 'gcp' and gcp_backups_service_account_key_file != '') %}
+    backups:
+      bucket: "{{ gitlab_object_storage_backups_bucket }}"
+{% endif %}
 {% endif %}
   initialRootPassword:
     secret: gitlab-initial-root-password
@@ -406,9 +408,6 @@ registry:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
-{% endif %}
-{% if cloud_provider == 'gcp' %}
-    extraKey: key.json
 {% endif %}
 {% else %}
   enabled: false

@@ -345,6 +345,31 @@ module "gitlab_ref_arch_gcp" {
 
 Note that the default zone configured in `variables.tf` is still required in this setup as a backup for other resources.
 
+##### Configure Service Account name prefix (GCP)
+
+As per recommended [best practices](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices), the Toolkit will provision and configure least privileged Service Accounts for GCP resources as required.
+
+Due to length limits on Service Account IDs however (30 characters or fewer) while ensuring a consistent naming scheme the Toolkit will create the Service Accounts using a set prefix (`gl`) by default.
+
+As such, if you intend to deploy more than one environment in the same GCP project you will see this clash accordingly. To help with this scenario the prefix can be configured in the [module's environment config file](#configure-module-settings-environmenttf) via the following variable:
+
+- `service_account_prefix` - Sets the prefix the Toolkit will use when generating Service Accounts. To comply with GCP limits the prefix must be 5 characters or fewer and only contain alphanumeric and dash (`-`) characters. This should only be changed if the IDs are expected to clash in your GCP project. Optional, default is `gl`.
+
+An example of setting this in your environment config file would be as follows:
+
+```tf
+module "gitlab_ref_arch_gcp" {
+  source = "../../modules/gitlab_ref_arch_gcp"
+
+  prefix = var.prefix
+  project = var.project
+
+  service_account_prefix = "gl2k"
+
+  [...]
+}
+```
+
 #### Configure Authentication (GCP)
 
 Finally, the last thing to configure is authentication. This is required to allow Terraform to access GCP (provider) as well as its State Storage Bucket (backend).

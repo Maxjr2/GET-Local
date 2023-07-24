@@ -21,8 +21,6 @@ internal_hostname_lookup: {gcp: ['ansible_facts', 'fqdn'], aws: ['private_dns_na
 internal_addr_lookup: "{{ internal_hostname_lookup[cloud_provider] if internal_addr_use_hostnames else internal_ip_lookup[cloud_provider] }}"
 
 ## GCP
-gcp_service_account_host_file: "{{ service_account_file | default('', true) }}"
-gcp_service_account_target_file: "/etc/gitlab/serviceaccount.json"
 gcp_project: "{{ project_name | default('', true) }}"
 gcp_zone: ""
 

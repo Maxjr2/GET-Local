@@ -18,6 +18,8 @@ module "haproxy_external" {
   setup_external_ip = var.setup_external_ips
   external_ips      = var.haproxy_external_external_ips
 
+  service_account_prefix = var.service_account_prefix
+
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
@@ -49,6 +51,8 @@ module "haproxy_internal" {
   subnet            = local.subnet_name
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
+
+  service_account_prefix = var.service_account_prefix
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
