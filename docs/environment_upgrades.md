@@ -23,7 +23,8 @@ On this page we'll detail how both work. **It's worth noting this guide is suppl
 
 ## Toolkit Upgrades
 
-Before running any upgrades for your environment we recommend using the latest version of the Toolkit. This will ensure that the latest GitLab config is used when updating and will avoid any issues.
+Before running any upgrades for your environment, we recommend using the latest [release version](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) of the
+Toolkit. This ensures that the latest GitLab configuration is used when updating and should avoid any issues.
 
 When updating the Toolkit, we recommend checking the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any called out breaking or config changes to ensure no issues occur on upgrade.
 
