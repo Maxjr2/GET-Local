@@ -190,8 +190,8 @@ module "gitlab_ref_arch_aws" {
   consul_node_count = 3
   consul_instance_type = "c5.large"
 
-  elastic_node_count = 3
-  elastic_instance_type = "c5.4xlarge"
+  opensearch_vm_node_count = 3
+  opensearch_vm_instance_type = "c5.4xlarge"
 
   gitaly_node_count = 3
   gitaly_instance_type = "m5.4xlarge"

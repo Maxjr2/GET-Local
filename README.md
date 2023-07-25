@@ -11,7 +11,7 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 - GCP, AWS and Azure (Omnibus) [cloud provider support](TECHNICAL_DESIGN.md#supported-cloud-providers)
 - Upgrades
 - Release and nightly Omnibus builds support
-- Advanced search with Elasticsearch
+- Advanced search with OpenSearch
 - Geo support
 - Container Registry support
 - Zero Downtime Upgrades support
@@ -75,7 +75,7 @@ Refer to the docs above for full instructions on each.
 At a high level the Toolkit is designed to be as straightforward as possible. A high level overview of how it works is as follows:
 
 - Machines and associated infrastructure are _provisioned_ as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures) with Terraform. Part of this provisioning includes adding specific labels / tags to each machine for Ansible to then use to identify.
-- Machines are _configured_ with Ansible. Through identifying each machine by its Labels, Ansible will intelligently go through them in the correct installation order. On each it will install and configure Omnibus to set up the intended component as required. The Ansible scripts have been designed to handle certain dynamic setups depending on what machines have been provisioned (e.g. an environment without Elasticsearch, or a 2k environment with a smaller amount of nodes). Additional tasks are also performed as required such as setting GitLab config through Rails or Load Balancer / Monitoring setup.
+- Machines are _configured_ with Ansible. Through identifying each machine by its Labels, Ansible will intelligently go through them in the correct installation order. On each it will install and configure Omnibus to set up the intended component as required. The Ansible scripts have been designed to handle certain dynamic setups depending on what machines have been provisioned (e.g. an environment without OpenSearch, or a 2k environment with a smaller amount of nodes). Additional tasks are also performed as required such as setting GitLab config through Rails or Load Balancer / Monitoring setup.
 
 ```plantuml
 @startuml 10k
