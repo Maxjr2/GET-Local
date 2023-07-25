@@ -15,8 +15,7 @@ locals {
   eks_cluster_subnet_ids      = !local.default_network ? local.all_subnet_ids : local.eks_default_subnet_ids
   eks_backend_node_subnet_ids = !local.default_network ? local.backend_subnet_ids : local.eks_default_subnet_ids
 
-  eks_node_group_ami_id   = var.eks_ami_id != null ? var.eks_ami_id : (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_ami_recommended_image_id[0].value) : null)
-  eks_node_group_ami_type = var.eks_ami_id != null ? "CUSTOM" : null
+  eks_node_group_ami_id = var.eks_ami_id != null ? var.eks_ami_id : (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_ami_recommended_image_id[0].value) : null)
 }
 
 # Cluster
@@ -135,7 +134,7 @@ resource "aws_launch_template" "gitlab_webservice" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
 }
 
 resource "aws_eks_node_group" "gitlab_webservice_pool" {
@@ -150,7 +149,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     id      = aws_launch_template.gitlab_webservice[0].id
     version = aws_launch_template.gitlab_webservice[0].latest_version
   }
-  ami_type = local.eks_node_group_ami_type
+  ami_type = "CUSTOM"
 
   scaling_config {
     desired_size = local.webservice_node_pool_autoscaling ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
@@ -233,7 +232,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
 }
 
 resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
@@ -248,7 +247,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     id      = aws_launch_template.gitlab_sidekiq[0].id
     version = aws_launch_template.gitlab_sidekiq[0].latest_version
   }
-  ami_type = local.eks_node_group_ami_type
+  ami_type = "CUSTOM"
 
   scaling_config {
     desired_size = local.sidekiq_node_pool_autoscaling ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
@@ -331,7 +330,7 @@ resource "aws_launch_template" "gitlab_supporting" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }))
 }
 
 resource "aws_eks_node_group" "gitlab_supporting_pool" {
@@ -346,7 +345,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     id      = aws_launch_template.gitlab_supporting[0].id
     version = aws_launch_template.gitlab_supporting[0].latest_version
   }
-  ami_type = local.eks_node_group_ami_type
+  ami_type = "CUSTOM"
 
   scaling_config {
     desired_size = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
