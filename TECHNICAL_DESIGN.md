@@ -17,7 +17,7 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 - GCP, AWS and Azure cloud provider support
 - Upgrades
 - Release and nightly Omnibus builds support
-- Advanced search with Elasticsearch
+- Advanced search with OpenSearch
 - Geo support
 - Zero Downtime Upgrades support
 - Built in Load Balancing and Monitoring (Prometheus, Grafana) setup
