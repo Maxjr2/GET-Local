@@ -2,7 +2,7 @@
 postgresql['md5_auth_cidr_addresses'] = ['{{ geo_secondary_site_postgres_int_ip }}/32', '{{ geo_secondary_site_postgres_int_ip }}/32']
 {% elif postgres_external %}
 gitlab_rails['db_host'] = '{{ geo_secondary_postgres_host }}'
-gitlab_rails['db_username'] = 'gitlab'
+gitlab_rails['db_username'] = '{{ postgres_username }}'
 {% endif %}
 
 gitlab_rails['db_password'] = '{{ postgres_password }}'
