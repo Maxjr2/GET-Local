@@ -1,12 +1,3 @@
-- name: Setup Namespaces
-  kubernetes.core.k8s:
-    name: "{{ item }}"
-    kind: Namespace
-    state: present
-  loop:
-    - "{{ kube_prometheus_stack_charts_namespace }}"
-    - "{{ consul_charts_namespace }}"
-
 - name: Setup Consul agent
   block:
     - name: Add Consul repo

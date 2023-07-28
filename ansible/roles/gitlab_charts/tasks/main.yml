@@ -8,6 +8,16 @@
     - kube-prometheus-stack
     - kubeconfig
 
+- name: Setup Monitoring Namespaces if configured
+  kubernetes.core.k8s:
+    name: "{{ item }}"
+    kind: Namespace
+    state: present
+  loop:
+    - "{{ kube_prometheus_stack_charts_namespace }}"
+    - "{{ consul_charts_namespace }}"
+  when: cloud_native_hybrid_monitoring_setup
+
 - name: Configure chart secrets
   import_tasks: secrets.yml
   tags:
