@@ -316,11 +316,8 @@ kube_prometheus_stack_charts_namespace: monitoring
 kube_prometheus_stack_charts_storage_size: 100Gi
 kube_prometheus_stack_charts_storage_class: ""
 kube_prometheus_stack_charts_app_version: "v0.63.0"
-kube_prometheus_stack_charts_grafana_image_tag: "7.5.17"
-kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
 
-kube_prometheus_stack_charts_custom_dashboards_path: "{{ inventory_path }}/../files/grafana"
-kube_prometheus_stack_charts_custom_dashboards: []
+kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
 kube_prometheus_stack_charts_custom_scrape_config: []
 
 consul_charts_namespace: consul
