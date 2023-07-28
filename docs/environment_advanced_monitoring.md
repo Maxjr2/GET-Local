@@ -92,14 +92,13 @@ ansible-playbook -i environments/<ENV_NAME>/inventory playbooks/haproxy.yml
 
 ## Cloud Native Hybrid (`kube-prometheus-stack`)
 
-In Cloud Native Hybrid environments the Toolkit utilises the [`kube-prometheus-stack`](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) and [`consul`](https://artifacthub.io/packages/helm/hashicorp/consul) Helm Charts to provide monitoring.
+In Cloud Native Hybrid environments the Toolkit utilises the [`kube-prometheus-stack`](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) and [`consul`](https://artifacthub.io/packages/helm/hashicorp/consul) Helm Charts to configure metrics scraping.
 
-In this setup the two charts are deployed alongside GitLab in the same Kubernetes cluster. `kube-prometheus-stack` configures Prometheus via the Prometheus Operator to scrape various Kubernetes, Pod and GitLab metrics via [`ServiceMonitors`](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md#related-resources) as well as Grafana. Consul is also deployed and hooked up to the Omnibus Consul cluster to provide automated discovery for the Omnibus backends.
+In this setup the two charts are deployed alongside GitLab in the same Kubernetes cluster. `kube-prometheus-stack` configures Prometheus via the Prometheus Operator to scrape various Kubernetes, Pod and GitLab metrics via [`ServiceMonitors`](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md#related-resources). Consul is also deployed and hooked up to the Omnibus Consul cluster to provide automated discovery for the Omnibus backends.
 
 All of this is handled in Ansible via several settings in the [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
 - `cloud_native_hybrid_monitoring_setup` - Enables the setup of the monitoring stack. Defaults to `false`.
-- `grafana_password` - Password for the Grafana Admin user.
 - `kube_prometheus_stack_charts_namespace` - The [Kubernetes Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for the `kube-prometheus-stack` chart. Defaults to `monitoring`.
 - `kube_prometheus_stack_charts_storage_size` - The size of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for Prometheus data storage. Must be given in the [SI or Binary notation](https://kubernetes.io/docs/reference/glossary/?all=true#term-quantity), for example a `100 GB` storage would be `100Gi`. Defaults to `100Gi`.
 - `kube_prometheus_stack_charts_storage_class` - The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/). If left unset will use the provider's default (recommended). Defaults to `''`,
@@ -120,7 +119,9 @@ all:
     cloud_native_hybrid_monitoring_setup: true
 ```
 
-Once completed, Grafana will be available at the address `<ENVIRONMENT_URL>/-/grafana`.
+Once completed, Prometheus will be scraping various Kubernetes, Pod and GitLab metrics.
+
+:information_source:&nbsp; The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-secrets-via-custom-tasks).
 
 ## Custom Config
 
@@ -213,7 +214,7 @@ For Omnibus, the following variables are used to configure custom rules:
 - `monitor_custom_rules_path` - Path the Toolkit will look under for any rules. Default is `environments/<env_name>/files/prometheus`.
 - `monitor_custom_rules` - List of rule folders under `monitor_custom_rules_path` the Toolkit should transfer. Each entry requires a couple of variables to be set in dict format: For each a dict should be set with the following sub-variables:
   - `folder` - The folder under `monitor_custom_rules_path` to transfer over
-  
+
 An example of how you would configure this for several folders in the default location would be as follows:
 
 ```yaml
@@ -247,25 +248,6 @@ An example of how you would configure this for several folders in the default lo
 
 ```yaml
 monitor_custom_dashboards:
-  - folder: 'my_sidekiq_dashboards'
-    display_name: 'Sidekiq Dashboards'
-  - folder: 'my_gitaly_dashboards'
-    display_name: 'Gitaly Dashboards'
-```
-
-### Cloud Native Hybrid (`kube-prometheus-stack`)
-
-For Cloud Native Hybrid, the following variables are used to configure custom dashboards:
-
-- `kube_prometheus_stack_charts_custom_dashboards_path` - Path the Toolkit will look under for any Dashboards. Default is `environments/<env_name>/files/grafana`.
-- `kube_prometheus_stack_charts_custom_dashboards` - List of Dashboard folders under `kube_prometheus_stack_charts_custom_dashboards_path` the Toolkit should transfer. Each entry requires a couple of variables to be set in dict format: For each a dict should be set with the following sub-variables:
-  - `folder` - The folder under `kube_prometheus_stack_charts_custom_dashboards_path` to transfer over
-  - `display_name` - Display name of Folder to be shown in the Grafana UI.
-
-An example of how you would configure this for several folders in the default location would be as follows:
-
-```yaml
-kube_prometheus_stack_charts_custom_dashboards:
   - folder: 'my_sidekiq_dashboards'
     display_name: 'Sidekiq Dashboards'
   - folder: 'my_gitaly_dashboards'

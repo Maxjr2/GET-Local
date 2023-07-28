@@ -44,38 +44,7 @@ prometheusOperator:
     workload: support
 
 grafana:
-  enabled: true
-  image:
-    tag: "{{ kube_prometheus_stack_charts_grafana_image_tag }}"
-  nodeSelector:
-    workload: support
-  admin:
-    existingSecret: gitlab-grafana-initial-password
-    userKey: username
-    passwordKey: password
-  ingress:
-    enabled: true
-    ingressClassName: 'gitlab-nginx'
-    hosts: ["{{ external_host }}"]
-    path: '/-/grafana'
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: '0'  # Disables client body size limit, needed for Grafana dashboard exports
-  grafana.ini:
-    server:
-      domain: "{{ external_host }}"
-      root_url: "{{ external_url}}/-/grafana"
-      serve_from_sub_path: true
-    auth:
-      login_cookie_name: gitlab_grafana_session
-  defaultDashboardsEnabled: false
-  sidecar:
-    dashboards:
-      enabled: true
-      label: gitlab_grafana_dashboard
-      labelValue: "true"
-      folderAnnotation: gitlab_grafana_folder
-      provider:
-        foldersFromFilesStructure: true
+  enabled: false
 
 {% if cloud_provider == 'gcp' %}
 coreDns:
