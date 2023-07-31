@@ -179,6 +179,7 @@
           package:
             name: "{{ gitlab_repo_package }}"
             state: "{{ 'present' if gitlab_version != '' else 'latest' }}"
+            lock_timeout: 360
           register: result
           retries: 12
           delay: 5
