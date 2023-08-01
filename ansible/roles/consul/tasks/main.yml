@@ -60,6 +60,7 @@
 
 - name: Reconfigure Consul
   command: gitlab-ctl reconfigure
+  throttle: 1
   register: result
   retries: 3
   until: result is success
@@ -79,6 +80,7 @@
 
 - name: Restart Consul
   command: gitlab-ctl restart
+  throttle: 1
   register: result
   retries: 2
   until: result is success
