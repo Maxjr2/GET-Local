@@ -1,0 +1,24 @@
+---
+# Performs full graceful shutdown of Postgres if required by ensuring no partial failover is triggered
+# Stops secondaries first and then the primary
+- hosts: postgres
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Perform graceful Postgres HA shutdown
+      block:
+        - name: Get latest Postgres Primary
+          command: gitlab-ctl get-postgresql-primary
+          register: postgres_primary_int_address
+          run_once: true
+
+        - name: Stop if secondary
+          command: gitlab-ctl stop patroni
+          when: (ansible_default_ipv4.address != postgres_primary_int_address.stdout.split(':')[0])
+
+        - name: Stop if primary
+          command: gitlab-ctl stop patroni
+          when: (ansible_default_ipv4.address == postgres_primary_int_address.stdout.split(':')[0])
+      when: (groups['postgres'] | length > 1)

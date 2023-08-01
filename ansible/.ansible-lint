@@ -26,4 +26,5 @@ skip_list:
   - galaxy[no-runtime] # Collection runtime config file missing - Optional in Ansible
   - key-order[task] # You can improve the task key order to: name, when, block - Optional in Ansible
   - var-naming[no-role-prefix] # Variables names from within roles should use role_name_ as a prefix - Optional in Ansible, subjective.
+  - run-once[task] # This rule warns against the use of run_once when the strategy is set to free - Fires regardless of what's set in strategy
 offline: true
