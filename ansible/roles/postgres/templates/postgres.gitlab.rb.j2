@@ -9,10 +9,6 @@ patroni['postgresql']['max_wal_senders'] = {{ (((groups['postgres'] | length) * 
 patroni['remove_data_directory_on_rewind_failure'] = {{ patroni_remove_data_directory_on_rewind_failure | lower }}
 patroni['remove_data_directory_on_diverged_timelines'] = {{ patroni_remove_data_directory_on_diverged_timelines | lower }}
 
-{% if gitlab_version == '' or gitlab_version is version('14.2', '>') %}
-patroni['allowlist'] = {{ postgres_md5_auth_cidr_blocks }}
-{% endif %}
-
 postgresql['shared_preload_libraries'] = 'pg_stat_statements'
 
 {% if patroni_password is defined %}
