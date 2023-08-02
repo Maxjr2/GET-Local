@@ -264,6 +264,11 @@ variable "gitlab_rails_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "gitlab_rails_security_group_ids" {
+  description = "List of additional Security Group IDs to apply to GitLab Rails nodes"
+  type        = list(string)
+  default     = []
+}
 
 variable "haproxy_external_node_count" {
   type    = number

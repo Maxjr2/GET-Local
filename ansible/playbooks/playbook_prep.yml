@@ -16,4 +16,6 @@
         - hostvars['localhost'].gitlab_secrets_json is not defined
         - omnibus_node
         - gitlab_secrets_setup
-      tags: reconfigure
+      tags:
+        - reconfigure
+        - secrets
