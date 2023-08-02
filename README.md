@@ -15,7 +15,7 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 - Geo support
 - Container Registry support
 - Zero Downtime Upgrades support
-- Built-in optional Load Balancing and Monitoring (Prometheus, Grafana) setup
+- Built-in optional Load Balancing and Monitoring (Prometheus) setup
 - SSL / TLS support (either direct or via hooks)
 - Alternative sources (Cloud Services, Custom Servers) for select components (Load Balancers, PostgreSQL, Redis)
 - On Prem Support (Ansible)
@@ -175,7 +175,7 @@ Feature Requests can be raised in [our tracker](https://gitlab.com/gitlab-org/gi
 Due to complexities, permutations or areas best left to be configured directly we do not plan to include the following:
 
 - Cloud accounts management
-- Observability stack beyond Prometheus and Grafana
+- Observability stack beyond Prometheus
 - Direct OmniAuth and Email support
 - DNS server management
 - Full GitLab agent server for Kubernetes (KAS) setup
