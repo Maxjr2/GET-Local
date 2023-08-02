@@ -28,10 +28,11 @@ module "gitlab_rails" {
   iam_permissions_boundary_arn = var.default_iam_permissions_boundary_arn
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null)
-  ]
+    try(aws_security_group.gitlab_external_ssh[0].id, null),
+    var.gitlab_rails_security_group_ids
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment

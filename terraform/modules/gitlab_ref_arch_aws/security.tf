@@ -9,6 +9,7 @@ data "aws_vpc" "selected" {
   id = coalesce(local.vpc_id, local.default_vpc_id)
 }
 
+# Internal
 resource "aws_security_group" "gitlab_internal_networking" {
   # Allows for machine internal connections as well as outgoing internet access
   # Avoid changes that cause replacement due to EKS Cluster issue
@@ -21,7 +22,6 @@ resource "aws_security_group" "gitlab_internal_networking" {
     to_port     = 0
     protocol    = "-1"
     self        = true
-    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   dynamic "ingress" {
@@ -49,6 +49,7 @@ resource "aws_security_group" "gitlab_internal_networking" {
   }
 }
 
+# External
 resource "aws_security_group" "gitlab_external_ssh" {
   # Create only if no created or existing private subnets and if a SSH key has been passed
   count = (var.subnet_priv_count == 0 && var.subnet_priv_ids == null) && (var.ssh_public_key != null || var.ssh_public_key_file != null) ? 1 : 0
@@ -152,17 +153,38 @@ resource "aws_security_group" "gitlab_rds" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_rds" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_internal_networking" {
   count = local.rds_postgres_create ? 1 : 0
 
   security_group_id = aws_security_group.gitlab_rds[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to RDS"
+  description = "Enable internal access to RDS from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = var.rds_postgres_port
   to_port     = var.rds_postgres_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.rds_postgres_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-rds-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_cidr" {
+  for_each = local.rds_postgres_create ? toset(var.rds_postgres_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_rds[0].id
+
+  description = "Enable access to RDS from CIDR block ${each.key}"
+  from_port   = var.rds_postgres_port
+  to_port     = var.rds_postgres_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-rds-cidr-${each.key}"
+  }
 }
 
 ### Praefect
@@ -181,17 +203,38 @@ resource "aws_security_group" "gitlab_rds_praefect" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_rds_praefect" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_internal_networking" {
   count = local.rds_praefect_postgres_create ? 1 : 0
 
   security_group_id = aws_security_group.gitlab_rds_praefect[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to Praefect RDS"
+  description = "Enable internal access to Praefect RDS from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = var.rds_praefect_postgres_port
   to_port     = var.rds_praefect_postgres_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.rds_praefect_postgres_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-rds-praefect-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_cidr" {
+  for_each = local.rds_praefect_postgres_create ? toset(var.rds_praefect_postgres_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_rds_praefect[0].id
+
+  description = "Enable access to Praefect RDS from CIDR block ${each.key}"
+  from_port   = var.rds_praefect_postgres_port
+  to_port     = var.rds_praefect_postgres_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-rds-praefect-cidr-${each.key}"
+  }
 }
 
 ### Geo Tracking
@@ -210,17 +253,38 @@ resource "aws_security_group" "gitlab_rds_geo_tracking" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_rds_geo_tracking" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_internal_networking" {
   count = local.rds_geo_tracking_postgres_create ? 1 : 0
 
   security_group_id = aws_security_group.gitlab_rds_geo_tracking[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to Geo Tracking RDS"
+  description = "Enable internal access to Geo Tracking RDS from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = var.rds_geo_tracking_postgres_port
   to_port     = var.rds_geo_tracking_postgres_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.rds_geo_tracking_postgres_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-rds-geo-tracking-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_cidr" {
+  for_each = local.rds_geo_tracking_postgres_create ? toset(var.rds_geo_tracking_postgres_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_rds_geo_tracking[0].id
+
+  description = "Enable access to Geo Tracking RDS from CIDR block ${each.key}"
+  from_port   = var.rds_geo_tracking_postgres_port
+  to_port     = var.rds_geo_tracking_postgres_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-rds-geo-tracking-cidr-${each.key}"
+  }
 }
 
 ## AWS Elasticache
@@ -240,20 +304,45 @@ resource "aws_security_group" "gitlab_elasticache_redis" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_elasticache_redis" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_internal_networking" {
   count = min(var.elasticache_redis_node_count, 1)
 
   security_group_id = aws_security_group.gitlab_elasticache_redis[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to ElastiCache Redis"
+  description = "Enable internal access to ElastiCache Redis from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = var.elasticache_redis_port
   to_port     = var.elasticache_redis_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.elasticache_redis_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cidr" {
+  for_each = var.elasticache_redis_node_count > 0 ? toset(var.elasticache_redis_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_elasticache_redis[0].id
+
+  description = "Enable access to ElastiCache Redis from CIDR block ${each.key}"
+  from_port   = var.elasticache_redis_port
+  to_port     = var.elasticache_redis_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-cidr-${each.key}"
+  }
 }
 
 ### Redis Cache
+locals {
+  elasticache_redis_cache_allowed_ingress_cidr_blocks = coalesce(var.elasticache_redis_cache_allowed_ingress_cidr_blocks, var.elasticache_redis_allowed_ingress_cidr_blocks)
+}
+
 resource "aws_security_group" "gitlab_elasticache_redis_cache" {
   count = min(var.elasticache_redis_cache_node_count, 1)
 
@@ -269,20 +358,45 @@ resource "aws_security_group" "gitlab_elasticache_redis_cache" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_elasticache_redis_cache" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_internal_networking" {
   count = min(var.elasticache_redis_cache_node_count, 1)
 
   security_group_id = aws_security_group.gitlab_elasticache_redis_cache[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to ElastiCache Redis Cache"
+  description = "Enable internal access to ElastiCache Redis Cache from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = local.elasticache_redis_cache_port
   to_port     = local.elasticache_redis_cache_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.elasticache_redis_cache_allowed_ingress_cidr_blocks, var.elasticache_redis_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-cache-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_cidr" {
+  for_each = var.elasticache_redis_cache_node_count > 0 ? toset(local.elasticache_redis_cache_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_elasticache_redis_cache[0].id
+
+  description = "Enable access to ElastiCache Redis Cache from CIDR block ${each.key}"
+  from_port   = local.elasticache_redis_cache_port
+  to_port     = local.elasticache_redis_cache_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-cache-cidr-${each.key}"
+  }
 }
 
 ### Redis Persistent
+locals {
+  elasticache_redis_persistent_allowed_ingress_cidr_blocks = coalesce(var.elasticache_redis_persistent_allowed_ingress_cidr_blocks, var.elasticache_redis_allowed_ingress_cidr_blocks)
+}
+
 resource "aws_security_group" "gitlab_elasticache_redis_persistent" {
   count = min(var.elasticache_redis_persistent_node_count, 1)
 
@@ -298,17 +412,38 @@ resource "aws_security_group" "gitlab_elasticache_redis_persistent" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_elasticache_redis_persistent" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persistent_internal_networking" {
   count = min(var.elasticache_redis_persistent_node_count, 1)
 
   security_group_id = aws_security_group.gitlab_elasticache_redis_persistent[0].id
 
-  type        = "ingress"
-  description = "Enable internal access to ElastiCache Redis Persistent"
+  description = "Enable internal access to ElastiCache Redis Persistent from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = local.elasticache_redis_persistent_port
   to_port     = local.elasticache_redis_persistent_port
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.elasticache_redis_persistent_allowed_ingress_cidr_blocks, var.elasticache_redis_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-persistent-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persistent_cidr" {
+  for_each = var.elasticache_redis_persistent_node_count > 0 ? toset(local.elasticache_redis_persistent_allowed_ingress_cidr_blocks) : []
+
+  security_group_id = aws_security_group.gitlab_elasticache_redis_persistent[0].id
+
+  description = "Enable access to ElastiCache Redis Persistent from CIDR block ${each.key}"
+  from_port   = local.elasticache_redis_persistent_port
+  to_port     = local.elasticache_redis_persistent_port
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-elasticache-redis-persistent-cidr-${each.key}"
+  }
 }
 
 ## AWS OpenSearch
@@ -327,22 +462,36 @@ resource "aws_security_group" "gitlab_opensearch" {
   }
 }
 
-resource "aws_security_group_rule" "gitlab_opensearch" {
+resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_internal_networking" {
   count = min(var.opensearch_node_count, 1)
+
+  security_group_id = aws_security_group.gitlab_elasticache_redis_cache[0].id
+
+  description = "Enable internal access to OpenSearch from ${aws_security_group.gitlab_internal_networking.name} security group"
+  from_port   = 443
+  to_port     = 443
+  ip_protocol = "tcp"
+
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  tags = {
+    Name = "${var.prefix}-opensearch-internal-networking"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_cidr" {
+  for_each = var.opensearch_node_count > 0 ? toset(var.opensearch_allowed_ingress_cidr_blocks) : []
 
   security_group_id = aws_security_group.gitlab_opensearch[0].id
 
-  type        = "ingress"
-  description = "Enable internal HTTPS access for OpenSearch"
+  description = "Enable access to OpenSearch from CIDR block ${each.key}"
   from_port   = 443
   to_port     = 443
-  protocol    = "tcp"
-  cidr_blocks = coalescelist(var.opensearch_allowed_ingress_cidr_blocks, [data.aws_vpc.selected.cidr_block])
-}
+  ip_protocol = "tcp"
 
-# Ensure correct order for OpenSearch security group switch
-# To be removed in 3.x
-moved {
-  from = aws_security_group.gitlab_opensearch_security_group
-  to   = aws_security_group.gitlab_opensearch
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-opensearch-cidr-${each.key}"
+  }
 }
