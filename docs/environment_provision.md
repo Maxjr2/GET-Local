@@ -353,7 +353,7 @@ Due to length limits on Service Account IDs however (30 characters or fewer) whi
 
 As such, if you intend to deploy more than one environment in the same GCP project you will see this clash accordingly. To help with this scenario the prefix can be configured in the [module's environment config file](#configure-module-settings-environmenttf) via the following variable:
 
-- `service_account_prefix` - Sets the prefix the Toolkit will use when generating Service Accounts. To comply with GCP limits the prefix must be 5 characters or fewer and only contain alphanumeric and dash (`-`) characters. This should only be changed if the IDs are expected to clash in your GCP project. Optional, default is `gl`.
+- `service_account_prefix` - Sets the prefix the Toolkit will use when generating Service Accounts. To comply with GCP limits the prefix must be 10 characters or fewer and only contain alphanumeric and dash (`-`) characters. This should only be changed if the IDs are expected to clash in your GCP project. Optional, default is `gl`.
 
 An example of setting this in your environment config file would be as follows:
 
