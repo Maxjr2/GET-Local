@@ -211,7 +211,7 @@ praefect_postgres_external_prep: "{{ true if praefect_postgres_host != postgres_
 monitor_int_addr: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'monitor' in groups else '' }}"
 monitor_int_ip: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if 'monitor' in groups else '' }}"
 monitor_prometheus_scrape_config_setup: true
-monitor_enable_deprecated_grafana: true
+monitor_enable_deprecated_grafana: false
 monitor_install_bundled_grafana: "{{ monitor_enable_deprecated_grafana }}"
 monitor_custom_dashboards: []
 monitor_custom_dashboards_path: "{{ inventory_path }}/../files/grafana"
