@@ -42,8 +42,8 @@ variable "service_account_prefix" {
   default = "gl"
 
   validation {
-    condition     = length(var.service_account_prefix) <= 5 && can(regex("[a-z]([-a-z0-9]*[a-z0-9])", var.service_account_prefix))
-    error_message = "service_account_prefix must be 5 characters or less and only contain lowercase alphanumeric characters and dashes."
+    condition     = length(var.service_account_prefix) <= 10 && can(regex("[a-z]([-a-z0-9]*[a-z0-9])", var.service_account_prefix))
+    error_message = "service_account_prefix must be 10 characters or less and only contain lowercase alphanumeric characters and dashes."
   }
 }
 
