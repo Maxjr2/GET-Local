@@ -360,7 +360,6 @@ all:
 
     # Passwords / Secrets (Replace values accordingly)
     gitlab_root_password: '<GITLAB_ROOT_PASSWORD>'
-    grafana_password: '<GRAFANA_PASSWORD>'
     postgres_password: '<POSTGRES_PASSWORD>'
     consul_database_password: '<CONSUL_DATABASE_PASSWORD>'
     gitaly_token: '<GITALY_TOKEN>'

@@ -340,7 +340,6 @@ all:
 
     # Passwords / Secrets
     gitlab_root_password: '<gitlab_root_password>'
-    grafana_password: '<grafana_password>'
     postgres_password: '<postgres_password>'
     patroni_password: '<patroni_password>'
     consul_database_password: '<consul_database_password>'
@@ -381,7 +380,6 @@ Component settings are specific component for GitLab components, e.g. Postgres:
 Passwords and Secrets settings are what they suggest - all the various passwords and secrets that GitLab requires to be configured by the user.
 
 - `gitlab_root_password` - Sets the password for the root user on first installation.
-- `grafana_password` - Sets the password for the [Grafana admin user](https://docs.gitlab.com/omnibus/settings/grafana.html#specifying-an-admin-password) on first installation.
 - `postgres_password` - Sets the password for the [GitLab's default Postgres user](https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#postgresql-information).
 - `patroni_password` - Sets the password for the [Patroni REST API](https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#patroni-information) (GitLab 14.1+).
 - `consul_database_password` - Sets the password for [Consul's database user](https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#consul-information). Required for Postgres HA.

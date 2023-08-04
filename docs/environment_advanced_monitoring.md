@@ -19,25 +19,20 @@ The Toolkit supports setting up optional monitoring of the environment of metric
 
 :information_source:&nbsp; Note that the following monitoring setups are optional. You're not required to use this functionality for monitoring your environment, and you can use a different setup as desired.
 
-:information_source:&nbsp; As of GitLab 16.0, [Omnibus-bundled Grafana is deprecated](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html#deprecation-of-bundled-grafana), and scheduled for removal from Omnibus in 16.3. This change does **not** affect the monitoring provided by GET for Cloud Native Hybrid environments. **ALL Omnibus GET users with monitoring enabled are urged to consult the docs section on [Deprecated Omnibus-bundled Grafana](#deprecated-omnibus-bundled-grafana) for further information and next steps.**
-
 While the implementation differs between Omnibus and Cloud Native Hybrid environments the same core components are used in each:
 
 - [Prometheus](https://prometheus.io/) - For metrics collection and storage.
-- [Grafana](https://grafana.com/) - To visualise the metrics.
 - [Consul](https://www.consul.io/) - Component auto-discovery.
 
 The Toolkit will configure these in each case, including scrape config, dashboard(s).
 
-On this page we'll detail how to deploy the monitoring setup for each environment type with the Toolkit. Head to the relevant section below depending on the type of environment you have. **It's also worth noting this guide assumes a working knowledge of Prometheus, Grafana and Consul as well as being supplementary to the rest of the docs.**
+On this page we'll detail how to deploy the monitoring setup for each environment type with the Toolkit. Head to the relevant section below depending on the type of environment you have. **It's also worth noting this guide assumes a working knowledge of Prometheus and Consul as well as being supplementary to the rest of the docs.**
 
 [[_TOC_]]
 
 ## Omnibus
 
-:information_source:&nbsp; As of GitLab 16.0, [Omnibus-bundled Grafana is deprecated](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html#deprecation-of-bundled-grafana), and scheduled for removal from Omnibus in 16.3. **ALL Omnibus GET users with monitoring enabled are urged to consult the docs section on [Deprecated Omnibus-bundled Grafana](#deprecated-omnibus-bundled-grafana) for further information and next steps.**
-
-In Omnibus environments the monitoring stack is provided by [Omnibus GitLab](https://docs.gitlab.com/omnibus/), which has Prometheus, Grafana and Consul built in.
+In Omnibus environments the monitoring stack is provided by [Omnibus GitLab](https://docs.gitlab.com/omnibus/), which has Prometheus and Consul built in.
 
 In this setup, these components are deployed to their own VM named `monitor`. Like other Omnibus components this is enabled by simply deploying this node in Terraform and Ansible will configure it automatically. See the below sections for details on each.
 
@@ -57,38 +52,11 @@ module "gitlab_ref_arch_gcp" {
 
 **Ansible**
 
-With that node provisioned, Ansible will detect it, and configure the monitoring stack automatically. It will configure the relevant metrics exporters on the component nodes, and connect them to the Prometheus instance. It will also deploy select Grafana Dashboard(s).
+With that node provisioned, Ansible will detect it, and configure the monitoring stack automatically. It will configure the relevant metrics exporters on the component nodes, and connect them to the Prometheus instance. You can disable this behavior by specifying the following setting in your Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
-By default, as given by Omnibus, Grafana will be configured with no authentication option. [Various options are available on how to configure authentication for Grafana](https://docs.gitlab.com/omnibus/settings/grafana.html#authentication) which can be configured with [Custom Config](environment_advanced.md#custom-config), but the Toolkit also allows for basic authentication of an Admin user and password via the following setting in your Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
-
-- `grafana_password` - Password for the Grafana Admin user. Will also configure the basic authentication method.
-  - Note that changing this password after it has been set will have no effect. The password needs to be changed directly [as detailed here](https://docs.gitlab.com/omnibus/settings/grafana.html#resetting-the-admin-password).
 - `monitor_prometheus_scrape_config_setup` - Configures if any scrape configs should be configured by the Toolkit. Setting this to `false` will remove these to allow for more flexibility if desired. Optional, defaults to `true`.
 
-Once completed, Grafana will be available at the address `<ENVIRONMENT_URL>/-/grafana`.
-
-### Deprecated Omnibus-bundled Grafana
-
-As of GitLab 16.0, [Omnibus-bundled Grafana has been deprecated](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html#deprecation-of-bundled-grafana), and it is scheduled for removal from Omnibus in 16.3.
-
-To prevent the unexpected removal of Grafana instances for existing users with monitoring enabled, GET currently enables the [temporary workaround in Omnibus](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html#temporary-workaround) by default, but new users are encouraged to disable it as detailed below. This workaround will only be available for GitLab version 16.2 and earlier.
-
-All users are urged to find [an alternative option to Omnibus-bundled Grafana](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html#switch-to-new-grafana-instance), and can investigate [custom tasks in GET](environment_advanced.md#custom-tasks) as a means of installing an alternate visualization solution.
-
-Disabling the bundled Grafana will not affect Prometheus or Consul. If the monitoring role is enabled, metrics will still be collected, but will not have a visualization solution unless an alternate is provided.
-
-To disable Omnibus-bundled Grafana, include the following in your Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
-
-```yml
-monitor_enable_deprecated_grafana: false
-```
-
-Then run `ansible-playbook` with the intended environment's inventory against the `monitor.yml` and `haproxy.yml` playbooks.
-
-```yml
-ansible-playbook -i environments/<ENV_NAME>/inventory playbooks/monitor.yml
-ansible-playbook -i environments/<ENV_NAME>/inventory playbooks/haproxy.yml
-```
+You can also [customize Prometheus scrape definitions](environment_advanced_monitoring.md#omnibus-2) and [Prometheus alerting/recording rules](environment_advanced_monitoring.md#omnibus-3).
 
 ## Cloud Native Hybrid (`kube-prometheus-stack`)
 
@@ -133,7 +101,7 @@ How this works differs depending on the environment setup used as detailed in th
 
 ### Omnibus
 
-As Prometheus and Grafana are packaged within Omnibus [the standard approach detailed here](environment_advanced.md#omnibus) for the `monitor` node can be followed for any [valid config](https://docs.gitlab.com/ee/administration/monitoring/prometheus/).
+As Prometheus is packaged within Omnibus [the standard approach detailed here](environment_advanced.md#omnibus) for the `monitor` node can be followed for any [valid config](https://docs.gitlab.com/ee/administration/monitoring/prometheus/).
 
 ### Cloud Native Hybrid (`kube-prometheus-stack`)
 
@@ -221,35 +189,4 @@ An example of how you would configure this for several folders in the default lo
 monitor_custom_rules:
   - folder: 'my_sidekiq_rules'
   - folder: 'my_gitaly_rules'
-```
-
-## Custom Grafana Dashboards
-
-The Toolkit allows you to pass in custom dashboards to be used in Grafana for either the Omnibus or Cloud Native Hybrid setups described above.
-
-By default, the Toolkit will look for Dashboards under the `environments/<env_name>/files/grafana` folder. In Grafana, Dashboards are typically organised under folders, so the same is expected here. As such, Dashboards should be placed in their own folder in this path, for example `environments/<env_name>/files/grafana/<dashboards folder name>/<dashboard files>`. You can create multiple folders to store different dashboards or store everything in a single folder. You can also store the dashboards in a different location other than `environments/<env_name>/files/grafana/` for each setup.
-
-Once the dashboards are in place you can then configure the Toolkit to set these up accordingly. This is done by configuring the Toolkit to know what sub-folders of dashboards to transfer over as well as configuring how they are displayed in the Grafana UI.
-
-For details on how to do this for each setup, refer to the applicable section below.
-
-:information_source:&nbsp; Note that [Custom Config](#custom-config) will take precedence over this if the same underlying variables are specified.
-
-### Omnibus
-
-For Omnibus, the following variables are used to configure custom dashboards:
-
-- `monitor_custom_dashboards_path` - Path the Toolkit will look under for any Dashboards. Default is `environments/<env_name>/files/grafana`.
-- `monitor_custom_dashboards` - List of Dashboard folders under `monitor_custom_dashboards_path` the Toolkit should transfer. Each entry requires a couple of variables to be set in dict format: For each a dict should be set with the following sub-variables:
-  - `folder` - The folder under `monitor_custom_dashboards_path` to transfer over
-  - `display_name` - Display name of Folder to be shown in the Grafana UI.
-
-An example of how you would configure this for several folders in the default location would be as follows:
-
-```yaml
-monitor_custom_dashboards:
-  - folder: 'my_sidekiq_dashboards'
-    display_name: 'Sidekiq Dashboards'
-  - folder: 'my_gitaly_dashboards'
-    display_name: 'Gitaly Dashboards'
 ```
