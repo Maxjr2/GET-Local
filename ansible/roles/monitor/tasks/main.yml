@@ -9,25 +9,6 @@
     - secrets
     - gitlab-secrets
 
-- name: Import GitLab Grafana dashboards
-  include_tasks: dashboard_import.yml
-  vars:
-    monitor_custom_dashboards_path: "{{ role_path }}"
-  loop:
-    - { display_name: 'GitLab Environment Toolkit', folder: 'files' }
-  when: monitor_install_bundled_grafana
-  tags:
-    - reconfigure
-    - dashboards
-
-- name: Import custom Grafana dashboards
-  include_tasks: dashboard_import.yml
-  loop: "{{ monitor_custom_dashboards }}"
-  when: monitor_install_bundled_grafana
-  tags:
-    - reconfigure
-    - dashboards
-
 - name: Import custom Prometheus rules
   include_tasks: rule_import.yml
   loop: "{{ monitor_custom_rules }}"

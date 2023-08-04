@@ -15,4 +15,3 @@ all:
 
     # Passwords / Secrets
     gitlab_root_password: '<gitlab_root_password>'
-    grafana_password: '<grafana_password>'

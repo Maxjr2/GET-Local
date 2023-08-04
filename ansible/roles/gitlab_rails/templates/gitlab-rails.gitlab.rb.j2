@@ -277,7 +277,6 @@ postgresql['version'] = {{ postgres_version }}
 {% if 'monitor' in groups %}
 ## Monitor - Separate Node(s)
 prometheus['enable'] = false
-grafana['enable'] = false
 {% endif %}
 
 gitlab_workhorse['env'] = {

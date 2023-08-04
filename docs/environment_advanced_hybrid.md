@@ -401,7 +401,6 @@ all:
 
     # Passwords / Secrets
     gitlab_root_password: '<gitlab_root_password>'
-    grafana_password: '<grafana_password>'
     postgres_password: '<postgres_password>'
     patroni_password: '<patroni_password>'
     consul_database_password: '<consul_database_password>'
@@ -449,7 +448,6 @@ all:
 
     # Passwords / Secrets
     gitlab_root_password: '<gitlab_root_password>'
-    grafana_password: '<grafana_password>'
     postgres_password: '<postgres_password>'
     patroni_password: '<patroni_password>'
     consul_database_password: '<consul_database_password>'

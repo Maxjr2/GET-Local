@@ -20,7 +20,7 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 - Advanced search with OpenSearch
 - Geo support
 - Zero Downtime Upgrades support
-- Built in Load Balancing and Monitoring (Prometheus, Grafana) setup
+- Built in Load Balancing and Monitoring (Prometheus) setup
 - SSL / TLS (either direct or via hooks)
 - Alternative sources (Cloud Services, Custom Servers) for select components (Load Balancers, PostgreSQL, Redis)
 - On Prem Support (Ansible)

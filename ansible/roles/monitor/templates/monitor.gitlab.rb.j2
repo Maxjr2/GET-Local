@@ -28,63 +28,6 @@ prometheus['rules_files'] = [
 {% endfor %}
 ]
 
-{# Grafana section #}
-{% if monitor_install_bundled_grafana %}
-# Grafana
-grafana['enable'] = true
-grafana['enable_deprecated_service'] = true
-
-grafana['env'] = {
-  'GF_SERVER_ROOT_URL' => '{{ external_url_sanitised }}/-/grafana'
-}
-
-{% if grafana_password is defined and grafana_password != '' %}
-grafana['admin_password'] = "{{ grafana_password | regex_escape() }}"
-grafana['disable_login_form'] = false
-{% endif %}
-
-grafana['dashboards'] = [
-  {
-    'name' => 'GitLab Omnibus',
-    'orgId' => 1,
-    'folder' => 'GitLab Omnibus',
-    'type' => 'file',
-    'disableDeletion' => true,
-    'updateIntervalSeconds' => 600,
-    'options' => {
-      'path' => '/opt/gitlab/embedded/service/grafana-dashboards',
-    }
-  },
-  {
-    'name' => 'GitLab Environment Toolkit',
-    'orgId' => 1,
-    'folder' => 'GitLab Environment Toolkit',
-    'type' => 'file',
-    'disableDeletion' => true,
-    'updateIntervalSeconds' => 600,
-    'options' => {
-      'path' => '/opt/gitlab_environment_toolkit/dashboards',
-    }
-  },
-{% for item in monitor_custom_dashboards %}
-  {
-    'name' => '{{ item.display_name }}',
-    'orgId' => 1,
-    'folder' => '{{ item.display_name }}',
-    'type' => 'file',
-    'disableDeletion' => true,
-    'updateIntervalSeconds' => 600,
-    'options' => {
-      'path' => "/opt/{{ item.display_name | lower | replace(' ', '_') }}/dashboards",
-    }
-  },
-{% endfor %}
-]
-{% else %}
-grafana['enable'] = false
-{% endif %}
-{# End Grafana section #}
-
 {% if 'consul' in groups %}
 # Consul Agent (Monitoring Auto Discovery)
 consul['enable'] = true
