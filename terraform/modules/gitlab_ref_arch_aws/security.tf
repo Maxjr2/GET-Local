@@ -465,7 +465,7 @@ resource "aws_security_group" "gitlab_opensearch" {
 resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_internal_networking" {
   count = min(var.opensearch_node_count, 1)
 
-  security_group_id = aws_security_group.gitlab_elasticache_redis_cache[0].id
+  security_group_id = aws_security_group.gitlab_opensearch[0].id
 
   description = "Enable internal access to OpenSearch from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = 443
