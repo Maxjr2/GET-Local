@@ -1,3 +1,6 @@
+{% if gitlab_version == '' or gitlab_version is version('14.1', '>=') %}
+roles ["sidekiq_role"]
+{% else %}
 # Avoid running unnecessary services on the Sidekiq server
 gitaly['enable'] = false
 postgresql['enable'] = false
@@ -9,6 +12,7 @@ alertmanager['enable'] = false
 gitlab_exporter['enable'] = false
 nginx['enable'] = false
 gitlab_kas['enable'] = false
+{% endif %}
 
 external_url '{{ external_url_sanitised }}'
 
@@ -195,8 +199,9 @@ git_data_dirs({
 })
 {% endif %}
 
+## Configure Sidekiq as a Registry client
 {% if container_registry_enable %}
-registry_external_url "{{ container_registry_external_url }}"
+gitlab_rails['registry_api_url'] = "{{ container_registry_external_url }}"
 {% endif %}
 
 geo_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.geo.*.rb"))
