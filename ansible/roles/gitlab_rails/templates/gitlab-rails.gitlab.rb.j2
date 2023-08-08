@@ -18,11 +18,11 @@ unicorn['listen'] = '0.0.0.0'
 {% if gitlab_root_password != '' %}
 gitlab_rails['initial_root_password'] = "{{ gitlab_root_password }}"
 {% endif %}
-gitlab_rails['gitlab_shell_ssh_port'] = "{{ gitlab_shell_ssh_port }}"
 
+gitlab_rails['gitlab_shell_ssh_port'] = "{{ gitlab_shell_ssh_port }}"
 {% if gitlab_shell_ssh_daemon == 'gitlab-sshd' %}
 gitlab_sshd['enable'] = true
-gitlab_sshd['listen_address'] ="[::]:{{ gitlab_shell_ssh_port }}"
+gitlab_sshd['listen_address'] ="[::]:{{ gitlab_shell_ssh_internal_port }}"
 {% endif %}
 
 # Ensure UIDs and GIDs match between servers for permissions
