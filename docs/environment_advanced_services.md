@@ -184,7 +184,7 @@ When it comes to the version of PostgreSQL being deployed in AWS RDS, it's first
 
 Due to the above as well as ensuring that major upgrades don't happen unexpectedly, the Toolkit handles RDS version as follows:
 
-- The Toolkit will ask AWS RDS to deploy the current recommended version of PostgreSQL `12` as chosen by AWS.
+- The Toolkit will ask AWS RDS to deploy the current GitLab recommended version of PostgreSQL as chosen by AWS.
   - Conversely, if AWS decide to change the recommended version at a later date, Terraform will instruct AWS to upgrade the database to that version on the next run.
 - The Toolkit disables any auto upgrade behaviour (`auto_minor_version_upgrade`) for the RDS instance to avoid any Terraform clashes.
 
@@ -240,6 +240,132 @@ To configure these you can copy all the same variables listed above and replace 
 
 Please note that on the primary site it is possible to use a single RDS instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 RDS instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
 
+#### GCP Cloud SQL
+
+The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://cloud.google.com/sql/docs/postgres) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
+
+:information_source:&nbsp; Note that the account being used by Terraform to create the Cloud SQL instance will require the `cloudsql.admin` IAM role. 
+
+:information_source:&nbsp; Note that Geo setups are not directly supported at this time. While the Toolkit can set up two separate Cloud SQL instances, additional manual setup for [VPC Network Peering](https://cloud.google.com/vpc/docs/vpc-peering) and [Logical Replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication) will be required.
+
+The variables for this service start with the prefix `cloud_sql_*` and should replace any previous `postgres_*`, `pgbouncer_*` and `praefect_postgres_*` settings. The available variables are as follows:
+
+- `cloud_sql_postgres_machine_tier`- The [GCP Cloud SQL Machine Tier](https://cloud.google.com/sql/docs/postgres/create-instance#machine-types) for the service to use without the `db-` prefix. Note that for this service the standard GCP machine sizes don't apply, instead utilizing custom sizes in most cases. For example, to deploy an instance that matches a `n1-standard-4` machine type this can be configured as `custom-4-15360`. **Required**.
+- `cloud_sql_postgres_edition` - The [Cloud SQL edition](https://cloud.google.com/sql/docs/postgres/editions-intro) to be used. Optional, defaults to `ENTERPRISE`.
+- `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Optional, defaults to `POSTGRES_13`.
+- `cloud_sql_postgres_root_password` - The root password for the instance to be used for the default `postgres` user. If not set the user will not be given a password and access won't be available until a password is given manually. Optional, default is `null`.
+- `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` or `PD-HDD`. Optional, default is `PD-HDD`.
+- `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
+- `cloud_sql_postgres_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for Cloud SQL instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `ZONAL`.
+- `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.
+- `cloud_sql_praefect_postgres_encryption_key_name` - The path for a custom existing encryption key for CMEK disk encryption. [This key must be set up manually beforehand](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#encryption_key_name). If not provider Google provided keys will be used instead. Optional, default is `null`.
+
+:information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` prefix instead.
+
+To set up a standard GCP Cloud SQL PostgreSQL service for a 10k environment with the required variables, it should look like the following in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
+
+```tf
+module "gitlab_ref_arch_gcp" {
+  source = "../../modules/gitlab_ref_arch_gcp"
+
+  [...]
+
+  cloud_sql_postgres_machine_tier = "db-custom-8-30720"
+  cloud_sql_postgres_root_password = "<postgres_password>"
+}
+```
+
+Once the variables are set in your file you can proceed to provision the service as normal. Note that this can take several minutes on GCP's side.
+
+Once provisioned the database will be configured, and you'll see several new outputs at the end of the process. Key from this is the `cloud_sql_host` output, which contains the [Private IP](https://cloud.google.com/sql/docs/postgres/configure-private-ip#connect_to_an_instance_using_its_private_ip) address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
+
+##### GCP Cloud SQL SSL config
+
+GCP Cloud SQL does offer the ability to connect to Postgres over SSL. However, it should be noted this has some considerations:
+
+- Certificates are self-signed and managed by Cloud SQL. [These will need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) and propagated to the relevant GitLab components separately. This includes client certificates if the `require_ssl` option is enabled (see below).
+- Setting the `require_ssl` option on Cloud SQL will enable mutual 2-way SSL. This will impact Ansible from performing the required [Database Preparation](#database-preparation) steps and as a result users and databases may need to be created separately.
+
+If the above is desirable then the `require_ssl` option can be enabled via the following variable:
+
+- `cloud_sql_postgres_require_ssl` - Sets if connections to the database require SSL (Mutual 2-way). Optional, default is `false`
+
+For more information about GCP Cloud SQL SSL [refer to the provider's documentation](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance).
+
+##### GCP Cloud SQL Maintenance config
+
+The Toolkit allows for configuring various Maintenance settings for a GCP Cloud SQL instance.
+
+Maintenance settings are configured via the `cloud_sql_postgres_maintenance_window` object variable that has the following variables:
+
+- `cloud_sql_postgres_maintenance_window`
+  - [`day`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#day) - The day of the week when maintenance should occur. Options are `1` through `7`, where `1` is Monday. Optional, default is `null`.
+  - [`hour`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#hour) - The hour of the day when maintenance should occur. Options are `0` through `23`, following 24 hour time notation. Optional, default is `null`.
+  - [`update_track`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance##update_track) - The update track that maintenance should follow. Options are `stable` or `canary`. GCP will follow `stable` unless set otherwise as recommended. Optional, default is `null`.
+
+An example of the above in Terraform would be as follows:
+
+```tf
+module "gitlab_ref_arch_gcp" {
+  source = "../../modules/gitlab_ref_arch_gcp"
+
+  [...]
+
+  cloud_sql_postgres_maintenance_window = {
+    day = 2
+    hour = 11
+  }
+}
+```
+
+##### GCP Cloud SQL Backup config
+
+The Toolkit allows for configuring various Backup settings for a GCP Cloud SQL instance.
+
+Maintenance settings are configured via the `cloud_sql_postgres_maintenance_window` object variable that has the following variables:
+
+- `cloud_sql_postgres_backup_configuration`
+  - [`enabled`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#enabled) - If backups are enabled. Optional, default is `null`.
+  - [`start_time`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#start_time) - The time when backups should be taken in `HH:MM` format. Optional, default is `null`.
+  - [`location`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#location) - The region where backups will be stored. By default, to the same region as configured by the provider. Optional, default is `null`.
+  - [`point_in_time_recovery_enabled`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#point_in_time_recovery_enabled) - If Point-in-time recovery is enabled. Optional, default is `null`.
+  - [`transaction_log_retention_days`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#transaction_log_retention_days) - The number of days Point-in-time transaction logs should be retained. Options are `1` through `7`. Optional, default is `null`,
+  - [`retained_backups`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#retained_backups) - The number of backups to retain. If not specified the Google default of `7` is used. Optional, default is `null`.
+
+An example of the above in Terraform would be as follows:
+
+```tf
+module "gitlab_ref_arch_gcp" {
+  source = "../../modules/gitlab_ref_arch_gcp"
+
+  [...]
+
+  cloud_sql_postgres_backup_configuration = {
+    enabled = true
+
+    retained_backups = 2
+    point_in_time_recovery_enabled = true
+    transaction_log_retention_days = 2
+  }
+}
+```
+
+##### GCP Cloud SQL Read Replicas
+
+The standard setup above will deploy a standalone GCP Cloud SQL instance that optionally can also be configured to have an availability replica for HA purposes. This replica is only used for HA though and can't be reached or read from.
+
+As an additional feature Cloud SQL also offers the ability to spin up separate [Read Replicas](https://cloud.google.com/sql/docs/postgres/replication/create-replica) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
+
+:information_source:&nbsp; Note this Read Replicas are only available for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
+
+Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
+
+- `cloud_sql_postgres_read_replica_count` - The number of read replicas to configure for the Cloud SQL database of the PostgreSQL instance to set up. Optional, default is `0`.
+- `cloud_sql_postgres_read_replica_deletion_protection` - If deletion protection should be enabled for the read replica instance. Optional, default is `false`.
+- `cloud_sql_postgres_read_replica_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for read replica instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `null`.
+ 
+Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `cloud_sql_read_replica_hosts` output, which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
+
 ### Configuring with Ansible
 
 Configuring GitLab to use an alternative PostgreSQL database with Ansible is the same regardless of its origin. All that's required are a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) to point the Toolkit at the PostgreSQL instance(s).
@@ -253,8 +379,8 @@ As detailed in [Database Setup Options](#database-setup-options) GitLab has seve
 The required variables in Ansible for this are as follows:
 
 - `postgres_host` - The hostname of the PostgreSQL instance. Provided in Terraform outputs if provisioned earlier. **Required**.
-- `postgres_password` - The password for the instance. **Required**.
 - `postgres_username` - The username of the PostgreSQL instance. Optional, default is `gitlab`.
+- `postgres_password` - The password for the user defined by `postgres_username`. **Required**.
 - `postgres_database_name` - The name of the main database in the instance for use by GitLab. Optional, default is `gitlabhq_production`.
 - `postgres_port` - The port of the PostgreSQL instance. Should only be changed if the instance isn't running with the default port. Optional, default is `5432`.
 - `postgres_load_balancing_hosts` - A list of all PostgreSQL hostnames to use in [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html). This is only applicable when running with an alternative Postgres setup (non-Omnibus) where you have multiple read replicas. The main host should also be included in this list to be used in load balancing. Optional, default is `[]`.
@@ -266,6 +392,7 @@ Depending on your Database instance setup some additional config may be required
 
 - `postgres_migrations_host` / `postgres_migrations_port` - Required for running GitLab Migrations if the main connection is not direct (e.g. via a connection pooler like PgBouncer). This should be set to the direct connection details of your database.
 - `postgres_admin_username` / `postgres_admin_password` - Required if the admin username for the Database instance differs from the main one.
+  - **GCP only** - This must be set to `postgres` and the password set via Terraform when using a Toolkit provisioned GCP Cloud SQL instance (`cloud_sql_postgres_root_password`).
 - `postgres_external_prep` - Sets up data on external main database as required by GitLab. Disable this if Ansible is unable to connect to the database directly. Refer to the [Database Preparation](#database-preparation) section below for more info. Optional, default is `true`.
 
 If a separate Database instance is to be used for Praefect then the additional following config may be required:
@@ -274,6 +401,7 @@ If a separate Database instance is to be used for Praefect then the additional f
 - `praefect_postgres_cache_host` / `praefect_postgres_cache_port` - Host and port for the [Praefect cache connection](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#reads-distribution-caching). This should be either set to the direct connection or through a PgBouncer connection that has session pooling enabled.
 - `praefect_postgres_migrations_host` / `praefect_postgres_migrations_port` - Required for running Praefect Migrations if the main connection is not direct (e.g. via a connection pooler like PgBouncer). This should be set to the direct connection details of your database.
 - `praefect_postgres_admin_username` / `praefect_postgres_admin_password` - Required if the admin username for the Database instance differs from the main one.
+  - **GCP only** - This must be set to `postgres` and the password set via Terraform when using a Toolkit provisioned GCP Cloud SQL instance (`cloud_sql_postgres_root_password`).
 - `praefect_postgres_external_prep` - Sets up data on the external Praefect database(s) as required by GitLab. Disable this if Ansible is unable to connect to the database directly. Refer to the [Database Preparation](#database-preparation) section below for more info. Optional, default is `true`.
 
 Once set, Ansible can then be run as normal. During the run it will configure the various GitLab components to use the database as well as any additional tasks such as setting up a separate database in the same instance for Praefect.
@@ -434,7 +562,7 @@ For optional variables they work in a default like manner. When configuring for 
 - `memorystore_redis_transit_encryption_mode` - The [TLS mode of the Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#tlscertificate) instance for the [In-transit encryption](https://cloud.google.com/memorystore/docs/redis/in-transit-encryption). Optional, default is `DISABLED`. To enable set to `SERVER_AUTHENTICATION`.
   - Optionally `memorystore_redis_cache_transit_encryption_mode` or `memorystore_redis_persistent_transit_encryption_mode` can be used to override for separate services.
   - If you would like to enable TLS, you need to follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-secrets-and-custom-config) after environment is provisioned.
-  - :information_source:&nbsp; Note that the service will generate its own CA certificate and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
+  - :information_source:&nbsp; Note that the service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
 - [`memorystore_redis_weekly_maintenance_window_day`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#day) - The day of week that maintenance updates occur, e.g. `MONDAY`. Optional, default is `null`.
   - Optionally `memorystore_redis_cache_weekly_maintenance_window_day` or `memorystore_redis_persistent_weekly_maintenance_window_day` can be used to override for separate services.
 - [`memorystore_redis_weekly_maintenance_window_start_time`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#start_time) - Start time when maintenance updates occur. Optional, default is `null`.
@@ -453,7 +581,7 @@ For optional variables they work in a default like manner. When configuring for 
 
     </details>
 
-:information_source:&nbsp; Note that due to the service's design, you can't set the AUTH string (or password) directly. It's set on GCP's side during creation and you have to then [retrieve it accordingly](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
+:information_source:&nbsp; Note that due to the service's design, you can't set the AUTH string (or password) directly. It's set on GCP's side during creation, and you have to then [retrieve it accordingly](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
 
 If deploying a combined Redis setup that contains all queues (5k and lower) the following settings should be set (replacing any previous `redis_*` settings):
 
@@ -513,7 +641,7 @@ The variables to set are dependent on if the setup is to have combined or separa
   - **AWS only** - Default is `true`. Should only be changed when Redis store doesn't have SSL configured. ElastiCache stores provisioned by the Toolkit will always use SSL.
   - **GCP only** - Default is `false`. Should only be changed when Memorystore have SSL configured.
     - If TLS encryption was enabled via `memorystore_redis*_transit_encryption_mode`, follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-secrets-and-custom-config) for Redis.
-      - :information_source:&nbsp; Note that the service will generate its own CA certificate and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
+      - :information_source:&nbsp; Note that the service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
 - `redis_external_enable_client` - Configures the use of the Redis `client` command, as this is restricted on certain Cloud Providers such as [GCP](https://docs.gitlab.com/omnibus/settings/redis.html#using-google-cloud-memorystore). This command is only used for debugging purposes in Omnibus.
   - **AWS only** - Default is `true`.
   - **GCP only** - Default is `false`.
@@ -581,7 +709,7 @@ Once provisioned you'll see several new outputs at the end of the process. Key f
 
 A key limitation of this service managed role is that **only one can exist in the entire AWS account**. As such, you can't create more than one role or conversely delete it if it's being used.
 
-Due to this limitation the Toolkit will _not_ attempt to create this role for you due to the likelihood of clashes and it's strongly recommended that this role is created separately beforehand.
+Due to this limitation the Toolkit will _not_ attempt to create this role for you due to the likelihood of clashes, and it's strongly recommended that this role is created separately beforehand.
 
 However, the Toolkit can be configured to manage this role for you via the `opensearch_service_linked_role_create` variable in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). This should only be set to `true` if you are confident that there won't be any other OpenSearch domains being created in this account.
 

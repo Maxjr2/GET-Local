@@ -1,7 +1,3 @@
-data "google_compute_network" "gitlab_network" {
-  name = local.vpc_name
-}
-
 resource "google_redis_instance" "gitlab_redis" {
   count = var.memorystore_redis_node_count > 0 ? 1 : 0
 

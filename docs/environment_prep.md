@@ -78,6 +78,7 @@ To create a Service Account, you need to have `admin` permissions in the GCP pro
    - `Storage Admin` (Note - Not `Compute Storage Admin`)
    - `Service Account Admin`
    - `Service Account User`
+   - `Compute Network Admin` (Only required when deploying [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql))
 
 After the account is created, proceed to create a key file:
 
