@@ -62,7 +62,7 @@ Before you start setting up the config you should select a Terraform Module sour
 
 Terraform can retrieve Modules from various [sources](https://www.terraform.io/language/modules/sources). The Toolkit's Modules are available from Local paths, Git URL or this Project's Terraform Module Registry.
 
-:information_source:&nbsp; This documentation assume the Local method is being used but any of these sources can be used as desired.
+:information_source:&nbsp; This documentation assumes the Local method is being used but any of these sources can be used as desired.
 
 Below we detail each source and how to configure them:
 
@@ -347,7 +347,7 @@ Note that the default zone configured in `variables.tf` is still required in thi
 
 ##### Configure Service Account name prefix (GCP)
 
-As per recommended [best practices](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices), the Toolkit will provision and configure least privileged Service Accounts for GCP resources as required.
+As per recommended [best practices](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices), the Toolkit will provision and configure the least privileged Service Accounts for GCP resources as required.
 
 Due to length limits on Service Account IDs however (30 characters or fewer) while ensuring a consistent naming scheme the Toolkit will create the Service Accounts using a set prefix (`gl`) by default.
 

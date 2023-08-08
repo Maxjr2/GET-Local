@@ -483,6 +483,154 @@ variable "supporting_node_pool_disk_size" {
   default = null
 }
 
+# PaaS Services
+## PostgreSQL (Cloud SQL)
+variable "cloud_sql_postgres_machine_tier" {
+  type    = string
+  default = ""
+}
+variable "cloud_sql_postgres_edition" {
+  type    = string
+  default = "ENTERPRISE"
+}
+variable "cloud_sql_postgres_version" {
+  type    = string
+  default = "POSTGRES_13"
+}
+variable "cloud_sql_postgres_root_password" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+variable "cloud_sql_postgres_disk_type" {
+  type    = string
+  default = "PD-HDD"
+}
+variable "cloud_sql_postgres_disk_size" {
+  type    = number
+  default = 100
+}
+variable "cloud_sql_postgres_availability_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_postgres_require_ssl" {
+  type    = bool
+  default = false
+}
+variable "cloud_sql_postgres_encryption_key_name" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_postgres_deletion_protection" {
+  type    = bool
+  default = false
+}
+variable "cloud_sql_postgres_backup_configuration" {
+  type = object({
+    enabled = optional(bool)
+
+    start_time = optional(string)
+    location   = optional(string)
+
+    point_in_time_recovery_enabled = optional(bool)
+    transaction_log_retention_days = optional(number)
+
+    retained_backups = optional(number)
+  })
+
+  default = {}
+}
+variable "cloud_sql_postgres_maintenance_window" {
+  type = object({
+    day          = optional(number)
+    hour         = optional(number)
+    update_track = optional(string)
+  })
+
+  default = {}
+}
+
+variable "cloud_sql_postgres_read_replica_count" {
+  type    = number
+  default = 0
+}
+variable "cloud_sql_postgres_read_replica_availability_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_postgres_read_replica_deletion_protection" {
+  type    = bool
+  default = false
+}
+
+## Praefect PostgreSQL (Cloud SQL)
+variable "cloud_sql_praefect_postgres_machine_tier" {
+  type    = string
+  default = ""
+}
+variable "cloud_sql_praefect_postgres_edition" {
+  type    = string
+  default = "ENTERPRISE"
+}
+variable "cloud_sql_praefect_postgres_version" {
+  type    = string
+  default = "POSTGRES_13"
+}
+variable "cloud_sql_praefect_postgres_root_password" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+variable "cloud_sql_praefect_postgres_disk_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_praefect_postgres_disk_size" {
+  type    = number
+  default = 100
+}
+variable "cloud_sql_praefect_postgres_require_ssl" {
+  type    = bool
+  default = null
+}
+variable "cloud_sql_praefect_postgres_deletion_protection" {
+  type    = bool
+  default = false
+}
+variable "cloud_sql_praefect_postgres_availability_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_praefect_postgres_encryption_key_name" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_praefect_postgres_backup_configuration" {
+  type = object({
+    enabled = optional(bool)
+
+    start_time = optional(string)
+    location   = optional(string)
+
+    point_in_time_recovery_enabled = optional(bool)
+    transaction_log_retention_days = optional(number)
+
+    retained_backups = optional(number)
+  })
+
+  default = {}
+}
+variable "cloud_sql_praefect_postgres_maintenance_window" {
+  type = object({
+    day          = optional(number)
+    hour         = optional(number)
+    update_track = optional(string)
+  })
+
+  default = {}
+}
+
 ## Redis
 ### Combined \ Defaults
 variable "memorystore_redis_node_count" {

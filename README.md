@@ -133,7 +133,7 @@ card gcp #ffffff [
   Networking (For example VPCs, Subnets,
   Gateways or IPs)
   Cloud Load Balancing (Planned)
-  Cloud SQL (Planned)
+  Cloud SQL
   Cloud Memorystore
 ]
 
