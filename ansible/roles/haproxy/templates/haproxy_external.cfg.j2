@@ -42,11 +42,7 @@ backend gitlab-rails-ssh
     option srvtcpka
 
 {% for ip in gitlab_rails_int_addrs %}
-{% if gitlab_shell_ssh_daemon == 'gitlab-sshd' %}
-    server gitlab-rails{{loop.index}} {{ ip }}:{{ gitlab_shell_ssh_port }} track gitlab-rails/gitlab-rails{{loop.index}}
-{% else %}
-    server gitlab-rails{{loop.index}} {{ ip }}:22 track gitlab-rails/gitlab-rails{{loop.index}}
-{% endif %}
+    server gitlab-rails{{loop.index}} {{ ip }}:{{ gitlab_shell_ssh_internal_port }} track gitlab-rails/gitlab-rails{{loop.index}}
 {% endfor %}
 
 {% if 'monitor' in groups and monitor_install_bundled_grafana %}

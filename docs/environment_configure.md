@@ -430,14 +430,6 @@ This method can be customised in several ways via the following variables in you
 
 If the `object_storage_prefix` variable was used in Terraform to change what prefix is used for the buckets then this should also be configured in Ansible via `gitlab_object_storage_prefix`.
 
-##### SSH Server Daemon
-
-GitLab offers two server options for providing [SSH git operations](https://docs.gitlab.com/ee/development/gitlab_shell/features.html#git-operations) - `openssh` or [`gitlab-sshd`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html). The latter being a bespoke offering that provides additional features.
-
-By default `openssh` will be used, but you can switch over to `gitlab-sshd` via the following variable in [`vars.yml`](#environment-config-varsyml) file:
-
-- `gitlab_shell_ssh_daemon` - Configures what SSH server daemon GitLab should set up and use for Git operations. Options are `openssh` or `gitlab-sshd`. Default is `openssh`.
-
 #### Full config list and further examples
 
 The default Ansible config is defined as [Role Defaults](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#understanding-variable-precedence) to ensure correct precedence in the [`common_vars`](../ansible/roles/common_vars/defaults/main.yml) role.

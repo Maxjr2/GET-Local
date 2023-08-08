@@ -103,7 +103,8 @@ gitlab_rpm_target_path: "{{ lookup('env','GITLAB_TARGET_RPM_PATH') | default('/t
 gitlab_admin_email: "admin@example.com"
 
 gitlab_shell_ssh_daemon: "openssh"  # openssh or gitlab-sshd
-gitlab_shell_ssh_port: "2222"
+gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment else '2222' }}"
+gitlab_shell_ssh_internal_port: "{{ '2222' if (gitlab_shell_ssh_daemon == 'gitlab-sshd' or cloud_native_hybrid_environment) else '22' }}"
 gitlab_shell_ssh_key_path: "{{ '/var/opt/gitlab/gitlab-sshd' if gitlab_shell_ssh_daemon == 'gitlab-sshd' else '/etc/ssh/' }}"
 
 gitlab_secrets_setup: true
@@ -293,7 +294,6 @@ cloud_native_hybrid_geo_role: ""
 # Charts Settings
 ## GitLab
 gitlab_charts_release_namespace: default
-gitlab_charts_shell_ssh_port: "{{ gitlab_shell_ssh_port if gitlab_shell_ssh_port != '2222' else '22' }}"
 
 ### Webservice
 gitlab_charts_webservice_requests_memory_gb: 5

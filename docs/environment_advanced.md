@@ -233,6 +233,28 @@ The Toolkit supports setting up both of these setups. This is controlled simply 
 
 :information_source:&nbsp; Attempting to switch an existing environment from using Gitaly Cluster to Sharded or vice versa is not supported in the Toolkit and may lead to data loss.
 
+## GitLab SSH
+
+The `git+ssh` service in GitLab allows for users to perform [Git actions such as pushes or pulls over SSH](https://docs.gitlab.com/ee/development/gitlab_shell/features.html#git-operations). There are multiple options on how to configure this service as detailed below.
+
+### GitLab SSH Daemon
+
+GitLab offers two server daemon options for serving Git operations over SSH - `openssh` or [`gitlab-sshd`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html). The latter being a bespoke offering that provides additional features.
+
+By default, `openssh` will be used, but you can switch over to `gitlab-sshd` via the following Ansible variable in [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
+
+- `gitlab_shell_ssh_daemon` - Configures what SSH server daemon GitLab should set up and use for Git operations. Options are `openssh` or `gitlab-sshd`. Default is `openssh`.
+
+### GitLab SSH Port (External / Internal)
+
+The Toolkit allows you to configure the External and Internal ports used for serving Git operations over SSH, where external is the port users will use and internal is the port that the selected SSH daemon runs on. These can be configured via the following Ansible variables in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
+
+- `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure all parts of the external connection - HAProxy (Linux installs) or Kubernetes Ingress. Optional, default is `2222` (Linux) / `22` (Cloud Native Hybrid).
+  - :information_source:&nbsp; On Linux installs with the Toolkit, the external SSH port can not be `22` to prevent clashes with the system SSH service. This is due to Ansible needing to connect over SSH in most cases.
+  - :information_source:&nbsp; On Linux installs using the default HAProxy External load balancer, if the default port of `2222` is intended to be changed the port will need to be adjusted on the HAProxy External node as well. This can be done by changing the `external_ssh_port` in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf) to the new value.
+    - Additionally, it should be noted in this setup that the external SSH port can not be `22` to prevent clashes with the system SSH service. This is due to Ansible needing to connect over SSH in most cases.
+- `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for `gitlab-sshd` this will change whatever port the service runs on (Note for `gitlab-sshd` [it can not be run on a port number lower than `1024`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd)). Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
+
 ## Advanced Search
 
 The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes provisioning and configuring [OpenSearch](https://opensearch.org/) nodes to be a cluster as well as configuring GitLab to use it.
@@ -535,17 +557,6 @@ Then in Ansible you need to configure the `gitlab_object_storage_type` variable 
 ```yml
 gitlab_object_storage_type: 'nfs'
 ```
-
-## External Git SSH Port Options
-
-The Toolkit allows you to configure the external GitLab Shell SSH port - The port that is used externally to serve the `git+ssh` service on for Git actions such as pushes or pulls.
-
-Typically, this is set up on port `22`, but this differs slightly with Toolkit built environments as follows:
-
-- Omnibus - Port `2222`. This is to allow the external load balancer to have it's standard SSH service to run on port `22`, which is used by Ansible for configuring.
-- Cloud Native Hybrid - Port `22`. Due to the different nature of the setup port `22` can be used normally on the Kubernetes frontend.
-
-You can configure either environment type to serve the service on a different external port via the `gitlab_shell_ssh_port` Ansible setting in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file. Changing this setting also changes required firewall rules ports to match.
 
 ## Custom IAM options (AWS)
 

@@ -106,6 +106,8 @@ gitlab:
 {% if gitlab_shell_ssh_daemon == 'gitlab-sshd' %}
   gitlab-shell:
     sshDaemon: "{{ gitlab_shell_ssh_daemon }}"
+    service:
+      internalPort: "{{ gitlab_shell_ssh_internal_port }}"
 {% endif %}
   gitlab-exporter:
     metrics:
@@ -163,7 +165,7 @@ global:
     enabled: false
 {% endif %}
   shell:
-    port: {{ gitlab_charts_shell_ssh_port }}
+    port: {{ gitlab_shell_ssh_port }}
     authToken:
       secret: gitlab-shell-token
       key: password
