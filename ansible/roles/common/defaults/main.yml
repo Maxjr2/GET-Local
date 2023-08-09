@@ -23,6 +23,7 @@ disk_device_prefix:
   aws: "/dev/"
 mkfs_opts: "-m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard"
 mount_opts: "discard,defaults"
+mount_state: mounted
 
 ## Legacy setting for data_disks. Still supported at this time but will apply to all nodes.
 ## data_disks setting with individual group names (below) should be used instead
