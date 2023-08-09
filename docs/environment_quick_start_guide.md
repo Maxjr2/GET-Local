@@ -115,8 +115,8 @@ First we need to install Terraform. To easily switch between Terraform versions 
 
     ```sh
     asdf plugin add terraform
-    asdf install terraform 1.2.0
-    asdf global terraform 1.2.0
+    asdf install terraform 1.5.0
+    asdf global terraform 1.5.0
     ```
 
 Terraform should now be installed and ready on your `PATH`.
