@@ -1,10 +1,14 @@
-resource "aws_lb" "gitlab_internal" {
+resource "aws_lb" "gitlab_internal_lb" {
   count = var.elb_internal_create ? 1 : 0
 
   name               = "${format("%.28s", var.prefix)}-int"
   load_balancer_type = "network"
   internal           = true
   subnets            = coalesce(local.backend_subnet_ids, local.default_subnet_ids)
+
+  security_groups = [
+    aws_security_group.gitlab_internal_networking.id
+  ]
 
   enable_cross_zone_load_balancing = true
 }
@@ -39,7 +43,7 @@ resource "aws_lb_target_group_attachment" "gitlab_internal_gitlab_rails" {
 resource "aws_lb_listener" "gitlab_internal_gitlab_rails" {
   count = var.elb_internal_create && var.gitlab_rails_node_count > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.gitlab_internal[0].arn
+  load_balancer_arn = aws_lb.gitlab_internal_lb[0].arn
   port              = 80
   protocol          = "TCP"
 
@@ -79,7 +83,7 @@ resource "aws_lb_target_group_attachment" "gitlab_internal_pgbouncer" {
 resource "aws_lb_listener" "gitlab_internal_pgbouncer" {
   count = var.elb_internal_create && var.pgbouncer_node_count > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.gitlab_internal[0].arn
+  load_balancer_arn = aws_lb.gitlab_internal_lb[0].arn
   port              = 6432
   protocol          = "TCP"
 
@@ -119,7 +123,7 @@ resource "aws_lb_target_group_attachment" "gitlab_internal_praefect" {
 resource "aws_lb_listener" "gitlab_internal_praefect" {
   count = var.elb_internal_create && var.praefect_node_count > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.gitlab_internal[0].arn
+  load_balancer_arn = aws_lb.gitlab_internal_lb[0].arn
   port              = var.elb_internal_praefect_port
   protocol          = "TCP"
 
@@ -160,7 +164,7 @@ resource "aws_lb_target_group_attachment" "gitlab_internal_postgres_primary" {
 resource "aws_lb_listener" "gitlab_internal_postgres_primary" {
   count = var.elb_internal_create && var.postgres_node_count > 0 && var.geo_site != null ? 1 : 0
 
-  load_balancer_arn = aws_lb.gitlab_internal[0].arn
+  load_balancer_arn = aws_lb.gitlab_internal_lb[0].arn
   port              = 5432
   protocol          = "TCP"
 
@@ -172,7 +176,7 @@ resource "aws_lb_listener" "gitlab_internal_postgres_primary" {
 
 output "elb_internal" {
   value = {
-    "elb_internal_host"    = try(aws_lb.gitlab_internal[0].dns_name, "")
-    "elb_internal_zone_id" = try(aws_lb.gitlab_internal[0].zone_id, "")
+    "elb_internal_host"    = try(aws_lb.gitlab_internal_lb[0].dns_name, "")
+    "elb_internal_zone_id" = try(aws_lb.gitlab_internal_lb[0].zone_id, "")
   }
 }
