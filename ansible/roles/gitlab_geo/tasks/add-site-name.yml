@@ -1,6 +1,6 @@
 - name: Add Site Name - Add Geo secondary site to tracking db for Omnibus environments
   command: |
-    gitlab-rails runner "GeoNode.find_or_create_by(name: '{{ geo_secondary_site_name }}', url: '{{geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}')"
+    gitlab-rails runner "n = GeoNode.find_or_initialize_by(name: '{{ geo_secondary_site_name }}'); n.assign_attributes(url: '{{geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}'); n.save!"
   when:
     - ('gitlab_rails_primary' in group_names)
     - ( geo_primary_site_group_name in group_names)
@@ -26,5 +26,5 @@
         pod: "{{ task_runner_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
-          gitlab-rails runner "GeoNode.find_or_create_by(name: '{{ geo_secondary_site_name }}', url: '{{ geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}')"
+          gitlab-rails runner "n = GeoNode.find_or_initialize_by(name: '{{ geo_secondary_site_name }}'); n.assign_attributes(url: '{{geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}'); n.save!"
   when: cloud_native_hybrid_geo
