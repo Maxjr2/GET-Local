@@ -447,14 +447,14 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persist
 }
 
 ## AWS OpenSearch
-resource "aws_security_group" "gitlab_opensearch" {
-  count = min(var.opensearch_node_count, 1)
+resource "aws_security_group" "gitlab_opensearch_service" {
+  count = min(var.opensearch_service_node_count, 1)
 
-  name_prefix = "${var.prefix}-opensearch-"
+  name_prefix = "${var.prefix}-opensearch-service-"
   vpc_id      = data.aws_vpc.selected.id
 
   tags = {
-    Name = "${var.prefix}-opensearch"
+    Name = "${var.prefix}-opensearch-service"
   }
 
   lifecycle {
@@ -462,12 +462,12 @@ resource "aws_security_group" "gitlab_opensearch" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_internal_networking" {
-  count = min(var.opensearch_node_count, 1)
+resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_internal_networking" {
+  count = min(var.opensearch_service_node_count, 1)
 
-  security_group_id = aws_security_group.gitlab_opensearch[0].id
+  security_group_id = aws_security_group.gitlab_opensearch_service[0].id
 
-  description = "Enable internal access to OpenSearch from ${aws_security_group.gitlab_internal_networking.name} security group"
+  description = "Enable internal access to AWS OpenSearch from ${aws_security_group.gitlab_internal_networking.name} security group"
   from_port   = 443
   to_port     = 443
   ip_protocol = "tcp"
@@ -475,16 +475,16 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_internal_netwo
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
   tags = {
-    Name = "${var.prefix}-opensearch-internal-networking"
+    Name = "${var.prefix}-opensearch-service-internal-networking"
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_cidr" {
-  for_each = var.opensearch_node_count > 0 ? toset(var.opensearch_allowed_ingress_cidr_blocks) : []
+resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" {
+  for_each = var.opensearch_service_node_count > 0 ? toset(var.opensearch_service_allowed_ingress_cidr_blocks) : []
 
-  security_group_id = aws_security_group.gitlab_opensearch[0].id
+  security_group_id = aws_security_group.gitlab_opensearch_service[0].id
 
-  description = "Enable access to OpenSearch from CIDR block ${each.key}"
+  description = "Enable access to AWS OpenSearch from CIDR block ${each.key}"
   from_port   = 443
   to_port     = 443
   ip_protocol = "tcp"
@@ -492,6 +492,6 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_cidr" {
   cidr_ipv4 = each.key
 
   tags = {
-    Name = "${var.prefix}-opensearch-cidr-${each.key}"
+    Name = "${var.prefix}-opensearch-service-cidr-${each.key}"
   }
 }

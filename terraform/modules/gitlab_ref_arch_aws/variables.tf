@@ -1286,55 +1286,55 @@ variable "elasticache_redis_persistent_tags" {
 }
 
 ## OpenSearch (AWS Service)
-variable "opensearch_node_count" {
+variable "opensearch_service_node_count" {
   type    = number
   default = 0
 }
-variable "opensearch_instance_type" {
+variable "opensearch_service_instance_type" {
   type    = string
   default = ""
 }
-variable "opensearch_master_node_count" {
+variable "opensearch_service_master_node_count" {
   type    = number
   default = null
 }
-variable "opensearch_master_instance_type" {
+variable "opensearch_service_master_instance_type" {
   type    = string
   default = null
 }
-variable "opensearch_warm_node_count" {
+variable "opensearch_service_warm_node_count" {
   type    = number
   default = null
 }
-variable "opensearch_warm_instance_type" {
+variable "opensearch_service_warm_instance_type" {
   type    = string
   default = null
 }
-variable "opensearch_engine_version" {
+variable "opensearch_service_engine_version" {
   type    = string
   default = null
 }
-variable "opensearch_volume_size" {
+variable "opensearch_service_volume_size" {
   type    = number
   default = 500
 }
-variable "opensearch_volume_type" {
+variable "opensearch_service_volume_type" {
   type    = string
   default = "io1"
 }
-variable "opensearch_volume_iops" {
+variable "opensearch_service_volume_iops" {
   type    = number
   default = 1000
 }
-variable "opensearch_multi_az" {
+variable "opensearch_service_multi_az" {
   type    = bool
   default = true
 }
-variable "opensearch_default_subnet_count" {
+variable "opensearch_service_default_subnet_count" {
   type    = number
   default = 2
 }
-variable "opensearch_kms_key_arn" {
+variable "opensearch_service_kms_key_arn" {
   type    = string
   default = null
 }
@@ -1342,7 +1342,7 @@ variable "opensearch_service_linked_role_create" {
   type    = bool
   default = false
 }
-variable "opensearch_tags" {
+variable "opensearch_service_tags" {
   description = "Tags to apply to OpenSearch"
   type        = map(any)
   default     = {}
@@ -1474,7 +1474,7 @@ variable "elasticache_redis_persistent_allowed_ingress_cidr_blocks" {
   default = []
 }
 
-variable "opensearch_allowed_ingress_cidr_blocks" {
+variable "opensearch_service_allowed_ingress_cidr_blocks" {
   type    = list(any)
   default = []
 }
