@@ -384,6 +384,11 @@ variable "monitor_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "monitor_security_group_ids" {
+  description = "List of additional Security Group IDs to apply to Monitor nodes"
+  type        = list(string)
+  default     = []
+}
 
 # Opensearch (self-managed)
 variable "opensearch_vm_node_count" {
