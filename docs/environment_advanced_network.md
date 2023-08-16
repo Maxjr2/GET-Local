@@ -258,13 +258,16 @@ There are several possible combinations supported. The Toolkit will dynamically 
 
 :information_source:&nbsp; When Private subnets are being used most VMs won't have a public IP address. As such, when running Ansible it should be run from within the network [with its Dynamic Inventory configured to connect via private IPs](environment_configure.md#amazon-web-services-aws) (`compose.ansible_host` set to `private_ip_address`).
 
-### Custom Security Groups (GitLab Rails)
+### Custom Security Groups
 
-The Toolkit manages all the [Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) required for the environment. However, one specific scenario that requires additional config is when using custom External Load Balancers that in turn will require ingress access to GitLab Rails.
+The Toolkit manages all the [Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) required for the environment.
 
-The below setting can be used to add additional security groups to GitLab Rails nodes to accept connections from an External Load Balancer in [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
+In some advanced cases additional security group configuration may be desired depending on the setup, such as allowing access to nodes from custom load balancers or direct access to web frontends.
 
-- `gitlab_rails_security_group_ids` - A list of additional Security Groups IDs for the GitLab Rails machines. Optional, default is `[]`.
+For these scenarios the Toolkit supports customisation of node Security groups as follows via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
+
+- `gitlab_rails_security_group_ids` - A list of additional Security Groups IDs for the GitLab Rails nodes. Optional, default is `[]`.
+- `monitor_security_group_ids` - A list of additional Security Groups IDs for the Monitor node(s). Optional, default is `[]`.
 
 ## Disable External IPs (Azure)
 
