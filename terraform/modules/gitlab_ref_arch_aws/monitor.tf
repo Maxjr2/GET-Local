@@ -27,7 +27,6 @@ module "monitor" {
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
     try(aws_security_group.gitlab_external_ssh[0].id, null),
-    try(aws_security_group.gitlab_external_http_https[0].id, null),
     var.monitor_security_group_ids
   ])
 

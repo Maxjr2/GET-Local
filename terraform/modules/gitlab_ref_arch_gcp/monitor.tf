@@ -22,8 +22,6 @@ module "monitor" {
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
-  tags = ["${var.prefix}-web"]
-
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot
 }
