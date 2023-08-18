@@ -113,20 +113,24 @@ gitlab_secrets_setup: true
 gitlab_object_storage_type: "object_storage"  # object_storage or nfs
 
 ## Object Storage Buckets
+gitlab_object_storage_list: ["artifacts", "dependency_proxy", "lfs", "external_diffs", "packages", "terraform_state", "uploads", "backups", "registry", "ci_secure_files"]
 gitlab_object_storage_prefix: "{{ prefix }}"
-gitlab_object_storage_artifacts_bucket: "{{ gitlab_object_storage_prefix }}-artifacts"
-gitlab_object_storage_backups_bucket: "{{ gitlab_object_storage_prefix }}-backups"
-gitlab_object_storage_dependency_proxy_bucket: "{{ gitlab_object_storage_prefix }}-dependency-proxy"
-gitlab_object_storage_external_diffs_bucket: "{{ gitlab_object_storage_prefix }}-mr-diffs"
-gitlab_object_storage_lfs_bucket: "{{ gitlab_object_storage_prefix }}-lfs"
-gitlab_object_storage_packages_bucket: "{{ gitlab_object_storage_prefix }}-packages"
-gitlab_object_storage_terraform_state_bucket: "{{ gitlab_object_storage_prefix }}-terraform-state"
-gitlab_object_storage_uploads_bucket: "{{ gitlab_object_storage_prefix }}-uploads"
-gitlab_object_storage_registry_bucket: "{{ gitlab_object_storage_prefix }}-registry"
+gitlab_object_storage_bucket_names:
+  artifacts: "{{ gitlab_object_storage_prefix }}-artifacts"
+  dependency_proxy: "{{ gitlab_object_storage_prefix }}-dependency-proxy"
+  external_diffs: "{{ gitlab_object_storage_prefix }}-mr-diffs"
+  lfs: "{{ gitlab_object_storage_prefix }}-lfs"
+  packages: "{{ gitlab_object_storage_prefix }}-packages"
+  terraform_state: "{{ gitlab_object_storage_prefix }}-terraform-state"
+  uploads: "{{ gitlab_object_storage_prefix }}-uploads"
+  backups: "{{ gitlab_object_storage_prefix }}-backups"
+  registry: "{{ gitlab_object_storage_prefix }}-registry"
+  ci_secure_files: "{{ gitlab_object_storage_prefix }}-ci-secure-files"
+
 gitlab_object_storage_registry_chunksize_mb: "{{ '10' if cloud_provider == 'aws' else '5' }}"
 
 # Container Registry Settings
-container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gcp') and external_url_ssl and external_ssl_source != '' }}"
+container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gcp') and external_url_ssl and external_ssl_source != '' and 'registry' in gitlab_object_storage_list }}"
 
 container_registry_external_url: "https://registry.{{ external_host }}"
 container_registry_external_host: "{{ container_registry_external_url | regex_replace('^https?:\/\/') }}"

@@ -133,24 +133,49 @@ global:
       connection:
         secret: gitlab-object-storage-key
         key: key
+{% if 'artifacts' in gitlab_object_storage_list %}
     artifacts:
-      bucket: "{{ gitlab_object_storage_artifacts_bucket }}"
-    dependencyProxy:
-      bucket: "{{ gitlab_object_storage_dependency_proxy_bucket }}"
-    externalDiffs:
-      bucket: "{{ gitlab_object_storage_external_diffs_bucket }}"
-      when: outdated
+      bucket: "{{ gitlab_object_storage_bucket_names['artifacts'] }}"
+{% endif %}
+{% if 'lfs' in gitlab_object_storage_list %}
     lfs:
-      bucket: "{{ gitlab_object_storage_lfs_bucket }}"
+      bucket: "{{ gitlab_object_storage_bucket_names['lfs'] }}"
+{% endif %}
+{% if 'packages' in gitlab_object_storage_list %}
     packages:
-      bucket: "{{ gitlab_object_storage_packages_bucket }}"
-    terraformState:
-      bucket: "{{ gitlab_object_storage_terraform_state_bucket }}"
+      bucket: "{{ gitlab_object_storage_bucket_names['packages'] }}"
+{% endif %}
+{% if 'uploads' in gitlab_object_storage_list %}
     uploads:
-      bucket: "{{ gitlab_object_storage_uploads_bucket }}"
-{% if cloud_provider == 'aws' or (cloud_provider == 'gcp' and gcp_backups_service_account_key_file != '') %}
+      bucket: "{{ gitlab_object_storage_bucket_names['uploads'] }}"
+{% endif %}
+{% if 'external_diffs' in gitlab_object_storage_list %}
+    externalDiffs:
+      enabled: true
+      bucket: "{{ gitlab_object_storage_bucket_names['external_diffs'] }}"
+      when: outdated
+{% endif %}
+{% if 'dependency_proxy' in gitlab_object_storage_list %}
+    dependencyProxy:
+      enabled: true
+      bucket: "{{ gitlab_object_storage_bucket_names['dependency_proxy'] }}"
+{% endif %}
+{% if 'terraform_state' in gitlab_object_storage_list %}
+    terraformState:
+      enabled: true
+      bucket: "{{ gitlab_object_storage_bucket_names['terraform_state'] }}"
+{% endif %}
+{% if 'ci_secure_files' in gitlab_object_storage_list and (gitlab_version == '' or gitlab_version is version('15.7', '>=')) %}
+    ciSecureFiles:
+      enabled: true
+      bucket: "{{ gitlab_object_storage_bucket_names['ci_secure_files'] }}"
+      connection:
+        secret: gitlab-object-storage-key
+        key: key
+{% endif %}
+{% if 'backups' in gitlab_object_storage_list and (cloud_provider == 'aws' or (cloud_provider == 'gcp' and gcp_backups_service_account_key_file != '')) %}
     backups:
-      bucket: "{{ gitlab_object_storage_backups_bucket }}"
+      bucket: "{{ gitlab_object_storage_bucket_names['backups'] }}"
 {% endif %}
 {% endif %}
   initialRootPassword:
@@ -342,7 +367,7 @@ global:
   registry:
     enabled: true
     # global.registry.bucket is used by GitLab backups
-    bucket: "{{ gitlab_object_storage_registry_bucket }}"
+    bucket: "{{ gitlab_object_storage_bucket_names['registry'] }}"
 # Needed on Primary and Secondary sites to ensure secret is synced
 {% if (container_registry_token is defined) %}
     notificationSecret:

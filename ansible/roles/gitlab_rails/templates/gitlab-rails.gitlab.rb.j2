@@ -78,9 +78,6 @@ registry_nginx['listen_https'] = false
 registry['enable'] = false
 {% endif %}
 
-### External merge request diffs - store outdated diffs in object storage
-gitlab_rails['external_diffs_when'] = 'outdated'
-
 # Storage Config
 ## Object Storage - consolidated object storage configuration
 
@@ -92,25 +89,41 @@ gitlab_rails['object_store']['connection'] = {
   {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
 }
 
-gitlab_rails['object_store']['objects']['artifacts']['bucket'] = "{{ gitlab_object_storage_artifacts_bucket }}"
-gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "{{ gitlab_object_storage_dependency_proxy_bucket }}"
-gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "{{ gitlab_object_storage_external_diffs_bucket }}"
-gitlab_rails['object_store']['objects']['lfs']['bucket'] = "{{ gitlab_object_storage_lfs_bucket }}"
-gitlab_rails['object_store']['objects']['packages']['bucket'] = "{{ gitlab_object_storage_packages_bucket }}"
-gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "{{ gitlab_object_storage_terraform_state_bucket }}"
-gitlab_rails['object_store']['objects']['uploads']['bucket'] = "{{ gitlab_object_storage_uploads_bucket }}"
+{% for obj_stor_name in (gitlab_object_storage_list | reject('equalto', 'backups|registry|ci_secure_files|external_diffs')) %}
+gitlab_rails['object_store']['objects']['{{ obj_stor_name }}']['bucket'] = '{{ gitlab_object_storage_bucket_names[obj_stor_name] }}'
+{% endfor %}
 
+## Object Storage - External Diffs (Outdated)
+{% if 'external_diffs' in gitlab_object_storage_list %}
+gitlab_rails['external_diffs_enabled'] = true
+gitlab_rails['external_diffs_when'] = 'outdated'
+gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "{{ gitlab_object_storage_bucket_names['external_diffs'] }}"
+{% endif %}
+
+## Object Storage - CI Secure Files (15.7+)
+{% if 'ci_secure_files' in gitlab_object_storage_list and (gitlab_version == '' or gitlab_version is version('15.7', '>=')) %}
+gitlab_rails['ci_secure_files_object_store_enabled'] = true
+gitlab_rails['ci_secure_files_object_store_remote_directory'] = "{{ gitlab_object_storage_bucket_names['ci_secure_files'] }}"
+gitlab_rails['ci_secure_files_object_store_connection'] = {
+  {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
+}
+{% endif %}
+
+## Object Storage - Container Registry
 {% if container_registry_enable %}
 registry['storage'] = {
   {{ lookup('template', 'object_storage/registry.' + cloud_provider + '.rb.j2') | indent(width=2) }}
 }
 {% endif %}
 
-## Object Storage - separated backups storage
+## Object Storage - Backups
+{% if 'backups' in gitlab_object_storage_list %}
 gitlab_rails['backup_upload_connection'] = {
   {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
 }
-gitlab_rails['backup_upload_remote_directory'] = "{{ gitlab_object_storage_backups_bucket }}"
+gitlab_rails['backup_upload_remote_directory'] = "{{ gitlab_object_storage_bucket_names['backups'] }}"
+{% endif %}
+
 {% elif 'gitlab_nfs' in groups and gitlab_object_storage_type == 'nfs' %}
 
 ## NFS - Objects

@@ -1,5 +1,5 @@
 s3:
-  bucket: {{ gitlab_object_storage_registry_bucket }}
+  bucket: {{ gitlab_object_storage_bucket_names['registry'] }}
   use_iam_profile: true
   region: {{ aws_region }}
   v4auth: true

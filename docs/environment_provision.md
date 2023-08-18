@@ -280,6 +280,7 @@ In addition to the above, the following optional settings are also available:
 
 - `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Ubuntu 20.04+, Debian 11 and RHEL 8 images are supported at this time. Defaults to `ubuntu-2004-lts`
 - `machine_secure_boot` - Controls whether [Secure Boot](https://cloud.google.com/security/shielded-cloud/shielded-vm#secure-boot) is enabled on the VMs. Can only be enabled for OS Images that support the `Shielded VM` feature. Defaults to `false`.
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
 - `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
 - `object_storage_labels` - Labels to apply to object storage buckets.
@@ -287,8 +288,6 @@ In addition to the above, the following optional settings are also available:
 - `allow_stopping_for_update` - Controls whether Terraform can restart VMs when making changes if required. Should only be disabled for additional resilience. Defaults to `true`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
-
-:information_source:&nbsp; The Toolkit currently **requires** a NFS node to distribute select config.
 
 ##### Configure Machine OS Image (GCP)
 
@@ -300,13 +299,13 @@ However, this can be changed via the `machine_image` in the [module's environmen
 
 :exclamation:&nbsp; **{-After deployment, this value shouldn't be changed as this would trigger a full rebuild (as it's treated as the base disk) and lead to data loss-}**. [Upgrading the OS should be done directly on the machines via their standard process](environment_upgrades.md#avoid-changing-machine-os-image).
 
-##### Object Storage Location (GCP)
+##### Object Storage location (GCP)
 
 The [Terraform Google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) doesn't automatically create buckets in the same region it's configured with. [This is due to the various location permutations available in GCP that don't directly map to regions](https://cloud.google.com/storage/docs/locations).
 
 Depending on the provider's version it will typically create buckets in the `US` multi-region by default. The Toolkit follows this design.
 
-To ensure good performance you should select a [location](https://cloud.google.com/storage/docs/locations) that is close to the region you've selected for the environment. We recommend either picking a [Multi-Region](https://cloud.google.com/storage/docs/locations#location-mr) if it's available for built-in HA or [Region](https://cloud.google.com/storage/docs/locations#location-r) if the former isn't available. However, any location can be chosen as desired based on your requirements.
+To ensure good performance you should select a [location](https://cloud.google.com/storage/docs/locations) that is close to the region you've selected for the environment and configure this via the `object_storage_location` variable. We recommend either picking a [Multi-Region](https://cloud.google.com/storage/docs/locations#location-mr) if it's available for built-in HA or [Region](https://cloud.google.com/storage/docs/locations#location-r) if the former isn't available. However, any location can be chosen as desired based on your requirements.
 
 :exclamation:&nbsp; **{-Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss-}**
 
@@ -521,6 +520,7 @@ output "gitlab_ref_arch_aws" {
   - `source` - The relative path to the `gitlab_ref_arch_aws` module. We assume you're creating config in the `terraform/environments/` folder here but if you're in a different location this setting must be updated to the correct path.
   - `prefix` - The name prefix of the project. Set in `variables.tf`.
   - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`. Not required if another connection method is being used.
+  - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
   - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
   - `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
   - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
@@ -769,6 +769,7 @@ output "gitlab_ref_arch_azure" {
   - `vm_admin_username` - The username of the administrator for the virtual machines. Set in `variables.tf`.
   - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`.
   - `external_ip_type` - [The type of Public IP](https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses) that will be created for each VM. Can be either `Standard` (recommended) or `Basic`. Default is `Basic` for backwards compatibility.
+  - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
   - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
 
 Next in the file are the various machine settings, separated the same as the Reference Architectures. To avoid repetition we'll describe each setting once:
