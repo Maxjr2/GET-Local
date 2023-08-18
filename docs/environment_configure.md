@@ -424,7 +424,15 @@ This method can be customised in several ways via the following variables in you
   - `gitlab_deb_download_url_headers` / `gitlab_rpm_download_url_headers` - Additional headers to use when downloading the installation file from the remote URL set via `gitlab_*_download_url`, such as authorization. These need to be given in a dictionary format, e.g. `{ "Authorization": "Basic <TOKEN>" }`. Optional, default is `{}`. Can also be specified via the environment variable `GITLAB_DEB_DOWNLOAD_URL_HEADERS` / `GITLAB_RPM_DOWNLOAD_URL_HEADERS`.
 - `gitlab_deb_target_path` / `gitlab_rpm_target_path` - The path where to store the installation file on the target machine. Optional, default is `tmp/gitlab_deb_package.deb` / `/tmp/gitlab_rpm_package.rpm`. Can also be specified via the environment variable `GITLAB_TARGET_DEB_PATH` / `GITLAB_TARGET_RPM_PATH`.
 
-##### Object Storage Prefix
+##### Object Storage Options
+
+There are several options available in Ansible on how to configure Object Storage as detailed below.
+
+###### Object Storage List
+
+The `gitlab_object_storage_list` variable tells Ansible what Object Storage buckets it should expect to configure GitLab with. By default, this variable is configured to expect every bucket as this is the equivalent default in Terraform via the `object_storage_buckets` variable. This should only be changed in advanced scenarios where not all expected buckets are available, such as when the Object Storage buckets list has been modified in Terraform or if you're deploying On Prem.
+
+###### Object Storage Prefix
 
 If the `object_storage_prefix` variable was used in Terraform to change what prefix is used for the buckets then this should also be configured in Ansible via `gitlab_object_storage_prefix`.
 

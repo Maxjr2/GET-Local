@@ -64,7 +64,7 @@ variable "default_storage_account_type" {
 
 variable "object_storage_buckets" {
   type    = list(string)
-  default = ["artifacts", "backups", "dependency-proxy", "lfs", "mr-diffs", "packages", "terraform-state", "uploads"]
+  default = ["artifacts", "backups", "dependency-proxy", "lfs", "mr-diffs", "packages", "terraform-state", "uploads", "registry", "ci-secure-files"]
 }
 variable "object_storage_prefix" {
   type    = string

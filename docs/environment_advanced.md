@@ -278,7 +278,7 @@ With both Omnibus and Cloud Native Hybrid setups the registry is configured to r
 
 For all setups, the below settings configure how the service and dependents are set up:
 
-- `container_registry_enable` - Controls whether the container registry and dependents are enabled. Optional, default is `true` when using [External SSL](environment_advanced_ssl.md#external-ssl) on AWS or GCP.
+- `container_registry_enable` - Controls whether the container registry and dependents are enabled. Optional, default is `true` when using [External SSL](environment_advanced_ssl.md#external-ssl) on AWS or GCP and if a `registry` Object Storage bucket has been configured.
 - `container_registry_external_url` - The URL registry will be available on. Optional, default is `https://registry.<external_host>`.
 - `gitlab_object_storage_registry_chunksize_mb` - The registry chunksize for multi-part uploads. Note this only applies when using Registry with Object Storage on either AWS or GCP. Consider increasing it somewhere between 25 and 50 if experiencing failures with large images, see [GitLab documentation](https://docs.gitlab.com/ee/administration/packages/container_registry.html#aws-s3-with-the-gitlab-registry-error-when-pushing-large-images) for more information. Optional, default is `10` on AWS and `5` on GCP.
 

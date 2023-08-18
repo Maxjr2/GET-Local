@@ -146,6 +146,7 @@ Enabling [AWS Object Storage Replication](https://docs.aws.amazon.com/AmazonS3/l
     "registry" = "<registry_bucket_arn>"
     "terraform-state" = "<terraform-state_bucket_arn>"
     "uploads" = "<uploads_bucket_arn>"
+    "ci_secure_files" = "<ci_secure_files_bucket_arn>"
   },
   "object_storage_kms_key_arn": "<object_storage_kms_key_arn>"
 ```
@@ -167,6 +168,7 @@ object_storage_destination_buckets = tomap({
     "registry"         = "<registry_bucket_arn>"
     "terraform-state"  = "<terraform-state_bucket_arn>"
     "uploads"          = "<uploads_bucket_arn>"
+    "ci_secure_files"  = "<ci_secure_files_bucket_arn>"
   })
 ```
 
