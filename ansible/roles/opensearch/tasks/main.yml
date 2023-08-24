@@ -8,6 +8,12 @@
   shell: amazon-linux-extras install docker -y && systemctl enable docker && systemctl start docker
   when: ansible_facts['distribution'] == "Amazon"
 
+- name: Configure Node exporter
+  vars:
+    node_exporter_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+  include_role:
+    name: geerlingguy.node_exporter
+
 - name: Configure Kernel vm.max_map_count setting
   sysctl:
     name: vm.max_map_count
