@@ -14,7 +14,7 @@ module "redis" {
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id
   vm_admin_username   = var.vm_admin_username
-  ssh_public_key      = var.ssh_public_key != null ? var.ssh_public_key : file(var.ssh_public_key_file_path)
+  ssh_public_key      = var.ssh_public_key
   location            = var.location
   external_ip_type    = var.external_ip_type
   setup_external_ip   = var.setup_external_ips
@@ -49,7 +49,7 @@ module "redis_cache" {
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id
   vm_admin_username   = var.vm_admin_username
-  ssh_public_key      = var.ssh_public_key != null ? var.ssh_public_key : file(var.ssh_public_key_file_path)
+  ssh_public_key      = var.ssh_public_key
   location            = var.location
   external_ip_type    = var.external_ip_type
   setup_external_ip   = var.setup_external_ips
@@ -82,7 +82,7 @@ module "redis_persistent" {
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id
   vm_admin_username   = var.vm_admin_username
-  ssh_public_key      = var.ssh_public_key != null ? var.ssh_public_key : file(var.ssh_public_key_file_path)
+  ssh_public_key      = var.ssh_public_key
   location            = var.location
   external_ip_type    = var.external_ip_type
   setup_external_ip   = var.setup_external_ips

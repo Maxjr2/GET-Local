@@ -64,11 +64,6 @@ variable "ssh_public_key" {
   type    = string
   default = null
 }
-# Deprecated - To be removed in 3.0.0
-variable "ssh_public_key_file" {
-  type    = string
-  default = null
-}
 
 variable "object_storage_buckets" {
   type    = list(string)
