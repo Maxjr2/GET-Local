@@ -43,11 +43,6 @@ variable "ssh_public_key" {
   type    = string
   default = null
 }
-# Deprecated - To be removed in 3.0.0
-variable "ssh_public_key_file_path" {
-  type    = string
-  default = null
-}
 variable "external_ip_type" {
   type    = string
   default = "Basic"

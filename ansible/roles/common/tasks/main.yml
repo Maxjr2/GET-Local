@@ -71,10 +71,6 @@
 
     - name: Mount any data disks
       block:
-        - name: Mount data disk if given (legacy)  # Deprecated
-          import_tasks: data_disk_legacy.yml
-          when: data_disk is defined
-
         - name: Get Group Data Disks Config
           set_fact:
             group_data_disks: "{{ lookup('vars', gitlab_node_type + '_data_disks', default=[]) }}"

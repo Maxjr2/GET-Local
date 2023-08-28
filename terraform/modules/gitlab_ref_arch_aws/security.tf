@@ -1,8 +1,8 @@
 resource "aws_key_pair" "ssh_key" {
-  count = var.ssh_public_key != null || var.ssh_public_key_file != null ? 1 : 0
+  count = var.ssh_public_key != null ? 1 : 0
 
   key_name   = "${var.prefix}-ssh-key"
-  public_key = var.ssh_public_key != null ? var.ssh_public_key : var.ssh_public_key_file
+  public_key = var.ssh_public_key
 }
 
 data "aws_vpc" "selected" {
@@ -52,7 +52,7 @@ resource "aws_security_group" "gitlab_internal_networking" {
 # External
 resource "aws_security_group" "gitlab_external_ssh" {
   # Create only if no created or existing private subnets and if a SSH key has been passed
-  count = (var.subnet_priv_count == 0 && var.subnet_priv_ids == null) && (var.ssh_public_key != null || var.ssh_public_key_file != null) ? 1 : 0
+  count = (var.subnet_priv_count == 0 && var.subnet_priv_ids == null) && var.ssh_public_key != null ? 1 : 0
 
   name_prefix = "${var.prefix}-external-ssh-"
   vpc_id      = data.aws_vpc.selected.id

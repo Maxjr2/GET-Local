@@ -25,13 +25,6 @@ mkfs_opts: "-m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard"
 mount_opts: "discard,defaults"
 mount_state: mounted
 
-## Legacy setting for data_disks. Still supported at this time but will apply to all nodes.
-## data_disks setting with individual group names (below) should be used instead
-## Example:
-##   - { device_name: 'log', mount_dir: '/var/log/gitlab' }
-##   - { device_name: 'data', mount_dir: '/var/opt/gitlab' }
-disk_mounts: []
-
 ## Each entry should be an array of hashes in the below format specifying the
 ## disk device name and mount dir for the target group
 ## Example:
@@ -39,18 +32,18 @@ disk_mounts: []
 ##  - { device_name: 'data', mount_dir: '/var/opt/gitlab' }
 ##  - { device_name: 'log', mount_dir: '/var/log/gitlab' }
 
-consul_data_disks: "{{ disk_mounts }}"
-postgres_data_disks: "{{ disk_mounts }}"
-pgbouncer_data_disks: "{{ disk_mounts }}"
-redis_data_disks: "{{ disk_mounts }}"
-redis_cache_data_disks: "{{ disk_mounts }}"
-redis_persistent_data_disks: "{{ disk_mounts }}"
-praefect_postgres_data_disks: "{{ disk_mounts }}"
-praefect_data_disks: "{{ disk_mounts }}"
-gitaly_data_disks: "{{ disk_mounts }}"
-gitlab_rails_data_disks: "{{ disk_mounts }}"
-sidekiq_data_disks: "{{ disk_mounts }}"
-monitor_data_disks: "{{ disk_mounts }}"
-haproxy_external_disks: "{{ disk_mounts }}"
-haproxy_internal_disks: "{{ disk_mounts }}"
-gitlab_nfs_disks: "{{ disk_mounts }}"
+consul_data_disks: []
+postgres_data_disks: []
+pgbouncer_data_disks: []
+redis_data_disks: []
+redis_cache_data_disks: []
+redis_persistent_data_disks: []
+praefect_postgres_data_disks: []
+praefect_data_disks: []
+gitaly_data_disks: []
+gitlab_rails_data_disks: []
+sidekiq_data_disks: []
+monitor_data_disks: []
+haproxy_external_disks: []
+haproxy_internal_disks: []
+gitlab_nfs_disks: []
