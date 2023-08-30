@@ -56,8 +56,8 @@ variable "source_image_reference" {
   type = map(any)
   default = {
     "publisher" = "Canonical"
-    "offer"     = "UbuntuServer"
-    "sku"       = "20.04-LTS"
+    "offer"     = "0001-com-ubuntu-server-focal"
+    "sku"       = "20_04-lts"
     "version"   = "latest"
   }
 }
