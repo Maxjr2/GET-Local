@@ -15,7 +15,7 @@
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](environment_post_considerations.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
-To start using the Toolkit to build an environment you'll first need to do some preparation for the environment itself, depending on how you intend to host it. These docs assume working knowledge of the selected host provider the environment is to run on, such as a specific Cloud provider.
+Preparation is required prior to building out an environment depending on where you intend to host it. These docs assume working knowledge of the selected host provider the environment is to run on, such as a specific Cloud provider.
 
 This page starts off with general guidance around fundamentals but then will split off into the steps for each supported specific provider. As such, you should only follow the section for your provider after the general sections.
 
@@ -80,24 +80,9 @@ To create a Service Account, you need to have `admin` permissions in the GCP pro
    - `Service Account User`
    - `Compute Network Admin` (Only required when deploying [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql))
 
-After the account is created, proceed to create a key file:
-
-1. Access the service accounts details by clicking over it on the accounts listing page.
-1. Go to the `Keys` tab.
-1. Click on `Add Key` > `Create new key`.
-1. Select `JSON` format.
-1. Click `Create` to start downloading.
-1. Rename the file to a more descriptive name such as `serviceaccount-<project-name>.json` (e.g. `serviceaccount-10k.json`).
-1. Move it to the [`keys`](../keys) directory in this project.
-
-This key will be used by both Terraform and Ansible later.
-
-The [`keys`](../keys) directory in this project is provided as a central place to store all of your keys. It is configured in `.gitignore` to never be included with any Git commit by default to avoid exposing credentials.
-
 ### 4. Setup SSH Authentication - SSH OS Login for GCP Service Account
 
-In addition to creating the Service Account and saving the key we need to also set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access)
-for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
+In addition to creating the Service Account, set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access) for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
 
 1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory.
 1. With the `gcloud` command set it to point at your intended project
@@ -142,14 +127,16 @@ That's all that's required for now. Later on in this guide we'll configure the T
 ### 5. Setup Terraform State Storage Bucket - GCP Cloud Storage
 
 Create a standard [GCP storage bucket](https://cloud.google.com/storage/docs/creating-buckets) on the intended environment's project
-for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`:
+for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`
+
+As an example this bucket can be created via the `gsutil` cli as follows:
 
 ```terminal
 # List of locations: https://cloud.google.com/storage/docs/locations
 gsutil mb -l BUCKET_LOCATION gs://<env_shortname>-get-terraform-state
 ```
 
-:information_source:&nbsp; The bucket may be named as desired. However, please note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
@@ -177,9 +164,7 @@ To create an access key for your user follow [the official docs](https://docs.aw
 
 :information_source:&nbsp; If you intend to use an alternative method for connecting to machines, for example AWS SSM, you can skip this step.
 
-SSH authentication for the created machines on AWS will require an SSH key.
-
-This is straightforward with AWS. All that's required is for a key to be created and then for this to be accessible for the Toolkit to handle the rest:
+SSH authentication for the created machines on AWS will require an SSH key. A key is required to be created and to be accessible for the Toolkit to handle the rest:
 
 - [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory.
 
@@ -195,7 +180,7 @@ That's all that's required for now. Later on in this guide we'll configure the T
 
 Create a standard [AWS storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) on the intended environment's project for its Terraform State. Give this a meaningful name such named as `<env_short_name>-get-terraform-state`.
 
-:information_source:&nbsp; The bucket may be named as desired. However, please note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
@@ -203,12 +188,12 @@ After the Bucket is created this is all that's required for now. We'll configure
 
 A static IP, AKA an Elastic IP, can be generated in AWS as follows:
 
-- Reserve a static external IP address in your project [as detailed in the AWS docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html#using-instance-addressing-eips-allocating)
-- Use the default options when given a choice
+- Reserve a static external IP address in your account [as detailed in the AWS docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html#using-instance-addressing-eips-allocating).
+- Use the default options when given a choice.
 
 Once the IP is available take note of its allocation ID for later.
 
-:information_source:&nbsp;  if you are deploying a Cloud Native Hybrid GitLab setup you'll need to allocate one Elastic IP for each subnet in the VPC instead of a single one.
+:information_source:&nbsp; If you are deploying a Cloud Native Hybrid GitLab setup you'll need to create an Elastic IP for each subnet in the intended VPC instead of a single one.
 
 ## Azure
 
@@ -248,7 +233,7 @@ Create a [storage account](https://docs.microsoft.com/en-us/azure/storage/common
 
 Then create a standard [Azure blob container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal) on the intended environment's storage account for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`.
 
-:information_source:&nbsp; The bucket may be named as desired. However, please note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
 
 After the container is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
