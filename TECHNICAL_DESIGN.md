@@ -1,22 +1,22 @@
 # GitLab Environment Toolkit - Technical Design
 
-This document serves as the Technical Design and Vision for the [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit). It aims to be a single source of truth covering areas such as design principles, technical implementations, reasonings and more.
+This document serves as the Technical Design and Vision for the [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit). It aims to be a single source of truth covering areas such as design principles, technical implementations, background and more.
 
-Unless specified otherwise all additions, changes, etc... to the Toolkit should resonate with this document.
+Unless specified otherwise, all additions or changes to the Toolkit should align with this document.
 
 [[_TOC_]]
 
 ## What is the GitLab Environment Toolkit?
 
-The GitLab Environment Toolkit (GET) is a collection of tools to deploy and operate production GitLab instances based on our [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/), including automation of common day 2 tasks, using the official [Omnibus](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/) packages.
+The GitLab Environment Toolkit (`GET`) is a collection of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying GitLab at scale as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). It uses the official [Linux package (Omnibus)](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/) packages.
 
-Created and maintained by the GitLab Quality Engineering Enablement team, the Toolkit - built with Terraform and Ansible - supports provisioning and configuring machines and other related infrastructure respectively:
+Created and maintained by the GitLab Quality Engineering Enablement team, the Toolkit supports provisioning and configuring machines and other related infrastructure respectively:
 
 - Support for deploying all Reference Architectures sizes dynamically from 1k to 50k.
 - Support for deploying Cloud Native Hybrid variants of the Reference Architectures (AWS & GCP only at this time).
 - GCP, AWS and Azure cloud provider support
 - Upgrades
-- Release and nightly Omnibus builds support
+- Release and nightly Linux package (Omnibus) builds support
 - Advanced search with OpenSearch
 - Geo support
 - Zero Downtime Upgrades support
@@ -27,9 +27,13 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 
 ### What is it not?
 
-The Toolkit is **expressly** not a replacement for [Omnibus](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/). It's a coordinator of these packages to help deploy GitLab at scale only with select supporting actions.
+The Toolkit is **not** a replacement for [Linux package (Omnibus)](https://docs.gitlab.com/omnibus/) or [GitLab Charts](https://docs.gitlab.com/charts/). It only provides automation scripts to deploy these packages per their instructions and best practices as documented in the [GitLab product documentation](https://docs.gitlab.com/) and [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/).
 
-Outside of supporting the deployment of GitLab at scale (e.g. Load Balancers) the Toolkit shouldn't be automating actions that a user can't do themselves. It also shouldn't be setting config defaults or handling tasks that are better suited to be done by Omnibus or Helm.
+The Toolkit is also **not** a replacement for a skilled GitLab Administrator, IT infrastructure expert, or implementations expert in your organization. It is provided as a convenience to ease the deployment of GitLab at scale, but it must still be reviewed, configured, maintained, and even modified to meet your organization's standards. Users who want a managed solution should consider our other offerings such as [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/).
+
+The Toolkit does not support deploying every infrastructure design or permutation. It is, by design, opinionated in how it approaches infrastructure, but, it is also given as-is for users to take and adjust accordingly to meet their specific needs as required.
+
+The Toolkit should not add any functionality, except to attempt automation of deployment of GitLab at scale. It also should not establish configuration defaults, or handle tasks that are better suited to be done by the Linux package (Omnibus) or Charts.
 
 All feature requests and issues should be considered against this principle. Quite often requests are better raised against GitLab itself.
 
@@ -37,13 +41,13 @@ All feature requests and issues should be considered against this principle. Qui
 
 ### Focused Design
 
-The Toolkit is designed to deploy a _base_ GitLab environment based on the Reference Architectures and then provide various advanced features and / or hooks that users can opt into based on the requirements, not unlike Omnibus or Helm.
+The Toolkit is designed to be a set of scripts to help deploy a _base_ GitLab environment based on the Reference Architectures and then provide various advanced features and / or hooks that users can opt into based on the requirements, not unlike Linux package (Omnibus) or Helm.
 
 This is very much by design and a core pillar of the Toolkit. Features should only be enabled by default where we're confident it applies to most users and doesn't add additional costs. Failure to do this will cause confusion and complaints. For example a change that may make sense for a SaaS environment doesn't for a Self Managed one.
 
 We also must maintain a high bar for any new features or additions. Provisioning and Configuration tools can get complicated fast, being pulled in _many_ directions quickly and fall into disrepair as the maintenance cost becomes too high. The Toolkit already touches on a [substantial amount of areas](#integrations-list) and every new feature is additional long term maintenance.
 
-Changes should only be considered when directly related to deploying GitLab at scale that can't be done in other existing Tools or Cloud Providers. Additionally the Toolkit shouldn't be working around or trying to make up for limitations in these other areas due to the high maintenance cost - These should be tackled directly in the dependent area.
+Changes should only be considered when directly related to deploying GitLab at scale that can't be done in other existing Tools or Cloud Providers. Additionally, the Toolkit shouldn't be working around or trying to make up for limitations in these other areas due to the high maintenance cost - These should be tackled directly in the dependent area.
 
 All changes must be strictly considered against the above.
 
@@ -52,6 +56,14 @@ All changes must be strictly considered against the above.
 The main design principle for the Toolkit is the most important and informs its design completely - **Simplicity**. Echoing the GitLab value of [Boring solutions](https://about.gitlab.com/handbook/values/#boring-solutions) it's critical that simplicity is considered in all aspects of the Toolkit.
 
 Provisioning and Configuration tools get complicated fast. There are typically many ways a certain action can be automated, many valid, but whatever we pick needs to be simple for both the user and the maintainer as detailed below.
+
+### Opinionation
+
+By the very nature of the fact there are various Cloud Providers with numerous services that all have their own options and permutations the Toolkit has to be opinionated.
+
+Examples such as networking, storage, authentication and more have so many options and as a result choices do need to be made, and conversely we may not be able to support the other choice.
+
+We endeavour to keep opinionation as simple as possible and follow best practices in general, but we can't avoid it in some form, so this must be accepted.
 
 #### User Experience
 
@@ -63,19 +75,19 @@ This is beholden in part to the tools we're using and their own interfaces but f
 
 #### Maintainer Experience
 
-It's critical that all code we add to the Toolkit is simple where possible. Every addition needs to be maintained and simpler code is easier to read and understand. This is required even more so in a Toolkit like this as there's a wide range of code to review - Terraform, Ansible and Ruby (GitLab) - all with their own quirks and considerations.
+It's critical that all code we add to the Toolkit is simple where possible. Every addition needs to be maintained, and simpler code is easier to read and understand. This is required even more so in a Toolkit like this as there's a wide range of code to review - Terraform, Ansible and Ruby (GitLab) - all with their own quirks and considerations.
 
-We askew complicated code designs or patterns wherever possible to achieve this principle.
+We avoid complicated code designs or patterns wherever possible to achieve this principle.
 
 ### AHA (Avoid Hasty Abstractions)
 
 Generally we follow the pragmatic principle of [AHA - _Avoid Hasty Abstractions_](https://kentcdodds.com/blog/aha-programming#aha-) over [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
 
-This works well for this type of tooling as by its nature - automation of tasks that are generally designed to be done manually - there may be times where repetition of tasks is required or maybe even desirable over complicated abstractions to achieve the required goal. Readability and Maintainability are more important as the code base we have is both wide and deep.
+This approach works well for this type of tooling. The Toolkit automates tasks that are generally designed to be done manually, and there may be times when repetition of tasks is required or desirable. Readability and Maintainability are more important than reducing code repetition via complicated abstraction.
 
 Some examples:
 
-- Select GitLab config is the same in GitLab Rails and Sidekiq. Extracting these would require abstracting outside of their Roles (breaking the point of Roles) and would become pretty hard to follow and maintain if it continued. It's easier to have a single source of truth for each component for readability and maintenance even if that means select config is the same in each.
+- Select GitLab config is the same in GitLab Rails and Sidekiq. Extracting these would require abstracting outside their Roles (breaking the point of Roles) and would become pretty hard to follow and maintain if it continued. It's easier to have a single source of truth for each component for readability and maintenance even if that means select config is the same in each.
 - Some generated config files from GitLab need to be shared across component nodes but don't exist until the first node has completed setup. This requires code to be present in each Role to either copy the new file to a shared location or copy an existing one over at the right time to keep everything in sync.
 
 ### Use Industry Leading Tools and Avoid Custom Implementations
@@ -84,27 +96,33 @@ We use industry leading tools natively for Provisioning and Configuration wherev
 
 We avoid custom code/implementations wherever possible as this will add additional maintenance cost.
 
+### Shared Responsibility
+
+The Toolkit follows the [Shared Responsibility Model](https://www.crowdstrike.com/cybersecurity-101/cloud-security/shared-responsibility-model/)).
+
+The principle is that Self Managed is primarily the responsibility of the user. GitLab does have responsibility to ensure that the Toolkit's scripts are following the best practices, where possible, specifically for the GitLab application. Outside that scope, such as with infrastructure, the responsibility is with the user to ensure that the environment meets all their requirements, and be aware of ongoing maintenance costs.
+
 ## Technical Implementations
 
 ### Integrations List
 
-The Toolkit integrates with many tools and services, along with contending with their own designs:
+The Toolkit integrates with many tools and services in an opinionated fashion, along with contending with their own designs:
 
 - Terraform
 - Ansible
 - GitLab
-  - Omnibus
+  - Linux package (Omnibus)
   - Helm
-- Cloud Providers - AWS, GCP, Azure (Omnibus Only)
+- Cloud Providers - AWS, GCP, Azure (Linux package (Omnibus) Only)
   - VMs
   - Kubernetes (Helm)
   - Disks
-  - Networking (IPs, VPCs, Subnets, Gateways, Routing, Firewalls, etc...)
-  - Services (e.g. RDS, etc...)
+  - Networking (IPs, VPCs, Subnets, Gateways, Routing or Firewalls)
+  - Services (e.g. RDS)
 
 #### Supported Cloud Providers
 
-The Toolkit primarily supports AWS and GCP as target Cloud Providers, [following the general GitLab guidance](https://docs.gitlab.com/ee/administration/reference_architectures/#recommended-cloud-providers-and-services), but we do also support Azure for Omnibus installs only. We additionally support On Prem setups for Configuration via Ansible.
+The Toolkit primarily supports AWS and GCP as target Cloud Providers, [following the general GitLab guidance](https://docs.gitlab.com/ee/administration/reference_architectures/#recommended-cloud-providers-and-services), but we do also support Azure for Linux package (Omnibus) installs only. We also support On Prem setups for Configuration via Ansible.
 
 We're unable to support or accept any contributions for any additional Cloud Providers directly as this would come with a significant maintenance cost and would require access to them on our end for long term testing.
 
@@ -116,8 +134,8 @@ There are modules created for each Cloud Provider (due to the numerous differenc
 
 The Toolkit uses two modules per cloud provider:
 
-- `instance` - Contains all of the code required to deploy a VM suitable for GitLab on the selected Cloud Provider.
-- `ref_arch` - An encompassing module - it deploys VMs via the `instance` module along with any other supporting infrastructure such as Kubernetes, networking, object storage, etc... Variables are passed through to other modules/resources.
+- `instance` - Contains all the code required to deploy a VM suitable for GitLab on the selected Cloud Provider.
+- `ref_arch` - An encompassing module - it deploys VMs via the `instance` module along with any other supporting infrastructure such as Kubernetes, networking or object storage. Variables are passed through to other modules/resources.
   - This module is designed to be flexible allowing users to only build what they want. Supporting resources should only be built if their dependent is.
 
 In the future we might consider breaking select code down into more modules for further modularity. Overall the design though is to interface mainly through the relevant `ref_arch` module to give a consistent user experience.
@@ -139,22 +157,22 @@ Our Ansible code follows a simple encapsulation approach primarily through [Ansi
 
 To recap there are five main concepts for Ansible:
 
-- [Inventories](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) - List of machines that Ansible will run against. Typically we use [Dynamic Inventories](https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html) in the Toolkit that build the list of machines automatically based on machine labels (set by Terraform).
+- [Inventories](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) - List of machines that Ansible will run against. Typically, we use [Dynamic Inventories](https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html) in the Toolkit that build the list of machines automatically based on machine labels (set by Terraform).
 - [Playbooks](https://docs.ansible.com/ansible/latest/user_guide/playbooks.html) - Effectively our "runners", the playbooks select what machines to run on and what Role to run on them
-- [Roles](https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) - The bulk of our code. Roles generally correspond to a GitLab component or a collection of actions and contain all of the actions required to setup that component. Some Roles are more specialized in that they run on all nodes regardless or on `localhost` when required.
+- [Roles](https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) - The bulk of our code. Roles generally correspond to a GitLab component or a collection of actions and contain all the actions required to set up that component. Some Roles are more specialized in that they run on all nodes regardless or on `localhost` when required.
 - [Variables](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html) - Variables are used throughout the code in both execution and file templates for GitLab config. All configurable by the user.
 - [Templates](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) - Templates are also used throughout in both Variable expansion and to configure config files on the target nodes.
 
 Utilizing the above the run flow of our code in Ansible is as follows:
 
 - Inventories list the machines with categories based on the labels they already have applied in our Terraform modules.
-- Variables are constructed at runtime, pulling from Inventory, Group and Roles. See the [Variables](#variables) section for more info.
-- Playbooks select nodes based on the above mentioned labels and run the corresponding Role(s) in the correct order required for GitLab.
+- Variables are constructed at runtime, pulling from Inventory, Group and Roles. See the section on [Variables](#variables) for more info.
+- Playbooks select nodes based on the above-mentioned labels and run the corresponding Role(s) in the correct order required for GitLab.
 - Role(s) run tasks on the selected nodes in order, utilizing the constructed Variables or any specific files they have as required.
 
 Some general implementation rules we follow for Ansible:
 
-- Roles should only be added when there's a clear need for them and they have a good purpose. This is to prevent code fragmentation that in turn will impact maintainability.
+- Roles should only be added when there's a clear need for them, and they have a good purpose. This is to prevent code fragmentation that in turn will impact maintainability.
 - It's allowed to repeat select tasks or config across Roles following the principle of [AHA](#aha-avoid-hasty-abstractions). Tasks should be viewed as equivalent to function calls.
 
 #### Variables
@@ -176,7 +194,7 @@ We support Ansible versions from `2.9.*` onwards. From time to time we may bump 
 #### Styling
 
 - Ansible code should pass the project's lint checks. We utilize [`ansible-lint`](https://github.com/ansible-community/ansible-lint) and a customized [rules list](ansible/.ansible-lint).
-- Variables follow the [Snake Case](https://en.wikipedia.org/wiki/Snake_case) naming convention. In addition to this variables for components typically should follow the convention of `<component>_*` to allow for easier readability and consistency of variables per component.
+- Variables follow the [Snake Case](https://en.wikipedia.org/wiki/Snake_case) naming convention. In addition to these variables for components typically should follow the convention of `<component>_*` to allow for easier readability and consistency of variables per component.
 
 ### General
 
@@ -210,4 +228,4 @@ The Toolkit has been designed to allow users to add in these via configuring fil
 
 We expressly avoid the management of User Accounts in the Toolkit wherever possible. This extends to system accounts provided by the Cloud Providers.
 
-This is due to User Accounts being subject to various considerations in regards to security and auditing depending on the company. The Toolkit expects accounts to be created separately as per the required process and passed in where appropriate.
+This is due to User Accounts being subject to various considerations in regard to security and auditing depending on the company. The Toolkit requires accounts to be created separately as per the required process and passed in where appropriate.

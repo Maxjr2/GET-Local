@@ -29,11 +29,7 @@ For the Toolkit Terraform `v1.5.0` or higher is required.
 
 Terraform generally works best when all users for an environment are using the same major version due to its State. As such it's recommended that all users sync on the same version of Terraform when working against the same environment and any Terraform upgrades are done in unison.
 
-### Using Terraform inside a Docker container
-
-With Docker the only prerequisite is installation, the [Toolkit's image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) contains everything else you'll need. The official [Docker installation instructions](https://docs.docker.com/engine/install/) should be followed to correctly install and run Docker.
-
-### Install Terraform using asdf
+### Install Terraform using `asdf`
 
 With the above considerations then we recommend installing Terraform with a Version Manager such as [`asdf`](https://asdf-vm.com/#/) (if supported on your machine(s)).
 
@@ -55,6 +51,10 @@ Installing Terraform with `asdf` is done as follows (using `v1.5.0` as an exampl
     ```
 
 With the above completed Terraform should now be available on your command line. You can check this by running `terraform version`.
+
+### Using Terraform via a Docker image
+
+It is possible to use Terraform from a Docker image. The [Toolkit's image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) contains Terraform and all other tools needed. Follow the official [Docker installation instructions](https://docs.docker.com/engine/install/) to correctly install and run Docker.
 
 ## 2. Select Module Source
 
@@ -103,7 +103,7 @@ For example, to configure the `gitlab_ref_arch_gcp` module to pull from the regi
 ```tf
 module "gitlab_ref_arch_gcp" {
   source = "gitlab.com/gitlab-org/gitlab-environment-toolkit/gitlab//modules/gitlab_ref_arch_gcp"
-  version = ">= 2.0.0"
+  version = ">= 3.0.0"
 
   [...]
 }
@@ -159,7 +159,7 @@ variable "external_ip" {
 }
 ```
 
-- `prefix` - Used to set the names and labels of the VMs consistently. Once set this should not be changed. An example of what this could be is `gitlab-qa-10k`.
+- `prefix` - Used to set the names and labels of the VMs consistently. Use a unique name to avoid any clashes. Once set, do not change. An example of what this could be is `gitlab-test` 
 - `project` - The [ID](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project the environment is to be deployed to.
 - `region` - The GCP region of the project, e.g. `us-east1`.
 - `zone` - The default GCP zone of the project, e.g. `us-east1-c`.
@@ -206,7 +206,7 @@ provider "google" {
 
 Next to configure is `environment.tf`. This file contains all the config for the `gitlab_ref_arch_gcp` module such as machine counts, machine sizes or external IP.
 
-How you configure this file depends on the size of [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/) you want to deploy. Below we show how a [10k](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) `environment.tf` would be set. If a different size is required all that's required is to tweak the machine counts and sizes to match the desired Reference Architecture as shown in the [docs](https://docs.gitlab.com/ee/administration/reference_architectures/).
+Configure this file depending on the size of [Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/) you want to deploy. Below is an example of how a [10k](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) `environment.tf` file is set. If a different size is desired, change the machine counts and sizes to match the desired Reference Architecture as shown in the [docs](https://docs.gitlab.com/ee/administration/reference_architectures/).
 
 Here's an example of the file with all config for a [10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) and descriptions below:
 
@@ -315,7 +315,7 @@ The Toolkit can enable [versioning in Google Cloud Storage buckets](https://clou
 
 ##### Configure Network Setup (GCP)
 
-By default, the toolkit sets up the infrastructure on the default network stack as provided by GCP. However, it can also support other advanced setups such as creating a new network or using an existing one. To learn more refer to [Configure network setup (GCP)](environment_advanced_network.md#configure-network-setup-gcp).
+By default, the Toolkit sets up the infrastructure on the default network stack as provided by GCP. However, it can also support other advanced setups such as creating a new network or using an existing one. To learn more refer to [Configure network setup (GCP)](environment_advanced_network.md#configure-network-setup-gcp).
 
 ##### Configure Network Zones (GCP)
 
@@ -410,7 +410,7 @@ variable "external_ip_allocation" {
 }
 ```
 
-- `prefix` - Used to set the names and labels of the VMs consistently. Once set this should not be changed. An example of what this could be is `gitlab-qa-10k`.
+- `prefix` - Used to set the names and labels of the VMs consistently. Use a unique name to avoid any clashes. Once set, do not change. An example of what this could be is `gitlab-test`
 - `region` - The AWS region of the project.
 - `ssh_public_key_file` - Path to the public SSH key file. Previously created in the [Setup SSH Authentication - AWS](environment_prep.md#2-setup-ssh-authentication-aws) step. Not required if another connection method is being used.
 - `external_ip_allocation` - The Allocation ID for the static external IP the environment will be accessible on. Previously created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
@@ -647,7 +647,7 @@ variable "external_ip_name" {
 
 ```
 
-- `prefix` - Used to set the names and labels of the VMs consistently. Once set this should not be changed. An example of what this could be is `gitlab-qa-10k`.
+- `prefix` - Used to set the names and labels of the VMs consistently. Use a unique name to avoid any clashes. Once set, do not change. An example of what this could be is `gitlab-test`
 - `resource_group_name` - The name of the resource group previously created in the [Create Azure Resource Group](environment_prep.md#1-create-azure-resource-group) step.
 - `location` - The Azure location of the resource group.
 - `vm_admin_username` - The username of the local administrator that will be used for the virtual machines. Previously created in the [Setup SSH Authentication - Azure](environment_prep.md#3-setup-ssh-authentication-azure) step.
@@ -815,7 +815,7 @@ Finally, the last thing to configure is authentication. This is required to allo
 
 Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) and [backend](https://www.terraform.io/docs/language/settings/backends/azurerm.html), you can select any method that is desired.
 
-If you are planning to run the toolkit locally it'll be easier to use [Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) authentication method. Otherwise, you can use either a Service Principal or Managed Service Identity when running Terraform non-interactively, please refer to [Authenticating to Azure](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as Environment Variables following the Terraform instructions for the specific authentication type to fully authenticate for both the provider and backend.
+If you are planning to run the toolkit locally, use [Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) authentication method. Otherwise, you can use either a Service Principal or Managed Service Identity when running Terraform non-interactively. Refer to [Authenticating to Azure](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as Environment Variables following the Terraform instructions for the specific authentication type to fully authenticate for both the provider and backend.
 
 ### Sensitive variable handling in Terraform
 

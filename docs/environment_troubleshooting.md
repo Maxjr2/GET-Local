@@ -27,7 +27,7 @@ When working with the Toolkit, you might encounter some of the following issues.
 
 1. Check your config - The most common issues seen with the Toolkit are Terraform or Ansible misconfiguration. In below sections some of the most common misconfigurations are called out and these should be checked first.
 1. Check if Omnibus / Charts is the root cause of the issue - If the Toolkit configuration looks correct then check if there is an error being thrown by Omnibus or the Charts. This may be the case if the error is occurring in `reconfigure` or `deploy charts` steps. If that's the case you should connect to either the Omnibus VM or Kubernetes Cluster and examine the logs, just as you would a standard deployment, for further info.
-1. Raise an issue - If the above checks out and none of the below specific scenarios apply then that suggests it's a Toolkit issue. In that case, please reach out via a support ticket or issue on this tracker for further help.
+1. Raise an issue - If the above checks out and none of the below specific scenarios apply then that suggests it's a Toolkit issue. In that case, reach out via a support ticket or issue on this tracker for further help.
 
 ## Terraform
 
@@ -36,7 +36,7 @@ When working with the Toolkit, you might encounter some of the following issues.
 In select GCP setups you may see Terraform throw the following error on the first creation:
 
 ```sh
-Error: Error creating instance: googleapi: Error 400: The resource 'projects/gitlab-qa-10k-cd77c7/regions/us-east1/subnetworks/default' is not ready, resourceNotReady
+Error: Error creating instance: googleapi: Error 400: The resource 'projects/gitlab-test-123341/regions/us-east1/subnetworks/default' is not ready, resourceNotReady
 ```
 
 This looks to be a race condition issue on Google's end and is [currently being investigated by them](https://github.com/hashicorp/terraform-provider-google/issues/10972).

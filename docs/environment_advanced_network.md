@@ -79,9 +79,9 @@ In addition to the above the following _optional_ settings change how the networ
 
 ### Existing (GCP)
 
-In this setup you have an existing network stack that you want the environment to use.
+For this advanced setup, you must have an existing network stack for the environment to use.
 
-This is an advanced setup, and you must ensure the network stack is configured correctly. This guide doesn't detail the specifics on how to do this, but generally a stack should include the same elements as listed in the **Created** for the environment to work properly. Please refer to the GCP docs for more info.
+Ensure the network stack is configured correctly. Generally, a stack should include the same elements as listed in the **Created** section for the environment to work properly. Refer to the GCP docs for more info and specifics on how to do this.
 
 Note that when this is configured the module will configure some GCP Firewall rules in your VPC to enable network access for the environment.
 
@@ -215,9 +215,9 @@ There are several possible combinations supported. The Toolkit will dynamically 
 
 ### Existing (AWS)
 
-In this setup you have an existing network stack that you want the environment to use.
+For this advanced setup, you must have an existing network stack for the environment to use.
 
-This is an advanced setup, and you must ensure the network stack is configured correctly. This guide doesn't detail the specifics on how to do this, but generally a stack should include the same elements as listed in the **Created** for the environment to work properly. Please refer to the AWS docs for more info.
+Ensure the network stack is configured correctly. Generally, a stack should include the same elements as listed in the **Created** section for the environment to work properly. Refer to the AWS docs for more info and specifics on how to do this.
 
 Note that when this is configured the module will configure some AWS Security Groups in your VPC to enable network access for the environment.
 
@@ -250,7 +250,7 @@ There are several possible combinations supported. The Toolkit will dynamically 
 
 - Public Subnets - The default. All resources are placed in public subnets and have public IPs.
   - When `subnet_pub_ids` is higher than `0` and `subnet_priv_ids` is `0`.
-- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External, EKS Cluster + EKS Supporting Node that runs NGinx).
+- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External and EKS Cluster).
   - When `subnet_pub_ids` is higher than `0` and `subnet_priv_ids` is higher than `0`.
   - :information_source:&nbsp; In this setup resources running on Private Subnets require Internet access via a [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) to be configured.
 - Private Subnets - A fully offline environment. All resources are placed in private subnets, additional setup will be required for GitLab to install, such as private OS package repos for example, along with resources such as private links to access.

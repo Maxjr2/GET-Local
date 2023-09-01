@@ -26,7 +26,7 @@ Except for the Let's Encrypt option for External SSL termination - User provided
 
 On this page we'll detail how you can configure each type of encryption with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout. It also assumes a working level knowledge of SSL in general.**
 
-:information_source:&nbsp; Please note that recommendations about what specific encryption strategy to use is outwith the scope of this guide. It's recommended you review GitLab independently to determine the strategy as per your security requirements.
+:information_source:&nbsp; Recommendations about what specific encryption strategy to use is not within the scope of this guide. You should review GitLab independently to determine the strategy as per your security requirements.
 
 [[_TOC_]]
 

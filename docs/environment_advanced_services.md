@@ -86,9 +86,9 @@ Once provisioned you'll see a new output at the end of the process - `elb_intern
 
 ### Configuring with Ansible
 
-Configuring GitLab to use alternative Load Balancer(s) with Ansible is the same regardless of its origin. All that's required is additional config in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) to point the Toolkit at the Load Balancer(s).
+To configure GitLab to use alternative Load Balancer(s) with Ansible, point the Toolkit at the Load Balancer(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom Load Balancers. Although please note, in this setup it's expected that all required balancing rules are in place and the URL to connect to the Balancer(s) never change. For the latest balancer rules you need to configure you should refer to the HAProxy config files provided as part of the Toolkit - [External](../ansible/roles/haproxy/templates/haproxy_external.cfg.j2), [Internal](../ansible/roles/haproxy/templates/haproxy_internal.cfg.j2).
+:information_source:&nbsp; This config is the same for custom Load Balancers. In this setup, all required balancing rules must be in place and the URL to connect to the Balancer(s) never change. For the latest balancer rules needed to configure refer to the HAProxy config files provided as part of the Toolkit - [External](../ansible/roles/haproxy/templates/haproxy_external.cfg.j2), [Internal](../ansible/roles/haproxy/templates/haproxy_internal.cfg.j2).
 
 The available variables in Ansible for this are as follows:
 
@@ -238,7 +238,7 @@ To configure these you can copy all the same variables listed above and replace 
 - If you're not using Gitaly Cluster (and therefore Praefect) then you must provide `rds_geo_tracking_postgres_*` settings.
 - Similar to the main Postgres instance the only properties required to create an instance are `*_instance_type` and `*_password`.
 
-Please note that on the primary site it is possible to use a single RDS instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 RDS instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
+The primary site can use a single RDS instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 RDS instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
 
 #### GCP Cloud SQL
 
@@ -368,9 +368,9 @@ Once provisioned you'll see a new output added at the end of the Terraform proce
 
 ### Configuring with Ansible
 
-Configuring GitLab to use an alternative PostgreSQL database with Ansible is the same regardless of its origin. All that's required are a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) to point the Toolkit at the PostgreSQL instance(s).
+To configure GitLab to use an alternative PostgreSQL database with Ansible, point the Toolkit at the PostgreSQL instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)  
 
-:information_source:&nbsp; This config is the same for custom PostgreSQL databases that have been provisioned outside of Omnibus or Cloud Services. Although please note, in this setup it's expected that HA is in place and the URL to connect to the PostgreSQL instance never changes.
+:information_source:&nbsp; This config is the same for custom PostgreSQL databases that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the PostgreSQL instance never changes.
 
 :information_source:&nbsp; The Toolkit will attempt to do some database preparation by default when it's given external databases, such as creating users. However, this may not be compatible with your specific database depending on your setup. Refer to the [Database Preparation](#database-preparation) section below for more info.
 
@@ -542,7 +542,7 @@ Once provisioned you'll see several new outputs at the end of the process. Key f
 
 The Toolkit supports provisioning a GCP Memorystore Redis service instance with everything GitLab requires or recommends such as built in HA support and encryption.
 
-:information_source:&nbsp; Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Please follow [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) how to enable it.
+:information_source:&nbsp; Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
 
 There are different variables to be set depending on the target architecture size and if it requires separate Redis instances (10k and up). First we'll detail the general settings that apply to all Redis setups:
 
@@ -620,9 +620,9 @@ Once provisioned you'll see several new outputs at the end of the process. Keys 
 
 ### Configuring with Ansible
 
-Configuring GitLab to use alternative Redis store(s) with Ansible is the same regardless of its origin. All that's required is a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) to point the Toolkit at the Redis instance(s).
+To configure GitLab to use alternative Redis store(s) with Ansible, point the Toolkit at the Redis instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. Although please note, in this setup it's expected that HA is in place and the URL to connect to the Redis instance(s) never changes.
+:information_source:&nbsp; This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the Redis instance(s) never changes.
 
 The variables to set are dependent on if the setup is to have combined or separated Redis queues depending on the target Reference Architecture. The only difference is that the prefix of the variables change depending on what Redis instances you're provisioning - `redis_*`, `redis_cache_*` and `redis_persistent_*` respectively. All the variables are the same for each instance type and are described once below:
 
@@ -715,9 +715,9 @@ However, the Toolkit can be configured to manage this role for you via the `open
 
 ### Configuring with Ansible
 
-Configuring GitLab to use alternative search backend(s) with Ansible is the same regardless of its origin. All that's required is a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) to point the Toolkit at the Search instance(s).
+To configure GitLab to use alternative search backend(s) with Ansible, point the Toolkit at the Search instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) 
 
-:information_source:&nbsp; This config is the same for custom search backend(s) that have been provisioned outside of Omnibus or Cloud Services. Although please note, in this setup it's expected that HA is in place and the URL to connect to the search backend(s) never changes.
+:information_source:&nbsp; This config is the same for custom search backend(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the search backend(s) never changes.
 
 The available variables in Ansible for this are as follows:
 

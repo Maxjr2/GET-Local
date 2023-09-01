@@ -138,11 +138,11 @@ Like other resources the process here is similar - The disks are provisioned and
 
 ### Provisioning with Terraform
 
-The first step is to provision and attach the disks to the selected machine groups.
+Using Terraform, provision and attach the disks to the selected machine groups.
 
-This is done with Terraform and as such will require additional config in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file.
+Additional config is required in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file.
 
-The config for this area is given per node type and is passed an array of hashes, where each hash represents a disk. Please note config differs between cloud providers and below are sections for each provider with full examples and descriptions below:
+The config is given per node type and is passed an array of hashes (each hash represents a disk). Additionally, config differs between cloud providers; below are examples and descriptions for each provider:
 
 **GCP**
 
@@ -288,7 +288,7 @@ For all setups, the below settings configure how the service and dependents are 
 
 While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
 
-Please note the following caveats before proceeding:
+Note the following before proceeding:
 
 - Your milage may vary - Due to the sheer potential number of customizations this support is offered on a best effort basis.
 - Custom Server setups must follow the [requirements](../README.md#requirements).

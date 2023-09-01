@@ -23,24 +23,34 @@ On this page we'll detail how both work. **It's worth noting this guide is suppl
 
 ## Toolkit Upgrades
 
-Before running any upgrades for your environment, we recommend using the latest [release version](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) of the
-Toolkit. This ensures that the latest GitLab configuration is used when updating and should avoid any issues.
+Before running any upgrades for your environment, upgrade the Toolkit scripts first to ensure compatibility with the latest GitLab versions.
 
-When updating the Toolkit, we recommend checking the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any called out breaking or config changes to ensure no issues occur on upgrade.
+In this section is guidance on upgrading the Toolkit that should be followed throughout.
 
-In addition to the above please be aware of the following guidance also:
+### Toolkit Upgrade Paths and Stops
+
+The following upgrade paths are supported for the Toolkit.
+
+- Upgrades within a major version will generally be supported unless specified otherwise in the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases), for example `2.5.0` to `2.8.6`.
+- Upgrades to a new major version **require an upgrade stop of the latest release of the previous major version**. For example to upgrade to GitLab Environment Toolkit `3.0.0` requires an upgrade first to the last `2.x` version (`2.8.6`).
+
+### Review Toolkit release notes
+
+When updating the Toolkit, check the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any called out breaking changes or other release guidance changes to ensure no issues occur on upgrade.
 
 ### Perform Terraform Dry Runs for new Toolkit versions
 
-Where possible we **strongly** recommend that you do Terraform dry runs whenever you have updated the Toolkit to ensure no significant unintended actions occur.
+Perform Terraform dry runs whenever you have updated the Toolkit to ensure no significant unintended actions occur with the infrastructure leading to downtime or data loss.
 
 This is done simply by running `terraform plan`.
 
-Once completed the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, we recommend checking these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect please reach out to us via the [issue tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues) or via the standard [support channels](https://about.gitlab.com/support/).
+Once completed, the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, check these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect you can reach out via the standard [support channels](https://about.gitlab.com/support/) or by creating an [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues).
 
 This is recommended as certain infrastructure changes can trigger large destroy actions that in turn can lead to the loss of the environment and data. While this is behaviour from the cloud providers, every effort is made with the Toolkit to ensure this is avoided but since the consequences can be significant it's always best to do the dry run as described above out an abundance of caution.
 
 In addition to this we'll endeavour to call out any config options that if changed could also lead to the above.
+
+:information_source:&nbsp; This recommendation only applies to Terraform. The equivalent in Ansible - [check mode](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html) - is not supported due to incompatibilities with how that mode runs.
 
 ### Avoid automated Toolkit updates and Terraform Auto Approve together
 
