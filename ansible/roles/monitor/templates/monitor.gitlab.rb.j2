@@ -39,24 +39,7 @@ consul['monitoring_service_discovery'] = true
 {% endif %}
 
 # Nginx
-nginx['enable'] = true
-nginx['status']['options'] = {
-  "server_tokens" => "off",
-  "access_log" => "off",
-  "deny" => "all",
-## Switch internal allow to IP as this is what Consul uses
-## When not using Consul localhost is used by default
-{% if 'consul' in groups %}
-  "allow" => "{{ monitor_int_ip }}"
-{% endif -%}
-}
-
-{% if external_url_ssl %}
-nginx['listen_port'] = 80
-nginx['listen_https'] = false
-
-letsencrypt['enable'] = false
-{% endif %}
+nginx['enable'] = false
 
 node_exporter['listen_address'] = '0.0.0.0:9100'
 
