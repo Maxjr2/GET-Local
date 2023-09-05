@@ -58,7 +58,8 @@ secret_detection:
 container_scanning:
   stage: container_scan
   variables:
-    DOCKER_IMAGE: $CI_REGISTRY_IMAGE:dev
+    CI_APPLICATION_REPOSITORY: $CI_REGISTRY_IMAGE
+    CI_APPLICATION_TAG: dev
     GIT_STRATEGY: fetch
   rules:
     - !reference [.on_default_branch, rules]
