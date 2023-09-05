@@ -271,7 +271,7 @@ Let's go through the steps for each.
 
 Config is recommended to be placed in a new folder named after the environment under the `gitlab-environment-toolkit/ansible/environments/` folder, e.g. `gitlab-environment-toolkit/ansible/environments/<ENV_NAME>/inventory`.
 
-:information_source:&nbsp; _For the purposes of this guide we're running the Toolkit natively from source where the playbooks and roles are all available on disk.
+:information_source:&nbsp; For the purposes of this guide we're running the Toolkit natively from source where the playbooks and roles are all available on disk.
 
 ### 3a. Installing Ansible with a Virtual Environment
 
