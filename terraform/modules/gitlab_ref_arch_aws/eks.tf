@@ -418,6 +418,7 @@ resource "aws_eks_addon" "kube_proxy" {
   addon_name    = "kube-proxy"
   addon_version = var.eks_kube_proxy_version == "latest" ? data.aws_eks_addon_version.kube_proxy[0].version : var.eks_kube_proxy_version
 
+  resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 }
 
@@ -437,6 +438,7 @@ resource "aws_eks_addon" "coredns" {
   addon_name    = "coredns"
   addon_version = var.eks_coredns_version == "latest" ? data.aws_eks_addon_version.coredns[0].version : var.eks_coredns_version
 
+  resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that Nodes are created beforehand as required by addon
@@ -464,6 +466,7 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_version            = var.eks_vpc_cni_version == "latest" ? data.aws_eks_addon_version.vpc_cni[0].version : var.eks_vpc_cni_version
   service_account_role_arn = aws_iam_role.gitlab_addon_vpc_cni_role[count.index].arn
 
+  resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that Kube Proxy addon and OpenID provider are created beforehand as required by addon
@@ -490,6 +493,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   addon_version            = var.eks_ebs_csi_driver_version == "latest" ? data.aws_eks_addon_version.ebs_csi_driver[0].version : var.eks_ebs_csi_driver_version
   service_account_role_arn = aws_iam_role.gitlab_addon_ebs_csi_driver_role[count.index].arn
 
+  resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   # Ensure that OpenID provider is created beforehand as required by addon
