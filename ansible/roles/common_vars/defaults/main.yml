@@ -360,6 +360,7 @@ gitlab_charts_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/git
 gitlab_charts_secrets_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/gitlab_charts_secrets.yml"
 
 common_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/common.yml"
+haproxy_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/haproxy.yml"
 post_configure_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/post_configure.yml"
 uninstall_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/uninstall.yml"
 
