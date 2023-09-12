@@ -248,7 +248,7 @@
     values: "{{ gitlab_charts_values }}"
   register: helm_install_result
   failed_when:
-    - ('Failure when executing Helm command' in helm_install_result.msg) or
+    - (helm_install_result.msg is defined and 'Failure when executing Helm command' in helm_install_result.msg) or
       ('FAILED' in helm_install_result.stderr)
   tags:
     - reconfigure
