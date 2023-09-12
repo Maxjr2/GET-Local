@@ -1,6 +1,10 @@
 ---
 - name: Run gitlab-ctl cleanse against all Omnibus nodes
   command: gitlab-ctl cleanse
+  register: result
+  failed_when:
+    - result.rc != 0
+    - ('No such file or directory' not in result.msg)
 
 - name: Unlock GitLab package installs
   command: "{{ 'yum versionlock delete' if ansible_facts['os_family'] == 'RedHat' else 'aptitude unhold' }} {{ gitlab_edition }}"
