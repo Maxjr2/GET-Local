@@ -107,3 +107,20 @@
   tags:
     - reconfigure
     - restart
+
+- name: Run Custom Tasks
+  block:
+    - name: Check if Custom Tasks file exists
+      stat:
+        path: "{{ haproxy_custom_tasks_file }}"
+      register: haproxy_custom_tasks_file_path
+      delegate_to: localhost
+      become: false
+
+    - name: Run Custom Tasks
+      include_tasks:
+        file: "{{ haproxy_custom_tasks_file }}"
+        apply:
+          tags: custom_tasks
+      when: haproxy_custom_tasks_file_path.stat.exists
+  tags: custom_tasks
