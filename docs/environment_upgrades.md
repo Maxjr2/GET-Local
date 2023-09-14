@@ -38,6 +38,16 @@ The following upgrade paths are supported for the Toolkit.
 
 When updating the Toolkit, check the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any called out breaking changes or other release guidance changes to ensure no issues occur on upgrade.
 
+### Terraform and Ansible Dependency Upgrades
+
+The release notes may at times call out a specific dependency update for Terraform and Ansible and to upgrade accordingly.
+
+As a standard practice though it's recommended as part of a Toolkit upgrade to stay up to date and go through the dependency setup for the tools as detailed earlier in the documentation as follows:
+
+- [Terraform modules](environment_provision.md#5-provision) - `terraform init --upgrade`
+- [Ansible host python packages](environment_configure.md#1-install-ansible) - `pip3 install -r ansible/requirements/requirements.txt`
+- [Ansible Galaxy collections & roles](environment_configure.md#1-install-ansible) - `ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.yml --force`
+
 ### Perform Terraform Dry Runs for new Toolkit versions
 
 Perform Terraform dry runs whenever you have updated the Toolkit to ensure no significant unintended actions occur with the infrastructure leading to downtime or data loss.

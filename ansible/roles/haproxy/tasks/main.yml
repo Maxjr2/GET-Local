@@ -1,7 +1,7 @@
 ---
 - name: Configure Docker
   include_role:
-    name: "{{ 'geerlingguy.docker_arm' if ansible_architecture == 'aarch64' else 'geerlingguy.docker' }}"
+    name: geerlingguy.docker
   when: ansible_facts['distribution'] != "Amazon"
 
 - name: Configure Docker (RHEL - Amazon Linux 2)
