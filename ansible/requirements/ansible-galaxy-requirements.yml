@@ -1,7 +1,6 @@
 roles:
-  - geerlingguy.node_exporter,2.0.0
-  - geerlingguy.docker,6.0.4
-  - geerlingguy.docker_arm,5.0.0
+  - geerlingguy.node_exporter,2.0.1
+  - geerlingguy.docker,6.2.0
 
 # Only set minimum versions for collections as ansible package comes with these built in
 collections:

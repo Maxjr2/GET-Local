@@ -366,7 +366,7 @@ There are various ways this can be tackled. While this is outside the scope of t
 
 ### Python Packages
 
-The Toolkit also installs several Python packages via PyPI as required by Ansible - `requests==2.27.1 google-auth==2.9.1 netaddr==0.8.0 openshift==0.13.1 PyYAML==6.0 docker==5.0.3 pexpect==4.8.0 psycopg2==2.9.3`. Note that the packages are version locked as recommend for Python installs.
+The Toolkit also installs several Python packages via PyPI as required by Ansible - `requests==2.27.1, google-auth==2.22.0, netaddr==0.8.0, openshift==0.13.2, PyYAML==6.0.1, docker==5.0.3, pexpect==4.8.0, psycopg2==2.9.5`. Note that the packages are version locked as recommend for Python installs.
 
 When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as an offline PyPI repo or installing directly.
 
