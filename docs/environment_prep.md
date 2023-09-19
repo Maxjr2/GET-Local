@@ -67,7 +67,12 @@ Existing projects can also be used, but this should be checked with the Project'
 
 Authentication with GCP directly is done with a [Service Account](https://cloud.google.com/iam/docs/understanding-service-accounts), which is required by both Terraform and Ansible.
 
-To create a Service Account, you need to have `admin` permissions in the GCP project and follow the instructions below:
+To create and manage Service Accounts, you need to set the following IAM permissions to your _own_ account:
+
+- `Service Account Admin`
+- `Service Account Token Creator`
+
+With the above set create the Service Account as follows:
 
 1. Access GCP's [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) page.
 1. Ensure that the correct project is selected in the dropdown at the top of the page.
@@ -79,6 +84,8 @@ To create a Service Account, you need to have `admin` permissions in the GCP pro
    - `Service Account Admin`
    - `Service Account User`
    - `Compute Network Admin` (Only required when deploying [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql))
+
+Take note of the Service Account email address, which will be used in the next step.
 
 ### 4. Setup SSH Authentication - SSH OS Login for GCP Service Account
 
@@ -99,18 +106,12 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
    gcloud compute project-info add-metadata --metadata enable-oslogin=TRUE
    ```
 
-1. Login as the Service Account user via its key created in the last step
-
-   ```terminal
-   gcloud auth activate-service-account --key-file=serviceaccount-<project-name>.json
-   ```
-
-1. Add the project's public SSH key to the account
+1. Add the project's public SSH key to the Service Account
 
    :information_source:&nbsp; **This command will output the SSH Username for the Service Account, typically in the format of `sa_<ID>`. Take a note of this username as later, it will be used in the Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) section.**
 
    ```terminal
-   gcloud compute os-login ssh-keys add --key-file=<SSH key>.pub
+   gcloud compute os-login ssh-keys add --key-file=<SSH key>.pub --impersonate-service-account=<service-account-email-address>
    ```
 
 1. Switch back your logged in account in `gcloud` to your regular account using your email address.
@@ -120,7 +121,7 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
    ```
 
 SSH access should now be enabled on the Service Account and this will be used by Ansible to SSH login to each VM.
-More info on OS Login and how it's configured can be found in this [blog post by Alex Dzyoba](https://alex.dzyoba.com/blog/gcp-ansible-service-account/).
+More info on OS Login and how it's configured can be found [in this community blog](https://pomba.net/2022/05/gcp-ssh-into-vms-as-service-account-when-oslogin-is-enabled/).
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use the key for accessing machines.
 
