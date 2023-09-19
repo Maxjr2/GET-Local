@@ -31,7 +31,7 @@ RUN /root/.local/bin/ansible-galaxy install -r ansible/requirements/ansible-gala
 
 #####
 
-FROM python:slim-bullseye 
+FROM python:slim-bullseye
 
 COPY --from=python-build /root/ /root/
 COPY --from=python-build /gitlab-environment-toolkit /gitlab-environment-toolkit
@@ -44,14 +44,14 @@ ENV PATH="/root/.asdf/shims:/root/.asdf/bin:/root/.local/bin:$PATH"
 ENV GCP_AUTH_KIND="application"
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
 
-RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip git-crypt gnupg openssh-client && rm -rf /var/lib/apt/lists/*
+RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
 
 # Install cloud tools
 ## gcloud cli
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk-$(lsb_release -c -s) main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
     apt-get update && apt-get install -y --no-install-recommends google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin && rm -rf /var/lib/apt/lists/*
-# aws cli
+## aws cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
     unzip /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
