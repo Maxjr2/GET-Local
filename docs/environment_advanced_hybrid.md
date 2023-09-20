@@ -247,13 +247,39 @@ The variables to configure each can be set in Terraform as follows in your [`env
 - `eks_vpc_cni_version` - Version to use for the [EKS VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 - `eks_ebs_csi_driver_version` - Version to use for the [EBS CSI Driver addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 
-#### EKS GitLab Namespace
+#### EKS IAM roles for service accounts (IRSA)
+
+The Toolkit configures the AWS EKS cluster to use [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for authenticating to AWS services as a security best practice.
+
+While this should work out of the box for most setups there are a few scenarios when additional configuration may be required as detailed below.
+
+##### GitLab Chart Namespace
 
 In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable.
 
-However, since the Toolkit uses [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) as a security best practice Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `eks_gitlab_charts_namespace` variable.
+However, since the Toolkit uses IRSA, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `eks_gitlab_charts_namespace` variable.
 
 As such, if you do choose to change the namespace for GitLab components you should change both the `eks_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
+
+#### AWS IAM ARN Account and Partition
+
+To configure IRSA, the Toolkit will look to pull the info it requires to correctly set the [IAM ARNs](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html) for the GitLab Charts to use for authentication as a convenience via the [Ansible `aws_caller_info` module](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_caller_info_module.html).
+
+However, this depends on the AWS authentication method being used for Ansible and assumes that the account being used is in the same AWS Partition and Account as the environment being deployed. If this is not the case you will need to set the correct partition and account directly via the `aws_partition` and `aws_account` settings in your Ansible [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`). For example if the environment was deployed with the standard `aws` partition with the account ID `123456789` then you would configure the settings as follows:
+
+```yml
+all:
+  vars:
+    # Ansible Settings
+    ansible_user: "<ssh_username>"
+    ansible_ssh_private_key_file: "<private_ssh_key_path>"
+
+    # Cloud Settings
+    aws_partition: "aws"
+    aws_account: 123456789
+
+    [...]
+```
 
 #### EKS Endpoint Setup
 

@@ -4,7 +4,11 @@ gitlab_charts_repo_url: "https://charts.gitlab.io/"
 
 gitlab_charts_show_values: false
 
+# Cloud Provider specific
 gcp_backups_service_account_key_file: ""
+
+aws_partition: ""
+aws_account: ""
 
 # Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 webservice_default_replica_counts:
