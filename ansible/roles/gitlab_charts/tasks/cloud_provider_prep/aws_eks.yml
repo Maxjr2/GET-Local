@@ -1,12 +1,25 @@
 ---
-- name: Save AWS Caller Info
-  amazon.aws.aws_caller_info:
-  register: aws_caller_info
+- name: Retrieve AWS Partition and Account ID if not configured
+  block:
+    - name: Get AWS Caller Info
+      amazon.aws.aws_caller_info:
+      register: aws_caller_info
+
+    - name: Extract AWS Partition from Caller Info
+      set_fact:
+        aws_partition: "{{ aws_caller_info.arn | regex_search(':(aws[a-zA-Z-]*):', '\\1') | first }}"
+      when: aws_partition == ''
+
+    - name: Extract AWS Account ID from Caller Info
+      set_fact:
+        aws_account: "{{ aws_caller_info.account }}"
+      when: aws_account == ''
+  when: (aws_partition == '' or aws_account == '')
   tags: cluster-autoscaler
 
-- name: Get AWS IAM ARN prefix  # AWS ARN Prefix can change, such as on GovCloud regions - https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/using-govcloud-arns.html
+- name: Configure AWS IAM ARN prefix
   set_fact:
-    aws_caller_arn_prefix: "{{ aws_caller_info.arn | regex_search('^.+::[0-9]+') }}"
+    aws_iam_arn_prefix: "arn:{{ aws_partition }}:iam::{{ aws_account }}"
   tags: cluster-autoscaler
 
 - name: Add Metrics server (AWS EKS)
@@ -61,7 +74,7 @@
           rbac:
             serviceAccount:
               annotations:
-                eks.amazonaws.com/role-arn: "{{ aws_caller_arn_prefix }}:role/{{ prefix }}-eks-cluster-autoscaler-role"
+                eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-cluster-autoscaler-role"
           extraArgs:  # https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
             balance-similar-node-groups: true
             skip-nodes-with-system-pods: false
