@@ -3,6 +3,9 @@ locals {
 
   rds_geo_tracking_postgres_subnet_ids    = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.rds_geo_tracking_default_subnet_count)
   rds_geo_tracking_postgres_major_version = floor(var.rds_geo_tracking_postgres_version)
+
+  # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks
+  rds_geo_tracking_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, statement_timeout = 15000, deadlock_timeout = 5000 }
 }
 
 data "aws_kms_key" "aws_geo_rds" {
@@ -27,14 +30,12 @@ resource "aws_db_parameter_group" "gitlab_geo_tracking" {
   name_prefix = "${var.prefix}-rds-geo-tracking-pg${local.rds_geo_tracking_postgres_major_version}-"
   family      = "postgres${local.rds_geo_tracking_postgres_major_version}"
 
-  parameter {
-    name  = "password_encryption"
-    value = "scram-sha-256"
-  }
-
-  parameter {
-    name  = "log_min_duration_statement"
-    value = 1000
+  dynamic "parameter" {
+    for_each = merge(local.rds_geo_tracking_postgres_default_params, var.rds_geo_tracking_postgres_params)
+    content {
+      name  = parameter.key
+      value = parameter.value
+    }
   }
 
   lifecycle {
