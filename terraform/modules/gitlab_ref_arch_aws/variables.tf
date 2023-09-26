@@ -933,6 +933,11 @@ variable "rds_postgres_maintenance_window" {
   type    = string
   default = null
 }
+variable "rds_postgres_params" {
+  description = "Additional RDS parameter group settings"
+  type        = map(any)
+  default     = {}
+}
 variable "rds_postgres_tags" {
   description = "Tags to apply to RDS Postgres"
   type        = map(any)
@@ -1025,6 +1030,11 @@ variable "rds_praefect_postgres_maintenance_window" {
   type    = string
   default = null
 }
+variable "rds_praefect_postgres_params" {
+  description = "Additional RDS Praefect parameter group settings"
+  type        = map(any)
+  default     = {}
+}
 variable "rds_praefect_postgres_tags" {
   description = "Tags to apply to RDS Praefect Postgres"
   type        = map(any)
@@ -1116,6 +1126,11 @@ variable "rds_geo_tracking_postgres_delete_automated_backups" {
 variable "rds_geo_tracking_postgres_maintenance_window" {
   type    = string
   default = null
+}
+variable "rds_geo_tracking_postgres_params" {
+  description = "Additional RDS Geo Tracking parameter group settings"
+  type        = map(any)
+  default     = {}
 }
 variable "rds_geo_tracking_postgres_tags" {
   description = "Tags to apply to RDS Geo Tracking Postgres"

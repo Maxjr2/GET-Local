@@ -199,6 +199,28 @@ Configuring how RDS version is selected in the Toolkit is done via the following
 
 :information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `rds_praefect_postgres_*` prefix instead.
 
+##### AWS RDS Parameters
+
+It's possible to configure [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html) via the Toolkit if desired.
+
+By default, the Toolkit sets the [following parameters](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/terraform/modules/gitlab_ref_arch_aws/rds.tf#L9) to follow [GitLab recommendations](https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks):
+
+```yaml
+{
+  password_encryption = "scram-sha-256"
+  log_min_duration_statement = 1000
+  idle_in_transaction_session_timeout = 60000
+  statement_timeout = 15000
+  deadlock_timeout = 5000
+}
+```
+
+With the following variable you can configure any [available parameter](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list), including the above in overriding fashion:
+
+- `rds_postgres_params` - A map of [Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) to configure in RDS. Any param set here will take precedence. Optional, default is `{}`.
+
+:information_source:&nbsp; Parameters for Praefect or Geo Tracking RDS databases can also be done with the same setting above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively instead.
+
 ##### AWS RDS Read Replicas
 
 The standard setup above will deploy an [RDS instance with a standby replica](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html) in a different Availability Zone to provide HA in case of a failure. This replica is only used for HA though and can't be reached.
