@@ -261,7 +261,7 @@ However, since the Toolkit uses IRSA, Terraform also needs to be aware of the na
 
 As such, if you do choose to change the namespace for GitLab components you should change both the `eks_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
 
-#### AWS IAM ARN Account and Partition
+##### AWS IAM ARN Account and Partition
 
 To configure IRSA, the Toolkit will look to pull the info it requires to correctly set the [IAM ARNs](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html) for the GitLab Charts to use for authentication as a convenience via the [Ansible `aws_caller_info` module](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_caller_info_module.html).
 
