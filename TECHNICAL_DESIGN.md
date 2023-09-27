@@ -142,7 +142,7 @@ In the future we might consider breaking select code down into more modules for 
 
 #### Version Support
 
-We support Terraform versions from `1.*` onwards. From time to time we may bump up this minimum supported version as required with adequate notice to users.
+The latest Terraform version we support is noted [here in the documentation](README.md#requirements).
 
 #### Styling
 
@@ -150,6 +150,14 @@ We support Terraform versions from `1.*` onwards. From time to time we may bump 
 - Terraform code should pass the project's lint checks. We utilize [`tflint`](https://github.com/terraform-linters/tflint) and a customized [rules list](.tflint.hcl).
 - Variables should be set in the relevant `variables.tf` file for the module.
 - All names in both resources and variables should follow the [Snake Case](https://en.wikipedia.org/wiki/Snake_case) naming convention.
+
+#### Variable Defaults (`null`)
+
+For any variables we add in Terraform for the Providers we use, we use [`null` values](https://developer.hashicorp.com/terraform/language/expressions/types#null) first as a rule.
+
+In Terraform `null` is equivalent to something not being set at all and the Cloud Provider's default is then used instead gracefully. This in turn avoids it being set definitively in Terraform's state and avoids any clashes between Terraform, it's state and the Cloud Provider such as when a user changes a setting or if a Cloud Provider changes a default either in its Terraform Provider or directly on it's service(s).
+
+To put it another way setting a value, even if just a default, on this layer means Terraform expects full ownership of it moving forward and as a general rule this behaviour should only be invoked when necessary.
 
 ### Ansible
 
@@ -189,7 +197,7 @@ For the Toolkit, variables must be placed in one of three places depending on th
 
 #### Version Support
 
-We support Ansible versions from `2.9.*` onwards. From time to time we may bump up this minimum supported version as required with adequate notice to users.
+The latest Ansible version we support is noted [here in the documentation](README.md#requirements). We regularly update the version to match the latest maintained versions accordingly.
 
 #### Styling
 
