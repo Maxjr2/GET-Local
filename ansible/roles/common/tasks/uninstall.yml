@@ -21,11 +21,11 @@
   delay: 3
 
 - name: Remove GitLab repository (Ubuntu)
-  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/ubuntu/"
+  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/ubuntu/ --yes"
   when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Remove GitLab repository (Debian)
-  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/debian/"
+  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/debian/ --yes"
   when: ansible_facts['distribution'] == "Debian"
 
 - name: Remove GitLab repository (RHEL)
