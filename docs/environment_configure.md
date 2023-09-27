@@ -67,7 +67,7 @@ Hopefully with this overview its clearer how Ansible in the Toolkit works. Below
 
 ## 1. Install Ansible
 
-The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `7.0` or higher (`ansible-core 2.14`).
+The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `8.0` or higher (`ansible-core 2.15`).
 
 :information_source:&nbsp; Ansible itself typically has requirements on what Python version is installed on the control node. Whatever version you chose will have a corresponding Python version requirement. **For Ansible `8.x` (`ansible-core 2.15`), [Python `3.9` or higher is required](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)**. Note that this Python requirement also applies to the box actually running Ansible and not for the target boxes - Typically the latest available version from the OS is sufficient for the latter.
 
