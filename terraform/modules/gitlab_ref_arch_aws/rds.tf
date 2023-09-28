@@ -94,6 +94,9 @@ resource "aws_db_instance" "gitlab" {
 
   delete_automated_backups = local.rds_postgres_is_primary ? var.rds_postgres_delete_automated_backups : null
 
+  performance_insights_enabled          = var.rds_postgres_performance_insights_enabled
+  performance_insights_retention_period = var.rds_postgres_performance_insights_retention_period
+
   copy_tags_to_snapshot = true
   tags                  = var.rds_postgres_tags
 }

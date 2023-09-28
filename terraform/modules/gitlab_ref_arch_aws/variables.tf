@@ -1151,6 +1151,18 @@ variable "rds_geo_tracking_postgres_read_replica_multi_az" {
   default = false
 }
 
+## RDS Performance Insights
+variable "rds_postgres_performance_insights_enabled" {
+  description = "Enables AWS RDS Performance Insights"
+  type        = bool
+  default     = null
+}
+variable "rds_postgres_performance_insights_retention_period" {
+  description = "Sets the retention period for AWS RDS Performance Insights"
+  type        = number
+  default     = null
+}
+
 ## Redis
 ### Combined \ Defaults
 variable "elasticache_redis_node_count" {
