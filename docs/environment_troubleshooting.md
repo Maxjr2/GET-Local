@@ -21,9 +21,9 @@ On this page you'll find troubleshooting guidance for various areas when using t
 
 ## Troubleshooting
 
-The Toolkit has been designed to deploy GitLab following the same steps as Omnibus or the Helm Charts. 
+The Toolkit has been designed to deploy GitLab following the same steps as Omnibus or the Helm Charts.
 
-When working with the Toolkit, you might encounter some of the following issues. 
+When working with the Toolkit, you might encounter some of the following issues.
 
 1. Check your config - The most common issues seen with the Toolkit are Terraform or Ansible misconfiguration. In below sections some of the most common misconfigurations are called out and these should be checked first.
 1. Check if Omnibus / Charts is the root cause of the issue - If the Toolkit configuration looks correct then check if there is an error being thrown by Omnibus or the Charts. This may be the case if the error is occurring in `reconfigure` or `deploy charts` steps. If that's the case you should connect to either the Omnibus VM or Kubernetes Cluster and examine the logs, just as you would a standard deployment, for further info.
@@ -148,7 +148,7 @@ ansible-inventory -i environments/10k/inventory --graph --host mytest-gitaly-1
 
 ### OS Package repository issues
 
-A subtle issue that can occur is when the OS repository script the [Toolkit is configured to use](environment_configure.md#repository) for setting up the repo is not correct for the target OS. When this occurs you may see a message such as `Package gitlab-ee cannot be found`. 
+A subtle issue that can occur is when the OS repository script the [Toolkit is configured to use](environment_configure.md#repository) for setting up the repo is not correct for the target OS. When this occurs you may see a message such as `Package gitlab-ee cannot be found`.
 
 Examples of this include the GitLab repo not having packages for the specific OS version or CPU architecture type.
 
@@ -200,7 +200,7 @@ When this is the case external database preparation needs to be completed manual
 As part of the Omnibus reconfigure step you may see the following error occurring for Rails or Sidekiq nodes:
 
 ```sh
-URI::InvalidURIError: bad URI(is not URI?): "redis://<password>@gitlab-redis-cache" 
+URI::InvalidURIError: bad URI(is not URI?): "redis://<password>@gitlab-redis-cache"
 ```
 
 This can happen as the password for the Redis cluster is required to be part of the URL for clients. As a result, if the password contains forbidden characters for http URLs the above error may show.
@@ -224,6 +224,10 @@ if yum list installed gitlab-runner; then yum clean all ; yum makecache; fi
 ```
 
 After the cache is reset the setup should work again as normal.
+
+### Unable to execute ssh command line on a controller due to: [Errno 24] Too many open files
+
+[This can occur for some people if Ansible is trying run multiple tasks at once](https://github.com/ansible/ansible/issues/12259). The safest way to resolve this is to lower the `forks` setting in your `ansible.cfg` file to `20`. The `ansible.cfg` file can be found at `./ansible/ansible.cfg` within your toolkit checkout.
 
 ## Cloud Native Hybrid
 
