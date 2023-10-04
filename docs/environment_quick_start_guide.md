@@ -106,18 +106,19 @@ Config is recommended to be placed in a new folder named after the environment u
 
 :information_source:&nbsp; For the purposes of this guide we're running the Toolkit natively from source where the modules are all available on disk.
 
-### 2a. Installing Terraform with `asdf`
+### 2a. Installing Terraform with `rtx`
 
-First we need to install Terraform. To easily switch between Terraform versions we recommend installing with [`asdf`](https://asdf-vm.com/#/) as follows:
+First we need to install Terraform. To easily switch between Terraform versions we recommend installing with [`rtx`](https://github.com/jdx/rtx) as follows:
 
-1. Install `asdf` as per its [documentation](https://asdf-vm.com/guide/getting-started.html)
-1. Add the Terraform asdf plugin, the intended version and set it to be the main on your PATH:
+1. Install `rtx` as per its [documentation](https://github.com/jdx/rtx#installation)
+1. In the Toolkit directory, install the default version of Terraform by first adding its plugin and then installing:
 
     ```sh
-    asdf plugin add terraform
-    asdf install terraform 1.5.0
-    asdf global terraform 1.5.0
+    rtx plugins add terraform
+    rtx install terraform
     ```
+
+:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required.
 
 Terraform should now be installed and ready on your `PATH`.
 

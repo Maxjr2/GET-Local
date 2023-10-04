@@ -1,4 +1,4 @@
-FROM python:slim-bullseye as python-build
+FROM python:3.11-slim-bullseye as python-build
 
 COPY ansible /gitlab-environment-toolkit/ansible
 COPY terraform /gitlab-environment-toolkit/terraform
@@ -9,29 +9,25 @@ USER root
 WORKDIR /gitlab-environment-toolkit
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH="/root/.asdf/shims:/root/.asdf/bin:/root/.local/bin:$PATH"
+ENV PATH="/root/.local/share/rtx/bin:/root/.local/share/rtx/shims:/root/.local/bin:$PATH"
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential git curl jq unzip && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl jq unzip && rm -rf /var/lib/apt/lists/*
 
-# Install ASDF
-RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git /root/.asdf && \
-    echo -e '\n. /root/.asdf/asdf.sh' >> ~/.bashrc && \
-    echo -e '\n. /root/.asdf/asdf.sh' >> ~/.profile && \
-    source ~/.bashrc
+# Install RTX
+RUN curl https://rtx.pub/install.sh | sh
 
-# Install Terraform
-RUN asdf plugin add terraform && \
-    asdf install terraform
+# Install Terraform (via RTX)
+RUN rtx plugin add terraform && rtx install terraform
 
 # Install Ansible
 ## Install Python Packages (Including Ansible)
 RUN pip3 install --no-cache-dir --user -r ansible/requirements/requirements.txt
 ## Install Ansible Dependencies
-RUN /root/.local/bin/ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.yml
+RUN ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.yml
 
 #####
 
-FROM python:slim-bullseye
+FROM python:3.11-slim-bullseye
 
 COPY --from=python-build /root/ /root/
 COPY --from=python-build /gitlab-environment-toolkit /gitlab-environment-toolkit
@@ -40,11 +36,12 @@ USER root
 WORKDIR /gitlab-environment-toolkit
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH="/root/.asdf/shims:/root/.asdf/bin:/root/.local/bin:$PATH"
+ENV PATH="/root/.local/share/rtx/bin:/root/.local/share/rtx/shims:/root/.local/bin:$PATH"
+
 ENV GCP_AUTH_KIND="application"
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
 
-RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
+RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip nano git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
 
 # Install cloud tools
 ## gcloud cli
@@ -62,11 +59,10 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 RUN apt-get install -y --no-install-recommends kubectl && rm -rf /var/lib/apt/lists/*
 RUN curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-# Copy Environments on login
+# Configure environment on login
 RUN echo -e '\n. /gitlab-environment-toolkit/bin/setup-get-symlinks.sh' >> ~/.bashrc && \
-    echo -e '\n export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
+    echo -e '\neval "$(rtx activate bash)"' >> ~/.bashrc
 
-RUN mkdir -p /gitlab-environment-toolkit/keys && \
-    mkdir /environments
+RUN mkdir -p /gitlab-environment-toolkit/keys && mkdir /environments
 
 CMD ["bash"]
