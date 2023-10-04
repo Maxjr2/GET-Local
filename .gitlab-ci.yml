@@ -130,21 +130,6 @@ check:markdown-link-check:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
   retry: 2
 
-# Does the requirements.txt install?
-check_requirements:
-  stage: test
-  image: python:3
-  script:
-    - python -m venv get-python-env
-    - source ./get-python-env/bin/activate
-    - pip install -r ansible/requirements/requirements.txt
-    - ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.yml
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - ansible/requirements/requirements.txt
-        - ansible/requirements/ansible-galaxy-requirements.yml
-
 ########################
 ##      Packages      ##
 ########################
@@ -163,7 +148,7 @@ upload-terraform-module:
   stage: upload
   image: alpine
   services:
-    - docker:20-dind
+    - docker:24-dind
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
@@ -172,6 +157,19 @@ upload-terraform-module:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   tags:
     - docker
+
+check:docker-image:
+  stage: test
+  extends: .upload-docker-image-base
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:test .
+    - docker run --rm $CI_REGISTRY_IMAGE:test bash -c "terraform version && ansible --version"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - Dockerfile
+        - .tool-versions
+        - ansible/requirements/requirements.txt
 
 upload-docker-image-dev:
   extends: .upload-docker-image-base

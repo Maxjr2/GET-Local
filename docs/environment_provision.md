@@ -29,26 +29,26 @@ For the Toolkit Terraform `v1.5.0` or higher is required.
 
 Terraform generally works best when all users for an environment are using the same major version due to its State. As such it's recommended that all users sync on the same version of Terraform when working against the same environment and any Terraform upgrades are done in unison.
 
-### Install Terraform using `asdf`
+### Install Terraform using `rtx` or `asdf`
 
-With the above considerations then we recommend installing Terraform with a Version Manager such as [`asdf`](https://asdf-vm.com/#/) (if supported on your machine(s)).
+With the above considerations then we recommend installing Terraform with a Version Manager such as [`rtx`](https://github.com/jdx/rtx) or [`asdf`](https://asdf-vm.com/#/) (if supported on your machine(s)).
 
-Installing Terraform with a version manager such as `asdf` has several benefits:
+Installing Terraform with a version manager like this has several benefits:
 
-- It's significantly easier to install and switch between multiple versions of Terraform.
-- The Terraform version can be specified in a `.tool-versions` file which `asdf` will look for and automatically switch to.
-- Being able to switch Terraform versions is particularly useful if you're using the Toolkit to manage multiple environments where versions differ.
+- It's significantly easier to install and switch between multiple versions of Terraform once set up.
+- The Terraform version can be specified in a `.tool-versions` file, version managers will look for and automatically switch to the version specified, this is useful when managing multiple environments where the Terraform version differs.
 
-Installing Terraform with `asdf` is done as follows (using `v1.5.0` as an example):
+As an example, installing Terraform with `rtx` is done as follows:
 
-1. Install `asdf` as per its [documentation](https://asdf-vm.com/guide/getting-started.html)
-1. Add the Terraform asdf plugin, the intended version and set it to be the main on your PATH:
+1. Install `rtx` as per its [documentation](https://github.com/jdx/rtx#installation)
+1. In the Toolkit directory, install the default version of Terraform by first adding its plugin and then installing:
 
     ```sh
-    asdf plugin add terraform
-    asdf install terraform 1.5.0
-    asdf global terraform 1.5.0
+    rtx plugins add terraform
+    rtx install terraform
     ```
+
+:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required.
 
 With the above completed Terraform should now be available on your command line. You can check this by running `terraform version`.
 
