@@ -1,11 +1,15 @@
 frontend http-in
     bind *:80
 {% if external_url_ssl and external_ssl_source != '' %}
-    bind *:443 ssl crt /usr/local/etc/haproxy/{{ external_host }}.pem
+    bind *:443 ssl crt /usr/local/etc/haproxy/ssl/ strict-sni
 
-    http-request redirect scheme https unless { ssl_fc }
     http-request set-header X-Forwarded-Proto https if { ssl_fc }
     http-request set-header X-Forwarded-Ssl on if { ssl_fc }
+
+{% if external_ssl_source == 'letsencrypt' %}
+    acl letsencrypt path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt if letsencrypt
+{% endif %}
 {% endif %}
 
 {% if container_registry_enable %}
@@ -26,6 +30,7 @@ frontend gitlab-ssh-in
 backend gitlab-rails
     option httpchk GET /-/readiness
     option forwardfor
+    redirect scheme https if !{ ssl_fc }
 
 {% for ip in gitlab_rails_int_addrs %}
     server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
@@ -43,8 +48,14 @@ backend gitlab-rails-ssh
 {% if container_registry_enable %}
 backend gitlab-registry
     option forwardfor
+    redirect scheme https if !{ ssl_fc }
 
 {% for ip in gitlab_rails_int_addrs %}
     server gitlab-rails{{loop.index}} {{ ip }}:80
 {% endfor %}
+{% endif %}
+
+{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
+backend letsencrypt
+    server acme-sh host.docker.internal:88
 {% endif %}

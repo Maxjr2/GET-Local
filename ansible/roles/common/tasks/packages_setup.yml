@@ -31,8 +31,20 @@
       until: result is success
   when:
     - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] == '8'
+    - ansible_facts['distribution'] != 'Amazon'
     - not offline_setup
+
+- name: Install system packages (RHEL)
+  yum:
+    name: "{{ system_packages_rhel }}"
+    update_cache: true
+  register: result
+  retries: 60
+  delay: 5
+  until: result is success
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution'] != 'Amazon'
 
 - name: Setup EPEL Repo (RHEL - Amazon Linux 2)
   command: amazon-linux-extras install epel -y
@@ -49,17 +61,18 @@
     - ansible_facts['distribution_major_version'] == '2'
     - not offline_setup
 
-- name: Install system packages (RHEL)
+- name: Install system packages (Amazon Linux)
   yum:
-    name: "{{ system_packages_rhel }}"
+    name: "{{ system_packages_amazon[ansible_facts['distribution_major_version']] }}"
     update_cache: true
   register: result
   retries: 60
   delay: 5
   until: result is success
-  when: ansible_facts['os_family'] == 'RedHat'
+  when: ansible_facts['distribution'] == 'Amazon'
 
 # Python
 - name: Install python packages
   pip:
     name: "{{ python_packages }}"
+    extra_args: "--upgrade-strategy only-if-needed"

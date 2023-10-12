@@ -86,7 +86,7 @@ Once the config is in place you're ready to [configure the environment](#configu
 
 [Let's Encrypt](https://letsencrypt.org/) allows users to generate signed SSL certificates for free. The Toolkit allows for these generated certificates to be used for External SSL termination instead of user provided ones.
 
-At a high level the Toolkit will either directly use [`certbot`](https://certbot.eff.org/) to generate the files then configure HAProxy (Standard) or configure Helm to use `certbot` and configure NGINX Ingress (Cloud Native Hybrid) instead. Below are the steps to configure this.
+At a high level the Toolkit will either directly use [`acme.sh`](https://github.com/acmesh-official/acme.sh) to generate the files then configure HAProxy (Linux Package (Omnibus)) or configure Helm to use its `certmanager` and configure NGINX Ingress (Cloud Native Hybrid) instead. Below are the steps to configure this.
 
 #### Configure Variables
 

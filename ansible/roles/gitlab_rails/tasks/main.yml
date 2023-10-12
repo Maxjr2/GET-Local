@@ -265,7 +265,7 @@
     - ssh_keys
 
 - name: Restart GitLab
-  shell: gitlab-ctl stop && gitlab-ctl start
+  command: gitlab-ctl restart
   register: result
   retries: 2
   until: result is success

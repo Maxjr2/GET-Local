@@ -6,7 +6,6 @@ external_url '{{ external_url_sanitised }}'
 unicorn['enable'] = false
 puma['enable'] = true
 
-
 puma['listen'] = '0.0.0.0'
 {% elif gitlab_rails_webserver == 'unicorn' %}
 unicorn['enable'] = true

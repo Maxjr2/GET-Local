@@ -4,8 +4,8 @@
     name: geerlingguy.docker
   when: ansible_facts['distribution'] != "Amazon"
 
-- name: Configure Docker (RHEL - Amazon Linux 2)
-  shell: amazon-linux-extras install docker -y && systemctl enable docker && systemctl start docker
+- name: Configure Docker (RHEL - Amazon Linux)
+  shell: "{{ 'amazon-linux-extras' if ansible_facts['distribution_major_version'] == '2' else 'yum' }} install docker -y && systemctl enable docker && systemctl start docker"
   when: ansible_facts['distribution'] == "Amazon"
 
 - name: Configure Node exporter
@@ -14,38 +14,10 @@
   include_role:
     name: geerlingguy.node_exporter
 
-- name: Stop HAProxy if running
-  docker_container:
-    name: haproxy
-    state: absent
-  tags: reconfigure
-
 - name: Create /opt/haproxy directory
   file:
     path: /opt/haproxy
     state: directory
-  tags: reconfigure
-
-- name: Configure External SSL
-  block:
-    - name: Configure Let's Encrypt certificates
-      import_tasks: ssl/letsencrypt.yml
-      when:
-        - external_url_ssl
-        - external_ssl_source == 'letsencrypt'
-
-    - name: Configure User provided certificates
-      import_tasks: ssl/user.yml
-      when:
-        - external_url_ssl
-        - external_ssl_source == 'user'
-
-    - name: Cleanup any previous External SSL config if disabled
-      import_tasks: ssl/none.yml
-      when:
-        - not external_url_ssl
-        - "external_ssl_source == ''"
-  when: "'haproxy_external' in group_names"
   tags: reconfigure
 
 - name: Create /opt/haproxy/haproxy.cfg file
@@ -67,6 +39,8 @@
       - /opt/haproxy:/usr/local/etc/haproxy:ro
     sysctls:
       net.ipv4.ip_unprivileged_port_start: 0
+    etc_hosts:
+      host.docker.internal: host-gateway
   register: result
   retries: 2
   delay: 5
@@ -75,6 +49,12 @@
   tags:
     - reconfigure
     - restart
+
+- name: Create /opt/haproxy/ssl directory if External SSL configured
+  file:
+    path: /opt/haproxy/ssl
+    state: directory
+  tags: reconfigure
 
 - name: Start HAProxy External Docker
   docker_container:
@@ -89,6 +69,8 @@
       - /opt/haproxy:/usr/local/etc/haproxy:ro
     sysctls:
       net.ipv4.ip_unprivileged_port_start: 0
+    etc_hosts:
+      host.docker.internal: host-gateway
   register: result
   retries: 2
   delay: 5
@@ -107,6 +89,28 @@
   tags:
     - reconfigure
     - restart
+
+- name: Configure External SSL
+  block:
+    - name: Configure External SSL (Let's Encrypt) if configured
+      import_tasks: ssl/letsencrypt.yml
+      when:
+        - external_url_ssl
+        - external_ssl_source == 'letsencrypt'
+
+    - name: Configure User provided certificates
+      import_tasks: ssl/user.yml
+      when:
+        - external_url_ssl
+        - external_ssl_source == 'user'
+
+    - name: Cleanup any previous External SSL config if disabled
+      import_tasks: ssl/none.yml
+      when:
+        - not external_url_ssl
+        - "external_ssl_source == ''"
+  when: "'haproxy_external' in group_names"
+  tags: reconfigure
 
 - name: Run Custom Tasks
   block:

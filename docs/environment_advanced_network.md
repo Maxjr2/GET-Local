@@ -357,6 +357,7 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 - Ubuntu / Debian _Main_ - `aptitude curl openssh-server ca-certificates tzdata python3-pip nfs-common postfix jq libpq-dev nvme-cli`
 - RHEL _Main, EPEL_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock libpq-devel`
 - Amazon Linux 2 _Main, EPEL, Postgres_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock postgresql-devel`
+- Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock libpq-devel`
 
 :information_source:&nbsp; For the most up-to-date list of packages it's recommend to check the `system_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
 

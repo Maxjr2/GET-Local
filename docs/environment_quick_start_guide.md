@@ -17,7 +17,7 @@
 
 On this page you'll find a Quick Start Guide where we go through the steps with examples on how to set up a GitLab environment required with the Toolkit.
 
-For the purpose of this guide we'll go through the steps required for one of the more common setups - An [Omnibus 10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) on Amazon Web Services (AWS).
+For the purpose of this guide we'll go through the steps required for one of the more common setups - An [Omnibus 10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) on Amazon Web Services (AWS). This will be done by running the Toolkit natively from source via a Git checkout.
 
 :information_source:&nbsp; This quick guide won't cover all the potential options available and assumes a good working knowledge of Terraform, Ansible and GitLab. It's recommended you still read the docs in full to ensure the environment is configured as per your requirements.
 
