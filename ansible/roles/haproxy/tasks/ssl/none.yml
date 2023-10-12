@@ -1,8 +1,8 @@
 ---
-- name: Remove certbot
-  package:
-    name: certbot
-    state: absent
+- name: Uninstall acme.sh
+  shell: |
+    /opt/acme.sh/acme.sh --uninstall
+    rm -rf /opt/acme.sh /root/.acme.sh
 
 - name: Delete any existing SSL files or config
   file:
@@ -11,3 +11,5 @@
   loop:
     - "/opt/haproxy/{{ external_host }}.pem"
     - "/opt/haproxy/{{ external_host }}.pem.key"
+    - "/opt/haproxy/ssl/{{ external_host }}.pem"
+    - "/opt/haproxy/ssl/{{ external_host }}.pem.key"

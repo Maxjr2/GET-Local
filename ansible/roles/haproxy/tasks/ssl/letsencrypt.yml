@@ -1,38 +1,62 @@
 ---
-- name: Install certbot
-  package:
+- name: Remove old certbot package (Debian)
+  apt:
     name: certbot
-    update_cache: true
+    state: absent
+    purge: true
+  when: ansible_facts['os_family'] == "Debian"
 
-- name: Run certbot to generate certs
-  command:
-    cmd: certbot certonly -n --standalone --keep --agree-tos --email {{ external_ssl_letsencrypt_issuer_email }} --cert-name {{ external_host }} -d {{ external_host }}{{ ',' + container_registry_external_host if container_registry_enable else '' }}
+- name: Remove old certbot package (RHEL)
+  yum:
+    name: certbot
+    state: absent
+  when: ansible_facts['os_family'] == 'RedHat'
 
-- name: Copy over HAProxy SSL files
-  copy:
-    src: "{{ item.hostfile }}"
-    dest: "{{ item.targetfile }}"
-    remote_src: true
+- name: Remove old certbot package files (RHEL)
+  file:
+    path: /etc/letsencrypt/
+    state: absent
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Remove any old SSL Certificates
+  file:
+    path: "{{ item }}"
+    state: absent
   loop:
-    - { hostfile: "/etc/letsencrypt/live/{{ external_host }}/fullchain.pem", targetfile: "/opt/haproxy/{{ external_host }}.pem" }
-    - { hostfile: "/etc/letsencrypt/live/{{ external_host }}/privkey.pem", targetfile: "/opt/haproxy/{{ external_host }}.pem.key" }
+    - "/opt/haproxy/{{ external_host }}.pem"
+    - "/opt/haproxy/{{ external_host }}.pem.key"
 
-- name: Setup certbot renew haproxy pre hook script
-  blockinfile:
-    path: /etc/letsencrypt/renewal-hooks/pre/haproxy.sh
-    block: |
-      #!/bin/sh
-      docker stop haproxy
-    create: true
-    mode: "0755"
+- name: Install Socat for acme.sh
+  package:
+    name: socat
 
-- name: Setup certbot renew haproxy post hook script
-  blockinfile:
-    path: /etc/letsencrypt/renewal-hooks/post/haproxy.sh
-    block: |
-      #!/bin/sh
-      cp -u /etc/letsencrypt/live/{{ external_host }}/fullchain.pem /opt/haproxy/{{ external_host }}.pem
-      cp -u /etc/letsencrypt/live/{{ external_host }}/privkey.pem /opt/haproxy/{{ external_host }}.pem.key
-      docker start haproxy
-    create: true
-    mode: "0755"
+- name: Install and configure Cronie (Amazon Linux 2023)
+  shell: yum install -y cronie && systemctl enable crond && systemctl start crond
+  when:
+    - ansible_facts['distribution'] == "Amazon"
+    - ansible_facts['distribution_major_version'] != '2'
+
+- name: Check if acme.sh is already installed
+  stat:
+    path: /opt/acme.sh/acme.sh
+  register: acme_sh_file
+
+- name: Install acme.sh
+  shell: curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --home /opt/acme.sh --accountemail {{ external_ssl_letsencrypt_issuer_email }}
+  when: not acme_sh_file.stat.exists
+
+- name: Upgrade acme.sh
+  command: /opt/acme.sh/acme.sh --upgrade
+
+- name: Run acme.sh to generate certs
+  command: /opt/acme.sh/acme.sh --issue --standalone --httpport 88 --server {{ acme_sh_server }} -d {{ external_host }} {{ ('-d ' + container_registry_external_host) if container_registry_enable else '' }} --key-file /opt/haproxy/ssl/{{ external_host }}.pem.key --fullchain-file /opt/haproxy/ssl/{{ external_host }}.pem --reloadcmd 'docker kill -s HUP haproxy'
+  register: acme_sh_cmd
+  failed_when: acme_sh_cmd.rc == 1
+
+- name: Update cert file permissions
+  file:
+    path: "/opt/haproxy/ssl/{{ external_host }}.pem.key"
+    mode: '0644'
+
+- name: Reload HAProxy
+  command: docker kill -s HUP haproxy

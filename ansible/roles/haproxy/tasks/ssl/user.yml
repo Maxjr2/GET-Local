@@ -28,5 +28,16 @@
     src: "{{ item.hostfile }}"
     dest: "{{ item.targetfile }}"
   loop:
-    - { hostfile: "{{ external_ssl_files_host_certificate_file }}", targetfile: "/opt/haproxy/{{ external_host }}.pem" }
-    - { hostfile: "{{ external_ssl_files_host_key_file }}", targetfile: "/opt/haproxy/{{ external_host }}.pem.key" }
+    - { hostfile: "{{ external_ssl_files_host_certificate_file }}", targetfile: "/opt/haproxy/ssl/{{ external_host }}.pem" }
+    - { hostfile: "{{ external_ssl_files_host_key_file }}", targetfile: "/opt/haproxy/ssl/{{ external_host }}.pem.key" }
+
+- name: Remove any old User provided SSL Certificates
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/opt/haproxy/{{ external_host }}.pem"
+    - "/opt/haproxy/{{ external_host }}.pem.key"
+
+- name: Reload HAProxy External Docker
+  command: docker kill -s HUP haproxy

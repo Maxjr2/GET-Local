@@ -4,8 +4,8 @@
     name: geerlingguy.docker
   when: ansible_facts['distribution'] != "Amazon"
 
-- name: Configure Docker (RHEL - Amazon Linux 2)
-  shell: amazon-linux-extras install docker -y && systemctl enable docker && systemctl start docker
+- name: Configure Docker (RHEL - Amazon Linux)
+  shell: "{{ 'amazon-linux-extras' if ansible_facts['distribution_major_version'] == '2' else 'yum' }} install docker -y && systemctl enable docker && systemctl start docker"
   when: ansible_facts['distribution'] == "Amazon"
 
 - name: Configure Node exporter

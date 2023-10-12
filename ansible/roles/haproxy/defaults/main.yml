@@ -1,3 +1,7 @@
 ---
 
 haproxy_docker_image: haproxy:alpine
+
+# https://github.com/acmesh-official/acme.sh/wiki/Server
+# Only to be changed if required, such as for testing to avoid rate limits ('letsencrypt_test')
+acme_sh_server: "letsencrypt"

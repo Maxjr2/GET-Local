@@ -35,7 +35,7 @@
     - system_packages_auto_security_upgrade
     - ansible_facts['os_family'] == "Debian"
 
-- name: Configure Automatic Security Upgrades (RHEL 8)
+- name: Configure Automatic Security Upgrades (RHEL 8, Amazon Linux 2023)
   block:
     - name: Install dnf-automatic package
       package:
@@ -71,7 +71,7 @@
   when:
     - system_packages_auto_security_upgrade
     - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] == '8'
+    - ansible_facts['distribution_major_version'] != '2'
 
 - name: Configure Automatic Security Upgrades (RHEL - Amazon Linux 2)
   block:
