@@ -285,6 +285,16 @@ For all setups, the below settings configure how the service and dependents are 
 
 :information_source:&nbsp; When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates) the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
 
+## Pages
+
+:information_source:&nbsp; Pages is currently only supported on Cloud Native Hybrid installations.
+
+Ansible variables are available to configure the [GitLab Charts' Pages sub-chart](https://docs.gitlab.com/charts/charts/gitlab/gitlab-pages/) as part of a GET-managed cloud-native hybrid installation:
+
+- `pages_external_url` -  [Wildcard URL root](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains) that will be used to serve Pages content for this instance. Provided as a url format including protocol, e.g. `https://pages.example.io`. Specifying HTTPS protocol will enable wildcard SSL, and require `pages_ssl_cert_file` and `pages_ssl_key_file` to be specified. **Required**.
+- `pages_ssl_cert_file` - Path to SSL certificate file for the Pages daemon to serve. Must be specified with `pages_ssl_key_file`. Required if `pages_external_url` protocol is HTTPS. Certificate must meet [the following requirements](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains-with-tls-support).
+- `pages_ssl_key_file` - Path to key file for SSL certificate that the Pages daemon will serve. Must be specified with `pages_ssl_cert_file`. Required if `pages_external_url` protocol is HTTPS.
+
 ## Custom Servers (On Prem)
 
 While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).

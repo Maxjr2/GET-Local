@@ -113,7 +113,7 @@ gitlab_secrets_setup: true
 gitlab_object_storage_type: "object_storage"  # object_storage or nfs
 
 ## Object Storage Buckets
-gitlab_object_storage_list: ["artifacts", "dependency_proxy", "lfs", "external_diffs", "packages", "terraform_state", "uploads", "backups", "registry", "ci_secure_files"]
+gitlab_object_storage_list: ["artifacts", "dependency_proxy", "lfs", "external_diffs", "packages", "terraform_state", "uploads", "backups", "registry", "ci_secure_files", "pages"]
 gitlab_object_storage_prefix: "{{ prefix }}"
 gitlab_object_storage_bucket_names:
   artifacts: "{{ gitlab_object_storage_prefix }}-artifacts"
@@ -126,6 +126,7 @@ gitlab_object_storage_bucket_names:
   backups: "{{ gitlab_object_storage_prefix }}-backups"
   registry: "{{ gitlab_object_storage_prefix }}-registry"
   ci_secure_files: "{{ gitlab_object_storage_prefix }}-ci-secure-files"
+  pages: "{{ gitlab_object_storage_prefix }}-pages"
 
 gitlab_object_storage_registry_chunksize_mb: "{{ '10' if cloud_provider == 'aws' else '5' }}"
 
@@ -182,6 +183,16 @@ gitaly_ssl_key_file: ""
 gitaly_ssl_ca_file: ""
 gitaly_ssl_port: "9999"
 gitaly_ssl: "{{ gitaly_ssl_cert_file != '' and gitaly_ssl_key_file != '' }}"
+
+# Pages
+pages_enable: "{{ pages_external_url != '' and 'pages' in gitlab_object_storage_list }}"
+pages_external_url: ""
+pages_host: "{{ pages_external_url | regex_replace('^https?:\/\/') }}"
+
+## Pages SSL
+pages_ssl_enable: "{{ 'https' in pages_external_url }}"
+pages_ssl_cert_file: ""
+pages_ssl_key_file: ""
 
 # Praefect
 praefect_primary_int_addr: "{{ (groups['praefect_primary'] | map('extract', hostvars, internal_addr_lookup) | join('')) if 'praefect_primary' in groups else '' }}"

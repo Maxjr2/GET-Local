@@ -103,6 +103,22 @@ gitlab:
       username: "{{ postgres_username }}"
       database: "{{ postgres_database_name }}"
 {% endif %}
+{% if pages_enable %}
+  gitlab-pages:
+    ingress:
+      enabled: true
+      tls:
+{% if pages_ssl_enable %}
+        enabled: true
+        secretName: gitlab-pages-ssl
+{% else %}
+        enabled: false
+{% endif %}
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+{% endif %}
 {% if gitlab_shell_ssh_daemon == 'gitlab-sshd' %}
   gitlab-shell:
     sshDaemon: "{{ gitlab_shell_ssh_daemon }}"
@@ -265,6 +281,19 @@ global:
 {% endif %}
   minio:
     enabled: false
+{% if pages_enable %}
+  pages:
+    enabled: true
+    host: "{{ pages_host }}"
+{% if pages_ssl_enable %}
+    https: true
+{% else %}
+    https: false
+{% endif %}
+    objectStore:
+      enabled: true
+      bucket: "{{ gitlab_object_storage_bucket_names['pages'] }}"
+{% endif %}
   psql:
     password:
       secret: gitlab-postgres-password
