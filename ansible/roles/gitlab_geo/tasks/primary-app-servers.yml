@@ -15,6 +15,7 @@
     - name: Primary App Servers - Update internal URL for primary site
       command: |
         gitlab-rails runner "GeoNode.find_by(name: '{{ geo_primary_site_name }}').update(internal_url: '{{ geo_primary_internal_url }}')"
+      when: ('gitlab_rails_primary' in group_names)
   when:
     - ('gitlab_rails' in group_names or 'sidekiq' in group_names)
     - (geo_primary_site_group_name in group_names)

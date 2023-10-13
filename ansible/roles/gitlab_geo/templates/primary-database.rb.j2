@@ -1,5 +1,5 @@
 postgresql['sql_replication_password'] = "{{ geo_sql_replication_password_md5 }}"
-{% if geo_primary_is_multi_node %}
+{% if geo_primary_postgres_is_ha %}
 patroni['replication_slots'] = {
     'geo_secondary' => { 'type' => 'physical' }
 }
@@ -11,6 +11,11 @@ patroni['username'] = 'patroni-api'
 patroni['password'] = '{{ patroni_password }}'
 {% endif %}
 {% else %}
+
+{% if geo_primary_is_multi_node %}
+geo_primary_role['enable'] = true
+{% endif %}
+
 gitlab_rails['db_password'] = "{{ postgres_password }}"
 
 postgresql['sql_user_password'] = "{{ (postgres_password + 'gitlab') | md5 }}"

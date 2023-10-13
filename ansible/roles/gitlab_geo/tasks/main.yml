@@ -67,7 +67,7 @@
     - tracking-database
     - secondary
   when:
-    - ('postgres_primary' in group_names) or postgres_external
+    - (geo_secondary_is_multi_node) or postgres_external
 
 - name: Configure the frontend app servers on the secondary site
   import_tasks: secondary-frontend-app-servers.yml
