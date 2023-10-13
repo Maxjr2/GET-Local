@@ -58,8 +58,8 @@ resource "aws_db_instance" "gitlab" {
 
   instance_class = "db.${var.rds_postgres_instance_type}"
   multi_az       = var.rds_postgres_multi_az
-  iops           = var.rds_postgres_iops
   storage_type   = var.rds_postgres_storage_type
+  iops           = var.rds_postgres_storage_type == "io1" && var.rds_postgres_iops == null ? 1000 : var.rds_postgres_iops
 
   port = var.rds_postgres_port
 
