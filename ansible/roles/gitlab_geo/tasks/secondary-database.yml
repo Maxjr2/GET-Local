@@ -5,7 +5,7 @@
 
     - name: Secondary Database - Run gitlab-ctl stop sidekiq
       command: gitlab-ctl stop sidekiq
-  when: ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups)
+  when: not geo_secondary_is_multi_node
 
 - name: Secondary Database - Copy psql certificate
   copy:
@@ -29,7 +29,7 @@
 - name: Secondary database - Remove existing cluster information for Patroni
   import_tasks: secondary-database-patroni-workaround.yml
   when:
-    - ('postgres' in group_names)
+    - geo_secondary_postgres_is_ha
     - geo_run_patroni_workaround
 
 - name: Secondary Database - Run gitlab-ctl reconfigure
@@ -43,8 +43,8 @@
   expect:
     command: |
       gitlab-ctl replicate-geo-database \
-        --slot-name={{ 'geo_secondary' if geo_primary_is_multi_node else inventory_hostname | regex_replace("-", "_") }} \
-        --host={{ internal_lb_host if geo_primary_is_multi_node else geo_primary_site_postgres_int_ip }} \
+        --slot-name={{ 'geo_secondary' if geo_primary_postgres_is_ha else inventory_hostname | regex_replace("-", "_") }} \
+        --host={{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }} \
         --sslmode=verify-ca \
         --force \
         --skip-backup
@@ -53,4 +53,4 @@
       (.*)Enter the password for gitlab_replicator@(.*): "{{ postgres_password }}"
     timeout: 300
   when:
-    - (not geo_secondary_is_multi_node)
+    - (not geo_secondary_postgres_is_ha)

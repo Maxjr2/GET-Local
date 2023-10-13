@@ -13,4 +13,4 @@
   command: gitlab-rake {{ geo_migration_task }}
   when:
     - ('gitlab_rails_primary' in group_names)
-    - geo_secondary_is_multi_node
+    - geo_secondary_postgres_is_ha
