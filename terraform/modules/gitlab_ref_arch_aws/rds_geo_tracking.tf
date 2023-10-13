@@ -51,8 +51,8 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
   engine_version = var.rds_geo_tracking_postgres_version
   instance_class = "db.${var.rds_geo_tracking_postgres_instance_type}"
   multi_az       = var.rds_geo_tracking_postgres_multi_az
-  iops           = var.rds_geo_tracking_postgres_iops
   storage_type   = var.rds_geo_tracking_postgres_storage_type
+  iops           = var.rds_geo_tracking_postgres_storage_type == "io1" && var.rds_geo_tracking_postgres_iops == null ? 1000 : var.rds_geo_tracking_postgres_iops
 
   db_name  = var.rds_geo_tracking_postgres_database_name
   port     = var.rds_geo_tracking_postgres_port

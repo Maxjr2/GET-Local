@@ -148,7 +148,7 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - `rds_postgres_max_allocated_storage` - The max disk size for the instance. Optional, default is `1000`.
 - `rds_postgres_multi_az` - Specifies if the RDS instance is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
 - `rds_postgres_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
-- `rds_postgres_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1`. Optional, default is `1000`.
+- `rds_postgres_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
 - `rds_postgres_storage_type` - The type of storage to use. Optional, default is `io1`.
 - `rds_postgres_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt the database instance. If not provided `default_kms_key_arm` or the default AWS KMS key will be used in that order. Optional, default is `null`.
   - **Warning** Changing this value after the initial creation will result in the database being recreated and will lead to **data loss**.
@@ -294,7 +294,7 @@ module "gitlab_ref_arch_gcp" {
 
   [...]
 
-  cloud_sql_postgres_machine_tier = "db-custom-8-30720"
+  cloud_sql_postgres_machine_tier = "custom-8-30720"
   cloud_sql_postgres_root_password = "<postgres_password>"
 }
 ```
@@ -708,7 +708,7 @@ The variables for this service start with the prefix `opensearch_service_*` and 
   - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher.
 - `opensearch_service_volume_size` - The volume size per data node. Optional, default is `500`.
 - `opensearch_service_volume_type` - The type of storage to use per data node. Optional, default is `io1`.
-- `opensearch_service_volume_iops` - The amount of provisioned IOPS per data node. Setting this requires a storage_type of `io1`. Optional, default is `1000`.
+- `opensearch_service_volume_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
 - `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
 - `opensearch_service_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Can be set to either `1`, `2` or `3`. Optional, default is `2`.
 - `opensearch_service_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt the OpenSearch domain. If not provided `default_kms_key_arm` or the default AWS KMS key will be used in that order. Optional, default is `null`.

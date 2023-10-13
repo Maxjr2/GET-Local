@@ -51,8 +51,8 @@ resource "aws_db_instance" "gitlab_praefect" {
   engine_version = var.rds_praefect_postgres_version
   instance_class = "db.${var.rds_praefect_postgres_instance_type}"
   multi_az       = var.rds_praefect_postgres_multi_az
-  iops           = var.rds_praefect_postgres_iops
   storage_type   = var.rds_praefect_postgres_storage_type
+  iops           = var.rds_praefect_postgres_storage_type == "io1" && var.rds_praefect_postgres_iops == null ? 1000 : var.rds_postgres_iops
 
   db_name  = var.rds_praefect_postgres_database_name
   port     = var.rds_praefect_postgres_port

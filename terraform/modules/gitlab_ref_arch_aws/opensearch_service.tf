@@ -42,7 +42,7 @@ resource "aws_opensearch_domain" "gitlab" {
     ebs_enabled = true
     volume_type = var.opensearch_service_volume_type
     volume_size = var.opensearch_service_volume_size
-    iops        = var.opensearch_service_volume_iops
+    iops        = var.opensearch_service_volume_type == "io1" && var.opensearch_service_volume_iops == null ? 1000 : var.opensearch_service_volume_iops
   }
 
   domain_endpoint_options {

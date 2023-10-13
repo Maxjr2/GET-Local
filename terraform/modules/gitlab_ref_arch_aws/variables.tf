@@ -903,7 +903,7 @@ variable "rds_postgres_default_subnet_count" {
 }
 variable "rds_postgres_iops" {
   type    = number
-  default = 1000
+  default = null
 }
 variable "rds_postgres_storage_type" {
   type    = string
@@ -1004,7 +1004,7 @@ variable "rds_praefect_postgres_default_subnet_count" {
 }
 variable "rds_praefect_postgres_iops" {
   type    = number
-  default = 1000
+  default = null
 }
 variable "rds_praefect_postgres_storage_type" {
   type    = string
@@ -1101,7 +1101,7 @@ variable "rds_geo_tracking_default_subnet_count" {
 }
 variable "rds_geo_tracking_postgres_iops" {
   type    = number
-  default = 1000
+  default = null
 }
 variable "rds_geo_tracking_postgres_storage_type" {
   type    = string
@@ -1351,7 +1351,7 @@ variable "opensearch_service_volume_type" {
 }
 variable "opensearch_service_volume_iops" {
   type    = number
-  default = 1000
+  default = null
 }
 variable "opensearch_service_multi_az" {
   type    = bool
