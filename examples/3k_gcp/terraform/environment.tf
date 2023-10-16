@@ -38,8 +38,8 @@ module "gitlab_ref_arch_gcp" {
   redis_node_count   = 3
   redis_machine_type = "n1-standard-2"
 
-  sidekiq_node_count   = 4
-  sidekiq_machine_type = "n1-standard-2"
+  sidekiq_node_count   = 2
+  sidekiq_machine_type = "n1-standard-4"
 }
 
 output "gitlab_ref_arch_gcp" {

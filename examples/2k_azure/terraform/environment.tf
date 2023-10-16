@@ -16,6 +16,9 @@ module "gitlab_ref_arch_azure" {
   gitlab_rails_node_count = 2
   gitlab_rails_size       = "Standard_F8s_v2"
 
+  sidekiq_node_count = 1
+  sidekiq_size       = "Standard_D4s_v3"
+
   haproxy_external_node_count        = 1
   haproxy_external_size              = "Standard_F2s_v2"
   haproxy_external_external_ip_names = [var.external_ip_name]
