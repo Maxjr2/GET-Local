@@ -413,21 +413,7 @@ variable "sidekiq_disks" {
 }
 
 # Kubernetes \ Helm
-## Defaults
-variable "cluster_release_channel" {
-  type    = string
-  default = "STABLE"
-}
-variable "cluster_enable_workload_identity" {
-  type    = bool
-  default = false
-}
-variable "cluster_deletion_protection" {
-  type    = bool
-  default = false
-}
 
-## Webservice
 variable "webservice_node_pool_count" {
   type    = number
   default = 0
@@ -444,7 +430,7 @@ variable "webservice_node_pool_disk_size" {
   type    = string
   default = null
 }
-### Cluster Autoscaling (Optional)
+## Cluster Autoscaling (Optional)
 variable "webservice_node_pool_max_count" {
   type    = number
   default = 0
@@ -454,7 +440,6 @@ variable "webservice_node_pool_min_count" {
   default = 0
 }
 
-## Sidekiq
 variable "sidekiq_node_pool_count" {
   type    = number
   default = 0
@@ -471,7 +456,7 @@ variable "sidekiq_node_pool_disk_size" {
   type    = string
   default = null
 }
-### Cluster Autoscaling (Optional)
+## Cluster Autoscaling (Optional)
 variable "sidekiq_node_pool_max_count" {
   type    = number
   default = 0
@@ -481,7 +466,6 @@ variable "sidekiq_node_pool_min_count" {
   default = 0
 }
 
-## Supporting
 variable "supporting_node_pool_count" {
   type    = number
   default = 0
@@ -497,15 +481,6 @@ variable "supporting_node_pool_disk_type" {
 variable "supporting_node_pool_disk_size" {
   type    = string
   default = null
-}
-## Cluster Autoscaling (Optional)
-variable "supporting_node_pool_max_count" {
-  type    = number
-  default = 0
-}
-variable "supporting_node_pool_min_count" {
-  type    = number
-  default = 0
 }
 
 # PaaS Services
@@ -733,6 +708,25 @@ variable "memorystore_redis_persistent_weekly_maintenance_window_day" {
 variable "memorystore_redis_persistent_weekly_maintenance_window_start_time" {
   type    = any
   default = []
+}
+
+## Cluster Autoscaling (Optional)
+variable "supporting_node_pool_max_count" {
+  type    = number
+  default = 0
+}
+variable "supporting_node_pool_min_count" {
+  type    = number
+  default = 0
+}
+
+variable "cluster_release_channel" {
+  type    = string
+  default = "STABLE"
+}
+variable "cluster_enable_workload_identity" {
+  type    = bool
+  default = false
 }
 
 # Networking

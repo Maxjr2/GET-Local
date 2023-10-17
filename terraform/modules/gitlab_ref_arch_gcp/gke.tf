@@ -44,8 +44,6 @@ resource "google_container_cluster" "gitlab_cluster" {
       workload_pool = "${var.project}.svc.id.goog"
     }
   }
-
-  deletion_protection = var.cluster_deletion_protection
 }
 
 resource "google_container_node_pool" "gitlab_webservice_pool" {
@@ -67,6 +65,11 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       max_node_count = ceil(var.webservice_node_pool_max_count / local.node_pool_zones_count)
       min_node_count = ceil(var.webservice_node_pool_min_count / local.node_pool_zones_count)
     }
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
   }
 
   upgrade_settings {
@@ -138,6 +141,11 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
     }
   }
 
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
   upgrade_settings {
     max_surge       = 2
     max_unavailable = 0
@@ -205,6 +213,11 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       max_node_count = ceil(var.supporting_node_pool_max_count / local.node_pool_zones_count)
       min_node_count = ceil(var.supporting_node_pool_min_count / local.node_pool_zones_count)
     }
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
   }
 
   upgrade_settings {
