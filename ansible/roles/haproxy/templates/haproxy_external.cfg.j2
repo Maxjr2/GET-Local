@@ -30,7 +30,9 @@ frontend gitlab-ssh-in
 backend gitlab-rails
     option httpchk GET /-/readiness
     option forwardfor
+{% if external_url_ssl and external_ssl_source != '' %}
     redirect scheme https if !{ ssl_fc }
+{% endif %}
 
 {% for ip in gitlab_rails_int_addrs %}
     server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
@@ -48,7 +50,9 @@ backend gitlab-rails-ssh
 {% if container_registry_enable %}
 backend gitlab-registry
     option forwardfor
+{% if external_url_ssl and external_ssl_source != '' %}
     redirect scheme https if !{ ssl_fc }
+{% endif %}
 
 {% for ip in gitlab_rails_int_addrs %}
     server gitlab-rails{{loop.index}} {{ ip }}:80
