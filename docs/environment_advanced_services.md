@@ -747,6 +747,7 @@ The available variables in Ansible for this are as follows:
 
 - `advanced_search_hosts` - The list of search backend URLs GitLab should use for Advanced Search. Provided in Terraform outputs if provisioned earlier. **Required**.
   - When using a service such as AWS OpenSearch this will typically be only one address but still be provided in list format, e.g. `["https://<AWS_OPENSEARCH_URL>"]`.
+- `advanced_search_enable` - A boolean flag to enable or disable the searching option for Advanced Search. When set to `false`, indexing is still enabled and will happen asynchronously in the background. Optional, `true` by default.
 
 Once set, Ansible can then be run as normal. During the run it will configure the various GitLab components to use the search backend(s) as given.
 

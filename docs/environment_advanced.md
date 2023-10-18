@@ -270,6 +270,7 @@ Enabling Advanced Search on your environment is designed to be as easy possible 
 - Once the nodes are available Ansible will automatically configure them, downloading and setting up the OpenSearch Docker image.
   - To deploy a specific version you can set the `opensearch_version` variable in Ansible accordingly. Otherwise the Toolkit deploys the latest supported version.
 - Ansible will then configure the GitLab environment near the end of its run to enable Advanced Search against those nodes and perform the first index.
+  - If it's desired to complete indexing before enabling the search feature (e.g. for large datasets that may require long indexing times), set the `advanced_search_enable` variable to `false`. Indexing will be started while the search feature is still disabled. Once indexing is complete, set `advanced_search_enable` to `true` (or remove the variable to use the default setting) and run Ansible again to enable search.
 
 ## Container Registry (GCP, AWS)
 
