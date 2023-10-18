@@ -209,6 +209,7 @@
           when:
             - toolbox_pod is defined
             - "'gitlab_rails' not in groups"
+      when: advanced_search_enable | bool
   when: not gitlab_environment_settings.elasticsearch_indexing
 
 - name: Get and save Environment Settings
@@ -262,4 +263,6 @@
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"
-  when: not gitlab_environment_settings.elasticsearch_search
+  when:
+    - advanced_search_enable | bool
+    - not gitlab_environment_settings.elasticsearch_search
