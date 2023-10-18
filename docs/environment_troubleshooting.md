@@ -55,6 +55,15 @@ Depending on the Cloud Provider, Object Storage bucket names have various limita
 
 One key limitation is that names need to be globally unique across the Cloud Provider. As such, depending on the `prefix` or `object_storage_prefix` you have set the generated bucket names may clash with others globally, and you may see an error saying the buckets already exists. If this occurs, change either of the settings to chose different names for the buckets to workaround.
 
+### AWS: Allocation ID not specified for Static External IP
+
+```plaintext
+Error: creating EC2 EIP Association: InvalidAllocationID.NotFound: The allocation ID 'xxx.xxx.xxx.xxx' does not exist
+```
+
+When [configuring the Terraform variables](environment_provision.md#configure-variables-variablestf-1)
+`variable "external_ip_allocation"` in `variables.tf` should specify the Allocation ID, not the IP address.
+
 ## Ansible
 
 ### Omnibus Reconfigure Errors
@@ -77,11 +86,13 @@ Upgrade your Python version to `3.9` or higher and try installing again to fix.
 
 You may see an error appear when running Ansible that it couldn't parse the passed Inventory source, for example `Failed to parse environments/<env_name>/files as an inventory source`.
 
-This can happen when the wrong path is given, if there's a misconfiguration in the Inventory files, or if the inventory contains extra files that should be stored in a different location e.g. [custom config files](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_advanced.md#custom-config).
+1. This can happen when the wrong path is given, if there's a misconfiguration in the Inventory files, or if the inventory contains extra files that should be stored in a different location e.g. [custom config files](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_advanced.md#custom-config).
 
-When using the Toolkit, [an Inventory will consist of several files](environment_configure.md#2-set-up-the-environments-inventory-and-config) that detail both node details and config for Ansible to use. When Ansible is passed a folder it takes all files present and combines them accordingly.
+   When using the Toolkit, [an Inventory will consist of several files](environment_configure.md#2-set-up-the-environments-inventory-and-config) that detail both node details and config for Ansible to use. When Ansible is passed a folder it takes all files present and combines them accordingly.
 
-If the above error is showing, check that you're passing the Inventory folder (note not any specific file) and that there are no mistakes in any of the files present.
+   If the above error is showing, check that you're passing the Inventory folder (note not any specific file) and that there are no mistakes in any of the files present.
+
+1. Missing credentials can also cause this error, with an additional error `Failed to parse <path>/<configuration>.yml with auto plugin: Failed to describe instances: Unable to locate credentials`. This will be generated if you need to set the variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` [for AWS](environment_prep.md#1-setup-provider-authentication-environment-variables), for example.
 
 ### Ansible can't find any hosts
 

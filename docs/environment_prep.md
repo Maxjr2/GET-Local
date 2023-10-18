@@ -91,7 +91,10 @@ Take note of the Service Account email address, which will be used in the next s
 
 In addition to creating the Service Account, set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access) for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+
+   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
+   [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
 1. With the `gcloud` command set it to point at your intended project
 
    :information_source:&nbsp; You need the project's [ID](https://support.google.com/googleapi/answer/7014113?hl=en) here and not the name. You can find it in project's dashboard in GCP Console.
@@ -167,7 +170,10 @@ To create an access key for your user follow [the official docs](https://docs.aw
 
 SSH authentication for the created machines on AWS will require an SSH key. A key is required to be created and to be accessible for the Toolkit to handle the rest:
 
-- [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+
+   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
+   [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
 
 It is also possible to use an existing SSH key pair, but it is recommended to use a new key to avoid any potential security implications.
 
@@ -192,7 +198,7 @@ A static IP, AKA an Elastic IP, can be generated in AWS as follows:
 - Reserve a static external IP address in your account [as detailed in the AWS docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html#using-instance-addressing-eips-allocating).
 - Use the default options when given a choice.
 
-Once the IP is available take note of its allocation ID for later.
+Once the IP is available take note of its **allocation ID** [to specify in the Terraform `variables.tf` file](environment_provision.md#configure-variables-variablestf-1) during the environment provision steps.
 
 :information_source:&nbsp; If you are deploying a Cloud Native Hybrid GitLab setup you'll need to create an Elastic IP for each subnet in the intended VPC instead of a single one.
 
@@ -222,7 +228,10 @@ First think of an admin username that will be used for SSH connection to the Azu
 
 All that's required for an SSH key is to be created and then for this to be accessible for the Toolkit to handle the rest:
 
-- [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the `keys` directory.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+
+   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
+   [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
 
 It is also possible to use an existing SSH key pair, but it is recommended to use a new key to avoid any potential security implications.
 

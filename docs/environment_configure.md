@@ -223,7 +223,7 @@ The config file for this plugin which requires the naming convention `*.aws_ec2.
 ```yaml
 plugin: aws_ec2
 regions:
-  - us-east-1
+  - <region>
 filters:
   tag:gitlab_node_prefix: <prefix> # Same prefix set in Terraform
 keyed_groups:
@@ -235,8 +235,8 @@ hostnames:
   # List host by name instead of the default public ip
   - tag:Name
 compose:
-  # Set to public_ip_address to connect from outwith the network
-  # Set to private_ip_address to connect from within the network
+  # Set to 'public_ip_address' to make Ansible SSH into the public IP address of the hosts.
+  # Set to 'private_ip_address' to use the private (non-internet routable) IP addresses for the hosts.
   # (note: this does not modify inventory_hostname, which is set via I(hostnames))
   ansible_host: public_ip_address
 ```

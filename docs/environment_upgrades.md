@@ -92,7 +92,7 @@ It should be noted that achieving true Zero Downtime during an update is difficu
 
 The Toolkit, being an automative solution, can't perform all the same actions a manual process can do such as removing nodes from load balancers as custom load balancers are supported. It therefore takes the approach of depending on existing automatic mechanisms in the environment setup such as load balancing and failovers to achieve the same effect in practice. In rigorous testing, it's been found this approach has minimal downtime while being faster to achieve.
 
-At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS or Praefect Postgres ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be updated separately in a maintenance period.
+At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS, or Praefect PostgreSQL ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be updated separately in a maintenance period.
 
 Running the zero downtime update process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
 
@@ -108,6 +108,10 @@ Running the zero downtime update process with the Toolkit is done in the same wa
 1. If you have HAProxy load balancers deployed via the Toolkit, you will need to run the following command to update them _with_ downtime:
 
     `ansible-playbook -i environments/10k/inventory playbooks/haproxy.yml`
+
+1. If you have a monitoring node deployed via the Toolkit, you will need to run the following command to update it _with_ downtime:
+
+    `ansible-playbook -i environments/10k/inventory playbooks/monitor.yml`
 
 1. If you are using OpenSearch deployed via the Toolkit, you will need to run the following command to update it _with_ downtime:
 
