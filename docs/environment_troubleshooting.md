@@ -360,6 +360,16 @@ As Desired Size is likely to be adjusted outside of Terraform, either manually o
 
 As such, if this issue is occurring you would need to first [adjust the Desired Size manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to be equal to or greater than the target Minimum Size and then run Terraform again.
 
+## GitLab
+
+### `422` Error on Login due to Redis misconfiguration
+
+If you are seeing a 422 error when trying to log into the deployed GitLab environment. THis is a general HTTP error code and can mean many things but one potential reason for this is Redis setup misconfiguration.
+
+In particular, this can happen when you have configured a separated Redis setup, as recommended for the [10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) and up, but not set up both the Redis Persistent and Cache clusters accordingly, i.e. only one of these have been set. The Toolkit requires either a combined single Redis cluster or both Redis Persistent and Cache clusters to be configured. Anything other that this may result in this error.
+
+If this issue is occurring, switch to either a combined Redis or separated Redis clusters as recommended and go through set up again. Note that after setup you may need to also need to clear browser caches to clear out the old issue on clients.
+
 ## Other
 
 ### macOS - Python package install failure - `fatal error: 'openssl/opensslv.h' file not found`
