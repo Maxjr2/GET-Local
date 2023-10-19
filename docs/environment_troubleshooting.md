@@ -364,11 +364,11 @@ As such, if this issue is occurring you would need to first [adjust the Desired 
 
 ### `422` Error on Login due to Redis misconfiguration
 
-If you are seeing a 422 error when trying to log into the deployed GitLab environment. THis is a general HTTP error code and can mean many things but one potential reason for this is Redis setup misconfiguration.
+If you are seeing a 422 error when trying to log into the deployed GitLab environment. This is a general HTTP error code and can mean many things but one potential reason for this is Redis setup misconfiguration.
 
 In particular, this can happen when you have configured a separated Redis setup, as recommended for the [10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) and up, but not set up both the Redis Persistent and Cache clusters accordingly, i.e. only one of these have been set. The Toolkit requires either a combined single Redis cluster or both Redis Persistent and Cache clusters to be configured. Anything other that this may result in this error.
 
-If this issue is occurring, switch to either a combined Redis or separated Redis clusters as recommended and go through set up again. Note that after setup you may need to also need to clear browser caches to clear out the old issue on clients.
+If this issue is occurring, switch to either a combined Redis or separated Redis clusters as recommended and go through set up again. Note that after setup you may also need to clear browser caches to clear out the old issue on clients.
 
 ## Other
 
