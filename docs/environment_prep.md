@@ -124,7 +124,7 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
    ```
 
 SSH access should now be enabled on the Service Account and this will be used by Ansible to SSH login to each VM.
-More info on OS Login and how it's configured can be found [in this community blog](https://pomba.net/2022/05/gcp-ssh-into-vms-as-service-account-when-oslogin-is-enabled/).
+More info on OS Login and how it's configured can be found [in Google's documentation](https://cloud.google.com/compute/docs/oslogin/).
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use the key for accessing machines.
 
