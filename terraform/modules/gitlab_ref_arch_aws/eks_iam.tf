@@ -176,6 +176,12 @@ resource "aws_iam_role_policy_attachment" "gitlab_eks_registry_role_s3_registry_
   policy_arn = aws_iam_policy.gitlab_s3_registry_policy[0].arn
   role       = aws_iam_role.gitlab_eks_registry_role[0].name
 }
+resource "aws_iam_role_policy_attachment" "gitlab_eks_registry_role_s3_kms_policy" {
+  count = local.total_node_pool_count > 0 && local.gitlab_s3_registry_policy_create && local.gitlab_s3_kms_policy_create ? 1 : 0
+
+  policy_arn = aws_iam_policy.gitlab_s3_kms_policy[0].arn
+  role       = aws_iam_role.gitlab_eks_registry_role[0].name
+}
 
 ### Toolbox (Backups)
 resource "aws_iam_role" "gitlab_eks_toolbox_role" {
@@ -220,6 +226,12 @@ resource "aws_iam_role_policy_attachment" "gitlab_eks_toolbox_role_s3_registry_p
   count = local.total_node_pool_count > 0 && local.gitlab_s3_registry_policy_create ? 1 : 0
 
   policy_arn = aws_iam_policy.gitlab_s3_registry_policy[0].arn
+  role       = aws_iam_role.gitlab_eks_toolbox_role[0].name
+}
+resource "aws_iam_role_policy_attachment" "gitlab_eks_toolbox_role_s3_kms_policy" {
+  count = local.total_node_pool_count > 0 && local.gitlab_s3_kms_policy_create ? 1 : 0
+
+  policy_arn = aws_iam_policy.gitlab_s3_kms_policy[0].arn
   role       = aws_iam_role.gitlab_eks_toolbox_role[0].name
 }
 
@@ -396,4 +408,3 @@ moved {
   from = aws_iam_role_policy_attachment.amazon_ec2_container_registry_read_only[0]
   to   = aws_iam_role_policy_attachment.gitlab_eks_node_role_ec2_container_registry_read_only_policy[0]
 }
-
