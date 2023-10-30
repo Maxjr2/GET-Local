@@ -151,7 +151,7 @@ gitlab_rails_nginx_real_ip_trusted_cidr_blocks: []
 
 # GitLab Postgres / PGBouncer
 postgres_primary_int_addr: "{{ (groups['postgres_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'postgres_primary' in groups else '' }}"
-postgres_int_addrs: "{{ (groups['postgres'] | map('extract', hostvars, internal_addr_lookup) | list) if 'postgres' in groups else [] }}"
+postgres_int_addrs: "{{ (groups['postgres'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'postgres' in groups else [] }}"
 pgbouncer_int_addrs: "{{ (groups['pgbouncer'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'pgbouncer' in groups else [] }}"
 
 postgres_host: "{{ postgres_primary_int_addr }}"
@@ -172,7 +172,7 @@ postgres_trust_auth_cidr_blocks: ['0.0.0.0/0']
 postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 
 # Gitaly
-gitaly_int_addrs: "{{ (groups['gitaly'] | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly' in groups else [] }}"
+gitaly_int_addrs: "{{ (groups['gitaly'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly' in groups else [] }}"
 gitaly_primary_int_addr: "{{ (groups['gitaly_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'gitaly_primary' in groups else '' }}"
 gitaly_secondary_int_addrs: "{{ (groups['gitaly_secondary'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly_secondary' in groups else [] }}"
 gitaly_callback_internal_api_url: "{{ ('http://' + internal_lb_host) if 'haproxy_internal' in groups and 'gitlab_rails' in groups else external_url_sanitised }}"
@@ -196,8 +196,8 @@ pages_ssl_key_file: ""
 
 # Praefect
 praefect_primary_int_addr: "{{ (groups['praefect_primary'] | map('extract', hostvars, internal_addr_lookup) | join('')) if 'praefect_primary' in groups else '' }}"
-praefect_secondary_int_addrs: "{{ (groups['praefect_secondary'] | map('extract', hostvars, internal_addr_lookup) | list) if 'praefect_secondary' in groups else [] }}"
-praefect_int_addrs: "{{ (groups['praefect'] | map('extract', hostvars, internal_addr_lookup) | list) if 'praefect' in groups else [] }}"
+praefect_secondary_int_addrs: "{{ (groups['praefect_secondary'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'praefect_secondary' in groups else [] }}"
+praefect_int_addrs: "{{ (groups['praefect'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'praefect' in groups else [] }}"
 praefect_external_token: ""
 
 ## Praefect SSL
@@ -275,7 +275,7 @@ sidekiq_max_concurrency: 20
 ################################################################################
 
 # GitLab NFS
-gitlab_nfs_int_addr: "{{ groups['gitlab_nfs'] | map('extract', hostvars, internal_addr_lookup) | join('') }}"
+gitlab_nfs_int_addr: "{{ groups['gitlab_nfs'] | sort | map('extract', hostvars, internal_addr_lookup) | join('') }}"
 gitlab_nfs_path: "{{ '/mnt/gitlab-nfs' if cloud_provider != 'azure' else '/srv/gitlab-nfs' }}"
 
 # Search
