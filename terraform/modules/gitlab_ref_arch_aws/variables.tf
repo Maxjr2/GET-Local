@@ -1474,6 +1474,12 @@ variable "external_ssh_port" {
   default = 2222
 }
 
+variable "internal_allowed_ingress_security_group_ids" {
+  description = "List of additional Security Group IDs to allow access to Internal Networking group"
+  type        = list(string)
+  default     = []
+}
+
 ### Services (Internal)
 variable "rds_postgres_allowed_ingress_cidr_blocks" {
   type    = list(any)

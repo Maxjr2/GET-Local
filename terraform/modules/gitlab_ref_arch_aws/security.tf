@@ -25,6 +25,18 @@ resource "aws_security_group" "gitlab_internal_networking" {
   }
 
   dynamic "ingress" {
+    for_each = range(length(var.internal_allowed_ingress_security_group_ids) > 0 ? 1 : 0)
+
+    content {
+      description     = "Open internal networking from configured Security Groups"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "-1"
+      security_groups = var.internal_allowed_ingress_security_group_ids
+    }
+  }
+
+  dynamic "ingress" {
     for_each = range(var.peer_vpc_cidr != null ? 1 : 0)
 
     content {

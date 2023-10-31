@@ -266,8 +266,24 @@ In some advanced cases additional security group configuration may be desired de
 
 For these scenarios the Toolkit supports customisation of node Security groups as follows via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
+:information_source:&nbsp; It's recommended that these settings be used with caution as misconfigurations may result in exposed access to the selected machines unintentionally.
+
 - `gitlab_rails_security_group_ids` - A list of additional Security Groups IDs for the GitLab Rails nodes. Optional, default is `[]`.
 - `monitor_security_group_ids` - A list of additional Security Groups IDs for the Monitor node(s). Optional, default is `[]`.
+
+### Internal Security Group Access (Default / Existing networks)
+
+An Internal Networking security group is created by the Toolkit on AWS that allows for internal networking access to be configured between resources such as VMs or EKS Clusters in the VPC. This group is membership based as a best practice, as a result anything not in this group does not have access.
+
+In some advanced cases though where your resources need internal access, such as a Bastion host on the same VPC, the Toolkit does provide for a way to configure this via [Security Group referencing](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html#security-group-referencing).
+
+In this setup you would put your resources in separate Security Group(s) within the same VPC and in turn pass those group names into the Toolkit. The Internal Networking security group will then be configured to allow internal networking access for resources in those groups. Note that due to the nature of AWS networking this is only applicable to the Default or Existing network types where the network exists separately to allow for other internal resources to be deployed outside the Toolkit.
+
+To pass in your Security Groups to be added for internal access this is done with the following variable in the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
+
+:information_source:&nbsp; It's recommended that this setting be used with caution. Full Internal Networking access will be granted to all resources in the configured Security Groups.
+
+- `internal_allowed_ingress_security_group_ids` - A list of additional Security Groups IDs to allow internal networking access to VMs or EKS Clusters. Note that the groups must be in the same VPC as the GitLab resources. Optional, default is `[]`.
 
 ## Disable External IPs (Azure)
 
