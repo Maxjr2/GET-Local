@@ -2,17 +2,7 @@ roles ['application_role']
 
 external_url '{{ external_url_sanitised }}'
 
-{% if gitlab_rails_webserver == 'puma' %}
-unicorn['enable'] = false
-puma['enable'] = true
-
 puma['listen'] = '0.0.0.0'
-{% elif gitlab_rails_webserver == 'unicorn' %}
-unicorn['enable'] = true
-puma['enable'] = false
-
-unicorn['listen'] = '0.0.0.0'
-{% endif %}
 
 {% if gitlab_root_password != '' %}
 gitlab_rails['initial_root_password'] = "{{ gitlab_root_password }}"
