@@ -53,10 +53,14 @@
   register: acme_sh_cmd
   failed_when: acme_sh_cmd.rc == 1
 
-- name: Update cert file permissions
+- name: Update cert files ownership
   file:
-    path: "/opt/haproxy/ssl/{{ external_host }}.pem.key"
-    mode: '0644'
+    path: "{{ item }}"
+    owner: '99' # HAProxy Docker User ID
+    mode: '0600'
+  loop:
+    - "/opt/haproxy/ssl/{{ external_host }}.pem"
+    - "/opt/haproxy/ssl/{{ external_host }}.pem.key"
 
 - name: Reload HAProxy
   command: docker kill -s HUP haproxy

@@ -24,6 +24,8 @@
   template:
     src: templates/haproxy.cfg.j2
     dest: /opt/haproxy/haproxy.cfg
+    owner: '99' # HAProxy Docker User ID
+    mode: '0600'
   tags: reconfigure
 
 - name: Start HAProxy Internal Docker
@@ -37,6 +39,7 @@
     ports: ['80:80', '6432:6432', '1936:1936', '5432:5432', "{{ (praefect_ssl_port + ':' + praefect_ssl_port) if praefect_ssl else '2305:2305' }}"]
     volumes:
       - /opt/haproxy:/usr/local/etc/haproxy:ro
+    user: '99' # HAProxy Docker User ID
     sysctls:
       net.ipv4.ip_unprivileged_port_start: 0
     etc_hosts:
@@ -67,6 +70,7 @@
     ports: ['80:80', '443:443', '1936:1936', "{{ gitlab_shell_ssh_port }}:{{ gitlab_shell_ssh_port }}"]
     volumes:
       - /opt/haproxy:/usr/local/etc/haproxy:ro
+    user: '99' # HAProxy Docker User ID
     sysctls:
       net.ipv4.ip_unprivileged_port_start: 0
     etc_hosts:
