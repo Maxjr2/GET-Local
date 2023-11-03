@@ -1,4 +1,4 @@
-- name: Stop puma/sidekiq for single node
+- name: Secondary Database - Stop puma/sidekiq for single node
   block:
     - name: Secondary Database - Run gitlab-ctl stop puma
       command: gitlab-ctl stop puma
