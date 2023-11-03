@@ -717,6 +717,9 @@ module "gitlab_ref_arch_azure" {
   consul_node_count = 3
   consul_size = "Standard_F2s_v2"
 
+  opensearch_vm_node_count = 3
+  opensearch_vm_size = "Standard_F16s_v2"
+
   gitaly_node_count = 3
   gitaly_size = "Standard_D16s_v3"
 
