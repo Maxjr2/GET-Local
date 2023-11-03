@@ -195,6 +195,23 @@ variable "monitor_disk_size" {
   default = null
 }
 
+variable "opensearch_vm_node_count" {
+  type    = number
+  default = 0
+}
+variable "opensearch_vm_size" {
+  type    = string
+  default = ""
+}
+variable "opensearch_vm_storage_account_type" {
+  type    = string
+  default = null
+}
+variable "opensearch_vm_disk_size" {
+  type    = string
+  default = null
+}
+
 variable "pgbouncer_node_count" {
   type    = number
   default = 0
