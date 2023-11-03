@@ -44,3 +44,4 @@
     dest: "{{ geo_psql_temp_folder.path }}/"
     flat: true
   tags: secondary-database
+  when: gitlab_custom_psql_crt_file == ""

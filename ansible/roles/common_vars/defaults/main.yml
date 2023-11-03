@@ -57,7 +57,7 @@ haproxy_internal_int_addr: "{{ (groups[haproxy_internal_primary_site_group_name]
 haproxy_external_int_addr: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'haproxy_external' in groups else '' }}"
 
 ### Internal Load Balancer
-internal_lb_host: "{{ haproxy_internal_int_addr }}"
+internal_lb_host: "{{ geo_primary_postgres_host if geo_primary_postgres_host != '' else haproxy_internal_int_addr }}"
 
 ## Offline setup
 offline_setup: false
@@ -418,7 +418,7 @@ geo_secondary_site_name: "Secondary Site"
 
 geo_replication_slot_modifier: "{{ 2 if geo_primary_site_group_name in group_names or geo_secondary_site_group_name in group_names else 1 }}"
 geo_primary_site_postgres_group_name: "{% if geo_primary_site_group_name + '_postgres_primary' in groups %}{{ geo_primary_site_group_name }}_postgres_primary{% elif geo_primary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_primary_site_group_name }}_gitlab_rails_primary{% elif 'postgres_primary' in groups%}postgres_primary{% else %}gitlab_rails_primary{% endif %}"
-geo_primary_site_postgres_int_ip: "{{ (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
+geo_primary_site_postgres_int_ip: "{{ geo_primary_postgres_host if geo_primary_postgres_host != '' else (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
 geo_secondary_site_postgres_group_name: "{% if geo_secondary_site_group_name + '_postgres_primary' in groups %}{{ geo_secondary_site_group_name }}_postgres_primary{% elif geo_secondary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_secondary_site_group_name }}_gitlab_rails_primary{% else %}{% endif %}"
 geo_secondary_site_postgres_int_ip: "{{ (groups[geo_secondary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if geo_secondary_site_postgres_group_name != '' else '' }}"
 
@@ -436,6 +436,15 @@ geo_migration_task: "{{ 'geo:db:migrate' if ((gitlab_version != '') and (gitlab_
 
 geo_sql_replication_password: "{{ postgres_password }}"
 geo_sql_replication_password_md5: "{{ (geo_sql_replication_password + 'gitlab_replicator') | md5 }}"
+
+gitlab_custom_secrets_file: ""
+gitlab_custom_secrets_json: "{{ lookup('file', gitlab_custom_secrets_file) | from_json if gitlab_custom_secrets_file != '' }}"
+
+gitlab_custom_ssh_host_keys_folder: ""
+gitlab_custom_registry_key_file: ""
+gitlab_custom_psql_crt_file: ""
+
+geo_primary_postgres_host: ""
 
 # Geo Tracking Postgres
 geo_tracking_postgres_host: "{% if geo_secondary_praefect_postgres_host != '' and postgres_external %}{{ geo_secondary_praefect_postgres_host }}{% elif cloud_native_hybrid_geo and postgres_external %}{{ praefect_postgres_host }}{% else %}{{ geo_secondary_site_postgres_int_ip }}{% endif %}"
