@@ -55,14 +55,30 @@
         release_namespace: "{{ gitlab_charts_release_namespace }}"
       register: gitlab_info
 
-    - name: Failover Promote Secondary - Update Geo Role
+    - name: Failover Promote Secondary - Set gitlab_values
       become: false
       delegate_to: localhost
       run_once: true
       set_fact:
-        gitlab_values: "{{ item.value | regex_replace(\"'role': 'secondary'\", \"'role': 'primary'\") }}"
+        gitlab_values: "{{ item.value }}"
       loop: "{{ lookup('dict', gitlab_info.status) }}"
       when: "'values' in item.key"
+
+    - name: Failover Promote Secondary - Update Geo Role from secondary to primary
+      become: false
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'role': 'primary' }}}, recursive=True ) }}"
+
+    - name: Failover Promote Secondary - Remove Registry primary API Url
+      become: false
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'registry':{'replication':{'primaryApiUrl': omit }}}}}, recursive=True ) }}"
+      when:
+        - container_registry_enable
 
     - name: Get GitLab Charts version if App version specified
       block:

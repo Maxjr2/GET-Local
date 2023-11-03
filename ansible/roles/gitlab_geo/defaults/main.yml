@@ -24,7 +24,4 @@ geo_secondary_site_gcp_project: ""
 geo_secondary_site_gcp_zone: ""
 geo_secondary_site_aws_region: ""
 
-geo_primary_registry_url: "https://registry.{{ geo_primary_external_url | regex_replace('^https?:\/\/') }}"
-geo_secondary_registry_url: "https://registry.{{ geo_secondary_external_url | regex_replace('^https?:\/\/') }}"
-
 geo_run_patroni_workaround: true

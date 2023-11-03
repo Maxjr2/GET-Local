@@ -15,5 +15,5 @@ geo_secondary['auto_migrate'] = false
 
 {% if container_registry_enable and container_registry_token is defined %}
 gitlab_rails['geo_registry_replication_enabled'] = true
-gitlab_rails['geo_registry_replication_primary_api_url'] = '{{ container_registry_external_url }}'
+gitlab_rails['geo_registry_replication_primary_api_url'] = '{{ geo_primary_registry_url }}'
 {% endif %}
