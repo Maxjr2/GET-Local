@@ -62,7 +62,7 @@
   delegate_to: localhost
   run_once: true
   set_fact:
-    gitlab_values: "{{ gitlab_values | regex_replace(\"'role': 'primary'\", \"'role': 'secondary'\") }}"
+    gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'role': 'secondary' }}}, recursive=True ) }}"
   when:
     - geo_recovery is defined and geo_recovery
 
@@ -71,7 +71,7 @@
   delegate_to: localhost
   run_once: true
   set_fact:
-    gitlab_values: "{{ gitlab_values | regex_replace(\"'primaryApiUrl': '\" + geo_secondary_registry_url + \"'\", \"'primaryApiUrl': '\" + geo_primary_registry_url + \"'\") }}"
+    gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'registry':{'replication':{'primaryApiUrl': geo_primary_registry_url }}}}}, recursive=True ) }}"
   when:
     - container_registry_enable
 

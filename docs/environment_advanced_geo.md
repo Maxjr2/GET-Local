@@ -380,7 +380,15 @@ The RDS recovery process involves deleting the old primary RDS instance, this is
 - Remove `rds_postgres_password`.
 - Remove `rds_postgres_backup_retention_period`.
 
-## Container Registry Replication
+## Container Registry
+
+The Toolkit configures the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) as documented in [Container Registry (GCP, AWS)](environment_advanced.md#container-registry-gcp-aws) section. No additional configuration for a Geo setup is required if you used default registry URL configuration.
+
+If you configured a custom value in `container_registry_external_url` for the priamry site, you need to also add `geo_primary_registry_url` variable in both the primary and secondary inventories:
+
+- `geo_primary_registry_url` - The Primary site's URL that the registry will be available on. Default is `https://registry.<geo_primary_external_host>`.
+
+### Container Registry Replication
 
 To enable Container registry replication you will need to define `container_registry_token` in your `vars.yml` file. For Cloud Native Hybrid environments you will need to specify this setting in both the primary and secondary inventories. For Omnibus environments you can specify it in just the primary inventory.
 

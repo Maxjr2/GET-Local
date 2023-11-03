@@ -453,3 +453,6 @@ geo_tracking_postgres_port: "5431"
 geo_tracking_postgres_password: "{{ postgres_password }}"
 geo_tracking_postgres_database: "gitlabhq_geo_production"
 geo_tracking_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
+
+# Registry
+geo_primary_registry_url: "https://registry.{{ geo_primary_external_url | regex_replace('^https?:\/\/') }}"
