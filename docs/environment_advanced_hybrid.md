@@ -387,10 +387,10 @@ First let's detail the general settings that apply to any Cloud Provider:
 - `cloud_native_hybrid_environment` - Tells Ansible it's configuring a Cloud Native Hybrid Reference Architecture environment. **Required.**
 - `kubeconfig_setup` - When true, will attempt to automatically configure the `.kubeconfig` file entry for the provisioned Kubernetes cluster. **Recommended unless kubeconfig is to be setup separately.**
 - `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
-  - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step. 
+  - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
 
-Next are specific Cloud Provider examples that will also detail any specific settings for each provider along with a section on various other additional settings that may be used. 
+Next are specific Cloud Provider examples that will also detail any specific settings for each provider along with a section on various other additional settings that may be used.
 
 ### Google Cloud Platform (GCP)
 

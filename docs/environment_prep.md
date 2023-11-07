@@ -224,7 +224,7 @@ SSH authentication for the created machines on Azure will require an admin usern
 
 First think of an admin username that will be used for SSH connection to the Azure's virtual machines.
 
-:information_source:&nbsp; **Take a note of the username you select as later, it will be used in the Terraform [Configure Variables (`variables.tf`)](environment_provision.md#configure-variables-variablestf-2) and Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) sections.** 
+:information_source:&nbsp; **Take a note of the username you select as later, it will be used in the Terraform [Configure Variables (`variables.tf`)](environment_provision.md#configure-variables-variablestf-2) and Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) sections.**
 
 All that's required for an SSH key is to be created and then for this to be accessible for the Toolkit to handle the rest:
 
