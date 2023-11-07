@@ -234,7 +234,7 @@ Read Replicas, as implied, mimic their main database in most ways, so the number
 - `rds_postgres_read_replica_count` - The number of read replicas to configure for the RDS database of the PostgreSQL instance to set up. Optional, default is `0`.
 - `rds_postgres_read_replica_port` - The port read replicas will run on. Optional, default is `5432`.
 - `rds_postgres_read_replica_multi_az` - Whether each replica should itself have a standby replica to provide HA. Optional, default is `false`.
- 
+
 :information_source:&nbsp; AWS requires that the main RDS database for which Read Replicas are being configured for must have its Backup Retention Period value (e.g. `rds_postgres_backup_retention_period`) set to 1 or higher.
 
 :information_source:&nbsp; Read replicas for Praefect or Geo Tracking RDS databases can also be done with the same settings above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively instead.
@@ -268,7 +268,7 @@ The primary site can use a single RDS instance to house both the main GitLab dat
 
 The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://cloud.google.com/sql/docs/postgres) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-:information_source:&nbsp; Note that the account being used by Terraform to create the Cloud SQL instance will require the `cloudsql.admin` IAM role. 
+:information_source:&nbsp; Note that the account being used by Terraform to create the Cloud SQL instance will require the `cloudsql.admin` IAM role.
 
 :information_source:&nbsp; Note that Geo setups are not directly supported at this time. While the Toolkit can set up two separate Cloud SQL instances, additional manual setup for [VPC Network Peering](https://cloud.google.com/vpc/docs/vpc-peering) and [Logical Replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication) will be required.
 
@@ -387,12 +387,12 @@ Read Replicas, as implied, mimic their main database in most ways, so the number
 - `cloud_sql_postgres_read_replica_count` - The number of read replicas to configure for the Cloud SQL database of the PostgreSQL instance to set up. Optional, default is `0`.
 - `cloud_sql_postgres_read_replica_deletion_protection` - If deletion protection should be enabled for the read replica instance. Optional, default is `false`.
 - `cloud_sql_postgres_read_replica_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for read replica instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `null`.
- 
+
 Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `cloud_sql_read_replica_hosts` output, which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
 
 ### Configuring with Ansible
 
-To configure GitLab to use an alternative PostgreSQL database with Ansible, point the Toolkit at the PostgreSQL instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)  
+To configure GitLab to use an alternative PostgreSQL database with Ansible, point the Toolkit at the PostgreSQL instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
 :information_source:&nbsp; This config is the same for custom PostgreSQL databases that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the PostgreSQL instance never changes.
 
@@ -434,7 +434,7 @@ After Ansible is finished running your environment will now be ready.
 
 #### Database Preparation
 
-When using an external database several preparation steps are required for GitLab to use them, including the setup of users, databases and extensions. 
+When using an external database several preparation steps are required for GitLab to use them, including the setup of users, databases and extensions.
 
 As a convenience, the Toolkit will attempt to do this for you automatically via Ansible's [`community.postgres`](https://docs.ansible.com/ansible/latest/collections/community/postgresql/) collection on one of the machines in the environment (as databases typically will only be available internally).
 
@@ -739,7 +739,7 @@ However, the Toolkit can be configured to manage this role for you via the `open
 
 ### Configuring with Ansible
 
-To configure GitLab to use alternative search backend(s) with Ansible, point the Toolkit at the Search instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) 
+To configure GitLab to use alternative search backend(s) with Ansible, point the Toolkit at the Search instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
 :information_source:&nbsp; This config is the same for custom search backend(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the search backend(s) never changes.
 

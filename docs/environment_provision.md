@@ -159,7 +159,7 @@ variable "external_ip" {
 }
 ```
 
-- `prefix` - Used to set the names and labels of the VMs consistently. Use a unique name to avoid any clashes. Once set, do not change. An example of what this could be is `gitlab-test` 
+- `prefix` - Used to set the names and labels of the VMs consistently. Use a unique name to avoid any clashes. Once set, do not change. An example of what this could be is `gitlab-test`
 - `project` - The [ID](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project the environment is to be deployed to.
 - `region` - The GCP region of the project, e.g. `us-east1`.
 - `zone` - The default GCP zone of the project, e.g. `us-east1-c`.
