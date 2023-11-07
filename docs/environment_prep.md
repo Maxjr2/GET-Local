@@ -228,7 +228,7 @@ First think of an admin username that will be used for SSH connection to the Azu
 
 All that's required for an SSH key is to be created and then for this to be accessible for the Toolkit to handle the rest:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) using [supported encryption](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys#supported-ssh-key-formats) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_rsa`.
 
    :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
    [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
