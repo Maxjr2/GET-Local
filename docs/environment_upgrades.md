@@ -32,7 +32,8 @@ In this section is guidance on upgrading the Toolkit that should be followed thr
 The following upgrade paths are supported for the Toolkit.
 
 - Upgrades within a major version will generally be supported unless specified otherwise in the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases), for example `2.5.0` to `2.8.6`.
-- Upgrades to a new major version **require an upgrade stop of the latest release of the previous major version**. For example to upgrade to GitLab Environment Toolkit `3.0.0` requires an upgrade first to the last `2.x` version (`2.8.6`).
+- Upgrades to a new major version **require an upgrade stop of the latest release of the previous major version**. For example to upgrade to GitLab Environment Toolkit `3.0.x` requires an upgrade first to the last `2.x` version (`2.8.6`).
+  - Upgrades to the latest patch release of a new major version are also supported, for example `2.8.6` to `3.0.2`.
 
 ### Review Toolkit release notes
 
