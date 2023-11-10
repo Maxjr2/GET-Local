@@ -394,7 +394,7 @@ To enable Container registry replication you will need to define `container_regi
 
 - `container_registry_token` - Secret value for the container registry authorization header and for the Geo event notification endpoint to use. Value should be a case-sensitive alphanumeric string that starts with a letter.
 
-## Migrating from an external Primary Site using Geo
+## Migrating from an external Primary Site using Geo (Linux Package)
 
 This section details how to setup Geo replication when the primary site is an external resource that is not provisioned by the Toolkit. This guide is intended to be used when migrating from a non Toolkit provisioned environment to a new instance that will be managed by the Toolkit. In this scenario, Geo is the mechanism to transfer data from one instance to another and is not intended to be used as a standard Geo deployment.
 
@@ -412,7 +412,7 @@ During the setup of Geo some secrets are copied over from the primary site to th
 
 - [`gitlab-secrets.json`](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-1-manually-replicate-secret-gitlab-values)
 - [`gitlab-registry.key`](https://docs.gitlab.com/ee/administration/geo/replication/container_registry.html) - Only required if using the container registry
-- [PostgreSQL `server.crt`](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication) -
+- [PostgreSQL `server.crt`](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication)
 - [SSH Host keys](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-2-manually-replicate-the-primary-sites-ssh-host-keys)
 
 ### Configuring the Primary Site
