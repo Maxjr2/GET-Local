@@ -83,6 +83,13 @@ The Toolkit by default will always attempt to install the latest GitLab version 
 
 However, the [standard GitLab Upgrade rules still apply](https://docs.gitlab.com/ee/update/#upgrade-paths) when upgrading across multiple GitLab versions. You should refer to the docs to ensure the intended upgrade can be performed directly or if you need to upgrade to a certain version first.
 
+### Database Upgrades
+
+Upgrades to Postgres version differ depending on the source as follows:
+
+- Cloud Providers ([RDS](environment_advanced_services.md#aws-rds-version), [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)) - Version handling and upgrades can differ notably depending on the provider. The Toolkit exposes the relevant variable to change what version should be used by the provider, but it's recommended to refer to the provider's documentation for what values are available and how upgrades are processed.
+- Linux package (Omnibus) - Upgrades to the database can be done by following the [documentation](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
+
 ### Zero Downtime Updates
 
 For Zero Downtime Updates, the Toolkit translates the [documented manual process](https://docs.gitlab.com/ee/update/zero_downtime.html) to achieve the same effect as much as possible.
