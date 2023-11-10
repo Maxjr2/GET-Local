@@ -276,7 +276,7 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 
 - `cloud_sql_postgres_machine_tier`- The [GCP Cloud SQL Machine Tier](https://cloud.google.com/sql/docs/postgres/create-instance#machine-types) for the service to use without the `db-` prefix. Note that for this service the standard GCP machine sizes don't apply, instead utilizing custom sizes in most cases. For example, to deploy an instance that matches a `n1-standard-4` machine type this can be configured as `custom-4-15360`. **Required**.
 - `cloud_sql_postgres_edition` - The [Cloud SQL edition](https://cloud.google.com/sql/docs/postgres/editions-intro) to be used. Optional, defaults to `ENTERPRISE`.
-- `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Optional, defaults to `POSTGRES_13`.
+- `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Changing this value will trigger an upgrade and may lead to some downtime. Optional, defaults to `POSTGRES_13`.
 - `cloud_sql_postgres_root_password` - The root password for the instance to be used for the default `postgres` user. If not set the user will not be given a password and access won't be available until a password is given manually. Optional, default is `null`.
 - `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` or `PD-HDD`. Optional, default is `PD-HDD`.
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
