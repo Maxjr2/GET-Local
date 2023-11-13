@@ -510,6 +510,7 @@ output "kubernetes" {
     # Expose All Roles created for EKS
     "kubernetes_eks_role"                    = try(aws_iam_role.gitlab_eks_role[0].name, "")
     "kubernetes_eks_node_role"               = try(aws_iam_role.gitlab_eks_node_role[0].name, "")
+    "kubernetes_eks_node_role_arn"           = try(aws_iam_role.gitlab_eks_node_role[0].arn, "")
     "kubernetes_eks_webservice_role"         = try(aws_iam_role.gitlab_eks_webservice_role[0].name, "")
     "kubernetes_eks_sidekiq_role"            = try(aws_iam_role.gitlab_eks_sidekiq_role[0].name, "")
     "kubernetes_eks_toolbox_role"            = try(aws_iam_role.gitlab_eks_toolbox_role[0].name, "")
