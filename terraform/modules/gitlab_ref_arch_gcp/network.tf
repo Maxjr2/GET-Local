@@ -9,6 +9,10 @@ locals {
 # Get full VPC details
 data "google_compute_network" "gitlab_network" {
   name = local.vpc_name
+
+  depends_on = [
+    google_compute_network.gitlab_vpc
+  ]
 }
 
 # Created Network
