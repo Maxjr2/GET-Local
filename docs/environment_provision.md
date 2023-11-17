@@ -377,8 +377,8 @@ Terraform provides multiple ways to authenticate with the [provider](https://reg
 
 All the methods given involve the Service Account file you generated previously. We've found the authentication methods that work best with the Toolkit in terms of ease of use are as follows:
 
-- `GOOGLE_CREDENTIALS` environment variable - This environment variable is picked up by both the provider and backend, meaning it only needs to be set once. It's particularly useful with CI pipelines. The variable should be set to the path of the Service Account file.
-- `gcloud` login - Authentication can also occur automatically through the [`gcloud`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) command line tool. Make sure the user that's logged in has access to the Project along with the `editor` role attached.
+- `GOOGLE_CREDENTIALS` environment variable - This environment variable is picked up by both the provider and backend, meaning it only needs to be set once. It's particularly useful with CI pipelines. The variable should be set to the path of the Service Account key file.
+- `gcloud` login - Authentication can also occur automatically through the [`gcloud`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) command line tool. To log in with the Service Account you created earlier the [`activate-service-account`](https://cloud.google.com/sdk/gcloud/reference/auth/activate-service-account) command is available.
 
 ### Amazon Web Services (AWS)
 
