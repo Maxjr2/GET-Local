@@ -207,10 +207,10 @@ Ansible provides several ways to authenticate with [GCP](https://docs.ansible.co
 
 All the methods given involve the Service Account file you generated previously. We've found the authentication methods that work best with the Toolkit in terms of ease of use are as follows:
 
-- `GCP_SERVICE_ACCOUNT_FILE` environment variable - Particularly useful with CI pipelines, the variable should be set to the local path of the Service Account file.
-  - Note that the `GCP_AUTH_KIND` variable also needs to be set to `serviceaccount` for this authentication method.
-- `gcloud` login - Authentication can also occur automatically through the [`gcloud`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) command line tool. Make sure the user that's logged in has access to the Project.
-  - Note that the `GCP_AUTH_KIND` variable also needs to be set to `application` for this authentication method.
+- `GCP_SERVICE_ACCOUNT_FILE` environment variable - Particularly useful with CI pipelines, the variable should be set to the local path of the Service Account key file.
+  - Note that the `GCP_AUTH_KIND` environment variable also needs to be set to `serviceaccount` for this authentication method.
+- `gcloud` login - Authentication can also occur automatically through the [`gcloud`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) command line tool. To log in with the Service Account you created earlier the [`activate-service-account`](https://cloud.google.com/sdk/gcloud/reference/auth/activate-service-account) command is available.
+  - Note that the `GCP_AUTH_KIND` environment variable also needs to be set to `application` for this authentication method.
 
 Alternatively, instead of setting `GCP_AUTH_KIND`, you can add `auth_kind` to your Inventory config file to specify which authentication method you'd like to use.
 

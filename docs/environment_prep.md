@@ -76,7 +76,7 @@ With the above set create the Service Account as follows:
 
 1. Access GCP's [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) page.
 1. Ensure that the correct project is selected in the dropdown at the top of the page.
-1. Create an account with a descriptive name like `gitlab-qa`.
+1. Create an account with a descriptive name like `gitlab-qa` and take note of its email address for the next step.
 1. Assign the following [IAM roles](https://cloud.google.com/iam/docs/granting-changing-revoking-access#granting-console):
    - `Compute Admin`
    - `Kubernetes Engine Admin`
@@ -84,8 +84,7 @@ With the above set create the Service Account as follows:
    - `Service Account Admin`
    - `Service Account User`
    - `Compute Network Admin` (Only required when deploying [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql))
-
-Take note of the Service Account email address, which will be used in the next step.
+1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be use later by Terraform and Ansible to authenticate.
 
 ### 4. Setup SSH Authentication - SSH OS Login for GCP Service Account
 
