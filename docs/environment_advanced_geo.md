@@ -155,22 +155,22 @@ Using this output, add the below values to the primaries `environment.tf` file. 
 
 - `object_storage_destination_buckets` - A map of each destination buckets name and ARN. For example:
 
-:exclamation:&nbsp; You must ensure you have copied over all the settings listed above in full. Failure to do so will cause Geo Replication to fail.
+  :exclamation:&nbsp; You must ensure you have copied over all the settings listed above in full. Failure to do so will cause Geo Replication to fail.
 
-```yml
-object_storage_destination_buckets = tomap({
-    "artifacts"        = "<artifacts_bucket_arn>"
-    "backups"          = "<backups_bucket_arn>"
-    "dependency-proxy" = "<dependency-proxy_bucket_arn>"
-    "lfs"              = "<lfs_bucket_arn>"
-    "mr-diffs"         = "<mr-diffs_bucket_arn>"
-    "packages"         = "<packages_bucket_arn>"
-    "registry"         = "<registry_bucket_arn>"
-    "terraform-state"  = "<terraform-state_bucket_arn>"
-    "uploads"          = "<uploads_bucket_arn>"
-    "ci_secure_files"  = "<ci_secure_files_bucket_arn>"
-  })
-```
+  ```yml
+  object_storage_destination_buckets = tomap({
+      "artifacts"        = "<artifacts_bucket_arn>"
+      "backups"          = "<backups_bucket_arn>"
+      "dependency-proxy" = "<dependency-proxy_bucket_arn>"
+      "lfs"              = "<lfs_bucket_arn>"
+      "mr-diffs"         = "<mr-diffs_bucket_arn>"
+      "packages"         = "<packages_bucket_arn>"
+      "registry"         = "<registry_bucket_arn>"
+      "terraform-state"  = "<terraform-state_bucket_arn>"
+      "uploads"          = "<uploads_bucket_arn>"
+      "ci_secure_files"  = "<ci_secure_files_bucket_arn>"
+    })
+  ```
 
 - `object_storage_replica_kms_key_id` - The ARN used to encrypt the secondaries object storage buckets.
 
