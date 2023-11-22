@@ -100,11 +100,13 @@ Once each site is configured we can run the `terraform apply` command against ea
 
 #### VPC Peering (AWS)
 
-:information_source:&nbsp; Currently Peering is only available when using a single secondary site.
+The Toolkit can configure [AWS VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) that will allow traffic to flow in both directions from a primary and secondary site just like normal internal connections. This is required if the sites are located in different regions.
 
-Enabling [AWS VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) will allow traffic to flow in both directions from a primary and secondary site just like normal internal connections. This is required if the sites are located in different regions.
+:information_source:&nbsp; Peering can only be configured directly by the Toolkit when using a [Created network](environment_advanced_network.md#created-aws). For Existing networks Peering should be configured separately.
 
-AWS VPC peering requires a handshake, I.E. A VPC must first request the Peering and the other has to then accept it. As such, this requires Terraform to be run a couple of times to go through this process. To do this, first provision the primary site with `terraform apply`, this will output some values that are required by the secondary site to setup peering.
+:information_source:&nbsp; Peering is only available when using a single secondary site.
+
+AWS VPC peering requires a handshake, I.E. A VPC must first request the Peering and the other has to then accept it. As such, this requires Terraform to be run a couple of times to go through this process. To do this, first provision the primary site with `terraform apply`, this will output some values that are required by the secondary site to set up peering.
 
 ```json
   "network" = {
