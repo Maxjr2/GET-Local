@@ -22,7 +22,11 @@
     dest: "/etc/gitlab/gitlab.gitlab_rails.post-deployment-migrations.rb"
   when: (geo_primary_site_group_name not in groups or geo_primary_site_group_name in group_names)
 
-- name: Run database migrations
+- name: Reconfigure GitLab Rails deploy node
+  command: gitlab-ctl reconfigure
+  when: (geo_primary_site_group_name not in groups or geo_primary_site_group_name in group_names)
+
+- name: Run post deployment migrations
   command: gitlab-rake db:migrate
   when: (geo_primary_site_group_name not in groups or geo_primary_site_group_name in group_names)
 
@@ -30,6 +34,10 @@
   file:
     path: "/etc/gitlab/gitlab.gitlab_rails.post-deployment-migrations.rb"
     state: absent
+  when: (geo_primary_site_group_name not in groups or geo_primary_site_group_name in group_names)
+
+- name: Reconfigure GitLab Rails deploy node
+  command: gitlab-ctl reconfigure
   when: (geo_primary_site_group_name not in groups or geo_primary_site_group_name in group_names)
 
 - name: Run Geo check on primary site
