@@ -102,6 +102,8 @@ The Toolkit, being an automative solution, can't perform all the same actions a 
 
 At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS, or Praefect PostgreSQL ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be updated separately in a maintenance period.
 
+For Geo environments, the zero downtime update process must be completed on the primary site first, and then repeated on each secondary site.
+
 Running the zero downtime update process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
 
 1. `cd` to the `ansible/` directory if not already there.
