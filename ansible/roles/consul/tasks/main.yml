@@ -66,12 +66,12 @@
   until: result is success
   tags: reconfigure
 
-- name: Propagate Secrets if new
+- name: Propagate Secrets if new or changed
   include_role:
     name: common
     tasks_from: secrets
   vars:
-    gitlab_secrets_reconfigure: true
+    gitlab_secrets_post_reconfigure: true
   when: gitlab_secrets_setup
   tags:
     - reconfigure
