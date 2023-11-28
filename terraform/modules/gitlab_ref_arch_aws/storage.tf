@@ -154,7 +154,14 @@ resource "aws_iam_policy" "gitlab_s3_kms_policy" {
           "kms:Decrypt",
           "kms:GenerateDataKey"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
+        Condition = {
+          "StringLike" = {
+            "kms:EncryptionContext:aws:s3:arn" = [
+              for key, values in aws_s3_bucket.gitlab_object_storage_buckets : values.arn
+            ]
+          }
+        },
         Resource = var.object_storage_kms_key_arn != null ? var.object_storage_kms_key_arn : var.default_kms_key_arn
       }
     ]
@@ -246,11 +253,59 @@ resource "aws_iam_policy" "gitlab_s3_replication_policy" {
   })
 }
 
+resource "aws_iam_policy" "gitlab_s3_kms_replication_policy" {
+  count = local.enable_object_storage_replication && local.gitlab_s3_kms_policy_create ? 1 : 0
+  name  = "${var.prefix}-s3-kms-replication-policy"
+  path  = var.default_iam_identifier_path
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ],
+        Effect = "Allow",
+        Condition = {
+          "StringLike" = {
+            "kms:EncryptionContext:aws:s3:arn" = [
+              for key, values in aws_s3_bucket.gitlab_object_storage_buckets : values.arn
+            ]
+          }
+        },
+        Resource = var.object_storage_kms_key_arn != null ? var.object_storage_kms_key_arn : var.default_kms_key_arn
+      },
+      {
+        Action = [
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ],
+        Effect = "Allow",
+        Condition = {
+          "StringLike" = {
+            "kms:EncryptionContext:aws:s3:arn" = [
+              for key, value in var.object_storage_destination_buckets : value
+            ]
+          }
+        },
+        Resource = var.object_storage_replica_kms_key_id
+      },
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "gitlab_s3_replication_attachment" {
   count = local.enable_object_storage_replication ? 1 : 0
 
   role       = aws_iam_role.gitlab_s3_replication_role[0].name
   policy_arn = aws_iam_policy.gitlab_s3_replication_policy[0].arn
+}
+resource "aws_iam_role_policy_attachment" "gitlab_s3_kms_replication_attachment" {
+  count = local.enable_object_storage_replication && local.gitlab_s3_kms_policy_create ? 1 : 0
+
+  role       = aws_iam_role.gitlab_s3_replication_role[0].name
+  policy_arn = aws_iam_policy.gitlab_s3_kms_replication_policy[0].arn
 }
 
 resource "aws_s3_bucket_replication_configuration" "gitlab_s3_replication_configuration" {
