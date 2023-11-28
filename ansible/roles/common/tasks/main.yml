@@ -188,8 +188,20 @@
 
         # Install GitLab Package via repo. State of latest means always run apt install
         # If gitlab_version is passed then this will always install that version
-        - name: Install GitLab repo package
-          package:
+        - name: Install GitLab repo package (deb)
+          apt:
+            name: "{{ gitlab_repo_package }}"
+            state: "{{ 'present' if gitlab_version != '' else 'latest' }}"
+            lock_timeout: 360
+            allow_change_held_packages: true
+          register: result
+          retries: 12
+          delay: 5
+          until: result is success
+          when: ansible_facts['os_family'] == "Debian"
+
+        - name: Install GitLab repo package (rpm)
+          yum:
             name: "{{ gitlab_repo_package }}"
             state: "{{ 'present' if gitlab_version != '' else 'latest' }}"
             lock_timeout: 360
@@ -197,6 +209,7 @@
           retries: 12
           delay: 5
           until: result is success
+          when: ansible_facts['os_family'] == 'RedHat'
       when:
         - omnibus_node
         - gitlab_repo_package != ''
@@ -230,6 +243,7 @@
           apt:
             deb: "{{ gitlab_deb_target_path }}"
             force: "{{ gitlab_deb_force_install }}"
+            allow_change_held_packages: true
           when:
             - omnibus_node
             - (gitlab_deb_host_path != '') or (gitlab_deb_download_url != '')
