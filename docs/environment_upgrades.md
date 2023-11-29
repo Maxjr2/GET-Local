@@ -129,6 +129,12 @@ Running the zero downtime update process with the Toolkit is done in the same wa
 
 The update process can take a couple of hours to complete, and the full runtime will depend on the number of nodes in the deployment.
 
+### Environment Downgrades
+
+Downgrades are not supported directly by the Toolkit as it can be a delicate process, requiring the use of backups and is best done manually to ensure it's done correctly.
+
+The Toolkit can however continue to be used against an environment after [a manual downgrade](https://docs.gitlab.com/ee/update/package/downgrade.html) has been performed. After downgrading the package on all nodes, you should [configure the GitLab version now used in Ansible](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_configure.md#repository) to ensure the Toolkit is aware and doesn't attempt to subsequently upgrade.
+
 ## OS Upgrades
 
 OS version upgrades should be handled directly and follow the standard process for each OS, such as via `apt` for Ubuntu. Refer to the OS's docs for more info.

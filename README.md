@@ -195,7 +195,7 @@ Due to complexities, permutations or areas best left to be configured directly w
 - Direct OmniAuth and Email support
 - DNS server management
 - Full GitLab agent server for Kubernetes (KAS) setup
-- [Downgrades](https://docs.gitlab.com/ee/update/package/downgrade.html)
+- [Downgrades](docs/environment_upgrades.md#environment-downgrades)
 
 Some of the above areas are better tackled via [Custom Config](docs/environment_advanced.md#custom-config).
 
