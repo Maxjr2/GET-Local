@@ -106,6 +106,7 @@ For Geo environments, the zero downtime update process must be completed on the 
 
 Running the zero downtime update process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
 
+1. Add or update `gitlab_version` in your [`vars.yml`](environment_configure.md#environment-config---varsyml) to the GitLab version you are updating to. The Toolkit will target the latest version otherwise and this may be too high for a Zero Downtime upgrade.
 1. `cd` to the `ansible/` directory if not already there.
 1. Run `ansible-playbook` with the intended environment's inventory against the `zero-downtime-update.yml` playbook
 
