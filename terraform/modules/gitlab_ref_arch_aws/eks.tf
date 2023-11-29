@@ -533,5 +533,9 @@ output "kubernetes" {
     "kubernetes_addon_coredns_version"        = try(aws_eks_addon.coredns[0].addon_version, "")
     "kubernetes_addon_vpc_cni_version"        = try(aws_eks_addon.vpc_cni[0].addon_version, "")
     "kubernetes_addon_ebs_csi_driver_version" = try(aws_eks_addon.ebs_csi_driver[0].addon_version, "")
+
+    # Exporting network configuration so that additional nodepools can be added with the same settings
+    "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
+    "cluster_security_group_id"     = try(aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id, "")
   }
 }
