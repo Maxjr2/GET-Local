@@ -123,8 +123,8 @@ output "gitlab_ref_arch_gcp" {
 
 In addition to the above there are some optional settings that can configure the GKE setup as follows:
 
-- `cluster_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
-- `cluster_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to allow Kubernetes service accounts to act as a user-managed [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
+- `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
+- `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to allow Kubernetes service accounts to act as a user-managed [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
 
 #### Networking (GCP)
 
@@ -140,15 +140,42 @@ In this setup however it would deploy the target count of nodes in _every_ zone.
 
 The Toolkit will attempt to manage this for you and try to honour the target node count you have given in config. However, if the number of Zones and Node Counts given are different in terms of parity (e.g. when the number of Zones is even and Node Count is odd) it will result in additional nodes being deployed and costing extra. To help with this it's possible to specifically set Zones for the Kubernetes cluster to use as follows:
 
-- `kubernetes_zones` - A list of Zone names inside the target region that any Kubernetes resources should be spread across. This will override what's given in the `zones` variable to allow for additional flexibility. If unset it will follow the former. Default is the same as `zones` (`null`). Optional.
+- `gke_zones` - A list of Zone names inside the target region that any Kubernetes resources should be spread across. This will override what's given in the `zones` variable to allow for additional flexibility. If unset it will follow the former. Default is the same as `zones` (`null`). Optional.
 
 It's recommended that in any environment where multiple Zones are to be used that you match the parity of Node Pool counts, i.e. all Zone and Node Pool counts should be either even or odd.
 
-#### GCP Toolbox Backups - Service Account Key
+#### GKE Private Cluster options
+
+The Toolkit allows for you to configure a [Private cluster](https://cloud.google.com/kubernetes-engine/docs/concepts/private-cluster-concept) in GKE where Nodes, Pods and Services rely only on internal IP addresses, but external access can still be configured via ingress.
+
+Private clusters can be configured in Terraform  as follows in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `gke_enable_private_nodes` - Flag to configure the enabling of a Private cluster. Optional, default is `false`.
+- `gke_enable_private_endpoint` - Flag to configure if **only** a Private endpoint is enabled for the Private cluster. If `false` then both a Public and Private endpoint are enabled. Optional, default is `false`.
+- `gke_master_ipv4_cidr_block` - The CIDR block to be used by the Private Cluster for its internal network. The block must be a `/28` subnet and must not overlap with any other ranges in use within the cluster's network. Optional, default is `10.87.0.0/28`.
+
+:information_source:&nbsp; Note that it's not possible to convert an existing GKE cluster to be Private and attempting to enable this will trigger a full recreation of the GKE Cluster.
+
+:information_source:&nbsp; Note that when the `gke_enable_private_endpoint` is enabled the `master_authorized_networks_config` setting is also enabled as required by GCP to block all addresses except Cluster IPs. Though additional private address access can be configured. See [GKE Authorized Network config](#gke-authorized-network-config) for more information. 
+
+#### GKE Authorized Network config
+
+It's possible to configure access to the cluster endpoints via the [`master_authorized_networks_config` setting](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#master_authorized_networks_config) depending on the type of cluster:
+
+- Public - Setting is disabled by default. Can be enabled to only allow access from configured CIDR blocks.
+- Private - Setting is disabled by default except when Private endpoint only is configured, where it is then enabled as required to block all access (except Cluster node IPs) but can be extended to other internal network addresses.
+
+The enabling and disabling of this setting is subject to the above and within those rules can be controlled via the following setting:
+
+- `gke_master_authorized_networks_config_cidr_blocks` - Limit endpoint access to given CIDR blocks. For a public cluster this would be external public IP ranges. For a private cluster this would be valid internal IP ranges. Optional, default is `[]`.
+
+For more information refer to the [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters).
+
+#### GKE Toolbox Backups - Service Account Key
 
 With a Cloud Native Hybrid environment, [GitLab backups are taken via the Charts Toolbox pod](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
 
-When running on GCP an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
+When running on GKE an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
 
 The Service Account requires the `roles/storage.objectAdmin` role to be given for each of the Object Storage Buckets to be used. The Toolkit creates a role for this purpose already with the suffix `-gke-supporting` so creating the account is not required. However, as Service Account keys are sensitive credential files the Toolkit doesn't generate the key specifically. As such, one manual step that is required is to [generate a key](https://cloud.google.com/iam/docs/keys-create-delete) for this account and download it accordingly to the node running Ansible. Once done the key file can be passed to the Toolkit via the following variable in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`):
 

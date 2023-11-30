@@ -34,15 +34,15 @@ resource "google_compute_subnetwork" "gitlab_vpc_subnet" {
 }
 
 # External IPs
-## Setup Router and NAT when not using external IPs for internet access
+## Setup Router and NAT when not using external IPs for internet access on VMs or GKE
 resource "google_compute_router" "router" {
-  count   = var.setup_external_ips ? 0 : 1
+  count   = var.setup_external_ips == false || var.gke_enable_private_nodes == true ? 1 : 0
   name    = "${var.prefix}-router"
   network = local.vpc_name
 }
 
 resource "google_compute_router_nat" "nat" {
-  count  = var.setup_external_ips ? 0 : 1
+  count  = var.setup_external_ips == false || var.gke_enable_private_nodes == true ? 1 : 0
   name   = "${var.prefix}-nat"
   router = google_compute_router.router[0].name
 

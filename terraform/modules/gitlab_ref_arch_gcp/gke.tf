@@ -5,7 +5,7 @@ locals {
   sidekiq_node_pool_autoscaling    = var.sidekiq_node_pool_max_count > 0
   supporting_node_pool_autoscaling = var.supporting_node_pool_max_count > 0
 
-  node_pool_zones       = var.kubernetes_zones != null ? var.kubernetes_zones : var.zones
+  node_pool_zones       = var.gke_zones != null ? var.gke_zones : (var.kubernetes_zones != null ? var.kubernetes_zones : var.zones)
   node_pool_zones_count = local.node_pool_zones != null ? length(local.node_pool_zones) : 1
 }
 
@@ -29,7 +29,33 @@ resource "google_container_cluster" "gitlab_cluster" {
   ip_allocation_policy {}
 
   release_channel {
-    channel = var.cluster_release_channel
+    channel = var.cluster_release_channel != null ? var.cluster_release_channel : var.gke_release_channel
+  }
+
+  dynamic "private_cluster_config" {
+    for_each = range(var.gke_enable_private_nodes ? 1 : 0)
+
+    content {
+      enable_private_nodes    = var.gke_enable_private_nodes
+      enable_private_endpoint = var.gke_enable_private_endpoint # When false *both* Public and Private endpoints are enabled, this would be better named as enable_private_endpoint_only
+      master_ipv4_cidr_block  = var.gke_master_ipv4_cidr_block
+    }
+  }
+
+  # Limit GKE endpoint access via CIDR blocks for both Private and Public endpoints
+  # This block being present alone with no settings will enable, which is required for Cluster's with private only endpoints (a CIDR block though is optional)
+  dynamic "master_authorized_networks_config" {
+    for_each = range(var.gke_enable_private_endpoint || length(var.gke_master_authorized_networks_config_cidr_blocks) > 0 ? 1 : 0)
+
+    content {
+      dynamic "cidr_blocks" {
+        for_each = var.gke_master_authorized_networks_config_cidr_blocks
+
+        content {
+          cidr_block = cidr_blocks.value
+        }
+      }
+    }
   }
 
   resource_labels = {
@@ -38,7 +64,7 @@ resource "google_container_cluster" "gitlab_cluster" {
   }
 
   dynamic "workload_identity_config" {
-    for_each = range(var.cluster_enable_workload_identity ? 1 : 0)
+    for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
 
     content {
       workload_pool = "${var.project}.svc.id.goog"
@@ -90,7 +116,7 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
     }
 
     dynamic "workload_metadata_config" {
-      for_each = range(var.cluster_enable_workload_identity ? 1 : 0)
+      for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
 
       content {
         mode = "GKE_METADATA"
@@ -164,7 +190,7 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
     }
 
     dynamic "workload_metadata_config" {
-      for_each = range(var.cluster_enable_workload_identity ? 1 : 0)
+      for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
 
       content {
         mode = "GKE_METADATA"
@@ -238,7 +264,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
     }
 
     dynamic "workload_metadata_config" {
-      for_each = range(var.cluster_enable_workload_identity ? 1 : 0)
+      for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
 
       content {
         mode = "GKE_METADATA"
