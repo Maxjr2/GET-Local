@@ -414,6 +414,37 @@ variable "sidekiq_disks" {
 
 # Kubernetes \ Helm
 
+## General
+variable "gke_release_channel" {
+  type    = string
+  default = "STABLE"
+}
+variable "gke_enable_workload_identity" {
+  type    = bool
+  default = false
+}
+variable "gke_master_authorized_networks_config_cidr_blocks" {
+  type    = list(string)
+  default = []
+}
+
+### Private Cluster
+variable "gke_enable_private_nodes" {
+  type    = bool
+  default = false
+}
+variable "gke_enable_private_endpoint" {
+  description = "Toggle to only allow connections to the GKE Private endpoint. If false both Public and Private endpoints will be enabled."
+
+  type    = bool
+  default = false
+}
+variable "gke_master_ipv4_cidr_block" {
+  type    = string
+  default = "10.87.0.0/28"
+}
+
+## Nodes
 variable "webservice_node_pool_count" {
   type    = number
   default = 0
@@ -481,6 +512,15 @@ variable "supporting_node_pool_disk_type" {
 variable "supporting_node_pool_disk_size" {
   type    = string
   default = null
+}
+## Cluster Autoscaling (Optional)
+variable "supporting_node_pool_max_count" {
+  type    = number
+  default = 0
+}
+variable "supporting_node_pool_min_count" {
+  type    = number
+  default = 0
 }
 
 # PaaS Services
@@ -710,25 +750,6 @@ variable "memorystore_redis_persistent_weekly_maintenance_window_start_time" {
   default = []
 }
 
-## Cluster Autoscaling (Optional)
-variable "supporting_node_pool_max_count" {
-  type    = number
-  default = 0
-}
-variable "supporting_node_pool_min_count" {
-  type    = number
-  default = 0
-}
-
-variable "cluster_release_channel" {
-  type    = string
-  default = "STABLE"
-}
-variable "cluster_enable_workload_identity" {
-  type    = bool
-  default = false
-}
-
 # Networking
 ## Create new network
 variable "create_network" {
@@ -766,6 +787,12 @@ variable "icmp_allowed_ingress_cidr_blocks" {
   default = []
 }
 
+## Created network
+variable "subnet_cidr" {
+  type    = string
+  default = "10.86.0.0/16"
+}
+
 ## Existing network
 variable "vpc_name" {
   type    = string
@@ -774,10 +801,6 @@ variable "vpc_name" {
 variable "subnet_name" {
   type    = string
   default = "default"
-}
-variable "subnet_cidr" {
-  type    = string
-  default = "10.86.0.0/16"
 }
 
 ## External IPs
@@ -788,10 +811,14 @@ variable "setup_external_ips" {
 
 ## Zones
 variable "zones" {
+  description = "Zones to use for all resources."
+
   type    = list(any)
   default = null
 }
-variable "kubernetes_zones" {
+variable "gke_zones" {
+  description = "Zones to use for all GKE resources. Overrides var.zones if present."
+
   type    = list(any)
   default = null
 }
@@ -810,4 +837,24 @@ variable "allow_stopping_for_update" {
 variable "machine_secure_boot" {
   type    = bool
   default = false
+}
+
+## Deprecated - To be removed in 4.0.0
+variable "cluster_release_channel" {
+  description = "Deprecated. Replaced by gke_release_channel."
+
+  type    = string
+  default = null
+}
+variable "cluster_enable_workload_identity" {
+  description = "Deprecated. Replaced by gke_enable_workload_identity."
+
+  type    = bool
+  default = false
+}
+variable "kubernetes_zones" {
+  description = "Deprecated. Replaced by gke_zones."
+
+  type    = list(any)
+  default = null
 }
