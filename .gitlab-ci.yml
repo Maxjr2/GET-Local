@@ -49,6 +49,8 @@ gemnasium-dependency_scanning:
 gemnasium-python-dependency_scanning:
   rules:
     - !reference [.on_merge_request_and_merged_events, rules]
+  image:
+    name: $CI_TEMPLATE_REGISTRY_HOST/security-products/gemnasium-python:4-python-3.10
 
 secret_detection:
   rules:
@@ -174,7 +176,7 @@ check:docker-image:
 upload-docker-image-dev:
   extends: .upload-docker-image-base
   script:
-    - docker build -t $CI_REGISTRY_IMAGE:dev .
+    - docker build --build-arg install_python_latest_pkgs=true -t $CI_REGISTRY_IMAGE:dev .
     - docker push $CI_REGISTRY_IMAGE:dev
   rules:
     - !reference [.on_default_branch, rules]

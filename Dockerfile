@@ -1,5 +1,7 @@
 FROM python:3.11-slim-bullseye as python-build
 
+ARG install_python_latest_pkgs=false
+
 COPY ansible /gitlab-environment-toolkit/ansible
 COPY terraform /gitlab-environment-toolkit/terraform
 COPY .tool-versions /gitlab-environment-toolkit/.tool-versions
@@ -21,7 +23,7 @@ RUN rtx plugin add terraform && rtx install terraform
 
 # Install Ansible
 ## Install Python Packages (Including Ansible)
-RUN pip3 install --no-cache-dir --user -r ansible/requirements/requirements.txt
+RUN pip3 install --no-cache-dir --user -r $(if [[ "$install_python_latest_pkgs" == "true" ]]; then echo "ansible/requirements/ansible-python-packages.txt"; else echo "ansible/requirements/requirements.txt"; fi)
 ## Install Ansible Dependencies
 RUN ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.yml
 
