@@ -100,38 +100,54 @@ Once each site is configured we can run the `terraform apply` command against ea
 
 #### VPC Peering (AWS)
 
-The Toolkit can configure [AWS VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) that will allow traffic to flow in both directions from a primary and secondary site just like normal internal connections. This is required if the sites are located in different regions.
+The Toolkit can configure [AWS VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. This is required if the Geo sites are located in different AWS regions.
 
-:information_source:&nbsp; Peering can only be configured directly by the Toolkit when using a [Created network](environment_advanced_network.md#created-aws). For Existing networks Peering should be configured separately.
+:information_source:&nbsp; Peering can only be configured directly by the Toolkit when using a [created network](environment_advanced_network.md#created-aws) with `create_network = true` on all Geo sites. For existing networks, peering should be configured separately.
 
 :information_source:&nbsp; Peering is only available when using a single secondary site.
 
-AWS VPC peering requires a handshake, I.E. A VPC must first request the Peering and the other has to then accept it. As such, this requires Terraform to be run a couple of times to go through this process. To do this, first provision the primary site with `terraform apply`, this will output some values that are required by the secondary site to set up peering.
+AWS VPC peering requires a handshake, i.e. a VPC must first request the peering and the other has to then accept it. As such, this requires Terraform to be executed a couple of times to go through this process.
 
-```json
-  "network" = {
-    "peer_connection_id" = "<peer_connection_id>"
-    "vpc_cidr_block" = "<vpc_cidr_block>"
-    "vpc_id" = "<vpc_id>"
-    "vpc_subnet_priv_ids" =["vpc_subnet_priv_id1", "vpc_subnet_priv_id2"]
-    "vpc_subnet_pub_ids" = ["vpc_subnet_pub_id1", "vpc_subnet_pub_id2"]
-  }
-```
+To set up VPC peering:
 
-Using this output, add the below values to the secondaries `environment.tf` file. These values are used so that each secondary is able to setup a peering connection with the primary's VPC.
+1. On the primary site, provision it by running `terraform apply`. This will output some values that are required by the secondary site to set up peering.
 
-- `peer_region` - The AWS region used for the primary site. This won't be in the output for Terraform but is something that is defined as part of the environment config.
-- `peer_vpc_id` - The VPC ID of the primary site.
-- `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC.
+   ```json
+   "network" = {
+     "peer_connection_id" = "<peer_connection_id>"
+     "vpc_cidr_block" = "<vpc_cidr_block>"
+     "vpc_id" = "<vpc_id>"
+     "vpc_subnet_priv_ids" =["vpc_subnet_priv_id1", "vpc_subnet_priv_id2"]
+     "vpc_subnet_pub_ids" = ["vpc_subnet_pub_id1", "vpc_subnet_pub_id2"]
+   }
+   ```
 
-:information_source:&nbsp; When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
+1. Using the Terraform output from provisioning the primary site in the last step, add the below values to the secondary site's `environment.tf` file. These values are used so that the secondary site is able to setup a peering connection with the primary site's VPC.
 
-Now run `terraform apply` for the secondary sites, once this completes the VPC connection details will be output in `network`, similar to the primary, this time take the `peering_id` and `vpc_cidr_block` and add them into the primary sites `environment.tf`:
+   - `peer_region` - The AWS region used for the primary site. This won't be in the output for Terraform but is something that is defined as part of the environment config.
+   - `peer_vpc_id` - The VPC ID of the primary site.
+   - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC.
 
-- `peer_connection_id` - The ID of the peer connection created as part of the secondaries `terraform apply`
-- `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC on the secondary site.
+   :information_source:&nbsp; When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
 
-Once added you will need to rerun `terraform apply` for the primary site. This will accept the peering request created by the secondaries as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your sites to communicate internally.
+1. On the secondary site, provision it by running `terraform apply`. This will output some values that are required by the secondary site to set up peering.
+
+   ```json
+   "network" = {
+     "peer_connection_id" = "<peer_connection_id>"
+     "vpc_cidr_block" = "<vpc_cidr_block>"
+     "vpc_id" = "<vpc_id>"
+     "vpc_subnet_priv_ids" =["vpc_subnet_priv_id1", "vpc_subnet_priv_id2"]
+     "vpc_subnet_pub_ids" = ["vpc_subnet_pub_id1", "vpc_subnet_pub_id2"]
+   }
+   ```
+
+1. Using the Terraform output from provisioning the secondary site in the last step, add the below values to the primary site's `environment.tf` file. 
+
+   - `peer_connection_id` - The ID of the peer connection created.
+   - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC on the secondary site.
+
+1. On the primary site, rerun `terraform apply`. This will accept the peering request created by the secondary site as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your Geo sites to communicate internally.
 
 #### Object Storage Replication (AWS)
 
