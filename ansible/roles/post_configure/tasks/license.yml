@@ -1,13 +1,8 @@
-- name: Configure Subscription or License via GitLab Rails
+- name: Check for or configure subscription / license via GitLab Rails
   block:
-    - name: Configure Subscription or License file if missing via GitLab Rails
+    - name: Check for or configure subscription / license via GitLab Rails
       command: |
         gitlab-rails runner "
-          if License.current&.plan != nil
-            print License.current.plan
-            exit
-          end
-
           if '{{ gitlab_subscription_activation_code }}' != ''
             GitlabSubscriptions::ActivateService.new.execute('{{ gitlab_subscription_activation_code }}')
           elsif '{{ gitlab_license_text }}' != ''
@@ -24,25 +19,20 @@
       diff: false
       register: configure_license_response
 
-    - name: Save License Plan
+    - name: Save license plan
       set_fact:
         gitlab_license_plan: "{{ configure_license_response.stdout }}"
   when: "'gitlab_rails' in groups"
   tags: license
 
-- name: Configure Subscription or License via GitLab Toolbox pod
+- name: Check for or configure subscription / license via GitLab Toolbox pod
   block:
-    - name: Configure Subscription or License file if missing via GitLab Toolbox pod
+    - name: Check for or configure subscription / license via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "
-            if License.current&.plan != nil
-              print License.current.plan
-              exit
-            end
-
             if '{{ gitlab_subscription_activation_code }}' != ''
               GitlabSubscriptions::ActivateService.new.execute('{{ gitlab_subscription_activation_code }}')
             elsif '{{ gitlab_license_text }}' != ''
@@ -56,7 +46,7 @@
       diff: false
       register: configure_license_response
 
-    - name: Save License Plan
+    - name: Save license plan
       set_fact:
         gitlab_license_plan: "{{ configure_license_response.stdout }}"
   when:

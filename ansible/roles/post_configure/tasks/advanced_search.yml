@@ -1,8 +1,3 @@
-- name: Configure License
-  include_tasks: license.yml
-  when: gitlab_license_plan is not defined
-  tags: license
-
 - name: Clean out previous Advanced Search configuration and index
   block:
     - name: Delete old Advanced Search index
@@ -148,38 +143,20 @@
 
 - name: Perform Advanced Search Indexing
   block:
-    - name: Create empty index for GitLab
+    - name: Index all GitLab data
       block:
-        - name: Create empty index for GitLab via GitLab Rails
-          command: gitlab-rake gitlab:elastic:create_empty_index
+        - name: Index all GitLab data via GitLab Rails
+          command: gitlab-rake gitlab:elastic:index
           delegate_to: "{{ groups['gitlab_rails'][0] }}"
           delegate_facts: true
           become: true
           when: "'gitlab_rails' in groups"
 
-        - name: Create empty index for GitLab via GitLab Toolbox pod
+        - name: Index all GitLab data via GitLab Toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
             namespace: "{{ gitlab_charts_release_namespace }}"
-            command: gitlab-rake gitlab:elastic:create_empty_index
-          when:
-            - toolbox_pod is defined
-            - "'gitlab_rails' not in groups"
-
-    - name: Index all GitLab projects
-      block:
-        - name: Index all GitLab projects via GitLab Rails
-          command: gitlab-rake gitlab:elastic:index_projects
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
-          delegate_facts: true
-          become: true
-          when: "'gitlab_rails' in groups"
-
-        - name: Index all GitLab projects via GitLab Toolbox pod
-          kubernetes.core.k8s_exec:
-            pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_charts_release_namespace }}"
-            command: gitlab-rake gitlab:elastic:index_projects
+            command: gitlab-rake gitlab:elastic:index
           when:
             - toolbox_pod is defined
             - "'gitlab_rails' not in groups"
