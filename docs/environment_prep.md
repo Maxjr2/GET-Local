@@ -90,7 +90,7 @@ With the above set create the Service Account as follows:
 
 In addition to creating the Service Account, set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access) for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
 
    :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
    [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
@@ -169,7 +169,7 @@ To create an access key for your user follow [the official docs](https://docs.aw
 
 SSH authentication for the created machines on AWS will require an SSH key. A key is required to be created and to be accessible for the Toolkit to handle the rest:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
 
    :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
    [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
@@ -227,7 +227,7 @@ First think of an admin username that will be used for SSH connection to the Azu
 
 All that's required for an SSH key is to be created and then for this to be accessible for the Toolkit to handle the rest:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/ssh/#generate-an-ssh-key-pair) using [supported encryption](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys#supported-ssh-key-formats) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_rsa`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair) using [supported encryption](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys#supported-ssh-key-formats) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_rsa`.
 
    :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
    [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
