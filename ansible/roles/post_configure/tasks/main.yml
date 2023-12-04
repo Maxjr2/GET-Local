@@ -83,7 +83,6 @@
     - name: Configure License
       import_tasks: license.yml
       when:
-        - gitlab_license_text != '' or gitlab_subscription_activation_code != ''
         - gitlab_license_plan is not defined
       tags:
         - license
@@ -97,10 +96,8 @@
       import_tasks: advanced_search.yml
       when:
         - ('opensearch' in groups or advanced_search_external)
-        - gitlab_license_text != '' or gitlab_subscription_activation_code != ''
-        - gitlab_license_plan is defined and gitlab_license_plan in ['premium', 'ultimate']
-      tags:
-        - opensearch
+        - gitlab_license_plan != '' and gitlab_license_plan in ['premium', 'ultimate']
+      tags: opensearch
 
 - name: Run Custom Tasks
   block:
