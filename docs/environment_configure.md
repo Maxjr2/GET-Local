@@ -538,7 +538,7 @@ After the config has been set up you're now ready to configure the environment. 
     ```
 
     - Note that we pass the whole inventory folder - `environments/10k/inventory`. This ensures Ansible reads all the files in the directory.
-    - If you only want to run a specific playbook & role against the respective VMs you can switch out `all.yml` and replace it with the intended playbook, e.g. `gitlab-rails.yml`
+    - If you only want to run a specific playbook & role against the respective VMs you can switch out `all.yml` and replace it with the intended playbook, e.g. `gitlab_rails.yml`
 
 The same commands are used when you wish to update an existing environment.
 
