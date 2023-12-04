@@ -262,7 +262,7 @@ The Toolkit supports automatically setting up GitLab's [Advanced Search](https:/
 
 :information_source:&nbsp; Note that to be able to enable Advanced Search you'll require at least a GitLab Premium License.
 
-Due to the nature of OpenSearch it's difficult to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance for Elasticsearch that also applies to OpenSearch can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration). As a starting point sizing similar to Gitaly seems to work well in most cases.
+Due to the nature of OpenSearch it's difficult to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance for Elasticsearch that also applies to OpenSearch can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration). As a starting point sizing similar to Gitaly seems to work well in most cases.
 
 Enabling Advanced Search on your environment is designed to be as easy possible and can be done as follows:
 
