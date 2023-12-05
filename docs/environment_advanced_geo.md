@@ -65,7 +65,7 @@ module "gitlab_ref_arch_*" {
   [...]
 ```
 
-Next you need to add 2 new labels that helps to identify the machines as belonging to our Geo deployment and to give them a unique site name:
+Next you need to add some new labels that will help to identify the machines as belonging to our Geo deployment and to give them a unique site name:
 
 - `geo_site` - used to identify a machine with unique identifier. This should be a unique way to identify a site e.g. `london-office`. We recommend avoiding terms like primary and secondary in these site names, this is because the primary and secondary sites can change when performing failover.
 - `geo_deployment` - used to identify that primary and secondary sites belong to the same Geo deployment. This must be unique across all Geo deployments that will be stored alongside each other.
@@ -142,12 +142,26 @@ To set up VPC peering:
    }
    ```
 
-1. Using the Terraform output from provisioning the secondary site in the last step, add the below values to the primary site's `environment.tf` file. 
+1. Using the Terraform output from provisioning the secondary site in the last step, add the below values to the primary site's `environment.tf` file.
 
    - `peer_connection_id` - The ID of the peer connection created.
    - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC on the secondary site.
 
 1. On the primary site, rerun `terraform apply`. This will accept the peering request created by the secondary site as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your Geo sites to communicate internally.
+
+#### Object Storage Replication (GCP)
+
+For Cloud Native Hybrid environments using GCP, depending on your bucket setup, you will need to add at least one of the following labels to the secondary config to enable object storage replication with the primary in the `environment.tf` file:
+
+- `geo_primary_site_object_storage_prefix` - The prefix used for buckets on the primary site. If a custom prefix was used for the buckets on the primary with the `object_storage_prefix` setting, this should match that value, if no custom naming was used this should match the `prefix` setting for the primary site.
+- `geo_primary_site_object_storage_buckets` - The list of all bucket names used on the primary site to setup replication with. Should be set only if the list of buckets on the Primary site was changed via the [`object_storage_buckets`](environment_provision.md#configure-module-settings-environmenttf) setting.
+
+An example of setting these variables would be:
+
+```tf
+  geo_primary_site_object_storage_buckets = ["artifacts", "backups", "dependency-proxy"]
+  geo_primary_site_object_storage_prefix = "geo-primary-bucket-prefix"
+```
 
 #### Object Storage Replication (AWS)
 
