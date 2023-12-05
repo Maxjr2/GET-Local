@@ -23,7 +23,7 @@ gitlab:
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role" 
+        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
 {% endif %}
     metrics:
       enabled: true
@@ -440,6 +440,10 @@ nginx-ingress:
         service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "{{ aws_allocation_ids | replace(' ', '') }}"
         service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: workload=support
+{% endif %}
+{% if cloud_native_hybrid_geo_role == 'primary' %}
+    config:
+      use-forwarded-headers: true
 {% endif %}
 
 {% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
