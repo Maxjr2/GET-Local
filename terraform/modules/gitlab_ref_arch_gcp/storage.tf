@@ -55,6 +55,21 @@ resource "google_storage_bucket_iam_member" "gitlab_gke_supporting_object_storag
   member = "serviceAccount:${google_service_account.gitlab_gke_supporting_service_account[0].email}"
 }
 
+### Geo Replication Kubernetes
+locals {
+  geo_primary_site_object_storage_buckets = length(var.geo_primary_site_object_storage_buckets) > 0 ? var.geo_primary_site_object_storage_buckets : var.object_storage_buckets
+  geo_primary_site_bucket_names           = [for b in local.geo_primary_site_object_storage_buckets : "${var.geo_primary_site_object_storage_prefix}-${b}"]
+  create_geo_primary_site_iam             = var.geo_primary_site_object_storage_prefix != null
+}
+
+resource "google_storage_bucket_iam_member" "geo_primary_gitlab_gke_supporting_object_storage_buckets_member" {
+  for_each = var.supporting_node_pool_count + var.supporting_node_pool_max_count > 0 && local.create_geo_primary_site_iam ? toset(local.geo_primary_site_bucket_names) : toset([])
+
+  bucket = each.value
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.gitlab_gke_supporting_service_account[0].email}"
+}
+
 # IAM Service Account Token role
 ## Required for signBlob permission, which is required Service Accounts to access storage via Application Default Credentials
 ## Role is strictly only given to the account directly to avoid impersonation attacks (https://docs.bridgecrew.io/docs/bc_gcp_iam_3)

@@ -3,6 +3,8 @@ variable "prefix" {
   type    = string
   default = null
 }
+
+# Geo
 variable "geo_site" {
   type    = string
   default = null
@@ -10,6 +12,15 @@ variable "geo_site" {
 variable "geo_deployment" {
   type    = string
   default = null
+}
+variable "geo_primary_site_object_storage_buckets" {
+  type    = list(string)
+  default = []
+}
+
+variable "geo_primary_site_object_storage_prefix" {
+  type    = string
+  default = ""
 }
 
 # GCP Settings
