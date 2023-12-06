@@ -57,13 +57,12 @@ resource "google_storage_bucket_iam_member" "gitlab_gke_supporting_object_storag
 
 ### Geo Replication Kubernetes
 locals {
-  create_geo_primary_site_iam             = var.geo_primary_site_object_storage_prefix != null
-  geo_primary_site_object_storage_buckets = local.create_geo_primary_site_iam ? (length(var.geo_primary_site_object_storage_buckets) > 0 ? var.geo_primary_site_object_storage_buckets : var.object_storage_buckets) : null
-  geo_primary_site_bucket_names           = local.create_geo_primary_site_iam ? [for b in local.geo_primary_site_object_storage_buckets : "${var.geo_primary_site_object_storage_prefix}-${b}"] : null
+  create_geo_primary_site_iam   = var.geo_primary_site_object_storage_prefix != null
+  geo_primary_site_bucket_names = local.create_geo_primary_site_iam ? [for b in coalescelist(var.geo_primary_site_object_storage_buckets, var.object_storage_buckets) : "${var.geo_primary_site_object_storage_prefix}-${b}"] : null
 }
 
 resource "google_storage_bucket_iam_member" "geo_primary_gitlab_gke_supporting_object_storage_buckets_member" {
-  for_each = var.supporting_node_pool_count + var.supporting_node_pool_max_count > 0 && local.create_geo_primary_site_iam ? toset(local.geo_primary_site_bucket_names) : toset([])
+  for_each = local.create_geo_primary_site_iam && (var.supporting_node_pool_count + var.supporting_node_pool_max_count > 0) ? toset(local.geo_primary_site_bucket_names) : toset([])
 
   bucket = each.value
   role   = "roles/storage.objectAdmin"
