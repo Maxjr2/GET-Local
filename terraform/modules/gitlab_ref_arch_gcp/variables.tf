@@ -13,14 +13,14 @@ variable "geo_deployment" {
   type    = string
   default = null
 }
+
 variable "geo_primary_site_object_storage_buckets" {
   type    = list(string)
   default = []
 }
-
 variable "geo_primary_site_object_storage_prefix" {
   type    = string
-  default = ""
+  default = null
 }
 
 # GCP Settings
