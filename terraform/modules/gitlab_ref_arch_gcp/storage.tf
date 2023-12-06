@@ -57,9 +57,9 @@ resource "google_storage_bucket_iam_member" "gitlab_gke_supporting_object_storag
 
 ### Geo Replication Kubernetes
 locals {
-  geo_primary_site_object_storage_buckets = length(var.geo_primary_site_object_storage_buckets) > 0 ? var.geo_primary_site_object_storage_buckets : var.object_storage_buckets
-  geo_primary_site_bucket_names           = [for b in local.geo_primary_site_object_storage_buckets : "${var.geo_primary_site_object_storage_prefix}-${b}"]
   create_geo_primary_site_iam             = var.geo_primary_site_object_storage_prefix != null
+  geo_primary_site_object_storage_buckets = local.create_geo_primary_site_iam ? (length(var.geo_primary_site_object_storage_buckets) > 0 ? var.geo_primary_site_object_storage_buckets : var.object_storage_buckets) : null
+  geo_primary_site_bucket_names           = local.create_geo_primary_site_iam ? [for b in local.geo_primary_site_object_storage_buckets : "${var.geo_primary_site_object_storage_prefix}-${b}"] : null
 }
 
 resource "google_storage_bucket_iam_member" "geo_primary_gitlab_gke_supporting_object_storage_buckets_member" {
