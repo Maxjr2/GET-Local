@@ -58,17 +58,27 @@ resource "google_container_cluster" "gitlab_cluster" {
     }
   }
 
-  resource_labels = {
-    gitlab_node_prefix = var.prefix
-    gitlab_node_type   = "gitlab-cluster"
-  }
-
   dynamic "workload_identity_config" {
     for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
 
     content {
       workload_pool = "${var.project}.svc.id.goog"
     }
+  }
+
+  # Additional secrets envelope additional encryption - https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets
+  dynamic "database_encryption" {
+    for_each = range(var.gke_database_encryption_key_name != null ? 1 : 0)
+
+    content {
+      state    = "ENCRYPTED"
+      key_name = var.gke_database_encryption_key_name
+    }
+  }
+
+  resource_labels = {
+    gitlab_node_prefix = var.prefix
+    gitlab_node_type   = "gitlab-cluster"
   }
 }
 

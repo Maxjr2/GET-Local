@@ -186,6 +186,15 @@ There are two options available to pass the key to Ansible to be subsequently co
 
 Note that you can also create a separate Service Account and key if desired as long as it has the correct permissions as given above.
 
+#### GKE Secrets Envelope Encryption
+
+As an additional security layer for Kubernetes secrets, which are already encrypted on disk automatically, you can optionally enable [envelope encryption of Kubernetes secrets in GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#envelope_encryption) with your own KMS key. This is also known as Application-layer secrets encryption or Database encryption in GKE.
+
+This feature requires a [Cloud KMS key to be created separately](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating-key). Once created, the feature can be enabled via the following variable in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `gke_database_encryption_key_name` - The resource name for an existing [Cloud KMS key](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating-key) to be used to envelope encrypt Kubernetes secrets. The name must be the full resource name and should be created in the correct region for a Zonal cluster as well as have the required permissions as detailed in the documentation. Optional, default is `null`.
+  - :information_source:&nbsp; Note that the name must be given in its [full resource ID format](https://cloud.google.com/kms/docs/resource-hierarchy) (`projects/<project-id>/locations/<location>/keyRings/<keyring>/cryptoKeys/<key>`)
+
 ### Amazon Web Services (AWS)
 
 ```tf
