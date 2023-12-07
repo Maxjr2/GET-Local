@@ -438,6 +438,10 @@ variable "gke_master_authorized_networks_config_cidr_blocks" {
   type    = list(string)
   default = []
 }
+variable "gke_database_encryption_key_name" {
+  type    = string
+  default = null
+}
 
 ### Private Cluster
 variable "gke_enable_private_nodes" {
