@@ -172,6 +172,7 @@ check:docker-image:
         - Dockerfile
         - .tool-versions
         - ansible/requirements/requirements.txt
+        - ansible/galaxy.yml
 
 upload-docker-image-dev:
   extends: .upload-docker-image-base
