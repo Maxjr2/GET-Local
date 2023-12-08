@@ -126,7 +126,7 @@ Unlike External SSL, Internal SSL is typically more complex. This is due to both
 
 Due to this, how the Toolkit approaches Internal SSL varies depending on the component, and it's implementation as follows:
 
-- [Custom Files](environment_advanced.md#custom-files) / [Secrets](environment_advanced_hybrid.md#custom-secrets-via-custom-tasks) and [Custom Config](environment_advanced.md#custom-config) (Cloud Native Hybrid) - Where setup is best handled with full control via Custom Files and Custom Config to ensure the encryption meets your requirements. This applies to most components.
+- [Custom Files](environment_advanced.md#custom-files) / [Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks) and [Custom Config](environment_advanced.md#custom-config) (Cloud Native Hybrid) - Where setup is best handled with full control via Custom Files and Custom Config to ensure the encryption meets your requirements. This applies to most components.
 - Direct - Where the Toolkit handles setup directly for components that have one approach to encryption and / or if it needs to manage additional configuration in areas such as network setup. At the time of writing this only applies to Gitaly / Gitaly Cluster.
 
 In this section we'll go through the process for each.
@@ -152,7 +152,7 @@ Once you have the certificates ready proceed to the relevant sections below to c
 
 ### Configuring Internal SSL via Custom Files / Secrets and Custom Config
 
-For most components it's best to configure Internal SSL for each via [Custom Files](environment_advanced.md#custom-files) (or [Custom Secrets](environment_advanced_hybrid.md#custom-secrets-via-custom-tasks) for Cloud Native Hybrids) and [Custom Config](environment_advanced.md#custom-config) to allow for full control over the various options each can have depending on your requirements. This applies to all components in the GitLab setup except for those specifically noted in the below [Configuring Internal SSL directly for select components](#configuring-internal-ssl-directly-for-select-components) section.
+For most components it's best to configure Internal SSL for each via [Custom Files](environment_advanced.md#custom-files) (or [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks) for Cloud Native Hybrids) and [Custom Config](environment_advanced.md#custom-config) to allow for full control over the various options each can have depending on your requirements. This applies to all components in the GitLab setup except for those specifically noted in the below [Configuring Internal SSL directly for select components](#configuring-internal-ssl-directly-for-select-components) section.
 
 Some of the most common components to set up encryption for can be found in the below non-exhaustive table:
 
@@ -169,7 +169,7 @@ For each component the general steps to configure Internal SSL encryption is as 
 - **For Omnibus Components** - Upload your certificates to the component node groups via [Custom Files](environment_advanced.md#custom-files), including any CA files to client nodes.
   - Certificates and Keys should be uploaded to `/etc/gitlab/ssl` and CA files to `/etc/gitlab/trusted-certs` in mode `644` on every client. The Toolkit will create these folders as a convenience.
   - Set the desired config for each component and client node groups via [Custom Config](environment_advanced.md#omnibus).
-- **For Cloud Native Hybrid components** - Upload your certificates as [Custom Secrets](environment_advanced_hybrid.md#custom-secrets-via-custom-tasks).
+- **For Cloud Native Hybrid components** - Upload your certificates as [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
   - Typically, in this setup all that will be required is to upload [CA files](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities) as [Kubernetes secrets](https://kubernetes.io/docs/concepts/configuration/secret/). These can be with any name, but then these must match in the config. You can also choose to do this directly via `kubectl` if desired after initial deployment.
   - Set the desired [config](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities
 ) via [Custom Config](environment_advanced.md#helm).

@@ -131,6 +131,29 @@ gitaly_custom_files_paths: [
 
 With the above done the files will be copied by the Toolkit.
 
+## Custom GitLab Secrets
+
+[GitLab runs with several secrets internally](https://docs.gitlab.com/ee/development/application_secrets.html) that the Toolkit will propagate accordingly across nodes and / or Kubernetes clusters as required.
+
+As an additional feature, it's possible for you to pass in your own GitLab secrets, either some or all, that the Toolkit will merge with any existing secrets on the environment and subsequently propagate out.
+
+:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
+
+Custom GitLab secrets can be given as a JSON string via the following variable in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
+
+- `gitlab_custom_secrets_json` - A JSON string containing any [GitLab secrets](https://docs.gitlab.com/ee/development/application_secrets.html) that is to be used instead of the generated defaults. Any secret passed in this string will always take precedence. Optional, default is `""`.
+
+The value must be correctly formatted JSON that matches the structure of the GitLab secrets file for the Toolkit to parse correctly. An example of one way to do this in Ansible with a multiline YAML string is as follows:
+
+```yml
+gitlab_custom_secrets_json: |
+  {
+    "gitlab_workhorse": {
+      "secret_token": "<example_secret>"
+    }
+  }
+```
+
 ## Data Disks (GCP, AWS)
 
 The Toolkit supports provisioning and configuring extra disks, AKA data disks, for each group of machines (i.e. for all Gitaly nodes). With this set up you can have additional disk volumes mounted for storing data for added resilience and flexibility.

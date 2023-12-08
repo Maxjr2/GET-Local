@@ -89,7 +89,7 @@ all:
 
 Once completed, Prometheus will be scraping various Kubernetes, Pod and GitLab metrics.
 
-:information_source:&nbsp; The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-secrets-via-custom-tasks).
+:information_source:&nbsp; The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
 
 ## Custom Config
 
