@@ -16,7 +16,9 @@ ENV PATH="/root/.local/share/rtx/bin:/root/.local/share/rtx/shims:/root/.local/b
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl jq unzip && rm -rf /var/lib/apt/lists/*
 
 # Install RTX
-RUN curl https://rtx.pub/install.sh | sh
+RUN mkdir -p /root/.local/share/rtx/bin && \
+    curl https://rtx.pub/rtx-latest-linux-$(dpkg --print-architecture) > /root/.local/share/rtx/bin/rtx && \
+    chmod +x /root/.local/share/rtx/bin/rtx 
 
 # Install Terraform (via RTX)
 RUN rtx plugin add terraform && rtx install terraform
