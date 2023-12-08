@@ -455,11 +455,11 @@ As the primary site is not managed by the Toolkit, you'll need to follow the [Se
 
 The below settings will need to be added to the secondary sites inventory:
 
-- `gitlab_custom_secrets_file` - Path to the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `gitlab_custom_secrets_json`.
-- `gitlab_custom_secrets_json` - Contents of the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `gitlab_custom_secrets_file`.
-- `gitlab_custom_ssh_host_keys_folder` - Path to a folder that contains the downloaded primary sites ssh host keys.
-- `gitlab_custom_registry_key_file` - Path to the downloaded primary sites `gitlab-registry.key`, only required if using the container registry.
-- `gitlab_custom_psql_crt_file` - Path to the downloaded primary sites PostgreSQL `server.crt`
+- `geo_primary_secrets_file` - Path to the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `geo_primary_secrets_json`.
+- `geo_primary_secrets_json` - Contents of the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `geo_primary_secrets_file`.
+- `geo_primary_ssh_host_keys_folder` - Path to a folder that contains the downloaded primary sites ssh host keys.
+- `geo_primary_registry_key_file` - Path to the downloaded primary sites `gitlab-registry.key`, only required if using the container registry.
+- `geo_primary_psql_crt_file` - Path to the downloaded primary sites PostgreSQL `server.crt`
 - `geo_primary_postgres_host` - IP address for the Patroni leader / PostgreSQL host
 - `geo_primary_is_multi_node` - true/false, is the primary site multi node(2k+)
 - `geo_primary_postgres_is_ha` - true/false, is the primary site using Patroni(3k+)

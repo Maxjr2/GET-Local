@@ -545,7 +545,7 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
 
-### Custom Secrets (via Custom Tasks)
+### Custom Kubernetes Secrets (via Custom Tasks)
 
 The Toolkit supports adding additional Kubernetes Secrets for your deployment the Toolkit does provide a hook to do this via a tasks list.
 
@@ -567,7 +567,7 @@ Through this you can provide a custom Ansible tasks file that can run [`kubernet
   diff: false
 ```
 
-Providing custom secrets for the Charts is done as follows:
+Providing custom Kubernetes secrets for the Charts is done as follows:
 
 1. Create a standard Ansible Tasks yaml file with the tasks you wish to run.
     - The file must be in a format that can be run in Ansible's [`include_tasks`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html) module.

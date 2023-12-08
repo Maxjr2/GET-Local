@@ -35,7 +35,7 @@
 
 - name: Copy custom psql certificate to local temp
   fetch:
-    src: "{{ gitlab_custom_psql_crt_file }}"
+    src: "{{ geo_primary_psql_crt_file }}"
     dest: "{{ geo_psql_temp_folder.path }}/"
     flat: true
   no_log: true
@@ -45,7 +45,7 @@
   tags:
     - secondary-database
     - secondary
-  when: gitlab_custom_psql_crt_file != ""
+  when: geo_primary_psql_crt_file != ""
 
 - name: Configure the database for the secondary site
   import_tasks: secondary-database.yml
