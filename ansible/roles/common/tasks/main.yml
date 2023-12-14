@@ -82,23 +82,6 @@
       when: cloud_provider != 'none'
       tags: data_disks
 
-    - name: Run Custom Tasks
-      block:
-        - name: Check if Custom Tasks file exists
-          stat:
-            path: "{{ common_custom_tasks_file }}"
-          register: common_custom_tasks_file_path
-          delegate_to: localhost
-          become: false
-
-        - name: Run Custom Tasks
-          include_tasks:
-            file: "{{ common_custom_tasks_file }}"
-            apply:
-              tags: custom_tasks
-          when: common_custom_tasks_file_path.stat.exists
-      tags: custom_tasks
-
     # Create select GitLab folders if missing. Allows for setup before reconfigure.
     - name: Create select GitLab dirs if missing
       file:
@@ -309,6 +292,23 @@
       import_tasks: packages_upgrade.yml
       tags: packages
       when: not offline_setup
+
+    - name: Run Custom Tasks
+      block:
+        - name: Check if Custom Tasks file exists
+          stat:
+            path: "{{ common_custom_tasks_file }}"
+          register: common_custom_tasks_file_path
+          delegate_to: localhost
+          become: false
+
+        - name: Run Custom Tasks
+          include_tasks:
+            file: "{{ common_custom_tasks_file }}"
+            apply:
+              tags: custom_tasks
+          when: common_custom_tasks_file_path.stat.exists
+      tags: custom_tasks
 
     - name: Mark common has run
       set_fact:
