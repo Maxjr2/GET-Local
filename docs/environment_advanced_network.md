@@ -379,13 +379,13 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 
 When `offline_setup` is configured the Toolkit will not attempt to set up any repos or install the required packages. As such, you are required to ensure the packages are present before running Ansible. Note this also disables any setup of [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades).
 
-There are various ways this can be tackled. While this is outside the scope of this guide, all that's required here is that the packages are present. Some examples include setting up an [offline repo](https://help.ubuntu.com/community/AptGet/Offline/Repository), or by installing the packages beforehand manually on the boxes. The Toolkit's [Custom Tasks](environment_advanced.md#custom-tasks) feature can assist here with automating this consistently, in particular `common` tasks can be run on the target machines early.
+There are various ways this can be tackled. While this is outside the scope of this guide, all that's required here is that the packages are present beforehand. Some examples include installing the packages via an [offline repo](https://help.ubuntu.com/community/AptGet/Offline/Repository), directly via `deb` / `rpm` files.
 
 ### Python Packages
 
 The Toolkit also installs several Python packages via PyPI as required by Ansible - `requests==2.27.1, google-auth==2.22.0, netaddr==0.8.0, openshift==0.13.2, PyYAML==6.0.1, docker==5.0.3, pexpect==4.8.0, psycopg2==2.9.5`. Note that the packages are version locked as recommend for Python installs.
 
-When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as an offline PyPI repo or installing directly.
+When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as installing the packages via an offline PyPI repo or directly.
 
 :information_source:&nbsp; For the most up-to-date list of Python packages it's recommend to check the `python_packages` variable [in this file](../ansible/roles/common/defaults/main.yml).
 
