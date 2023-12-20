@@ -704,6 +704,10 @@ variable "memorystore_redis_transit_encryption_mode" {
   type    = string
   default = "DISABLED"
 }
+variable "memorystore_redis_customer_managed_key" {
+  type    = string
+  default = null
+}
 variable "memorystore_redis_weekly_maintenance_window_day" {
   type    = string
   default = null
@@ -730,6 +734,10 @@ variable "memorystore_redis_cache_transit_encryption_mode" {
   type    = string
   default = null
 }
+variable "memorystore_redis_cache_customer_managed_key" {
+  type    = string
+  default = null
+}
 variable "memorystore_redis_cache_weekly_maintenance_window_day" {
   type    = string
   default = null
@@ -753,6 +761,10 @@ variable "memorystore_redis_persistent_version" {
   default = null
 }
 variable "memorystore_redis_persistent_transit_encryption_mode" {
+  type    = string
+  default = null
+}
+variable "memorystore_redis_persistent_customer_managed_key" {
   type    = string
   default = null
 }

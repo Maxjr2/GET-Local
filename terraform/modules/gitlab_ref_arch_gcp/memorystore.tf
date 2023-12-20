@@ -8,6 +8,7 @@ resource "google_redis_instance" "gitlab_redis" {
 
   auth_enabled            = true
   transit_encryption_mode = var.memorystore_redis_transit_encryption_mode
+  customer_managed_key    = var.memorystore_redis_customer_managed_key
   authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
 
   redis_version      = var.memorystore_redis_version
@@ -48,6 +49,7 @@ locals {
   ## Use default values if specifics aren't specfied
   memorystore_redis_cache_version                              = coalesce(var.memorystore_redis_cache_version, var.memorystore_redis_version)
   memorystore_redis_cache_transit_encryption_mode              = coalesce(var.memorystore_redis_cache_transit_encryption_mode, var.memorystore_redis_transit_encryption_mode)
+  memorystore_redis_cache_customer_managed_key                 = var.memorystore_redis_cache_customer_managed_key != null ? var.memorystore_redis_cache_customer_managed_key : var.memorystore_redis_customer_managed_key
   memorystore_redis_cache_weekly_maintenance_window_day        = var.memorystore_redis_cache_weekly_maintenance_window_day != null ? var.memorystore_redis_cache_weekly_maintenance_window_day : var.memorystore_redis_weekly_maintenance_window_day
   memorystore_redis_cache_weekly_maintenance_window_start_time = var.memorystore_redis_cache_weekly_maintenance_window_start_time != null ? var.memorystore_redis_cache_weekly_maintenance_window_start_time : var.memorystore_redis_weekly_maintenance_window_start_time
 }
@@ -62,6 +64,7 @@ resource "google_redis_instance" "gitlab_redis_cache" {
 
   auth_enabled            = true
   transit_encryption_mode = local.memorystore_redis_cache_transit_encryption_mode
+  customer_managed_key    = local.memorystore_redis_cache_customer_managed_key
   authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
 
   redis_version      = local.memorystore_redis_cache_version
@@ -107,6 +110,7 @@ locals {
   ## Use default values if specifics aren't specfied
   memorystore_redis_persistent_version                              = coalesce(var.memorystore_redis_persistent_version, var.memorystore_redis_version)
   memorystore_redis_persistent_transit_encryption_mode              = coalesce(var.memorystore_redis_persistent_transit_encryption_mode, var.memorystore_redis_transit_encryption_mode)
+  memorystore_redis_persistent_customer_managed_key                 = var.memorystore_redis_persistent_customer_managed_key != null ? var.memorystore_redis_persistent_customer_managed_key : var.memorystore_redis_customer_managed_key
   memorystore_redis_persistent_weekly_maintenance_window_day        = var.memorystore_redis_persistent_weekly_maintenance_window_day != null ? var.memorystore_redis_persistent_weekly_maintenance_window_day : var.memorystore_redis_weekly_maintenance_window_day
   memorystore_redis_persistent_weekly_maintenance_window_start_time = var.memorystore_redis_persistent_weekly_maintenance_window_start_time != null ? var.memorystore_redis_persistent_weekly_maintenance_window_start_time : var.memorystore_redis_weekly_maintenance_window_start_time
 }
@@ -121,6 +125,7 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
 
   auth_enabled            = true
   transit_encryption_mode = local.memorystore_redis_persistent_transit_encryption_mode
+  customer_managed_key    = local.memorystore_redis_persistent_customer_managed_key
   authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
 
   redis_version      = local.memorystore_redis_persistent_version
