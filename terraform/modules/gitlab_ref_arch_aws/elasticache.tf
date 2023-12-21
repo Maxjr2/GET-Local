@@ -24,7 +24,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
 
   engine_version             = var.elasticache_redis_engine_version
   port                       = var.elasticache_redis_port
-  multi_az_enabled           = var.elasticache_redis_multi_az
+  multi_az_enabled           = var.elasticache_redis_node_count > 1 ? var.elasticache_redis_multi_az : false
   automatic_failover_enabled = var.elasticache_redis_node_count > 1 ? true : false
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
@@ -65,13 +65,16 @@ locals {
   elasticache_redis_cache_maintenance_window       = var.elasticache_redis_cache_maintenance_window != null ? var.elasticache_redis_cache_maintenance_window : var.elasticache_redis_maintenance_window
   elasticache_redis_cache_snapshot_retention_limit = var.elasticache_redis_cache_snapshot_retention_limit != null ? var.elasticache_redis_cache_snapshot_retention_limit : var.elasticache_redis_snapshot_retention_limit
   elasticache_redis_cache_snapshot_window          = var.elasticache_redis_cache_snapshot_window != null ? var.elasticache_redis_cache_snapshot_window : var.elasticache_redis_snapshot_window
+
+  elasticache_redis_cache_major_version = regex("(\\d).", local.elasticache_redis_cache_engine_version)[0]
 }
 
 resource "aws_elasticache_parameter_group" "gitlab_redis_cache" {
   count = var.elasticache_redis_cache_node_count > 0 ? 1 : 0
 
-  name   = "${var.prefix}-redis-cache-parameter-group"
-  family = "redis${local.elasticache_redis_cache_engine_version}"
+  name = "${var.prefix}-redis-cache-parameter-group-${local.elasticache_redis_cache_major_version}"
+  # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
+  family = "redis${local.elasticache_redis_cache_engine_version == "6.x" ? local.elasticache_redis_cache_engine_version : local.elasticache_redis_cache_major_version}"
 
   parameter {
     name  = "maxmemory-policy"
@@ -81,6 +84,10 @@ resource "aws_elasticache_parameter_group" "gitlab_redis_cache" {
   parameter {
     name  = "maxmemory-samples"
     value = "5"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -95,7 +102,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
 
   engine_version             = local.elasticache_redis_cache_engine_version
   port                       = local.elasticache_redis_cache_port
-  multi_az_enabled           = local.elasticache_redis_cache_multi_az
+  multi_az_enabled           = var.elasticache_redis_cache_node_count > 1 ? local.elasticache_redis_cache_multi_az : false
   automatic_failover_enabled = var.elasticache_redis_cache_node_count > 1 ? true : false
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
@@ -148,8 +155,8 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
 
   engine_version             = local.elasticache_redis_persistent_engine_version
   port                       = local.elasticache_redis_persistent_port
-  multi_az_enabled           = local.elasticache_redis_persistent_multi_az
-  automatic_failover_enabled = var.elasticache_redis_cache_node_count > 1 ? true : false
+  multi_az_enabled           = var.elasticache_redis_persistent_node_count > 1 ? local.elasticache_redis_persistent_multi_az : false
+  automatic_failover_enabled = var.elasticache_redis_persistent_node_count > 1 ? true : false
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
   kms_key_id                 = local.elasticache_redis_persistent_kms_key_arn != null ? local.elasticache_redis_persistent_kms_key_arn : var.default_kms_key_arn
