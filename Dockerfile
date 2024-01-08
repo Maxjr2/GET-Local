@@ -11,17 +11,17 @@ USER root
 WORKDIR /gitlab-environment-toolkit
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH="/root/.local/share/rtx/bin:/root/.local/share/rtx/shims:/root/.local/bin:$PATH"
+ENV PATH="/root/.local/share/mise/bin:/root/.local/share/mise/shims:/root/.local/bin:$PATH"
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl jq unzip && rm -rf /var/lib/apt/lists/*
 
-# Install RTX
-RUN mkdir -p /root/.local/share/rtx/bin && \
-    curl https://rtx.pub/rtx-latest-linux-$(dpkg --print-architecture) > /root/.local/share/rtx/bin/rtx && \
-    chmod +x /root/.local/share/rtx/bin/rtx 
+# Install Mise
+RUN mkdir -p /root/.local/share/mise/bin && \
+    curl https://mise.jdx.dev/mise-latest-linux-$(dpkg --print-architecture) > /root/.local/share/mise/bin/mise && \
+    chmod +x /root/.local/share/mise/bin/mise 
 
-# Install Terraform (via RTX)
-RUN rtx plugin add terraform && rtx install terraform
+# Install Terraform (via Mise)
+RUN mise install terraform -y
 
 # Install Ansible
 ## Install Python Packages (Including Ansible)
@@ -40,7 +40,7 @@ USER root
 WORKDIR /gitlab-environment-toolkit
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH="/root/.local/share/rtx/bin:/root/.local/share/rtx/shims:/root/.local/bin:$PATH"
+ENV PATH="/root/.local/share/mise/bin:/root/.local/share/mise/shims:/root/.local/bin:$PATH"
 
 ENV GCP_AUTH_KIND="application"
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
@@ -65,7 +65,7 @@ RUN curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-
 
 # Configure environment on login
 RUN echo -e '\n. /gitlab-environment-toolkit/bin/setup-get-symlinks.sh' >> ~/.bashrc && \
-    echo -e '\neval "$(rtx activate bash)"' >> ~/.bashrc
+    echo -e '\neval "$(mise activate bash)"' >> ~/.bashrc
 
 RUN mkdir -p /gitlab-environment-toolkit/keys && mkdir /environments
 

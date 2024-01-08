@@ -29,32 +29,35 @@ For the Toolkit Terraform `v1.5.0` or higher is required.
 
 Terraform generally works best when all users for an environment are using the same major version due to its State. As such it's recommended that all users sync on the same version of Terraform when working against the same environment and any Terraform upgrades are done in unison.
 
-### Install Terraform using `rtx` or `asdf`
+### Install Terraform using `mise` or `asdf`
 
-With the above considerations then we recommend installing Terraform with a Version Manager such as [`rtx`](https://github.com/jdx/rtx) or [`asdf`](https://asdf-vm.com/#/) (if supported on your machine(s)).
+With the above considerations then we recommend installing Terraform with a Version Manager such as [`mise`](https://github.com/jdx/mise) or [`asdf`](https://asdf-vm.com/#/) (if supported on your machine(s)).
 
 Installing Terraform with a version manager like this has several benefits:
 
 - It's significantly easier to install and switch between multiple versions of Terraform once set up.
 - The Terraform version can be specified in a `.tool-versions` file, version managers will look for and automatically switch to the version specified, this is useful when managing multiple environments where the Terraform version differs.
 
-As an example, installing Terraform with `rtx` is done as follows:
+As an example, installing Terraform with `mise` is done as follows:
 
-1. Install `rtx` as per its [documentation](https://github.com/jdx/rtx#installation)
+1. Install `mise` as per its [documentation](https://mise.jdx.dev/getting-started.html)
 1. In the Toolkit directory, install the default version of Terraform by first adding its plugin and then installing:
 
     ```sh
-    rtx plugins add terraform
-    rtx install terraform
+    mise install terraform -y
     ```
 
-:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required.
+:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required via `mise` - `mise install terraform <version> -y`
 
 With the above completed Terraform should now be available on your command line. You can check this by running `terraform version`.
 
 ### Using Terraform via a Docker image
 
-It is possible to use Terraform from a Docker image. The [Toolkit's image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) contains Terraform and all other tools needed. Follow the official [Docker installation instructions](https://docs.docker.com/engine/install/) to correctly install and run Docker.
+It is possible to use Terraform from a Docker image.
+
+The [Toolkit's image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) comes with the default version of Terraform installed as defined in [`.tool-versions`](../.tool-versions) via the `mise` package manager. Additional Terraform versions can be installed via `mise` as [detailed earlier](#install-terraform-using-mise-or-asdf).
+
+Follow the official [Docker installation instructions](https://docs.docker.com/engine/install/) to correctly install and run Docker.
 
 ## 2. Select Module Source
 
