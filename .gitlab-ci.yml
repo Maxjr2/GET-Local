@@ -93,7 +93,8 @@ check:tflint:
     name: ghcr.io/terraform-linters/tflint:latest
     entrypoint: [""]
   script:
-    - find terraform/modules/* -type d -prune -not -path templates -print0 | xargs -0 -n1 -I % sh -c "printf '\n%\n' && tflint -c $PWD/.tflint.hcl --chdir %"
+    - cd terraform/modules
+    - tflint -c "$PWD/../../.tflint.hcl" --recursive
   rules:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
 

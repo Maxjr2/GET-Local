@@ -472,7 +472,7 @@ Once the secrets have been downloaded and the secondary site's inventory updated
 ansible-playbook -i <secondary inventory> playbooks/gitlab_geo.yml -t secondary
 ```
 
-Once completed you will need to follow the steps to [Add the secondary site](https://docs.gitlab.com/ee/administration/geo/setup/two_single_node_sites.html#add-the-secondary-site) to the primary site, starting from step 4 `Navigate to the primary node GitLab instance`. If using [GitLab-managed object storage replication](https://docs.gitlab.com/16.4/ee/administration/geo/replication/object_storage.html#enabling-gitlab-managed-object-storage-replication) then you will also need to enable this now on the primary site.
+Once completed you will need to follow the steps to [Add the secondary site](https://docs.gitlab.com/ee/administration/geo/setup/two_single_node_sites.html#add-the-secondary-site) to the primary site, starting from step 4 `Navigate to the primary node GitLab instance`. If using [GitLab-managed object storage replication](https://docs.gitlab.com/ee/administration/geo/replication/object_storage.html#enabling-gitlab-managed-object-storage-replication) then you will also need to enable this now on the primary site.
 
 Once complete, you'll need to restart the GitLab Rails/Sidekiq nodes on the primary and secondary sites, for the secondary site you can run the below command:
 
