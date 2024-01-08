@@ -82,8 +82,7 @@
   block:
     - name: Configure License
       import_tasks: license.yml
-      when:
-        - gitlab_license_plan is not defined
+      when: gitlab_license_plan is not defined
       tags:
         - license
         - opensearch

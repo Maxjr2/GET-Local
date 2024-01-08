@@ -1,8 +1,13 @@
 - name: Check for or configure subscription / license via GitLab Rails
   block:
-    - name: Check for or configure subscription / license via GitLab Rails
+    - name: Check for existing license or configure new subscription / license via GitLab Rails
       command: |
         gitlab-rails runner "
+          if License.current&.plan != nil
+            print License.current.plan
+            exit
+          end
+
           if '{{ gitlab_subscription_activation_code }}' != ''
             GitlabSubscriptions::ActivateService.new.execute('{{ gitlab_subscription_activation_code }}')
           elsif '{{ gitlab_license_text }}' != ''
@@ -27,12 +32,17 @@
 
 - name: Check for or configure subscription / license via GitLab Toolbox pod
   block:
-    - name: Check for or configure subscription / license via GitLab Toolbox pod
+    - name: Check for existing license or configure new subscription / license via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "
+            if License.current&.plan != nil
+              print License.current.plan
+              exit
+            end
+
             if '{{ gitlab_subscription_activation_code }}' != ''
               GitlabSubscriptions::ActivateService.new.execute('{{ gitlab_subscription_activation_code }}')
             elsif '{{ gitlab_license_text }}' != ''
