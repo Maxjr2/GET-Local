@@ -5,11 +5,14 @@
 # itself for more refined testing. Jenkins will look for for a tflint.hcl for
 # each module, if one does not exist, the below config will be used.
 
-config {
-  module = false
-  force  = false
+plugin "terraform" {
+  enabled = true
+  preset  = "recommended"
+}
 
-  variables = ["prefix=tflint"]
+config {
+  call_module_type = "none"
+  force            = false
 }
 
 rule "terraform_deprecated_interpolation" {
