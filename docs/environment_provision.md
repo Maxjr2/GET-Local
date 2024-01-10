@@ -276,7 +276,10 @@ output "gitlab_ref_arch_gcp" {
 Next in the file are the various machine settings, separated the same as the Reference Architectures. To avoid repetition we'll describe each setting once:
 
 - `*_node_count` - The number of machines to set up for that component
-- `*_machine_type` - The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for that component
+- `*_machine_type` - The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for that component.
+- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB). 
+- `*_disk_type` - The [GCP disk type](https://cloud.google.com/compute/docs/disks/performance#type_comparison) that should be used for the root disk. For Gitaly and OpenSearch machines this defaults to `pd-ssd`. If not set, this defaults to `default_disk_type`, which is set to `pd-standard`.
+  - :information_source:&nbsp; Disk IOPS performance in GCP is determined not only by the disk type but also several other factors such as CPU and storage size. [Refer to the GCP documentation for more information](https://cloud.google.com/compute/docs/disks/performance).
 - `haproxy_external_external_ips` - Set the external HAProxy load balancer to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP.
 
 In addition to the above, the following optional settings are also available:
@@ -288,6 +291,8 @@ In addition to the above, the following optional settings are also available:
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
 - `object_storage_labels` - Labels to apply to object storage buckets.
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
+- `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
+- `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `pd-standard`.
 - `allow_stopping_for_update` - Controls whether Terraform can restart VMs when making changes if required. Should only be disabled for additional resilience. Defaults to `true`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
@@ -523,19 +528,28 @@ output "gitlab_ref_arch_aws" {
   - `source` - The relative path to the `gitlab_ref_arch_aws` module. We assume you're creating config in the `terraform/environments/` folder here but if you're in a different location this setting must be updated to the correct path.
   - `prefix` - The name prefix of the project. Set in `variables.tf`.
   - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`. Not required if another connection method is being used.
-  - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
-  - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-  - `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
-  - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
-  - `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
-  - `additional_tags` - Additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VM (including root disks) or Kubernetes resources. Optional, default is `{}`
 
 Next in the file are the various machine settings, separated the same as the Reference Architectures. To avoid repetition we'll describe each setting once:
 
 - `*_node_count` - The number of machines to set up for that component
 - `*_instance_type` - The [AWS Instance Type Machine Type](https://aws.amazon.com/ec2/instance-types/) (size) for that component
-- `*_disk_delete_on_termination` - (Optional) Whether the root volume should be destroyed on instance termination. Defaults to true
+- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
+- `*_disk_type` - The [AWS disk type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html) that should be used for the root disk. Note that the HDD options (`st1` / `sc1`) are not available for root disks. If not set, this defaults to `default_disk_type`, which is set to `gp3`.
+  - :information_source:&nbsp; Disk IOPS performance in AWS differs depending on type. For the most common `gp3` [General Purpose SSD type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/general-purpose.html#gp3-ebs-volume-type) a baseline of 3000 IOPS is given with additional IOPS configurable. With this disk type, configuring additional IOPS is offered only for components that may require it as follows:
+    - `gitaly_disk_iops` - The amount of total IOPS to provision for the Gitaly node root disks. Defaults to `8000`.
+- `*_disk_delete_on_termination` - (Optional) Whether the root volume should be destroyed on instance termination. Defaults to `true`.
 - `haproxy_external_elastic_ip_allocation_ids` - Set the external HAProxy load balancer to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID.
+
+In addition to the above, the following optional settings are also available:
+
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
+- `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
+- `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
+- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
+- `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
+- `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
+- `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `gp3`.
+- `additional_tags` - Additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VM (including root disks) or Kubernetes resources. Optional, default is `{}`
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
@@ -770,15 +784,23 @@ output "gitlab_ref_arch_azure" {
   - `storage_account_name` - The name of the storage account. Set in `variables.tf`.
   - `vm_admin_username` - The username of the administrator for the virtual machines. Set in `variables.tf`.
   - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`.
-  - `external_ip_type` - [The type of Public IP](https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses) that will be created for each VM. Can be either `Standard` (recommended) or `Basic`. Default is `Basic` for backwards compatibility.
-  - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
-  - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
 
 Next in the file are the various machine settings, separated the same as the Reference Architectures. To avoid repetition we'll describe each setting once:
 
 - `*_node_count` - The number of machines to set up for that component
-- `*_size` - The [Azure Machine Size](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes) for that component
+- `*_size` - The [Azure Machine Size](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes) for that component.
+- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly machines this defaults to `4095` (GB) for IOPS requirements. For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB). 
+- `*_storage_account_type` - The [Azure disk storage account type](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types) that should be used for the root disk. For Gitaly machines this defaults to `Premium_LRS` (Premium SSD). If not set, this defaults to `default_disk_type`, which is set to `Standard_LRS` (Standard HDD).
+  - :information_source:&nbsp; Disk IOPS performance in Azure is determined not only by the disk type but also several other factors such as storage size. [Refer to the Azure documentation for more information](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size).
 - `haproxy_external_external_ip_names` - Set the external HAProxy load balancer to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name.
+
+In addition to the above, the following optional settings are also available:
+
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
+- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
+- `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
+- `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `Standard_LRS`.
+- `external_ip_type` - [The type of Public IP](https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses) that will be created for each VM. Can be either `Standard` (recommended) or `Basic`. Default is `Basic` for backwards compatibility.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
