@@ -1206,6 +1206,16 @@ variable "elasticache_redis_snapshot_window" {
   type    = string
   default = null
 }
+variable "elasticache_redis_final_snapshot_identifier" {
+  description = "Name of final snapshot to create if cluster is destroyed. If null no snapshot is created."
+  type        = string
+  default     = null
+}
+variable "elasticache_redis_snapshot_name" {
+  description = "Name of a snapshot from which to restore data into the new node group. Changing this setting forces a new resource."
+  type        = string
+  default     = null
+}
 variable "elasticache_redis_default_subnet_count" {
   type    = number
   default = 2
@@ -1258,6 +1268,16 @@ variable "elasticache_redis_cache_snapshot_window" {
   type    = string
   default = null
 }
+variable "elasticache_redis_cache_final_snapshot_identifier" {
+  description = "Name of final snapshot to create if cluster is destroyed. If null no snapshot is created."
+  type        = string
+  default     = null
+}
+variable "elasticache_redis_cache_snapshot_name" {
+  description = "Name of a snapshot from which to restore data into the new node group. Changing this setting forces a new resource."
+  type        = string
+  default     = null
+}
 variable "elasticache_redis_cache_tags" {
   description = "Tags to apply to ElastiCache Redis Cache"
   type        = map(any)
@@ -1305,6 +1325,16 @@ variable "elasticache_redis_persistent_snapshot_retention_limit" {
 variable "elasticache_redis_persistent_snapshot_window" {
   type    = string
   default = null
+}
+variable "elasticache_redis_persistent_final_snapshot_identifier" {
+  description = "Name of final snapshot to create if cluster is destroyed. If null no snapshot is created."
+  type        = string
+  default     = null
+}
+variable "elasticache_redis_persistent_snapshot_name" {
+  description = "Name of a snapshot from which to restore data into the new node group. Changing this setting forces a new resource."
+  type        = string
+  default     = null
 }
 variable "elasticache_redis_persistent_tags" {
   description = "Tags to apply to ElastiCache Redis Persistent"

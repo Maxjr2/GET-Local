@@ -508,7 +508,7 @@ For required variables they need to be set for each Redis service you are provis
   - `elasticache_redis_cache_kms_key_arn` or `elasticache_redis_persistent_kms_key_arn` when setting up separate services.
   - **Warning** Changing this value after the initial creation will result in the Redis instance being recreated and may lead to **data loss**.
 
-For optional variables they work in a default like manner. When configuring for any Redis types the main `elasticache_redis_*` variable can be set once and this will apply to all but you can also additionally override this behaviour with specific variables as follows:
+Next are optional variables. The following variables can be set once with the `elasticache_redis_*` prefix, which will apply to every provisioned service, but you can also additionally override this behaviour with specific variables as follows:
 
 - `elasticache_redis_password` - The password of the Redis instance. Must follow the [requirements as mandated by AWS](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html#auth-overview). **Required**.
   - Optionally `elasticache_redis_cache_password` or `elasticache_redis_persistent_password` can be used to override for separate services.
@@ -527,7 +527,15 @@ For optional variables they work in a default like manner. When configuring for 
 - [`elasticache_redis_snapshot_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_window) - The daily time range where backups will be taken, e.g. `09:46-10:16`. Optional, default is `null`.
   - Optionally `elasticache_redis_cache_snapshot_window` or `elasticache_redis_persistent_snapshot_window` can be used to override for separate services.
 - `elasticache_redis_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
-- [`elasticache_redis_tags`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#tags) - A map of [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to ElastiCache instance. Optional, default is `{}`.
+
+The following optional variables do not default to the `elasticache_redis_*` prefix if set and must be set for each specific service if desired:
+
+- [`elasticache_redis_final_snapshot_identifier`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#final_snapshot_identifier) - Name of final snapshot to create if cluster is destroyed. If `null` no snapshot is created. Note that this can cause name clashes if a cluster has been destroyed multiple times and the snapshot persists. Optional, default is `null`.
+  - `elasticache_redis_cache_snapshot_name` or `elasticache_redis_persistent_final_snapshot_identifier` when setting up separate services.
+- [`elasticache_redis_snapshot_name`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_name) - Name of a snapshot from which to restore data into the new node group. Changing this setting forces a new resource. Optional, default is `null`.
+  - `elasticache_redis_cache_snapshot_name` or `elasticache_redis_persistent_snapshot_name` when setting up separate services.
+- [`elasticache_redis_tags` / `elasticache_redis_cache_tags` / `elasticache_redis_persistent_tags`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#tags) - A map of [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to ElastiCache instance. Optional, default is `{}`.
+  - `elasticache_redis_cache_tags` or `elasticache_redis_persistent_tags` when setting up separate services.
 
 If deploying a combined Redis setup that contains all queues (5k and lower) the following settings should be set (replacing any previous `redis_*` settings):
 

@@ -37,6 +37,9 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   snapshot_retention_limit = var.elasticache_redis_snapshot_retention_limit
   snapshot_window          = var.elasticache_redis_snapshot_window
 
+  final_snapshot_identifier = var.elasticache_redis_final_snapshot_identifier
+  snapshot_name             = var.elasticache_redis_snapshot_name
+
   subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
   security_group_ids = [
     aws_security_group.gitlab_elasticache_redis[0].id
@@ -115,6 +118,9 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   snapshot_retention_limit = local.elasticache_redis_cache_snapshot_retention_limit
   snapshot_window          = local.elasticache_redis_cache_snapshot_window
 
+  final_snapshot_identifier = var.elasticache_redis_cache_final_snapshot_identifier
+  snapshot_name             = var.elasticache_redis_cache_snapshot_name
+
   subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
   security_group_ids = [
     aws_security_group.gitlab_elasticache_redis_cache[0].id
@@ -167,6 +173,9 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   maintenance_window       = local.elasticache_redis_persistent_maintenance_window
   snapshot_retention_limit = local.elasticache_redis_persistent_snapshot_retention_limit
   snapshot_window          = local.elasticache_redis_persistent_snapshot_window
+
+  final_snapshot_identifier = var.elasticache_redis_persistent_final_snapshot_identifier
+  snapshot_name             = var.elasticache_redis_persistent_snapshot_name
 
   subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
   security_group_ids = [
