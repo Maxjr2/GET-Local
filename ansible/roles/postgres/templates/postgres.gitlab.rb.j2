@@ -16,8 +16,17 @@ patroni['username'] = 'patroni-api'
 patroni['password'] = '{{ patroni_password }}'
 {% endif %}
 
+# PgBouncer config (Database Load Balancing)
+pgbouncer['databases'] = {
+  gitlabhq_production: {
+    host: "127.0.0.1",
+    user: "pgbouncer",
+    password: "{{ (pgbouncer_password + 'pgbouncer') | md5 }}"
+  }
+}
+
 {% else %}
-roles ['postgres_role', 'pgbouncer_role']
+roles ['postgres_role']
 {% endif %}
 
 {% if postgres_version is defined %}
@@ -27,22 +36,15 @@ postgresql['version'] = {{ postgres_version }}
 # PostgreSQL configuration
 postgresql['listen_address'] = '0.0.0.0'
 
-postgresql['pgbouncer_user_password'] = "{{ (pgbouncer_password + 'pgbouncer') | md5 }}"
 postgresql['sql_user_password'] = "{{ (postgres_password + 'gitlab') | md5 }}"
+{% if 'pgbouncer' in groups or groups['postgres'] | length > 1 %}
+postgresql['pgbouncer_user_password'] = "{{ (pgbouncer_password + 'pgbouncer') | md5 }}"
+{% endif %}
 
 postgresql['trust_auth_cidr_addresses'] = {{ postgres_trust_auth_cidr_blocks }}
 postgresql['md5_auth_cidr_addresses'] = {{ postgres_md5_auth_cidr_blocks }}
 
 gitlab_rails['auto_migrate'] = false
-
-# PgBouncer (for load balancing reads)
-pgbouncer['databases'] = {
-  gitlabhq_production: {
-    host: "127.0.0.1",
-    user: "pgbouncer",
-    password: "{{ (pgbouncer_password + 'pgbouncer') | md5 }}"
-  }
-}
 
 {% if 'consul' in groups %}
 # Consul Agent (Monitoring Auto Discovery)
