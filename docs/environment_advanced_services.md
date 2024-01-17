@@ -305,6 +305,27 @@ Once the variables are set in your file you can proceed to provision the service
 
 Once provisioned the database will be configured, and you'll see several new outputs at the end of the process. Key from this is the `cloud_sql_host` output, which contains the [Private IP](https://cloud.google.com/sql/docs/postgres/configure-private-ip#connect_to_an_instance_using_its_private_ip) address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
 
+##### GCP Cloud SQL Parameters
+
+It's possible to configure [Cloud SQL Postgres parameters](https://cloud.google.com/sql/docs/postgres/flags) via the Toolkit if desired.
+
+By default, the Toolkit sets the [following parameters](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/terraform/modules/gitlab_ref_arch_aws/rds.tf#L9) to follow [GitLab recommendations](https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks) as applicable:
+
+```yaml
+{
+  password_encryption = "scram-sha-256"
+  log_min_duration_statement = 1000
+  idle_in_transaction_session_timeout = 60000
+  deadlock_timeout = 5000
+}
+```
+
+With the following variable you can configure any [available parameter](https://cloud.google.com/sql/docs/postgres/flags#list-flags-postgres), including the above in overriding fashion:
+
+- `cloud_sql_postgres_params` - A map of [Postgres parameters](https://cloud.google.com/sql/docs/postgres/flags#list-flags-postgres) to configure in Cloud SQL. Any param set here will take precedence. Optional, default is `{}`.
+
+:information_source:&nbsp; Parameters for the Praefect database can also be done if provisioned via the `cloud_sql_praefect_postgres_params` variable.
+
 ##### GCP Cloud SQL SSL config
 
 GCP Cloud SQL does offer the ability to connect to Postgres over SSL. However, it should be noted this has some considerations:

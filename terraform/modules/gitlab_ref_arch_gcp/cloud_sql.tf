@@ -1,3 +1,9 @@
+locals {
+  # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks
+  # statement_timeout setting not available on GCP Cloud SQL
+  cloud_sql_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, deadlock_timeout = 5000 }
+}
+
 resource "google_sql_database_instance" "gitlab" {
   count = var.cloud_sql_postgres_machine_tier != "" ? 1 : 0
 
@@ -21,13 +27,12 @@ resource "google_sql_database_instance" "gitlab" {
       require_ssl     = var.cloud_sql_postgres_require_ssl
     }
 
-    database_flags {
-      name  = "password_encryption"
-      value = "scram-sha-256"
-    }
-    database_flags {
-      name  = "log_min_duration_statement"
-      value = 1000
+    dynamic "database_flags" {
+      for_each = merge(local.cloud_sql_postgres_default_params, var.cloud_sql_postgres_params)
+      content {
+        name  = database_flags.key
+        value = database_flags.value
+      }
     }
 
     dynamic "backup_configuration" {
