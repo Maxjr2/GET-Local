@@ -581,6 +581,11 @@ variable "cloud_sql_postgres_deletion_protection" {
   type    = bool
   default = false
 }
+variable "cloud_sql_postgres_params" {
+  description = "Additional Cloud SQL parameter group settings"
+  type        = map(any)
+  default     = {}
+}
 variable "cloud_sql_postgres_backup_configuration" {
   type = object({
     enabled = optional(bool)
@@ -660,6 +665,11 @@ variable "cloud_sql_praefect_postgres_availability_type" {
 variable "cloud_sql_praefect_postgres_encryption_key_name" {
   type    = string
   default = null
+}
+variable "cloud_sql_praefect_postgres_params" {
+  description = "Additional Cloud SQL Praefect parameter group settings"
+  type        = map(any)
+  default     = {}
 }
 variable "cloud_sql_praefect_postgres_backup_configuration" {
   type = object({
