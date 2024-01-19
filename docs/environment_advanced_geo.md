@@ -428,6 +428,8 @@ To enable Container registry replication you will need to define `container_regi
 
 ## Migrating from an external Primary Site using Geo (Linux Package)
 
+:information_source:&nbsp; Currently, migrating from an external primary site is only supported when using the Linux Package, support for CLoud Native Hybrid environments can be tracked in https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/802
+
 This section details how to setup Geo replication when the primary site is an external resource that is not provisioned by the Toolkit. This guide is intended to be used when migrating from a non Toolkit provisioned environment to a new instance that will be managed by the Toolkit. In this scenario, Geo is the mechanism to transfer data from one instance to another and is not intended to be used as a standard Geo deployment.
 
 ### Prerequisites
