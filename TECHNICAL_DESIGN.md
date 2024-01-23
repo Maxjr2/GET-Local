@@ -216,6 +216,23 @@ The following rules apply for Toolkit releases and support between them:
 - We aim to support Backwards Compatibility between minor releases. Although some small breaking changes may be added with adequate notice if the need is justified.
 - Backwards Compatibility is not guaranteed for in development code on the main branch.
 
+#### Support for New / Beta GitLab components
+
+As a general rule we only aim to add support for new or beta GitLab components once the feature has reached a good level of development maturity.
+
+Adding a component to GET is similar to adding one to the Reference Architectures and should happen quite far along in its development. The component requires a level of maturity as to answer the questions of how this is expected to run in production, which in turn drives the design in GET. We also require robust documentation on how to set up the component.
+
+Examples of maturity questions can be the following: 
+
+- Can the component work with both the Linux package (Omnibus) and Charts? 
+- What are the requirements to run in production with good performance? 
+- How does the component work in HA?
+- How does the component work in Geo setup?
+- What is the process for upgrading the component? Does it support Zero Downtime upgrades?
+- What is the [operational readiness](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Operational%20Readiness.md?ref_type=heads) status of the component?
+
+Each new component addition request will be reviewed using this guidance along with any additional context.
+
 #### Prefer Custom Config for GitLab variables
 
 As a general rule we prefer [Custom Config](docs/environment_advanced.md#custom-config) over encapsulating individual GitLab variables for the following reasons:
