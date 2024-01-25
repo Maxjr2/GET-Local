@@ -57,7 +57,7 @@ resource "google_compute_instance" "gitlab" {
   }
 
   service_account {
-    email  = google_service_account.gitlab[0].email
+    email  = module.google_service_account[0].email
     scopes = var.service_account_iam_scopes
   }
 
@@ -97,11 +97,17 @@ locals {
 }
 
 ## Service Account
-resource "google_service_account" "gitlab" {
-  count = min(var.node_count, 1)
+
+module "google_service_account" {
+  source = "../gitlab_gcp_service_account"
+  count  = min(var.node_count, 1)
 
   account_id   = "${var.service_account_prefix}-${var.node_type}"
   display_name = local.name_prefix
+
+  custom_service_account_email = var.custom_service_account_email
+
+  service_account_profiles = var.service_account_profiles
 }
 
 ## Data Disks
@@ -117,4 +123,10 @@ resource "google_compute_disk" "gitlab" {
 resource "google_compute_address" "gitlab" {
   count = length(var.external_ips) == 0 && var.setup_external_ip ? var.node_count : 0
   name  = "${local.name_prefix}-ip-${count.index + 1}"
+}
+
+## Refactors
+moved {
+  from = google_service_account.gitlab
+  to   = module.google_service_account[0].google_service_account.gitlab
 }

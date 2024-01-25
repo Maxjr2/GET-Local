@@ -53,6 +53,12 @@ variable "service_account_prefix" {
   }
 }
 
+variable "custom_service_account_emails" {
+  description = "A map containing the custom service accounts email to be used. If not supplied, service accounts will be created"
+  type        = map(string)
+  default     = {}
+}
+
 # Object Storage
 variable "object_storage_buckets" {
   type    = list(string)
