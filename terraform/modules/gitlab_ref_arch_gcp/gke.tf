@@ -1,17 +1,14 @@
 locals {
   total_node_pool_count = var.webservice_node_pool_count + var.sidekiq_node_pool_count + var.supporting_node_pool_count + var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count
 
-  webservice_node_pool_autoscaling = var.webservice_node_pool_max_count > 0
-  sidekiq_node_pool_autoscaling    = var.sidekiq_node_pool_max_count > 0
-  supporting_node_pool_autoscaling = var.supporting_node_pool_max_count > 0
-
-  node_pool_zones       = var.gke_zones != null ? var.gke_zones : (var.kubernetes_zones != null ? var.kubernetes_zones : var.zones)
-  node_pool_zones_count = local.node_pool_zones != null ? length(local.node_pool_zones) : 1
+  node_pool_locations = var.gke_zones != null ? var.gke_zones : (var.kubernetes_zones != null ? var.kubernetes_zones : var.zones)
 }
 
 resource "google_container_cluster" "gitlab_cluster" {
   count = min(local.total_node_pool_count, 1)
-  name  = var.prefix
+
+  name     = var.prefix
+  location = var.gke_location
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -19,6 +16,8 @@ resource "google_container_cluster" "gitlab_cluster" {
   remove_default_node_pool = true
   initial_node_count       = 1
   enable_shielded_nodes    = true
+
+  deletion_protection = var.gke_deletion_protection
 
   network    = local.vpc_name
   subnetwork = local.subnet_name
@@ -80,6 +79,13 @@ resource "google_container_cluster" "gitlab_cluster" {
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
   }
+
+  # Ensure avoidance of unexpected rebuilds as location controls Regional / Zonal clusters
+  lifecycle {
+    ignore_changes = [
+      location
+    ]
+  }
 }
 
 resource "google_container_node_pool" "gitlab_webservice_pool" {
@@ -88,19 +94,14 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
   # Max 14 chars, unique_id adds 26 chars, total max 40.
   name_prefix    = "gl-webservice-"
   cluster        = google_container_cluster.gitlab_cluster[0].name
-  node_locations = local.node_pool_zones
+  node_locations = local.node_pool_locations
 
-  node_count = local.webservice_node_pool_autoscaling ? null : ceil(var.webservice_node_pool_count / local.node_pool_zones_count)
-
-  # Cluster Autoscaling (Optional)
-  initial_node_count = local.webservice_node_pool_autoscaling ? ceil(var.webservice_node_pool_min_count / local.node_pool_zones_count) : null
-  dynamic "autoscaling" {
-    for_each = range(local.webservice_node_pool_autoscaling ? 1 : 0)
-
-    content {
-      max_node_count = ceil(var.webservice_node_pool_max_count / local.node_pool_zones_count)
-      min_node_count = ceil(var.webservice_node_pool_min_count / local.node_pool_zones_count)
-    }
+  # Node Count(s)
+  # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
+  initial_node_count = var.webservice_node_pool_min_count > 0 ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
+  autoscaling {
+    total_max_node_count = var.webservice_node_pool_max_count > 0 ? var.webservice_node_pool_max_count : var.webservice_node_pool_count
+    total_min_node_count = var.webservice_node_pool_min_count > 0 ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
   }
 
   management {
@@ -162,19 +163,14 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
   # Max 14 chars, unique_id adds 26 chars, total max 40.
   name_prefix    = "gl-sidekiq-"
   cluster        = google_container_cluster.gitlab_cluster[0].name
-  node_locations = local.node_pool_zones
+  node_locations = local.node_pool_locations
 
-  node_count = local.sidekiq_node_pool_autoscaling ? null : ceil(var.sidekiq_node_pool_count / local.node_pool_zones_count)
-
-  # Cluster Autoscaling (Optional)
-  initial_node_count = local.sidekiq_node_pool_autoscaling ? ceil(var.sidekiq_node_pool_min_count / local.node_pool_zones_count) : null
-  dynamic "autoscaling" {
-    for_each = range(local.sidekiq_node_pool_autoscaling ? 1 : 0)
-
-    content {
-      max_node_count = ceil(var.sidekiq_node_pool_max_count / local.node_pool_zones_count)
-      min_node_count = ceil(var.sidekiq_node_pool_min_count / local.node_pool_zones_count)
-    }
+  # Node Count(s)
+  # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
+  initial_node_count = var.sidekiq_node_pool_min_count > 0 ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
+  autoscaling {
+    total_max_node_count = var.sidekiq_node_pool_max_count > 0 ? var.sidekiq_node_pool_max_count : var.sidekiq_node_pool_count
+    total_min_node_count = var.sidekiq_node_pool_min_count > 0 ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
   }
 
   management {
@@ -236,19 +232,14 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   # Max 14 chars, unique_id adds 26 chars, total max 40.
   name_prefix    = "gl-supporting-"
   cluster        = google_container_cluster.gitlab_cluster[0].name
-  node_locations = local.node_pool_zones
+  node_locations = local.node_pool_locations
 
-  node_count = local.supporting_node_pool_autoscaling ? null : ceil(var.supporting_node_pool_count / local.node_pool_zones_count)
-
-  # Cluster Autoscaling (Optional)
-  initial_node_count = local.supporting_node_pool_autoscaling ? ceil(var.supporting_node_pool_min_count / local.node_pool_zones_count) : null
-  dynamic "autoscaling" {
-    for_each = range(local.supporting_node_pool_autoscaling ? 1 : 0)
-
-    content {
-      max_node_count = ceil(var.supporting_node_pool_max_count / local.node_pool_zones_count)
-      min_node_count = ceil(var.supporting_node_pool_min_count / local.node_pool_zones_count)
-    }
+  # Node Count(s)
+  # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
+  initial_node_count = var.supporting_node_pool_min_count > 0 ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
+  autoscaling {
+    total_max_node_count = var.supporting_node_pool_max_count > 0 ? var.supporting_node_pool_max_count : var.supporting_node_pool_count
+    total_min_node_count = var.supporting_node_pool_min_count > 0 ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
   }
 
   management {

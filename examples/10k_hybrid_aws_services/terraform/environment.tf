@@ -9,13 +9,16 @@ module "gitlab_ref_arch_aws" {
   elb_internal_create = true
 
   # 10k - K8s
-  webservice_node_pool_count         = 4
+  webservice_node_pool_max_count     = 4
+  webservice_node_pool_min_count     = 1
   webservice_node_pool_instance_type = "c5.9xlarge"
 
-  sidekiq_node_pool_count         = 4
+  sidekiq_node_pool_max_count     = 4
+  sidekiq_node_pool_min_count     = 1
   sidekiq_node_pool_instance_type = "m5.xlarge"
 
-  supporting_node_pool_count         = 2
+  supporting_node_pool_max_count     = 2
+  supporting_node_pool_min_count     = 1
   supporting_node_pool_instance_type = "m5.xlarge"
 
   gitaly_node_count    = 3

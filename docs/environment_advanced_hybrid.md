@@ -56,8 +56,8 @@ By design, the `environment.tf` file is similar to the one used in a [standard e
 
 Each node pool setting configures the following. To avoid repetition we'll describe each setting once:
 
-- `*_node_pool_count` - The number of machines to set up for that component's node pool
-  - `*_node_pool_max_count` and `*_node_pool_max_count` are available as alternatives for [Cluster Autoscaling](#cluster-autoscaling).
+- `*_node_pool_max_count` / `*_node_pool_min_count` - The maximum and minimum node pool machines that will be provisioned via Cluster Autoscaling.
+  - `*_node_pool_count` - Static number of node pool machines to provision with no autoscaling. This should not be set if configuring `*_node_pool_max_count` / `*_node_pool_min_count`.
 - `*_node_pool_machine_type` - **GCP only** The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for each machine in the node pool
 - `*_node_pool_instance_type` - **AWS only** The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) (size) for each machine in the node pool
 
@@ -73,13 +73,16 @@ module "gitlab_ref_arch_gcp" {
   project = var.project
 
   # 10k Hybrid - k8s Node Pools
-  webservice_node_pool_count        = 4
+  webservice_node_pool_max_count    = 4
+  webservice_node_pool_min_count    = 1
   webservice_node_pool_machine_type = "n1-highcpu-32"
 
   sidekiq_node_pool_max_count    = 4
+  sidekiq_node_pool_min_count    = 0
   sidekiq_node_pool_machine_type = "n1-standard-4"
 
-  supporting_node_pool_count    = 2
+  supporting_node_pool_max_count    = 2
+  supporting_node_pool_min_count    = 1
   supporting_node_pool_machine_type = "n1-standard-4"
 
   # 10k Hybrid - Compute VMs
@@ -121,28 +124,31 @@ output "gitlab_ref_arch_gcp" {
 }
 ```
 
+:information_source:&nbsp; With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional / Zonal / Autoscaling)](#gke-cluster-availability-type-regional--zonal--autoscaling) for more information.
+
 In addition to the above there are some optional settings that can configure the GKE setup as follows:
 
 - `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
 - `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to allow Kubernetes service accounts to act as a user-managed [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
+- `gke_deletion_protection` - Configures [deletion protection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#deletion_protection) in Terraform. Default is `false`.
 
-#### Networking (GCP)
+#### GKE Cluster Availability Type (Regional / Zonal / Autoscaling)
 
-As detailed in the earlier [Configuring network setup (GCP)](environment_provision.md#configure-network-setup-gcp) section the same networking options apply for Hybrid environments on GCP.
+GKE has several options available when it comes to a [Cluster's availability type](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters#availability). This covers both the control plane and the node pools themselves. There are two options available as follows:
 
-However, there are some additional networking considerations below that you should be aware of before building the environment.
+- Regional - Control plane has replicas spread across a region's zones. Node pools are also configured to spread out nodes between the zones unless configured otherwise.
+- Zonal - Control plane has no replicas and is deployed to a single zone. Node pools are also configured to only be deployed in that zone unless configured otherwise (which is known as a Multi-zonal cluster).
 
-##### Zones
+Before selecting an availability type you should be aware of the following:
 
-When you optionally configure Zones for GCP resources to be spread across for Kubernetes this will configure a [Multi-Zonal Cluster](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters#multi-zonal_clusters).
+- The Toolkit defaults to whatever the Terraform GCP provider selects, which was historically Zonal. [In `5.x` GCP changed this behaviour to now be regional](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#changes-to-how-default-location-region-and-zone-values-are-obtained-for-resources) for _new_ Clusters.
+- Attempting to change the availability type of existing clusters will trigger a full rebuild in GKE. As such, the Toolkit will ignore any attempts as a failsafe and such operations should be performed separately.
+- [Due to the nature of how GKE spreads its node pools across zones](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size), Cluster Autoscaling is always enabled by default. This allows GKE to correct manage node pool count across multiple zones instead of deploying the same count per zone individually. For Clusters deployed with the single `*_node_pool_count` setting the minimum and maximum values are set the same accordingly to achieve the desired effect.
 
-In this setup however it would deploy the target count of nodes in _every_ zone. So for example if you set up a Node Pool with a Node count of 4 but then also give it 2 Zones to spread across it would proceed to deploy 8 Nodes.
+The following settings are available to configure the availability type of new clusters:
 
-The Toolkit will attempt to manage this for you and try to honour the target node count you have given in config. However, if the number of Zones and Node Counts given are different in terms of parity (e.g. when the number of Zones is even and Node Count is odd) it will result in additional nodes being deployed and costing extra. To help with this it's possible to specifically set Zones for the Kubernetes cluster to use as follows:
-
-- `gke_zones` - A list of Zone names inside the target region that any Kubernetes resources should be spread across. This will override what's given in the `zones` variable to allow for additional flexibility. If unset it will follow the former. Default is the same as `zones` (`null`). Optional.
-
-It's recommended that in any environment where multiple Zones are to be used that you match the parity of Node Pool counts, i.e. all Zone and Node Pool counts should be either even or odd.
+- `gke_location` - Set the location of the cluster (region or zone). If a region is selected the Cluster will be set as Regional with control plan and node pool resources per zone. If set to a zone, the cluster will be Zonal with all resources being placed in that zone. This variable only applies for new clusters as attempting to change will trigger a full rebuild of the whole cluster. If left unset, a Regional cluster will be provisioned in the [`region` configured for the Terraform GKE provider](environment_provision.md#configure-variables-variablestf). Optional.
+- `gke_zones` - A list of Zone names inside the target region that Node Pools will be spread across. This is only recommended for use in advanced scenarios such as a Multi-Zonal cluster or overriding a Regional cluster's defaults. This will override what's given in the `zones` variable to allow for additional flexibility. If unset it will follow the former. Default is the same as `zones` (`null`). Optional.
 
 #### GKE Private Cluster options
 
@@ -207,16 +213,16 @@ module "gitlab_ref_arch_aws" {
   create_network = true
 
   # 10k Hybrid - k8s Node Pools
-  webservice_node_pool_min_count     = 2
-  webservice_node_pool_max_count     = 6
+  webservice_node_pool_max_count     = 4
+  webservice_node_pool_min_count     = 1
   webservice_node_pool_instance_type = "c5.9xlarge"
 
-  sidekiq_node_pool_min_count     = 2
-  sidekiq_node_pool_max_count     = 6
+  sidekiq_node_pool_max_count     = 4
+  sidekiq_node_pool_min_count     = 0
   sidekiq_node_pool_instance_type = "m5.xlarge"
 
-  supporting_node_pool_min_count     = 2
-  supporting_node_pool_max_count     = 4
+  supporting_node_pool_max_count     = 3
+  supporting_node_pool_min_count     = 1
   supporting_node_pool_instance_type = "m5.xlarge"
 
   # 10k Hybrid - Compute VMs
@@ -320,6 +326,12 @@ all:
     [...]
 ```
 
+#### EKS Cluster Autoscaling
+
+The provisioned EKS cluster is always _prepared_ for Cluster Autoscaling when setting node counts via the single (`*_node_pool_count`) or max / min values (`*_node_pool_max_count` / `*_node_pool_min_count`).
+
+However, [Cluster Autoscaling won't actually be enabled until the component is deployed](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html). This either needs to be done manually or can be done with the Toolkit via an additional setting in Ansible - `cloud_native_hybrid_cluster_autoscaler_setup`. Refer to the [Additional Config Settings](#additional-config-settings) for more detail.
+
 #### EKS Endpoint Setup
 
 [EKS Clusters have an endpoint](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html) that is used in several ways including internode communication as well as giving access to tools such as the Toolkit and `kubectl`. This endpoint can be configured to be Public, Private or both.
@@ -385,23 +397,6 @@ kubectl edit -n kube-system configmap/aws-auth
 
 If you ever want to deprovision resources created, with a Cloud Native Hybrid on AWS **you must run [helm uninstall gitlab](https://helm.sh/docs/helm/helm_uninstall/)** before running [terraform destroy](https://www.terraform.io/docs/cli/commands/destroy.html). This ensures all resources are correctly removed.
 
-### Cluster Autoscaling
-
-An additional and alternative configuration - Cluster Autoscaling - is available to be provisioned also on both supported Cloud Providers.
-
-[Cluster Autoscaling](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler) is where the node pool VMs are scaled dynamically based on requested pod count.
-
-:information_source:&nbsp; Note this is an advanced setup due to its dynamic nature as it can lead to varying performance and costs.
-
-Enabling this feature on either cloud provider is done via the following settings. To avoid repetition we'll describe each setting once:
-
-- `*_node_pool_max_count` - The maximum number of machines for the component's node pool
-- `*_node_pool_min_count` - The minimum number of machines for the component's node pool
-
-The counts to use should be based around the target Reference Architecture, but the actual values should be set based on your expected requirements. As a general guidance we recommend the Reference Architecture's node count as the maximum and at least `2` as the minimum to ensure HA.
-
-:information_source:&nbsp; [Cluster Autoscaler isn't deployed by default in AWS EKS](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html). This either needs to be done manually or can be done with the Toolkit via an additional setting in Ansible - `cloud_native_hybrid_cluster_autoscaler_setup`. Refer to the [Additional Config Settings](#additional-config-settings) for more detail.
-
 ## 3. Setting up authentication for the provisioned Kubernetes Cluster
 
 Authenticating with Kubernetes is different compared to other services, and can be [considered a challenge](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_gke_with_terraform#interacting-with-kubernetes) in terms of automation.
@@ -410,7 +405,10 @@ In a nutshell authentication must be setup for the `kubectl` command on the mach
 
 The easiest way to do this is via the selected cloud providers tooling after the cluster has been provisioned:
 
-- Google Cloud Platform (GCP) can be setup and selected via the `gcloud get-credentials` command, e.g. `gcloud container clusters get-credentials <CLUSTER NAME> --project <GCP PROJECT NAME> --zone <GCP ZONE NAME>`. Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.
+- Google Cloud Platform (GCP) can be setup and selected via the `gcloud get-credentials` command. This differs depending on the availability type of thecluster provisioned:
+  - Regional - `gcloud container clusters get-credentials <CLUSTER NAME> --project <GCP PROJECT NAME> --region <GCP REGION NAME>`
+  - Zonal - `gcloud container clusters get-credentials <CLUSTER NAME> --project <GCP PROJECT NAME> --zone <GCP ZONE NAME>`.
+  - Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.
 - Amazon Web Services (AWS) can be setup and selected via the `aws update-kubeconfig` command, e.g. `aws eks --region <AWS REGION NAME> update-kubeconfig --name <CLUSTER NAME>`. Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.
 
 As a convenience, the Toolkit can automatically run these commands for you in its configuration stage when the variable `kubeconfig_setup` is set to `true`, but it expects that you have configured authentication beforehand. This will be detailed more in the next section.
@@ -436,7 +434,7 @@ Next are specific Cloud Provider examples that will also detail any specific set
 For environments using GKE the following additional settings are available:
 
 - `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups. **Required.**
-- `gcp_zone` - Zone name the GCP Kubernetes cluster is in. Only required for Cloud Native Hybrid installs when `kubeconfig_setup` is set to true.
+- `gcp_gke_location` - Name of Region or Zone the GCP Kubernetes cluster is in, depending on if it's Regional or Zonal respectively. Only required for Cloud Native Hybrid installs when `kubeconfig_setup` is set to true.
 
 A full `vars.yml` file config example for GKE based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) is as follows:
 
@@ -450,7 +448,7 @@ all:
     # Cloud Settings
     cloud_provider: "gcp"
     gcp_project: "<gcp_project_id>"
-    gcp_zone: "<gcp_project_zone>"
+    gcp_gke_location: "<gcp_gke_region> / <gcp_gke_zone>"
 
     # General Settings
     prefix: "<environment_prefix>"

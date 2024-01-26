@@ -195,6 +195,7 @@ Due to complexities, permutations or areas best left to be configured directly w
 - Direct OmniAuth and Email support
 - DNS server management
 - Full GitLab agent server for Kubernetes (KAS) setup
+- On Prem HA Load Balancers
 - [Downgrades](docs/environment_upgrades.md#environment-downgrades)
 
 Some of the above areas are better tackled via [Custom Config](docs/environment_advanced.md#custom-config).
