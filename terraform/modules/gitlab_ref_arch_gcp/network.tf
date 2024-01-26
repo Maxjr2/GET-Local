@@ -67,4 +67,8 @@ resource "google_service_networking_connection" "gitlab_private_service_access" 
   network                 = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.gitlab_private_service_ip_range[0].name]
+
+  # Ensures Terraform is able to remove this cleanly
+  # https://github.com/hashicorp/terraform-provider-google/issues/16275
+  deletion_policy = "ABANDON"
 }

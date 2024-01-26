@@ -5,13 +5,16 @@ module "gitlab_ref_arch_gcp" {
   project = var.project
 
   # 10k Hybrid - k8s Node Pools
-  webservice_node_pool_count        = 4
+  webservice_node_pool_max_count    = 4
+  webservice_node_pool_min_count    = 1
   webservice_node_pool_machine_type = "n1-highcpu-32"
 
-  sidekiq_node_pool_count        = 4
+  sidekiq_node_pool_max_count    = 4
+  sidekiq_node_pool_min_count    = 1
   sidekiq_node_pool_machine_type = "n1-standard-4"
 
-  supporting_node_pool_count        = 2
+  supporting_node_pool_max_count    = 2
+  supporting_node_pool_min_count    = 1
   supporting_node_pool_machine_type = "n1-standard-4"
 
   # 10k Hybrid - Compute VMs

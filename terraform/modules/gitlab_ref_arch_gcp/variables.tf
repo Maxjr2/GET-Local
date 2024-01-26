@@ -426,11 +426,19 @@ variable "sidekiq_disks" {
 # Kubernetes \ Helm
 
 ## General
+variable "gke_location" {
+  type    = string
+  default = null
+}
 variable "gke_release_channel" {
   type    = string
   default = "STABLE"
 }
 variable "gke_enable_workload_identity" {
+  type    = bool
+  default = false
+}
+variable "gke_deletion_protection" {
   type    = bool
   default = false
 }

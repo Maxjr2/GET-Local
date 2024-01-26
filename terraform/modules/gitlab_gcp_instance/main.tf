@@ -4,7 +4,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.77"
+      version = "~> 5.12"
     }
   }
 }
@@ -37,7 +37,7 @@ resource "google_compute_instance" "gitlab" {
   labels = merge({
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
-    gitlab_node_level     = var.label_secondaries == true ? (count.index == 0 ? "${var.node_type}-primary" : "${var.node_type}-secondary") : ""
+    gitlab_node_level     = var.label_secondaries == true ? (count.index == 0 ? "${var.node_type}-primary" : "${var.node_type}-secondary") : null
     gitlab_geo_site       = var.geo_site
     gitlab_geo_deployment = var.geo_deployment
     gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
