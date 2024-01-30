@@ -70,7 +70,7 @@ prefix: ''
 omnibus_node: true
 
 ## When setting a specific version for upgrading to, review [standard GitLab Upgrade rules still apply](https://docs.gitlab.com/ee/update/#upgrade-paths)
-gitlab_version: ""
+gitlab_version: "{{ lookup('env','GITLAB_VERSION') }}"
 ## Alternatively set to "gitlab-ce" to install the Community Edition (Does not work for environments with Consul, PGBouncer or Patroni - 3k+)
 gitlab_edition: "gitlab-ee"
 
