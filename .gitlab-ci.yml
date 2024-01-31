@@ -122,13 +122,25 @@ check:markdownlint:
   rules:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
 
-check:markdown-link-check:
+check:markdown-external-link-check:
   stage: test
   image:
     name: ghcr.io/tcort/markdown-link-check:3.11.0
     entrypoint: [""]
   script:
     - /src/markdown-link-check *.md docs/*.md
+  rules:
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+  retry: 2
+
+check:markdown-internal-link-check:
+  stage: test
+  image:
+    name: lycheeverse/lychee:latest-alpine
+    entrypoint: [""]
+  needs: []
+  script:
+    - lychee --offline --no-progress docs/**/*.md
   rules:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
   retry: 2
