@@ -21,8 +21,6 @@ output "data_disk_device_names" {
 }
 
 output "service_account" {
-  value = {
-    "name"  = try(google_service_account.gitlab[0].name, "")
-    "email" = try(google_service_account.gitlab[0].email, "")
-  }
+  description = "Details of the service account associated with the created instances"
+  value       = var.node_count > 0 ? module.google_service_account[0].details : null
 }

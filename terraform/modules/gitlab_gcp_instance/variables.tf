@@ -47,6 +47,19 @@ variable "service_account_prefix" {
   }
 }
 
+variable "custom_service_account_email" {
+  type        = string
+  default     = null
+  description = "Service account to use for this GCP instance. If not supplied, one will be created"
+}
+
+variable "service_account_profiles" {
+  description = "The role for this service account, or null. Depending on the role, the account may be granted special access rights"
+  type        = list(string)
+  default     = []
+  nullable    = false
+}
+
 variable "geo_site" {
   type    = string
   default = null

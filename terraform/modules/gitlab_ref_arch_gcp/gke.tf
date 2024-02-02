@@ -119,7 +119,7 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
     disk_type    = coalesce(var.webservice_node_pool_disk_type, var.default_disk_type)
     disk_size_gb = coalesce(var.webservice_node_pool_disk_size, var.default_disk_size)
 
-    service_account = google_service_account.gitlab_gke_webservice_service_account[0].email
+    service_account = module.gitlab_gke_webservice_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -188,7 +188,7 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
     disk_type    = coalesce(var.sidekiq_node_pool_disk_type, var.default_disk_type)
     disk_size_gb = coalesce(var.sidekiq_node_pool_disk_size, var.default_disk_size)
 
-    service_account = google_service_account.gitlab_gke_sidekiq_service_account[0].email
+    service_account = module.gitlab_gke_sidekiq_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -257,7 +257,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
     disk_type    = coalesce(var.supporting_node_pool_disk_type, var.default_disk_type)
     disk_size_gb = coalesce(var.supporting_node_pool_disk_size, var.default_disk_size)
 
-    service_account = google_service_account.gitlab_gke_supporting_service_account[0].email
+    service_account = module.gitlab_gke_supporting_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -297,30 +297,42 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 
 ## Service Accounts
 ### Webservice
-resource "google_service_account" "gitlab_gke_webservice_service_account" {
-  count = min(var.webservice_node_pool_count + var.webservice_node_pool_max_count, 1)
+module "gitlab_gke_webservice_service_account" {
+  count  = min(var.webservice_node_pool_count + var.webservice_node_pool_max_count, 1)
+  source = "../gitlab_gcp_service_account"
 
   # Ensure account ID is 30 characters or less by trimming and only using alnum characters
   account_id   = "${var.service_account_prefix}-gke-webservice"
   display_name = "${var.prefix}-gke-webservice"
+
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-webservice", null)
+  service_account_profiles     = ["object_storage"]
 }
 
 ### Sidekiq
-resource "google_service_account" "gitlab_gke_sidekiq_service_account" {
-  count = min(var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count, 1)
+module "gitlab_gke_sidekiq_service_account" {
+  count  = min(var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count, 1)
+  source = "../gitlab_gcp_service_account"
 
   # Ensure account ID is 30 characters or less by trimming and only using alnum characters
   account_id   = "${var.service_account_prefix}-gke-sidekiq"
   display_name = "${var.prefix}-gke-sidekiq"
+
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-sidekiq", null)
+  service_account_profiles     = ["object_storage"]
 }
 
 ### Supporting
-resource "google_service_account" "gitlab_gke_supporting_service_account" {
-  count = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
+module "gitlab_gke_supporting_service_account" {
+  count  = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
+  source = "../gitlab_gcp_service_account"
 
   # Ensure account ID is 30 characters or less by trimming and only using alnum characters
   account_id   = "${var.service_account_prefix}-gke-supporting"
   display_name = "${var.prefix}-gke-supporting"
+
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
+  service_account_profiles     = ["object_storage"]
 }
 
 ## Firewall
@@ -348,13 +360,27 @@ output "kubernetes" {
     "kubernetes_cluster_version" = try(google_container_cluster.gitlab_cluster[0].master_version, "")
 
     # Service Accounts
-    "kubernetes_webservice_node_group_service_account_email" = try(google_service_account.gitlab_gke_webservice_service_account[0].email, "")
-    "kubernetes_sidekiq_node_group_service_account_email"    = try(google_service_account.gitlab_gke_sidekiq_service_account[0].email, "")
-    "kubernetes_supporting_node_group_service_account_email" = try(google_service_account.gitlab_gke_supporting_service_account[0].email, "")
+    "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_webservice_service_account[0].email, "")
+    "kubernetes_sidekiq_node_group_service_account_email"    = try(module.gitlab_gke_sidekiq_service_account[0].email, "")
+    "kubernetes_supporting_node_group_service_account_email" = try(module.gitlab_gke_supporting_service_account[0].email, "")
 
     # Node Group / Addon Versions
     "kubernetes_webservice_node_group_version" = try(google_container_node_pool.gitlab_webservice_pool[0].version, "")
     "kubernetes_sidekiq_node_group_version"    = try(google_container_node_pool.gitlab_sidekiq_pool[0].version, "")
     "kubernetes_supporting_node_group_version" = try(google_container_node_pool.gitlab_supporting_pool[0].version, "")
   }
+}
+
+## Refactors
+moved {
+  from = google_service_account.gitlab_gke_webservice_service_account
+  to   = module.gitlab_gke_webservice_service_account[0].google_service_account.gitlab
+}
+moved {
+  from = google_service_account.gitlab_gke_sidekiq_service_account
+  to   = module.gitlab_gke_sidekiq_service_account[0].google_service_account.gitlab
+}
+moved {
+  from = google_service_account.gitlab_gke_supporting_service_account
+  to   = module.gitlab_gke_supporting_service_account[0].google_service_account.gitlab
 }
