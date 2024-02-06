@@ -31,7 +31,7 @@ When working with the Toolkit, you might encounter some of the following issues.
 
 ## Terraform
 
-### GCP Resource Creation Error - `Error 400: The resource '<subnetwork>' is not ready, resourceNotReady`
+### GCP Resource Creation Error: `Error 400: The resource '<subnetwork>' is not ready, resourceNotReady`
 
 In select GCP setups you may see Terraform throw the following error on the first creation:
 
@@ -72,7 +72,7 @@ On Omnibus environments the Toolkit will be deploying [Omnibus GitLab](https://d
 
 Debugging these errors would be the same as if you were setting up Omnibus directly, such as accessing the nodes directly and [examining the logs](https://docs.gitlab.com/omnibus/settings/logs.html). There is notable documentation available on troubleshooting Omnibus issues [here](https://docs.gitlab.com/omnibus/troubleshooting.html).
 
-### Ansible Install Failure - `No matching distribution found`
+### Ansible Install Failure: `No matching distribution found`
 
 Ansible `7.x` upwards requires Python `3.9` and higher. Attempting to install this version of Ansible via `pip` on a lower version of Python will fail with the following error:
 
@@ -165,7 +165,7 @@ Examples of this include the GitLab repo not having packages for the specific OS
 
 To fix this the "bad" repository should be removed as per the OS instructions and then the correct one configured via Ansible in a subsequent run.
 
-### Postgres Upgrade Error - `PostgreSQL did not respond before service checks were exhausted`
+### Postgres Upgrade Error: `PostgreSQL did not respond before service checks were exhausted`
 
 The following error can show when running the Toolkit on PostgreSQL nodes:
 
@@ -198,7 +198,7 @@ sudo su - gitlab-psql -c '/opt/gitlab/embedded/bin/pg_resetwal -f /var/opt/gitla
 
 This wipes the records from the specific server and will unblock it to start replicating again. This should **only** be run on the specific Secondary server that is failing and no others as this would lead to data loss.
 
-### External Postgres Connection Error from Ansible - `unable to connect to database: FATAL: <reason>`
+### External Postgres Connection Error from Ansible: `unable to connect to database: FATAL: <reason>`
 
 As a convenience, the Toolkit attempts to prep any external database it's given for GitLab such as creating users or enabling extensions. It does this directly before setting up GitLab.
 
@@ -292,9 +292,9 @@ Some common reasons for this may be:
 
 - Double check that `cloud_native_hybrid_environment` and `kubeconfig_setup` are enabled to instruct the Toolkit to deploy the Charts
 - AWS EKS has failed to configure the AWS Load Balancer (which it manages directly) due to not enough Elastic IPs being given via the [`aws_allocation_ids` setting](environment_advanced_hybrid.md#amazon-web-services-aws-1) - There should be one for every Subnet.
-- Webservice / Sidekiq pods have failed to deploy due to one of their pre-actions or checks failing. [See the below Webservice / Sidekiq Pods not deploying section for more info](#webservice-sidekiq-pods-not-deploying).
+- Webservice / Sidekiq pods have failed to deploy due to one of their pre-actions or checks failing. [See the below Webservice / Sidekiq Pods not deploying section for more info](#webservice-or-sidekiq-pods-not-deploying).
 
-### Webservice / Sidekiq Pods not deploying
+### Webservice or Sidekiq Pods not deploying
 
 There may be times when the Webservice / Sidekiq pods may not deploy on the target Kubernetes cluster even though the Toolkit has completed "successfully". While Ansible has been successful in giving the _instruction_ via the Helm Charts to deploy said pods, something such as any pre-actions or additional checks that happen in Kubernetes have failed to complete.
 
@@ -394,7 +394,7 @@ If this issue is occurring, switch to either a combined Redis or separated Redis
 
 ## Other
 
-### macOS - Python package install failure - `fatal error: 'openssl/opensslv.h' file not found`
+### macOS: Python package install failure `fatal error: 'openssl/opensslv.h' file not found`
 
 For macOS users, installation of Python packages via `pip3 install` may fail with an error:
 

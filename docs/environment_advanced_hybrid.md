@@ -581,10 +581,10 @@ More information on setting up Geo within GET can be found in our [GitLab Enviro
 
 ## Monitoring
 
-More information on setting up an optional Monitoring stack for Cloud Native Hybrid environments [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md#cloud-native-hybrid) documentation.
+More information on setting up an optional Monitoring stack for Cloud Native Hybrid environments [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md#cloud-native-hybrid-kube-prometheus-stack) documentation.
 
 ## Troubleshooting
 
 Cloud Native Hybrid environments have quite a few moving parts, all of which could cause a failure.
 
-Some common Troubleshooting steps to follow for these setups can be found on the [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md#cloud-native-hybrids) page.
+Some common Troubleshooting steps to follow for these setups can be found on the [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md#cloud-native-hybrid) page.

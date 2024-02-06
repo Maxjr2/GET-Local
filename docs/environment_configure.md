@@ -302,7 +302,7 @@ The structure of these files are flexible, ansible will merge all YAML files tha
 
 - `vars.yml` - Contains all main config specific to the environment such as connection details, component settings, passwords and more.
 
-#### Environment Config - `vars.yml`
+#### Environment Config: `vars.yml`
 
 Starting with the main environment config file, `vars.yml`, which should be **saved in the same folder as the Dynamic Inventory file**, e.g. `ansible/environments/<env_name>/inventory`. This is important as Ansible will load this file alongside the Dynamic Inventory file at runtime to get all the variables.
 
