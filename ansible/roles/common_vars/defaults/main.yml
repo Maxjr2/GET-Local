@@ -191,7 +191,9 @@ pages_host: "{{ pages_external_url | regex_replace('^https?:\/\/') }}"
 
 ## Pages SSL
 pages_ssl_enable: "{{ 'https' in pages_external_url }}"
+pages_ssl_cert: "{{ lookup('file', pages_ssl_cert_file) if pages_ssl_cert_file != '' else '' }}"
 pages_ssl_cert_file: ""
+pages_ssl_key: "{{ lookup('file', pages_ssl_key_file) if pages_ssl_key_file != '' else '' }}"
 pages_ssl_key_file: ""
 
 # Praefect
