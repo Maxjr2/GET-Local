@@ -317,7 +317,9 @@ Ansible variables are available to configure the [GitLab Charts' Pages sub-chart
 
 - `pages_external_url` -  [Wildcard URL root](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains) that will be used to serve Pages content for this instance. Provided as a url format including protocol, e.g. `https://pages.example.io`. Specifying HTTPS protocol will enable wildcard SSL, and require `pages_ssl_cert_file` and `pages_ssl_key_file` to be specified. **Required**.
 - `pages_ssl_cert_file` - Path to SSL certificate file for the Pages daemon to serve. Must be specified with `pages_ssl_key_file`. Required if `pages_external_url` protocol is HTTPS. Certificate must meet [the following requirements](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains-with-tls-support).
+  - `pages_ssl_cert` - An alternative to `pages_ssl_cert_file` if the certificate is not stored in a local file, to pass the certificate contents directly to Ansible. Use `pages_ssl_cert`, or `pages_ssl_cert_file`, but not both. This approach can be used to retrieve the certificate via a lookup.
 - `pages_ssl_key_file` - Path to key file for SSL certificate that the Pages daemon will serve. Must be specified with `pages_ssl_cert_file`. Required if `pages_external_url` protocol is HTTPS.
+  - `pages_ssl_key` - An alternative to `pages_ssl_key_file` if the private key is not stored in a local file, to pass the private key contents directly to Ansible. Use `pages_ssl_key`, or `pages_ssl_key_file`, but not both. This approach can be used to retrieve the private key via a lookup.
 
 ## Custom Servers (On Prem)
 
