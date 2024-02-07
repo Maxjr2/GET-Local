@@ -46,18 +46,22 @@ variable "service_account_prefix" {
     error_message = "service_account_prefix must be 10 characters or less and only contain lowercase alphanumeric characters and dashes."
   }
 }
-
-variable "custom_service_account_email" {
-  type        = string
-  default     = null
-  description = "Service account to use for this GCP instance. If not supplied, one will be created"
-}
-
 variable "service_account_profiles" {
   description = "The role for this service account, or null. Depending on the role, the account may be granted special access rights"
   type        = list(string)
   default     = []
-  nullable    = false
+}
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members
+variable "service_account_user_members" {
+  description = "List of optional identity members that will be assigned the Service Account User role on each created Service Account, which is required to attach the service accounts to resources. List must contain the identity running Terraform if given. If not given account running Terraform will be given sole access."
+
+  type    = list(string)
+  default = []
+}
+variable "custom_service_account_email" {
+  type        = string
+  default     = null
+  description = "Service account to use for this GCP instance. If not supplied, one will be created"
 }
 
 variable "geo_site" {
