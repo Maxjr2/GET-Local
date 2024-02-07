@@ -1,5 +1,7 @@
+# External Firewall rules
+## Create if nodes present and public IPs OR private IPs and specific CIDR range given
 resource "google_compute_firewall" "gitlab_http_https" {
-  count   = min(var.haproxy_external_node_count + var.monitor_node_count, 1)
+  count   = (var.haproxy_external_node_count + var.monitor_node_count) > 0 && (var.setup_external_ips || length(var.http_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-http-https"
   network = local.vpc_name
 
@@ -15,7 +17,7 @@ resource "google_compute_firewall" "gitlab_http_https" {
 }
 
 resource "google_compute_firewall" "gitlab_ssh" {
-  count   = min(var.haproxy_external_node_count, 1)
+  count   = var.haproxy_external_node_count > 0 && (var.setup_external_ips || length(var.ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-ssh"
   network = local.vpc_name
 
@@ -31,7 +33,7 @@ resource "google_compute_firewall" "gitlab_ssh" {
 }
 
 resource "google_compute_firewall" "ssh" {
-  count   = var.setup_external_ips ? 1 : 0
+  count   = (var.setup_external_ips || length(var.external_ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-ssh"
   network = local.vpc_name
 
@@ -49,6 +51,7 @@ resource "google_compute_firewall" "ssh" {
 }
 
 resource "google_compute_firewall" "icmp" {
+  count   = (var.setup_external_ips || length(var.icmp_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-icmp"
   network = local.vpc_name
 
