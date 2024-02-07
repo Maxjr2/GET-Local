@@ -269,7 +269,7 @@ The primary site can use a single RDS instance to house both the main GitLab dat
 
 The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://cloud.google.com/sql/docs/postgres) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-:information_source:&nbsp; Note that the account being used by Terraform to create the Cloud SQL instance will require the `cloudsql.admin` IAM role.
+:information_source:&nbsp; Ensure that [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/redis.googleapis.com) APIs are enabled on the target GCP project. The account that Terraform is running with also requires the `Cloud SQL Admin` and `Compute Network Admin` IAM roles.
 
 :information_source:&nbsp; Note that Geo setups are not directly supported at this time. While the Toolkit can set up two separate Cloud SQL instances, additional manual setup for [VPC Network Peering](https://cloud.google.com/vpc/docs/vpc-peering) and [Logical Replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication) will be required.
 

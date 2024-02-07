@@ -67,10 +67,7 @@ Existing projects can also be used, but this should be checked with the Project'
 
 Authentication with GCP directly is done with a [Service Account](https://cloud.google.com/iam/docs/understanding-service-accounts), which is required by both Terraform and Ansible.
 
-To create and manage Service Accounts, you need to set the following IAM permissions to your _own_ account:
-
-- `Service Account Admin`
-- `Service Account Token Creator`
+:information_source:&nbsp; To create and manage Service Accounts you may require permissions on your own account. Refer to the [GCP documentation for more information](https://cloud.google.com/iam/docs/service-accounts-create).
 
 With the above set create the Service Account as follows:
 
@@ -82,9 +79,18 @@ With the above set create the Service Account as follows:
    - `Kubernetes Engine Admin`
    - `Storage Admin` (Note - Not `Compute Storage Admin`)
    - `Service Account Admin`
-   - `Service Account User`
-   - `Compute Network Admin` (Only required when deploying [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql))
-1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be use later by Terraform and Ansible to authenticate.
+1. Assign the following additional IAM roles if you're planning on deploying the respective optional service:
+   - [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)
+     - `Cloud SQL Admin`
+     - `Compute Network Admin`
+     - Note that the [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/redis.googleapis.com) APIs will also need to be enabled on the project for Cloud SQL.
+   - [Cloud Memorystore](environment_advanced_services.md#gcp-memorystore)
+     - `Cloud Memorystore Redis Admin`
+     - `Cloud Memorystore Redis Editor`
+     - Note that the [Memorystore for Redis](https://console.cloud.google.com/apis/library/redis.googleapis.com) API will also need to be enabled on the project for Memorystore.
+1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be used later by Terraform and Ansible to authenticate.
+
+:information_source:&nbsp; The Toolkit will in turn create several required Service Accounts via Terraform during the provisioning stage for the resources. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-accounts-gcp) for more information.
 
 ### 4. Setup SSH Authentication - SSH OS Login for GCP Service Account
 

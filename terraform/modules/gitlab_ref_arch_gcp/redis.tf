@@ -18,6 +18,7 @@ module "redis" {
   setup_external_ip = var.setup_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "redis", null)
 
   geo_site       = var.geo_site
@@ -55,6 +56,7 @@ module "redis_cache" {
   setup_external_ip = var.setup_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "redis-cache", null)
 
   geo_site       = var.geo_site
@@ -90,6 +92,7 @@ module "redis_persistent" {
   setup_external_ip = var.setup_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "redis-persistent", null)
 
   geo_site       = var.geo_site

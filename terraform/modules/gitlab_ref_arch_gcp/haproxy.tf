@@ -19,6 +19,7 @@ module "haproxy_external" {
   external_ips      = var.haproxy_external_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "haproxy-external", null)
 
   geo_site       = var.geo_site
@@ -54,6 +55,7 @@ module "haproxy_internal" {
   setup_external_ip = var.setup_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "haproxy-internal", null)
 
   geo_site       = var.geo_site

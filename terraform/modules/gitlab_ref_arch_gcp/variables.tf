@@ -43,6 +43,7 @@ variable "project" {
   default = null
 }
 
+# Service Accounts
 variable "service_account_prefix" {
   type    = string
   default = "gl"
@@ -52,7 +53,13 @@ variable "service_account_prefix" {
     error_message = "service_account_prefix must be 10 characters or less and only contain lowercase alphanumeric characters and dashes."
   }
 }
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members
+variable "service_account_user_members" {
+  description = "List of optional identity members that will be assigned the Service Account User role on each created Service Account, which is required to attach the service accounts to resources. List must contain the identity running Terraform if given. If not given account running Terraform will be given sole access."
 
+  type    = list(string)
+  default = []
+}
 variable "custom_service_account_emails" {
   description = "A map containing the custom service accounts email to be used. If not supplied, service accounts will be created"
   type        = map(string)

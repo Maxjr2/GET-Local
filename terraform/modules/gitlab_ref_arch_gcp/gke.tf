@@ -16,6 +16,10 @@ resource "google_container_cluster" "gitlab_cluster" {
   remove_default_node_pool = true
   initial_node_count       = 1
   enable_shielded_nodes    = true
+  node_config {
+    # Temporary service account for initial node pool
+    service_account = module.gitlab_gke_supporting_service_account[0].email
+  }
 
   deletion_protection = var.gke_deletion_protection
 
@@ -80,10 +84,12 @@ resource "google_container_cluster" "gitlab_cluster" {
     gitlab_node_type   = "gitlab-cluster"
   }
 
-  # Ensure avoidance of unexpected rebuilds as location controls Regional / Zonal clusters
   lifecycle {
     ignore_changes = [
-      location
+      # Ensure avoidance of unexpected rebuilds as location controls Regional / Zonal clusters
+      location,
+      # Ensure node config is not processed again after initial node pool is deleted on first create
+      node_config
     ]
   }
 }
@@ -305,8 +311,9 @@ module "gitlab_gke_webservice_service_account" {
   account_id   = "${var.service_account_prefix}-gke-webservice"
   display_name = "${var.prefix}-gke-webservice"
 
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-webservice", null)
   service_account_profiles     = ["object_storage"]
+  service_account_user_members = var.service_account_user_members
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-webservice", null)
 }
 
 ### Sidekiq
@@ -318,8 +325,9 @@ module "gitlab_gke_sidekiq_service_account" {
   account_id   = "${var.service_account_prefix}-gke-sidekiq"
   display_name = "${var.prefix}-gke-sidekiq"
 
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-sidekiq", null)
   service_account_profiles     = ["object_storage"]
+  service_account_user_members = var.service_account_user_members
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-sidekiq", null)
 }
 
 ### Supporting
@@ -331,8 +339,9 @@ module "gitlab_gke_supporting_service_account" {
   account_id   = "${var.service_account_prefix}-gke-supporting"
   display_name = "${var.prefix}-gke-supporting"
 
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
   service_account_profiles     = ["object_storage"]
+  service_account_user_members = var.service_account_user_members
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
 }
 
 ## Firewall
