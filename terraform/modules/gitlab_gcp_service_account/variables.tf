@@ -33,3 +33,11 @@ variable "service_account_profiles" {
     error_message = "Service account profile must be one of 'object_storage'."
   }
 }
+
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members
+variable "service_account_user_members" {
+  description = "List of optional identity members that will be assigned the Service Account User role on each created Service Account, which is required to attach the service accounts to resources. List must contain the identity running Terraform if given. If not given account running Terraform will be given sole access."
+
+  type    = list(string)
+  default = []
+}

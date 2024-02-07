@@ -18,6 +18,7 @@ module "praefect" {
   setup_external_ip = var.setup_external_ips
 
   service_account_prefix       = var.service_account_prefix
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "praefect", null)
 
   geo_site       = var.geo_site
