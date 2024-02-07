@@ -9,10 +9,13 @@
 - [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Geo](environment_advanced_geo.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
 - [**GitLab Environment Toolkit - Upgrades (Toolkit, Environment)**](environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](environment_post_considerations.md)
+- [GitLab Environment Toolkit - Geo](geo/README.md)
+  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](geo/geo_provision.md)
+  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](geo/geo_configure.md)
+  - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
 When discussing upgrades there's not only the Environment to consider but also the Toolkit itself.
