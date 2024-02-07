@@ -105,9 +105,9 @@ module "google_service_account" {
   account_id   = "${var.service_account_prefix}-${var.node_type}"
   display_name = local.name_prefix
 
+  service_account_profiles     = var.service_account_profiles
+  service_account_user_members = var.service_account_user_members
   custom_service_account_email = var.custom_service_account_email
-
-  service_account_profiles = var.service_account_profiles
 }
 
 ## Data Disks
