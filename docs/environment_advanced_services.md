@@ -9,10 +9,13 @@
 - [**GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)**](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Geo](environment_advanced_geo.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
 - [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](environment_post_considerations.md)
+- [GitLab Environment Toolkit - Geo](geo/README.md)
+  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](geo/geo_provision.md)
+  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](geo/geo_configure.md)
+  - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
 The Toolkit supports using alternative sources for select components, such as cloud services or custom servers, instead of deploying them directly. This is supported for the Load Balancer(s), PostgreSQL and Redis components as follows:
@@ -476,22 +479,10 @@ Due to the complexity of this area and restrictions in Ansible it's not possible
 
 When setting up Geo with RDS you must specify some extra settings to configure the RDS instances being used. To configure these you can copy all the same variables listed above and replace `postgres_*` with `praefect_postgres_*` or `geo_tracking_postgres_*` respectively with the below considerations.
 
-##### Primary Inventory
-
-- `praefect_postgres_host` - Only required if you are using a separate Praefect RDS instance. If this is not set then the `postgres_*` settings will be used and the Praefect database will be co-located in the GitLab RDS instance.
-
-##### Secondary Inventory
-
-- `praefect_postgres_host` - This must be set to a separate RDS instance than the main GitLab instance for the secondary site, this is due to the main instance being a read-only replica.
+- `geo_secondary_postgres_host` - Should always be specified and needs to point to the secondary sites GitLab RDS instance.
 - `geo_tracking_postgres_host` - By default this will use the same database used for Praefect. If Gitaly cluster is not being used then this must be set to a separate RDS instance than the main GitLab instance.
 - `geo_tracking_postgres_port` - By default the Geo tracking database uses port `5431`, if the Geo tracking database is sharing an RDS instance with Praefect this needs to be set to the same value as `praefect_postgres_port` (`5432` by default).
-
-##### All Inventory
-
-- `postgres_host` - Should point to the primary sites GitLab RDS instance.
-- `geo_secondary_postgres_host` - Should point to the secondary sites GitLab RDS instance.
 - `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate RDS instance being used for Praefect.
-- `geo_tracking_postgres_host` - Should only be set if using a separate RDS instance for the Geo tracking database, if this is being co-located with Praefect this should not be set.
 
 ## Redis
 

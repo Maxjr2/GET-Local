@@ -9,10 +9,13 @@
 - [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Geo](environment_advanced_geo.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
 - [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](environment_post_considerations.md)
+- [GitLab Environment Toolkit - Geo](geo/README.md)
+  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](geo/geo_provision.md)
+  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](geo/geo_configure.md)
+  - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
 With [Terraform](https://www.terraform.io/), you can automatically provision machines and associated dependencies on a provider.
@@ -277,7 +280,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 
 - `*_node_count` - The number of machines to set up for that component
 - `*_machine_type` - The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for that component.
-- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB). 
+- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
 - `*_disk_type` - The [GCP disk type](https://cloud.google.com/compute/docs/disks/performance#type_comparison) that should be used for the root disk. For Gitaly and OpenSearch machines this defaults to `pd-ssd`. If not set, this defaults to `default_disk_type`, which is set to `pd-standard`.
   - :information_source:&nbsp; Disk IOPS performance in GCP is determined not only by the disk type but also several other factors such as CPU and storage size. [Refer to the GCP documentation for more information](https://cloud.google.com/compute/docs/disks/performance).
 - `haproxy_external_external_ips` - Set the external HAProxy load balancer to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP.
@@ -805,7 +808,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 
 - `*_node_count` - The number of machines to set up for that component
 - `*_size` - The [Azure Machine Size](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes) for that component.
-- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly machines this defaults to `4095` (GB) for IOPS requirements. For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB). 
+- `*_disk_size` - The size of root disk to assign to the machine. For Gitaly machines this defaults to `4095` (GB) for IOPS requirements. For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
 - `*_storage_account_type` - The [Azure disk storage account type](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types) that should be used for the root disk. For Gitaly machines this defaults to `Premium_LRS` (Premium SSD). If not set, this defaults to `default_disk_type`, which is set to `Standard_LRS` (Standard HDD).
   - :information_source:&nbsp; Disk IOPS performance in Azure is determined not only by the disk type but also several other factors such as storage size. [Refer to the Azure documentation for more information](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size).
 - `haproxy_external_external_ip_names` - Set the external HAProxy load balancer to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name.

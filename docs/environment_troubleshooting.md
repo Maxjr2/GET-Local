@@ -9,10 +9,13 @@
 - [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Geo](environment_advanced_geo.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
 - [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](environment_post_considerations.md)
+- [GitLab Environment Toolkit - Geo](geo/README.md)
+  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](geo/geo_provision.md)
+  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](geo/geo_configure.md)
+  - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [**GitLab Environment Toolkit - Troubleshooting**](environment_troubleshooting.md)
 
 On this page you'll find troubleshooting guidance for various areas when using the GitLab Environment Toolkit.
@@ -243,14 +246,14 @@ After the cache is reset the setup should work again as normal.
 ### GitHub Rate Limit exceeded error by Node Exporter role
 
 The Toolkit makes use of the `geerlingguy.node_exporter` Ansible role to install the Prometheus Node Exporter on several nodes where the GitLab Linux package isn't used (such as HAProxy or OpenSearch). This role checks for the latest version of Node Exporter via the GitHub API by default.
- 
+
 However in some cases you may find this check may fail as GitHub has a [rate limit of 60 per hour for unauthenticated requests](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-personal-accounts). This may happen in situations such as running the install multiple times in succession or if the nodes access the internet via the same point such as a NAT. If this happens you would see an error similar to the following:
 
 ```sh
 FAILED - RETRYING: [REDACTED_HOSTNAME -> localhost]: Determine latest GitHub release (local) (1 retries left).
 TASK [geerlingguy.node_exporter : Determine latest GitHub release (local)] *****
 ...
-fatal: [REDACTED_HOSTNAME -> localhost]: FAILED! => changed=false 
+fatal: [REDACTED_HOSTNAME -> localhost]: FAILED! => changed=false
     documentation_url: https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
     message: 'API rate limit exceeded for [REDACTED_IP]. (But here''s the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)'
   msg: 'Status code was 403 and not [200]: HTTP Error 403: rate limit exceeded

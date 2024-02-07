@@ -27,7 +27,7 @@ The Toolkit can help you with the deployment and maintenance of a self-managed G
 
 The Toolkit is designed to be flexible, and to follow best practices for GitLab. However, the scripts are opinionated, presented as-is, and may not be compatible with your specific environment build needs. There may be cases where you will need to extend or customize the Toolkit for your unique needs.
 
-Review the Toolkit in full before any use, as it offers no guarantees on topics such as [security](docs/environment_post_considerations.md#security) or data integrity. 
+Review the Toolkit in full before any use, as it offers no guarantees on topics such as [security](docs/environment_post_considerations.md#security) or data integrity.
 
 [Further manual setup](docs/environment_post_considerations.md) after deployment may also be required.
 
@@ -59,10 +59,10 @@ Target machine(s):
 - [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](docs/environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](docs/environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](docs/environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Geo](docs/environment_advanced_geo.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](docs/environment_advanced_monitoring.md)
 - [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](docs/environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](docs/environment_post_considerations.md)
+- [GitLab Environment Toolkit - Geo](docs/geo/README.md)
 - [GitLab Environment Toolkit - Troubleshooting](docs/environment_troubleshooting.md)
 
 ### Config Examples
@@ -180,7 +180,7 @@ Issues specific to the Toolkit code can also be raised in our tracker.
 
 ## Feature Requests
 
-The Toolkit is opinionated by necessity, as there is a vast amount of options and permutations available when deploying infrastructure across various Cloud Providers or on-prem. 
+The Toolkit is opinionated by necessity, as there is a vast amount of options and permutations available when deploying infrastructure across various Cloud Providers or on-prem.
 
 Consequently, during our independent review of feature requests, we might determine that some are not feasible to implement according to Toolkit's opinionated approach. In some cases, it could be more straightforward and quicker for you to tackle it separately.
 
