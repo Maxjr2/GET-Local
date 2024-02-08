@@ -79,7 +79,7 @@ Before running the failover process you should ensure you have read and complete
 
 Once you get to the [Promote the secondary site](https://docs.gitlab.com/ee/administration/geo/disaster_recovery/planned_failover.html#promote-the-secondary-site) step in the documentation you can proceed to perform a failover. To do the failover you can use the existing inventories to disable the primary and promote the secondary in a single command `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo_failover.yml`. If using multiple secondaries you will need to choose a single secondary that will be promoted to a stand a lone instance until recovery is run.
 
-After failover has occurred it's important to update your inventories to reflect the new roles they now perform and to avoid misconfiguration on subsequent runs. The original primary and secondary inventories need updating. For all environment types you will need to update the settings mentioned in the [Adding Geo specific config](geo_configure.md#adding-geo-specific-config) section.
+After failover has occurred it's important to update your inventories to reflect the new roles they now perform and to avoid misconfiguration on subsequent runs. The original primary and secondary inventories need updating. For all environment types you will need to update the settings mentioned in the [Adding Geo specific config](geo_configure.md) section.
 
 Finally, if using AWS RDS, in the Terraform config for the original secondary site you will need to remove the `rds_postgres_replication_database_arn` variable to prevent any misconfiguration happening on the next Terraform run.
 
