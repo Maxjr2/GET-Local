@@ -44,7 +44,7 @@ You should also select an [AWS Region](https://docs.aws.amazon.com/AWSEC2/latest
 
 :information_source:&nbsp; **This will be referred to as `<AWS_REGION>` later in this guide.**
 
-### Select Passwords / Tokens
+### Select Passwords and Tokens
 
 There are various passwords and tokens to be set for GitLab. Later on in the guide you'll be asked to fill these in with any values you desire. You can generate these now or later accordingly.
 
@@ -342,7 +342,7 @@ Next is the Environment config file that contains all the config for configuring
 
 <details><summary>Environment - <code>gitlab-environment-toolkit/ansible/environments/&#60;ENV_NAME&#62;/inventory/vars.yml</code></summary>
 
-:information_source:&nbsp; [As mentioned earlier in this guide](#select-passwords-tokens) all `<*_PASSWORD>` and `<*_TOKEN>` entries should be replaced with your own.
+:information_source:&nbsp; [As mentioned earlier in this guide](#select-passwords-and-tokens) all `<*_PASSWORD>` and `<*_TOKEN>` entries should be replaced with your own.
 
 ```yaml
 all:

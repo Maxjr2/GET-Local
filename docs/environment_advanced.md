@@ -249,7 +249,7 @@ For GitLab, we suggest the following mount paths are suggested:
 - `/var/opt/gitlab` - Common path for GitLab to store stateful data (e.g. Git Repo data).
 - `/var/log/gitlab` - Common path for GitLab to store its logs.
 
-## Gitaly Setups - Cluster or Sharded
+## Gitaly Setups: Cluster or Sharded
 
 [Gitaly](https://docs.gitlab.com/ee/administration/gitaly/), which is our repo storage backend, can be run in two different ways:
 

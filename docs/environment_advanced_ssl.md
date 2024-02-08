@@ -1,4 +1,4 @@
-# Advanced - SSL
+# Advanced: SSL
 
 - [GitLab Environment Toolkit - Quick Start Guide](environment_quick_start_guide.md)
 - [GitLab Environment Toolkit - Preparing the environment](environment_prep.md)
@@ -145,7 +145,7 @@ When preparing the certificates the following conditions should be met:
 - Certificates are in the `.pem` format and Keys in the `.pem` or `.key` format.
 - Certificates must contain a Subject Alternative Name (SAN) as Common Name (CN) use only is deprecated.
 - The files will be copied to each component node group. As such the SAN entries should either match each node group machine's specific hostname or be an appropriate wildcard.
-  - :information_source:&nbsp; The Toolkit by default uses IPs for internal connections. [However, this can be switched to use internal hostnames as discovered by Ansible](environment_advanced_network.md#configuring-internal-connection-type-ips-hostnames) which is generally preferred for Internal SSL.
+  - :information_source:&nbsp; The Toolkit by default uses IPs for internal connections. [However, this can be switched to use internal hostnames as discovered by Ansible](environment_advanced_network.md#configuring-internal-connection-type-ips-and-hostnames) which is generally preferred for Internal SSL.
   - :information_source:&nbsp; Terraform output contains the Hostnames / IPs for you to configure your certificates with.
 - For GitLab components to verify each certificate you will need either the CA file for your certificates or to upload the certificate itself to client components. Further guidance on this is given later.
 
@@ -153,7 +153,7 @@ Once the certificates are prepared you should place them in a location that's ac
 
 Once you have the certificates ready proceed to the relevant sections below to configure.
 
-### Configuring Internal SSL via Custom Files / Secrets and Custom Config
+### Configuring Internal SSL via Custom Files and Custom Config
 
 For most components it's best to configure Internal SSL for each via [Custom Files](environment_advanced.md#custom-files) (or [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks) for Cloud Native Hybrids) and [Custom Config](environment_advanced.md#custom-config) to allow for full control over the various options each can have depending on your requirements. This applies to all components in the GitLab setup except for those specifically noted in the below [Configuring Internal SSL directly for select components](#configuring-internal-ssl-directly-for-select-components) section.
 

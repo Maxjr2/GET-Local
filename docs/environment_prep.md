@@ -66,7 +66,7 @@ Existing projects can also be used, but this should be checked with the Project'
 
 :information_source:&nbsp; Ensure that you have the [Service Usage API](https://console.cloud.google.com/apis/api/serviceusage.googleapis.com/overview) and [Compute Engine API](https://console.developers.google.com/apis/api/compute.googleapis.com/overview) enabled.
 
-### 3. Setup Provider Authentication - GCP Service Account
+### 3. Setup Provider Authentication: GCP Service Account
 
 Authentication with GCP directly is done with a [Service Account](https://cloud.google.com/iam/docs/understanding-service-accounts), which is required by both Terraform and Ansible.
 
@@ -95,7 +95,7 @@ With the above set create the Service Account as follows:
 
 :information_source:&nbsp; The Toolkit will in turn create several required Service Accounts via Terraform during the provisioning stage for the resources. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-accounts-gcp) for more information.
 
-### 4. Setup SSH Authentication - SSH OS Login for GCP Service Account
+### 4. Setup SSH Authentication: SSH OS Login for GCP Service Account
 
 In addition to creating the Service Account, set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access) for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
 
@@ -136,7 +136,7 @@ More info on OS Login and how it's configured can be found [in Google's document
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use the key for accessing machines.
 
-### 5. Setup Terraform State Storage Bucket - GCP Cloud Storage
+### 5. Setup Terraform State Storage Bucket: GCP Cloud Storage
 
 Create a standard [GCP storage bucket](https://cloud.google.com/storage/docs/creating-buckets) on the intended environment's project
 for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`
@@ -152,7 +152,7 @@ gsutil mb -l BUCKET_LOCATION gs://<env_shortname>-get-terraform-state
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
-### 6. Create Static External IP - GCP
+### 6. Create Static External IP: GCP
 
 A static IP can be generated in GCP as follows:
 
@@ -164,7 +164,7 @@ Once the IP is available take note of it for later.
 
 ## Amazon Web Services (AWS)
 
-### 1. Setup Provider Authentication - Environment Variables
+### 1. Setup Provider Authentication: Environment Variables
 
 Authentication with AWS directly can be done in [various ways](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
 
@@ -172,7 +172,7 @@ The most straightforward of these options that work with both Terraform and AWS 
 
 To create an access key for your user follow [the official docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey). Once created save these in a secure location and then set each key to the respective environment variable as shown above in any shell or CI job you're looking to run the Toolkit.
 
-### 2. Setup SSH Authentication - AWS
+### 2. Setup SSH Authentication: AWS
 
 :information_source:&nbsp; If you intend to use an alternative method for connecting to machines, for example AWS SSM, you can skip this step.
 
@@ -191,7 +191,7 @@ SSH usernames are provided by AWS depending on the [AMI Image](https://docs.aws.
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use this key for adding into the AWS machines as well as accessing them.
 
-### 3. Setup Terraform State Storage - AWS S3
+### 3. Setup Terraform State Storage: AWS S3
 
 Create a standard [AWS storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) on the intended environment's project for its Terraform State. Give this a meaningful name such named as `<env_short_name>-get-terraform-state`.
 
@@ -199,7 +199,7 @@ Create a standard [AWS storage bucket](https://docs.aws.amazon.com/AmazonS3/late
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
-### 4. Create Static External IP - AWS Elastic IP Allocation
+### 4. Create Static External IP: AWS Elastic IP Allocation
 
 A static IP, AKA an Elastic IP, can be generated in AWS as follows:
 
@@ -218,7 +218,7 @@ Each environment is recommended to have its own [resource group](https://docs.mi
 
 Existing resource groups can also be used, but this should be checked with the Group's stakeholders as this will affect things such as total CPU quotas for example.
 
-### 2. Setup Provider Authentication - Azure
+### 2. Setup Provider Authentication: Azure
 
 Authentication with Azure directly can be done in [various ways](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure).
 
@@ -226,7 +226,7 @@ It's recommended to use either a Service Principal(with [Client Certificate](htt
 
 Once you have selected the authentication method and obtained the credentials you may export them as Environment Variables following the Terraform instructions for the specific authentication type.
 
-### 3. Setup SSH Authentication - Azure
+### 3. Setup SSH Authentication: Azure
 
 SSH authentication for the created machines on Azure will require an admin username and an SSH key.
 
@@ -245,7 +245,7 @@ It is also possible to use an existing SSH key pair, but it is recommended to us
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use the admin username and the key for adding into the Azure machines as well as accessing them.
 
-### 4. Setup Terraform State Storage - Azure Blob Storage
+### 4. Setup Terraform State Storage: Azure Blob Storage
 
 Create a [storage account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create) that will contain all of your Azure Storage data objects. Take a note of its name and [access key](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage) for later.
 
@@ -255,7 +255,7 @@ Then create a standard [Azure blob container](https://docs.microsoft.com/en-us/a
 
 After the container is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
-### 5. Create Static External IP - Azure
+### 5. Create Static External IP: Azure
 
 A static IP can be generated in Azure as follows:
 

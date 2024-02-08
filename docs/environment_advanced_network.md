@@ -191,16 +191,16 @@ module "gitlab_ref_arch_aws" {
 In addition to the above the following _optional_ settings change how the network is configured:
 
 - `vpc_cidr_block` - The [CIDR block](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html#vpc-ip-addressing) that will be used for your VPC. This shouldn't need to be changed in most scenarios unless you want to use a specific CIDR block. Default is `172.31.0.0/16`.
-- `subnet_pub_count` - The number of subnets to create in the VPC. This should only be changed if you want an increased subnet count for availability reasons. Refer to the below [Created Subnet Types (Public / Private)](#created-subnet-types-public-private) section for more info. Default is `2`.
+- `subnet_pub_count` - The number of subnets to create in the VPC. This should only be changed if you want an increased subnet count for availability reasons. Refer to the below [Created Subnet Types (Public / Private)](#created-subnet-types-public-and-private) section for more info. Default is `2`.
 - `subnet_pub_cidr_block`- A list of [CIDR blocks](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html#vpc-ip-addressing) that will be used for each public subnet created. This should be changed if you want to use specific CIDR blocks. Default is `["172.31.0.0/20","172.31.16.0/20","172.31.32.0/20"]`
   - The module has up to 3 subnet CIDR blocks it will use. If you have set `subnet_pub_count` higher than 3 then this variable will need to be adjusted to match the number of subnets to be created. The CIDR blocks will need to fit in the main block defined for the VPC via `vpc_cidr_block`.
-- `subnet_priv_count` - The number of private subnets to create in the VPC. This should be changed if you want more resources to be created with private subnets. Refer to the below [Created Subnet Types (Public / Private)](#created-subnet-types-public-private) section for more info. Default is `0`.
+- `subnet_priv_count` - The number of private subnets to create in the VPC. This should be changed if you want more resources to be created with private subnets. Refer to the below [Created Subnet Types (Public / Private)](#created-subnet-types-public-and-private) section for more info. Default is `0`.
 - `subnet_priv_cidr_block`- A list of [CIDR blocks](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html#vpc-ip-addressing) that will be used for each private subnet created. This should be changed if you want to use specific CIDR blocks. Default is `["172.31.128.0/20", "172.31.144.0/20", "172.31.160.0/20"]`
   - The module has up to 3 subnet CIDR blocks it will use. If you have set `subnet_priv_count` higher than 3 then this variable will need to be adjusted to match the number of subnets to be created. The CIDR blocks will need to fit in the main block defined for the VPC via `vpc_cidr_block`.
 - `zones_exclude` - In rare cases you may need to avoid specific Availability Zones [as they don't have the available resource to deploy the infrastructure in](https://aws.amazon.com/premiumsupport/knowledge-center/eks-cluster-creation-errors/). When this is the case you can specify a list of Zones by name via this setting that will then be avoided by the Toolkit, e.g. `["us-east-1e"]`. Default is `null`.
 - `availability_zones` - Availability Zones resources should be spread across. By default, (subject to `zones_exclude`) zones are  automatically chosen in the VPC by lexical order (i.e. when two subnets are requested they will be in the zones with suffixes `a`, `b`). In some circumstances (e.g. exposing services via PrivateLink to other accounts) it may be desirable to choose the Availability Zones more precisely but still allow the Toolkit to create all the resources. In these cases, you can supply the list of Zones to use. If you supply fewer zones than the number of subnets, zones will be re-used in round-robin order; if you supply more zones than the number of subnets (N), only the first N zones will be used. `zones_exclude` will _not_ be applied to this list. Default is `[]`.
 
-#### Created Subnet Types (Public / Private)
+#### Created Subnet Types (Public and Private)
 
 When creating a network the Toolkit supports creating both Public and Private subnets.
 
@@ -227,8 +227,8 @@ Note that when this is configured the module will configure some AWS Security Gr
 With an existing stack configure the following config should be added to the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
 - `vpc_id` - The ID of your existing VPC
-- `subnet_pub_ids` - A list of public subnet IDs the environment's machines should be spread across. The subnets should be located in the same existing VPC. Refer to the below [Existing Subnet Types (Public / Private)](#existing-subnet-types-public-private) section for more info.
-- `subnet_priv_ids` - A list of private subnet IDs the environment's machines should be spread across. The subnets should be located in the same existing VPC and have any desired dependent infrastructure, e.g. NAT Gateway for internet access. Refer to the below [Existing Subnet Types (Public / Private)](#existing-subnet-types-public-private) section for more info.
+- `subnet_pub_ids` - A list of public subnet IDs the environment's machines should be spread across. The subnets should be located in the same existing VPC. Refer to the below [Existing Subnet Types (Public / Private)](#existing-subnet-types-public-and-private) section for more info.
+- `subnet_priv_ids` - A list of private subnet IDs the environment's machines should be spread across. The subnets should be located in the same existing VPC and have any desired dependent infrastructure, e.g. NAT Gateway for internet access. Refer to the below [Existing Subnet Types (Public / Private)](#existing-subnet-types-public-and-private) section for more info.
 
 An example of your environment config file with public subnets would look like:
 
@@ -245,7 +245,7 @@ module "gitlab_ref_arch_aws" {
   [...]
 ```
 
-#### Existing Subnet Types (Public / Private)
+#### Existing Subnet Types (Public and Private)
 
 When providing an existing network to the Toolkit it also supports the passthrough of public / private subnets.
 
@@ -347,7 +347,7 @@ To lock down internal network access to particular CIDR blocks these _optional_ 
   - :information_source:&nbsp; [There are additional considerations for this setting when using Geo](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication).
 - `geo_tracking_postgres_md5_auth_cidr_blocks` - A list of CIDR blocks to be allowed access to [Geo Tracking Postgres (Omnibus)](https://docs.gitlab.com/ee/administration/geo/replication/multiple_servers.html#step-3-configure-the-geo-tracking-database-on-the-geo-secondary-site). Default is `['0.0.0.0/0']`.
 
-## Configuring Internal Connection Type (IPs / Hostnames)
+## Configuring Internal Connection Type (IPs and Hostnames)
 
 The Toolkit by default uses IPs for internal connections. However, this can be switched to use internal hostnames as discovered by Ansible via the following setting in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
