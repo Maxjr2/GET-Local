@@ -20,6 +20,10 @@
 
 [[_TOC_]]
 
+## Custom Servers with Geo (On Prem)
+
+On Prem servers are supported by the toolkit, details on how to work with On Prem servers can be found in our [Custom Servers (On Prem)](../environment_advanced.md#custom-servers-on-prem) documentation.
+
 ## Geo Proxying for Secondary Sites with a Unified URL
 
 > The Geo Proxying for Secondary Sites is only available for deployments using GitLab versions 14.6 or above.

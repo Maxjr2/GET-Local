@@ -63,6 +63,9 @@ Target machine(s):
 - [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](docs/environment_upgrades.md)
 - [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](docs/environment_post_considerations.md)
 - [GitLab Environment Toolkit - Geo](docs/geo/README.md)
+  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](docs/geo/geo_provision.md)
+  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](docs/geo/geo_configure.md)
+  - [GitLab Environment Toolkit - Geo - Advanced](docs/geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](docs/environment_troubleshooting.md)
 
 ### Config Examples
