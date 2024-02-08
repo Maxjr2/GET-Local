@@ -19,7 +19,9 @@ external_url '{{ external_url_sanitised }}'
 # Sidekiq Config
 sidekiq['enable'] = true
 sidekiq['listen_address'] = '0.0.0.0'
-sidekiq['max_concurrency'] = {{ sidekiq_max_concurrency }}
+{% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
+sidekiq['max_concurrency'] = 20
+{% else %}
 sidekiq['queue_groups'] = [
 {% for cpu in range(ansible_processor_vcpus) %}
   "*",

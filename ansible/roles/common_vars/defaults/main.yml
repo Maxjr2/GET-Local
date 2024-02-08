@@ -270,7 +270,6 @@ redis_sentinel_port: 26379
 
 # Sidekiq
 sidekiq_int_addrs: "{{ (groups['sidekiq'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'sidekiq' in groups else [] }}"
-sidekiq_max_concurrency: 20
 
 ################################################################################
 ## GitLab Component Settings (Non-Omnibus)
