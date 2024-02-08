@@ -46,7 +46,9 @@ gitlab:
   sidekiq:
     maxReplicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else sidekiq_replicas }}"
     minReplicas: "{{ gitlab_charts_sidekiq_min_replicas if gitlab_charts_sidekiq_min_replicas != '' else (sidekiq_replicas | int * gitlab_charts_sidekiq_min_replicas_scaler) | int }}"
-    concurrency: "{{ sidekiq_max_concurrency }}"
+{% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
+    concurrency: "20"
+{% else %}
     hpa:
 {% if gitlab_version != '' and gitlab_version is version('15.2', '<') %}
       targetAverageValue: 700m
