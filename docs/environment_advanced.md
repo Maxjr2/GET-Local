@@ -345,6 +345,14 @@ To configure Custom Servers with Ansible the setup process involves the followin
 
 Refer to each section below for how to do each:
 
+### Environment Config
+
+Configuring the environment config `vars.yml` file is [much the same as it would be normally](environment_configure.md#environment-config-varsyml) with the following differences:
+
+- `cloud_provider` **must** be set to `none`. This should be set when running with any static inventory.
+- Any Cloud Provider specific variables, such as `gcp_project` should be removed.
+- `prefix` can also be removed.
+
 ### Static Config
 
 First an [Ansible Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) is required instead of a [Dynamic Inventory](environment_configure.md#configure-dynamic-inventory).
@@ -355,6 +363,8 @@ An example of a 10k environment's static inventory file that's Toolkit compatibl
 
 - All text in `<>` brackets should be replaced accordingly with the IP addresses that Ansible can access
 - Group names (e.g. `gitaly`) and Inventory Hostnames (e.g. `gitlab-gitaly-1`) should not be replaced. These are required internally by Ansible to help correctly identify hosts.
+
+<details><summary>10k Static Inventory</summary>
 
 ```yml
 all:
@@ -486,7 +496,11 @@ all:
     ungrouped:
 ```
 
+</details>
+
 For smaller environments where Redis is combined it would look as follows:
+
+<details><summary>Redis Static Inventory</summary>
 
 ```yml
 all:
@@ -505,7 +519,11 @@ all:
               ansible_host: <REDIS-3-ADDRESS>
 ```
 
+</details>
+
 For environments with OpenSearch nodes, the static inventory should have OpenSearch hosts information:
+
+<details><summary>OpenSearch Static Inventory</summary>
 
 ```yml
 all:
@@ -524,13 +542,223 @@ all:
               ansible_host: <OPENSEARCH-3-ADDRESS>
 ```
 
-### Environment Config
+</details>
 
-Configuring the environment config `vars.yml` file is [much the same as it would be normally](environment_configure.md#environment-config-varsyml) with the following differences:
+For environments with Geo, the static inventory will need to follow the below example:
 
-- `cloud_provider` **must** be set to `none`. This should be set when running with any static inventory.
-- Any Cloud Provider specific variables, such as `gcp_project` should be removed.
-- `prefix` can also be removed.
+<details><summary>Geo Static Inventory</summary>
+
+```yml
+all:
+  children:
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>:
+      hosts:
+        <PREFIX>-consul-1:
+          ansible_host: <CONSUL-1-ADDRESS>
+        <PREFIX>-consul-2:
+          ansible_host: <CONSUL-2-ADDRESS>
+        <PREFIX>-consul-3:
+          ansible_host: <CONSUL-3-ADDRESS>
+        <PREFIX>-gitaly-1:
+          ansible_host: <GITALY-1-ADDRESS>
+        <PREFIX>-gitaly-2:
+          ansible_host: <GITALY-2-ADDRESS>
+        <PREFIX>-gitaly-3:
+          ansible_host: <GITALY-3-ADDRESS>
+        <PREFIX>-gitlab-rails-1:
+          ansible_host: <GITLAB-RAILS-1-ADDRESS>
+        <PREFIX>-gitlab-rails-2:
+          ansible_host: <GITLAB-RAILS-2-ADDRESS>
+        <PREFIX>-gitlab-rails-3:
+          ansible_host: <GITLAB-RAILS-3-ADDRESS>
+        <PREFIX>-haproxy-external-1:
+          ansible_host: <HAPROXY-EXTERNAL-1-ADDRESS>
+        <PREFIX>-haproxy-internal-1:
+          ansible_host: <HAPROXY-INTERNAL-1-ADDRESS>
+        <PREFIX>-monitor-1:
+          ansible_host: <MONITOR-1-ADDRESS>
+        <PREFIX>-pgbouncer-1:
+          ansible_host: <PGBOUNCER-1-ADDRESS>
+        <PREFIX>-pgbouncer-2:
+          ansible_host: <PGBOUNCER-2-ADDRESS>
+        <PREFIX>-pgbouncer-3:
+          ansible_host: <PGBOUNCER-3-ADDRESS>
+        <PREFIX>-postgres-1:
+          ansible_host: <POSTGRES-1-ADDRESS>
+        <PREFIX>-postgres-2:
+          ansible_host: <POSTGRES-2-ADDRESS>
+        <PREFIX>-postgres-3:
+          ansible_host: <POSTGRES-3-ADDRESS>
+        <PREFIX>-praefect-1:
+          ansible_host: <PRAEFECT-1-ADDRESS>
+        <PREFIX>-praefect-2:
+          ansible_host: <PRAEFECT-2-ADDRESS>
+        <PREFIX>-praefect-3:
+          ansible_host: <PRAEFECT-3-ADDRESS>
+        <PREFIX>-praefect-postgres-1:
+          ansible_host: <PRAEFECT-POSTGRES-1-ADDRESS>
+        <PREFIX>-redis-1:
+          ansible_host: <REDIS-1-ADDRESS>
+        <PREFIX>-redis-2:
+          ansible_host: <REDIS-2-ADDRESS>
+        <PREFIX>-redis-3:
+          ansible_host: <REDIS-3-ADDRESS>
+        <PREFIX>-sidekiq-1:
+          ansible_host: <SIDEKIQ-1-ADDRESS>
+        <PREFIX>-sidekiq-2:
+          ansible_host: <SIDEKIQ-2-ADDRESS>
+        <PREFIX>-sidekiq-3:
+          ansible_host: <SIDEKIQ-3-ADDRESS>
+        <PREFIX>-sidekiq-4:
+          ansible_host: <SIDEKIQ-4-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_gitlab_rails_primary:
+      hosts:
+        <PREFIX>-gitlab-rails-1:
+          ansible_host: <GITLAB-RAILS-1-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_gitlab_rails_secondary:
+      hosts:
+        <PREFIX>-gitlab-rails-2:
+          ansible_host: <GITLAB-RAILS-2-ADDRESS>
+        <PREFIX>-gitlab-rails-3:
+          ansible_host: <GITLAB-RAILS-3-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_haproxy_internal_primary:
+      hosts:
+        <PREFIX>-haproxy-internal-1:
+          ansible_host: <POSTGRES-1-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_postgres_primary:
+      hosts:
+        <PREFIX>-postgres-1:
+          ansible_host: <POSTGRES-1-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_postgres_secondary:
+      hosts:
+        <PREFIX>-postgres-2:
+          ansible_host: <POSTGRES-2-ADDRESS>
+        <PREFIX>-postgres-3:
+          ansible_host: <POSTGRES-3-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_sidekiq_primary:
+      hosts:
+        <PREFIX>-sidekiq-1:
+          ansible_host: <SIDEKIQ-1-ADDRESS>
+    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_sidekiq_secondary:
+      hosts:
+        <PREFIX>-sidekiq-2:
+          ansible_host: <SIDEKIQ-2-ADDRESS>
+        <PREFIX>-sidekiq-3:
+          ansible_host: <SIDEKIQ-3-ADDRESS>
+        <PREFIX>-sidekiq-4:
+          ansible_host: <SIDEKIQ-4-ADDRESS>
+    consul:
+      hosts:
+        <PREFIX>-consul-1:
+          ansible_host: <CONSUL-1-ADDRESS>
+        <PREFIX>-consul-2:
+          ansible_host: <CONSUL-2-ADDRESS>
+        <PREFIX>-consul-3:
+          ansible_host: <CONSUL-3-ADDRESS>
+    gitaly:
+      children:
+        gitaly_primary:
+          hosts:
+            <PREFIX>-gitaly-1:
+              ansible_host: <GITALY-1-ADDRESS>
+        gitaly_secondary:
+          hosts:
+            <PREFIX>-gitaly-2:
+              ansible_host: <GITALY-2-ADDRESS>
+            <PREFIX>-gitaly-3:
+              ansible_host: <GITALY-3-ADDRESS>
+    gitlab_rails:
+      children:
+        gitlab_rails_primary:
+          hosts:
+            <PREFIX>-gitlab-rails-1:
+              ansible_host: <GITLAB-RAILS-1-ADDRESS>
+        gitlab_rails_secondary:
+          hosts:
+            <PREFIX>-gitlab-rails-2:
+              ansible_host: <GITLAB-RAILS-2-ADDRESS>
+            <PREFIX>-gitlab-rails-3:
+              ansible_host: <GITLAB-RAILS-3-ADDRESS>
+    haproxy_external:
+      hosts:
+        <PREFIX>-haproxy-external-1:
+          ansible_host: <HAPROXY-EXTERNAL-1-ADDRESS>
+    haproxy_internal:
+      hosts:
+        <PREFIX>-haproxy-internal-1:
+          ansible_host: <HAPROXY-INTERNAL-1-ADDRESS>
+    monitor:
+      hosts:
+        gitlab-monitor-1:
+          ansible_host: <MONITOR-1-ADDRESS>
+    pgbouncer:
+      hosts:
+        gitlab-pgbouncer-1:
+          ansible_host: <PGBOUNCER-1-ADDRESS>
+        gitlab-pgbouncer-2:
+          ansible_host: <PGBOUNCER-2-ADDRESS>
+        gitlab-pgbouncer-3:
+          ansible_host: <PGBOUNCER-3-ADDRESS>
+    postgres:
+      children:
+        postgres_primary:
+          hosts:
+            <PREFIX>-postgres-1:
+              ansible_host: <POSTGRES-1-ADDRESS>
+        postgres_secondary:
+          hosts:
+            <PREFIX>-postgres-2:
+              ansible_host: <POSTGRES-2-ADDRESS>
+            <PREFIX>-postgres-3:
+              ansible_host: <POSTGRES-3-ADDRESS>
+    praefect:
+      children:
+        praefect_primary:
+          hosts:
+            gitlab-praefect-1:
+              ansible_host: <PRAEFECT-1-ADDRESS>
+        praefect_secondary:
+          hosts:
+            gitlab-praefect-2:
+              ansible_host: <PRAEFECT-2-ADDRESS>
+            gitlab-praefect-3:
+              ansible_host: <PRAEFECT-3-ADDRESS>
+    praefect_postgres:
+      children:
+        praefect_postgres_primary:
+          hosts:
+            gitlab-praefect-postgres-1:
+              ansible_host: <PRAEFECT-POSTGRES-1-ADDRESS>
+    redis:
+      children:
+        redis_primary:
+          hosts:
+            <PREFIX>-redis-1:
+              ansible_host: <REDIS-1-ADDRESS>
+        redis_secondary:
+          hosts:
+            <PREFIX>-redis-2:
+              ansible_host: <REDIS-2-ADDRESS>
+            <PREFIX>-redis-3:
+              ansible_host: <REDIS-3-ADDRESS>
+    sidekiq:
+      children:
+        sidekiq_primary:
+          hosts:
+            <PREFIX>-sidekiq-1:
+              ansible_host: <SIDEKIQ-1-ADDRESS>
+        sidekiq_secondary:
+          hosts:
+            <PREFIX>-sidekiq-2:
+              ansible_host: <SIDEKIQ-2-ADDRESS>
+            <PREFIX>-sidekiq-3:
+              ansible_host: <SIDEKIQ-3-ADDRESS>
+            <PREFIX>-sidekiq-4:
+              ansible_host: <SIDEKIQ-4-ADDRESS>
+    ungrouped:
+```
+
+</details>
 
 ### Facts Cache (Optional)
 

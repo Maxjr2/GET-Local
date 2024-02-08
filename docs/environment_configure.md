@@ -318,7 +318,7 @@ all:
     ansible_user: "<ssh_username>"
     ansible_ssh_private_key_file: "<private_ssh_key_path>"
 
-    # Cloud Settings, available options: gcp, aws, azure
+    # Cloud Settings, available options: gcp, aws, azure, none
     cloud_provider: "gcp"
 
     # GCP only settings
