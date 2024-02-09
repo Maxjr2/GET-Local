@@ -21,7 +21,7 @@ sidekiq['enable'] = true
 sidekiq['listen_address'] = '0.0.0.0'
 {% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
 sidekiq['max_concurrency'] = 20
-{% else %}
+{% endif %}
 sidekiq['queue_groups'] = [
 {% for cpu in range(ansible_processor_vcpus) %}
   "*",
