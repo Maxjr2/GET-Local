@@ -156,8 +156,9 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     id      = aws_launch_template.gitlab_webservice[0].id
     version = aws_launch_template.gitlab_webservice[0].latest_version
   }
-  ami_type        = local.eks_ami_type
-  release_version = local.eks_node_group_release_version
+  ami_type             = local.eks_ami_type
+  release_version      = local.eks_node_group_release_version
+  force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {
     desired_size = local.webservice_node_pool_autoscaling ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
@@ -260,8 +261,9 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     id      = aws_launch_template.gitlab_sidekiq[0].id
     version = aws_launch_template.gitlab_sidekiq[0].latest_version
   }
-  ami_type        = local.eks_ami_type
-  release_version = local.eks_node_group_release_version
+  ami_type             = local.eks_ami_type
+  release_version      = local.eks_node_group_release_version
+  force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {
     desired_size = local.sidekiq_node_pool_autoscaling ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
@@ -364,8 +366,9 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     id      = aws_launch_template.gitlab_supporting[0].id
     version = aws_launch_template.gitlab_supporting[0].latest_version
   }
-  ami_type        = local.eks_ami_type
-  release_version = local.eks_node_group_release_version
+  ami_type             = local.eks_ami_type
+  release_version      = local.eks_node_group_release_version
+  force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {
     desired_size = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count

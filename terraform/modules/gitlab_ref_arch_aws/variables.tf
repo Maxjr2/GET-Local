@@ -752,6 +752,10 @@ variable "eks_node_group_ami_release_version" {
   type    = string
   default = null
 }
+variable "eks_node_group_ami_force_update_version" {
+  type    = bool
+  default = false
+}
 variable "eks_kube_proxy_version" {
   type    = string
   default = null
