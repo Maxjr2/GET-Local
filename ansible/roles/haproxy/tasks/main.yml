@@ -114,7 +114,9 @@
         - not external_url_ssl
         - "external_ssl_source == ''"
   when: "'haproxy_external' in group_names"
-  tags: reconfigure
+  tags:
+    - reconfigure
+    - ssl
 
 - name: Run Custom Tasks
   block:

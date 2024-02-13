@@ -49,7 +49,7 @@
   command: /opt/acme.sh/acme.sh --upgrade
 
 - name: Run acme.sh to generate certs
-  command: /opt/acme.sh/acme.sh --issue --standalone --httpport 88 --server {{ acme_sh_server }} -d {{ external_host }} {{ ('-d ' + container_registry_external_host) if container_registry_enable else '' }} --key-file /opt/haproxy/ssl/{{ external_host }}.pem.key --fullchain-file /opt/haproxy/ssl/{{ external_host }}.pem --reloadcmd 'docker kill -s HUP haproxy'
+  command: /opt/acme.sh/acme.sh --issue --standalone --home /opt/acme.sh --httpport 88 --server {{ acme_sh_server }} -d {{ external_host }} {{ ('-d ' + container_registry_external_host) if container_registry_enable else '' }} --key-file /opt/haproxy/ssl/{{ external_host }}.pem.key --fullchain-file /opt/haproxy/ssl/{{ external_host }}.pem --reloadcmd 'docker kill -s HUP haproxy'
   register: acme_sh_cmd
   failed_when: acme_sh_cmd.rc == 1
 
