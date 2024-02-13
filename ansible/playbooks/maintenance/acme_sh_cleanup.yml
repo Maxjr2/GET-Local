@@ -1,0 +1,12 @@
+# Removes any previously misconfigured acme.sh directories on HAProxy nodes
+# Wrong working environments were used previously due to bash profile differences
+- hosts: haproxy_external
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Remove any previously misconfigured acme.sh install directories
+      file:
+        path: /root/.acme.sh
+        state: absent
