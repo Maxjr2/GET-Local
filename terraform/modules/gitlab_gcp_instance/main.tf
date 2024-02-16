@@ -28,6 +28,7 @@ resource "google_compute_instance" "gitlab" {
       size  = var.disk_size
       type  = var.disk_type
     }
+    kms_key_self_link = var.disk_kms_key
   }
 
   metadata = {
@@ -61,19 +62,19 @@ resource "google_compute_instance" "gitlab" {
     scopes = var.service_account_iam_scopes
   }
 
-  lifecycle {
-    ignore_changes = [
-      min_cpu_platform,
-      boot_disk
-    ]
-  }
-
   dynamic "attached_disk" {
     for_each = var.disks
     content {
       source      = google_compute_disk.gitlab["${attached_disk.value["device_name"]}-${count.index}"].self_link
       device_name = attached_disk.value["device_name"]
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      min_cpu_platform,
+      boot_disk,
+    ]
   }
 }
 
@@ -97,7 +98,6 @@ locals {
 }
 
 ## Service Account
-
 module "google_service_account" {
   source = "../gitlab_gcp_service_account"
   count  = min(var.node_count, 1)
@@ -113,10 +113,25 @@ module "google_service_account" {
 ## Data Disks
 resource "google_compute_disk" "gitlab" {
   for_each = { for d in local.node_data_disks : "${d.device_name}-${d.node_num}" => d }
-  name     = "${local.name_prefix}-${each.value.device_name}-${each.value.node_num}"
-  type     = each.value.type
-  size     = each.value.size
-  zone     = each.value.zone
+
+  name = "${local.name_prefix}-${each.value.device_name}-${each.value.node_num}"
+  type = each.value.type
+  size = each.value.size
+  zone = each.value.zone
+
+  dynamic "disk_encryption_key" {
+    for_each = range(var.disk_kms_key != null ? 1 : 0)
+
+    content {
+      kms_key_self_link = var.disk_kms_key
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      disk_encryption_key[0].kms_key_self_link
+    ]
+  }
 }
 
 ## External IP

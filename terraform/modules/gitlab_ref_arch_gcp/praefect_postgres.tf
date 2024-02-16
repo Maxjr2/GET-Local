@@ -8,9 +8,11 @@ module "praefect_postgres" {
 
   machine_type  = var.praefect_postgres_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.praefect_postgres_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.praefect_postgres_disk_type, var.default_disk_type)
-  disks         = var.praefect_postgres_disks
+
+  disk_size    = coalesce(var.praefect_postgres_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.praefect_postgres_disk_type, var.default_disk_type)
+  disk_kms_key = var.praefect_postgres_disk_kms_key != null ? var.praefect_postgres_disk_kms_key : var.default_disk_kms_key
+  disks        = var.praefect_postgres_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name

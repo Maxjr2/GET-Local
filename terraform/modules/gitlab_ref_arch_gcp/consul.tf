@@ -8,9 +8,11 @@ module "consul" {
 
   machine_type  = var.consul_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.consul_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.consul_disk_type, var.default_disk_type)
-  disks         = var.consul_disks
+
+  disk_size    = coalesce(var.consul_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.consul_disk_type, var.default_disk_type)
+  disk_kms_key = var.consul_disk_kms_key != null ? var.consul_disk_kms_key : var.default_disk_kms_key
+  disks        = var.consul_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name

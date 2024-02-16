@@ -8,9 +8,11 @@ module "opensearch_vm" {
 
   machine_type  = var.opensearch_vm_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.opensearch_vm_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.opensearch_vm_disk_type, var.default_disk_type)
-  disks         = var.opensearch_vm_disks
+
+  disk_size    = coalesce(var.opensearch_vm_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.opensearch_vm_disk_type, var.default_disk_type)
+  disk_kms_key = var.opensearch_vm_disk_kms_key != null ? var.opensearch_vm_disk_kms_key : var.default_disk_kms_key
+  disks        = var.opensearch_vm_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name

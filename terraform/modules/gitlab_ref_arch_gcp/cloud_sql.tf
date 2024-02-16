@@ -73,6 +73,13 @@ resource "google_sql_database_instance" "gitlab" {
   deletion_protection = var.cloud_sql_postgres_deletion_protection
   encryption_key_name = var.cloud_sql_postgres_encryption_key_name
 
+  lifecycle {
+    ignore_changes = [
+      # Can only be set for new instances so ignore any subsequent changes
+      encryption_key_name
+    ]
+  }
+
   depends_on = [
     google_service_networking_connection.gitlab_private_service_access[0]
   ]

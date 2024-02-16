@@ -37,6 +37,10 @@ variable "default_disk_type" {
   type    = string
   default = "pd-standard"
 }
+variable "default_disk_kms_key" {
+  type    = string
+  default = null
+}
 
 variable "project" {
   type    = string
@@ -112,6 +116,10 @@ variable "consul_disk_size" {
   type    = string
   default = null
 }
+variable "consul_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "consul_disks" {
   type    = list(any)
   default = []
@@ -133,6 +141,10 @@ variable "gitaly_disk_size" {
   type    = string
   default = "500"
 }
+variable "gitaly_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "gitaly_disks" {
   type    = list(any)
   default = []
@@ -151,6 +163,10 @@ variable "gitlab_nfs_disk_type" {
   default = null
 }
 variable "gitlab_nfs_disk_size" {
+  type    = string
+  default = null
+}
+variable "gitlab_nfs_disk_kms_key" {
   type    = string
   default = null
 }
@@ -175,6 +191,10 @@ variable "gitlab_rails_disk_size" {
   type    = string
   default = null
 }
+variable "gitlab_rails_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "gitlab_rails_disks" {
   type    = list(any)
   default = []
@@ -193,6 +213,10 @@ variable "haproxy_external_disk_type" {
   default = null
 }
 variable "haproxy_external_disk_size" {
+  type    = string
+  default = null
+}
+variable "haproxy_external_disk_kms_key" {
   type    = string
   default = null
 }
@@ -221,6 +245,10 @@ variable "haproxy_internal_disk_size" {
   type    = string
   default = null
 }
+variable "haproxy_internal_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "haproxy_internal_disks" {
   type    = list(any)
   default = []
@@ -239,6 +267,10 @@ variable "monitor_disk_type" {
   default = null
 }
 variable "monitor_disk_size" {
+  type    = string
+  default = null
+}
+variable "monitor_disk_kms_key" {
   type    = string
   default = null
 }
@@ -263,6 +295,10 @@ variable "opensearch_vm_disk_size" {
   type    = string
   default = "500"
 }
+variable "opensearch_vm_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "opensearch_vm_disks" {
   type    = list(any)
   default = []
@@ -281,6 +317,10 @@ variable "pgbouncer_disk_type" {
   default = null
 }
 variable "pgbouncer_disk_size" {
+  type    = string
+  default = null
+}
+variable "pgbouncer_disk_kms_key" {
   type    = string
   default = null
 }
@@ -305,6 +345,10 @@ variable "postgres_disk_size" {
   type    = string
   default = null
 }
+variable "postgres_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "postgres_disks" {
   type    = list(any)
   default = []
@@ -323,6 +367,10 @@ variable "praefect_disk_type" {
   default = null
 }
 variable "praefect_disk_size" {
+  type    = string
+  default = null
+}
+variable "praefect_disk_kms_key" {
   type    = string
   default = null
 }
@@ -347,6 +395,10 @@ variable "praefect_postgres_disk_size" {
   type    = string
   default = null
 }
+variable "praefect_postgres_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "praefect_postgres_disks" {
   type    = list(any)
   default = []
@@ -365,6 +417,10 @@ variable "redis_disk_type" {
   default = null
 }
 variable "redis_disk_size" {
+  type    = string
+  default = null
+}
+variable "redis_disk_kms_key" {
   type    = string
   default = null
 }
@@ -389,6 +445,10 @@ variable "redis_cache_disk_size" {
   type    = string
   default = null
 }
+variable "redis_cache_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "redis_cache_disks" {
   type    = list(any)
   default = []
@@ -410,6 +470,10 @@ variable "redis_persistent_disk_size" {
   type    = string
   default = null
 }
+variable "redis_persistent_disk_kms_key" {
+  type    = string
+  default = null
+}
 variable "redis_persistent_disks" {
   type    = list(any)
   default = []
@@ -428,6 +492,10 @@ variable "sidekiq_disk_type" {
   default = null
 }
 variable "sidekiq_disk_size" {
+  type    = string
+  default = null
+}
+variable "sidekiq_disk_kms_key" {
   type    = string
   default = null
 }
@@ -460,6 +528,10 @@ variable "gke_master_authorized_networks_config_cidr_blocks" {
   default = []
 }
 variable "gke_database_encryption_key_name" {
+  type    = string
+  default = null
+}
+variable "gke_default_disk_kms_key" {
   type    = string
   default = null
 }
@@ -497,6 +569,10 @@ variable "webservice_node_pool_disk_size" {
   type    = string
   default = null
 }
+variable "webservice_node_pool_disk_kms_key" {
+  type    = string
+  default = null
+}
 ## Cluster Autoscaling (Optional)
 variable "webservice_node_pool_max_count" {
   type    = number
@@ -523,6 +599,10 @@ variable "sidekiq_node_pool_disk_size" {
   type    = string
   default = null
 }
+variable "sidekiq_node_pool_disk_kms_key" {
+  type    = string
+  default = null
+}
 ## Cluster Autoscaling (Optional)
 variable "sidekiq_node_pool_max_count" {
   type    = number
@@ -546,6 +626,10 @@ variable "supporting_node_pool_disk_type" {
   default = null
 }
 variable "supporting_node_pool_disk_size" {
+  type    = string
+  default = null
+}
+variable "supporting_node_pool_disk_kms_key" {
   type    = string
   default = null
 }

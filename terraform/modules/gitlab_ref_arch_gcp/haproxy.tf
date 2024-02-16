@@ -8,9 +8,11 @@ module "haproxy_external" {
 
   machine_type  = var.haproxy_external_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.haproxy_external_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.haproxy_external_disk_type, var.default_disk_type)
-  disks         = var.haproxy_external_disks
+
+  disk_size    = coalesce(var.haproxy_external_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.haproxy_external_disk_type, var.default_disk_type)
+  disk_kms_key = var.haproxy_external_disk_kms_key != null ? var.haproxy_external_disk_kms_key : var.default_disk_kms_key
+  disks        = var.haproxy_external_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name
@@ -45,9 +47,11 @@ module "haproxy_internal" {
 
   machine_type  = var.haproxy_internal_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.haproxy_internal_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.haproxy_internal_disk_type, var.default_disk_type)
-  disks         = var.haproxy_internal_disks
+
+  disk_size    = coalesce(var.haproxy_internal_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.haproxy_internal_disk_type, var.default_disk_type)
+  disk_kms_key = var.haproxy_internal_disk_kms_key != null ? var.haproxy_internal_disk_kms_key : var.default_disk_kms_key
+  disks        = var.haproxy_internal_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name
