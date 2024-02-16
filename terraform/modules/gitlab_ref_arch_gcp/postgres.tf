@@ -8,9 +8,11 @@ module "postgres" {
 
   machine_type  = var.postgres_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.postgres_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.postgres_disk_type, var.default_disk_type)
-  disks         = var.postgres_disks
+
+  disk_size    = coalesce(var.postgres_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.postgres_disk_type, var.default_disk_type)
+  disk_kms_key = var.postgres_disk_kms_key != null ? var.postgres_disk_kms_key : var.default_disk_kms_key
+  disks        = var.postgres_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name

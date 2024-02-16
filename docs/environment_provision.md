@@ -310,7 +310,11 @@ However, this can be changed via the `machine_image` in the [module's environmen
 
 :exclamation:&nbsp; **{-After deployment, this value shouldn't be changed as this would trigger a full rebuild (as it's treated as the base disk) and lead to data loss-}**. [Upgrading the OS should be done directly on the machines via their standard process](environment_upgrades.md#avoid-changing-machine-os-image).
 
-##### Object Storage location (GCP)
+##### Object Storage options (GCP)
+
+This section gives more detail on the available options for configuring GCP Object Storage buckets for GitLab.
+
+###### Object Storage location (GCP)
 
 The [Terraform Google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) doesn't automatically create buckets in the same region it's configured with. [This is due to the various location permutations available in GCP that don't directly map to regions](https://cloud.google.com/storage/docs/locations).
 
@@ -320,15 +324,58 @@ To ensure good performance you should select a [location](https://cloud.google.c
 
 :exclamation:&nbsp; **{-Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss-}**
 
-##### Object Storage versioning (GCP)
+###### Object Storage versioning (GCP)
 
 The Toolkit can enable [versioning in Google Cloud Storage buckets](https://cloud.google.com/storage/docs/object-versioning) within GCP by setting the `object_storage_versioning` flag to `true`. This will enable the storing of multiple variants of an object in the same bucket. As this can lead to increased storage costs it is recommended to set up an [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle) to remove older versions of stored objects.
 
-##### Configure Network Setup (GCP)
+##### Storage Encryption (GCP)
+
+[GCP by default encrypts storage with service provided encryption keys](https://cloud.google.com/docs/security/encryption/default-encryption#googles_default_encryption) with no further action required.
+
+Additional options are detailed in this section.
+
+###### Customer managed encryption keys (CMEK) (GCP)
+
+The Toolkit allows for you to configure encrypting storage with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) on GCP.
+
+Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
+
+- Keys must be available in Cloud KMS and in the same location as the intended environment and services
+- The [Cloud KMS CryptoKey Encrypter/Decrypter](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.cryptoKeyEncrypterDecrypter) role must be granted on the required Service Agent or Service Account depending on the service:
+  - Compute Engine / Kubernetes Engine - [Compute Service Agent](https://cloud.google.com/compute/docs/disks/customer-managed-encryption#required-roles)
+  - Cloud SQL - [System Service Account](https://cloud.google.com/sql/docs/postgres/configure-cmek#service-account)
+  - Memorystore - [System Service Account](https://cloud.google.com/memorystore/docs/redis/use-cmek#granting_the_service_account_access_to_the_key)
+- Keys must be in the same location as the intended service.
+- Keys can only be configured for new environments.
+
+:information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the GCP service's respective documentation for further guidance.
+
+:information_source:&nbsp; Using CMEK with Google Cloud Object Storage is [_not_ supported by GitLab](https://docs.gitlab.com/ee/administration/object_storage.html#google-cloud-storage-gcs) at this time. Please refer to this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441782) for latest details.
+
+Once the Key(s) are created they can be configured in Terraform via the [module's environment config file](#configure-module-settings-environmenttf) with the following variables:
+
+:information_source:&nbsp; GCP Key resource names will be in the format `projects/<project-id>/locations/<location>/keyRings/<keyring-name>/cryptoKeys/<key-name>`
+
+- `default_disk_kms_key` - The GCP Key resource name to use for all disk storages across GCE Component VMs. Defaults to `null`.
+  - `*_disk_kms_key` - The GCP Key resource name to use for specific GCE Component VMs. Will override `default_disk_kms_key` if specified. Default is `null`.
+    - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq`, `monitor`, `opensearch_vm`, `gitlab_nfs`, `haproxy_external` and `haproxy_internal`.
+- `gke_default_disk_kms_key` - The GCP Key resource name to use for all disk storages across GKE Node Pools. Defaults to `null`.
+  - `*_node_pool_disk_kms_key` - The GCP Key resource name to use for specific GKE Node Pools. Will override `gke_default_disk_kms_key` if specified. Default is `null`.
+    - Available component options: `webservice`, `sidekiq`, `supporting`.
+- `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name to be used for storage encryption of a [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql) instance created by the Toolkit.
+  - Optionally `cloud_sql_praefect_postgres_encryption_key_name` can be used to configure for separate services.
+- `memorystore_redis_customer_managed_key` - The GCP Key resource name to be used for storage encryption of a [GCP Memorystore](environment_advanced_services.md#gcp-memorystore) instance created by the Toolkit.
+  - Optionally `memorystore_redis_cache_customer_managed_key` or `memorystore_redis_persistent_customer_managed_key` can be used to configure for separate services.
+
+##### Network options (GCP)
+
+This section gives more detail on the available options for configuring GCP networking for GitLab.
+
+###### Configure Network Setup (GCP)
 
 By default, the Toolkit sets up the infrastructure on the default network stack as provided by GCP. However, it can also support other advanced setups such as creating a new network or using an existing one. To learn more refer to [Configure network setup (GCP)](environment_advanced_network.md#configure-network-setup-gcp).
 
-##### Configure Network Zones (GCP)
+###### Configure Network Zones (GCP)
 
 With GCP you can spread optionally spread resources across multiple [Availability Zones](https://cloud.google.com/compute/docs/regions-zones) in the selected region, overriding the default Zone configured in `variables.tf`. By doing this it adds additional resilience for the environment in the case a Zone ever went down.
 
@@ -355,7 +402,7 @@ module "gitlab_ref_arch_gcp" {
 
 Note that the default zone configured in `variables.tf` is still required in this setup as a backup for other resources.
 
-##### Service Accounts (GCP)
+##### Service Account options (GCP)
 
 As per recommended [best practices](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices), the Toolkit will provision and configure the least privileged Service Accounts for GCP resources as required. These accounts are created by whatever account Terraform is running with, which can itself also be a Service Account.
 
@@ -615,15 +662,17 @@ Encryption is enabled by default for all storages and services using either AWS 
 
 :information_source:&nbsp; For backwards compatibility, encryption of Root Block Device disks can be controlled via the `default_disk_encrypt` setting. It's also possible to specify this setting for each component, e.g. `gitaly_disk_encrypt`. **{- Changing these settings on an existing environment will trigger the recreation of all nodes and will lead to data loss-}**. Snapshots should be taken before doing this and then restored onto the new encrypted disks, refer to the [AWS docs for more info](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html#encrypt-unencrypted).
 
-###### Encryption with user provided KMS keys
+###### Customer managed encryption keys (CMEK) (AWS)
 
-Encryption for all storage and services with your own KMS keys is supported by the Toolkit.
+Encryption for all storage and services with your own KMS keys, also known as customer-managed encryption keys (CMEK), is supported by the Toolkit.
 
 Note that these keys must be [available in AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) beforehand. Once available, you can configure them to be used with the following variables be configured with the following variables. Note that for individual storages or services the same variable suffix is used throughout, for readability this is defined once only:
 
 - `default_kms_key_arn` - The AWS KMS key ARN to use for all storages and services unless configured otherwise. Defaults to `null`.
   - This setting is also used for [Cloud Native Hybrid EKS clusters](environment_advanced_hybrid.md) and / or any [cloud services](environment_advanced_services.md) and Cloud Native Hybrid EKS clusters.
 - `*_kms_key_arn` - The AWS KMS key ARN to be used for a specific storage. For example `gitaly_disk_kms_key_arn` will configure a specific key for all its disk(s) and `object_storage_kms_key_arn` configures a key for all buckets.
+
+:information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the AWS service's respective documentation for further guidance.
 
 #### Configure Authentication (AWS)
 

@@ -36,6 +36,13 @@ resource "google_redis_instance" "gitlab_redis" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      # Can only be set for new instances so ignore any subsequent changes
+      customer_managed_key
+    ]
+  }
 }
 
 output "memorystore_redis_connection" {
@@ -97,6 +104,13 @@ resource "google_redis_instance" "gitlab_redis_cache" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      # Can only be set for new instances so ignore any subsequent changes
+      customer_managed_key
+    ]
+  }
 }
 
 output "memorystore_redis_cache_connection" {
@@ -152,6 +166,13 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
         }
       }
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # Can only be set for new instances so ignore any subsequent changes
+      customer_managed_key
+    ]
   }
 }
 

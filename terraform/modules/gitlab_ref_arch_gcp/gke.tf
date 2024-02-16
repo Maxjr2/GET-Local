@@ -122,8 +122,10 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
 
   node_config {
     machine_type = var.webservice_node_pool_machine_type
-    disk_type    = coalesce(var.webservice_node_pool_disk_type, var.default_disk_type)
-    disk_size_gb = coalesce(var.webservice_node_pool_disk_size, var.default_disk_size)
+
+    disk_type         = coalesce(var.webservice_node_pool_disk_type, var.default_disk_type)
+    disk_size_gb      = coalesce(var.webservice_node_pool_disk_size, var.default_disk_size)
+    boot_disk_kms_key = var.webservice_node_pool_disk_kms_key != null ? var.webservice_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
     service_account = module.gitlab_gke_webservice_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
@@ -158,7 +160,10 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
 
   lifecycle {
     ignore_changes = [
+      # Only set at creation, autoscaling takes over after
       initial_node_count,
+      # Can only be set for new node pools so ignore any subsequent changes
+      node_config[0].boot_disk_kms_key
     ]
   }
 }
@@ -191,8 +196,10 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
 
   node_config {
     machine_type = var.sidekiq_node_pool_machine_type
-    disk_type    = coalesce(var.sidekiq_node_pool_disk_type, var.default_disk_type)
-    disk_size_gb = coalesce(var.sidekiq_node_pool_disk_size, var.default_disk_size)
+
+    disk_type         = coalesce(var.sidekiq_node_pool_disk_type, var.default_disk_type)
+    disk_size_gb      = coalesce(var.sidekiq_node_pool_disk_size, var.default_disk_size)
+    boot_disk_kms_key = var.sidekiq_node_pool_disk_kms_key != null ? var.sidekiq_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
     service_account = module.gitlab_gke_sidekiq_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
@@ -227,7 +234,10 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
 
   lifecycle {
     ignore_changes = [
+      # Only set at creation, autoscaling takes over after
       initial_node_count,
+      # Can only be set for new node pools so ignore any subsequent changes
+      node_config[0].boot_disk_kms_key
     ]
   }
 }
@@ -260,8 +270,10 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 
   node_config {
     machine_type = var.supporting_node_pool_machine_type
-    disk_type    = coalesce(var.supporting_node_pool_disk_type, var.default_disk_type)
-    disk_size_gb = coalesce(var.supporting_node_pool_disk_size, var.default_disk_size)
+
+    disk_type         = coalesce(var.supporting_node_pool_disk_type, var.default_disk_type)
+    disk_size_gb      = coalesce(var.supporting_node_pool_disk_size, var.default_disk_size)
+    boot_disk_kms_key = var.supporting_node_pool_disk_kms_key != null ? var.supporting_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
     service_account = module.gitlab_gke_supporting_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
@@ -296,7 +308,10 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 
   lifecycle {
     ignore_changes = [
+      # Only set at creation, autoscaling takes over after
       initial_node_count,
+      # Can only be set for new node pools so ignore any subsequent changes
+      node_config[0].boot_disk_kms_key
     ]
   }
 }

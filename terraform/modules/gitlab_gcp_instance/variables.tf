@@ -27,6 +27,10 @@ variable "disk_type" {
   type    = string
   default = "pd-standard"
 }
+variable "disk_kms_key" {
+  type    = string
+  default = null
+}
 
 variable "label_secondaries" {
   type    = bool

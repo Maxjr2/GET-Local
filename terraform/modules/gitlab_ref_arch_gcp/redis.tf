@@ -8,9 +8,11 @@ module "redis" {
 
   machine_type  = var.redis_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.redis_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.redis_disk_type, var.default_disk_type)
-  disks         = var.redis_disks
+
+  disk_size    = coalesce(var.redis_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.redis_disk_type, var.default_disk_type)
+  disk_kms_key = var.redis_disk_kms_key != null ? var.redis_disk_kms_key : var.default_disk_kms_key
+  disks        = var.redis_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name
@@ -46,9 +48,11 @@ module "redis_cache" {
 
   machine_type  = var.redis_cache_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.redis_cache_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.redis_cache_disk_type, var.default_disk_type)
-  disks         = var.redis_cache_disks
+
+  disk_size    = coalesce(var.redis_cache_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.redis_cache_disk_type, var.default_disk_type)
+  disk_kms_key = var.redis_cache_disk_kms_key != null ? var.redis_cache_disk_kms_key : var.default_disk_kms_key
+  disks        = var.redis_cache_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name
@@ -82,9 +86,11 @@ module "redis_persistent" {
 
   machine_type  = var.redis_persistent_machine_type
   machine_image = var.machine_image
-  disk_size     = coalesce(var.redis_persistent_disk_size, var.default_disk_size)
-  disk_type     = coalesce(var.redis_persistent_disk_type, var.default_disk_type)
-  disks         = var.redis_persistent_disks
+
+  disk_size    = coalesce(var.redis_persistent_disk_size, var.default_disk_size)
+  disk_type    = coalesce(var.redis_persistent_disk_type, var.default_disk_type)
+  disk_kms_key = var.redis_persistent_disk_kms_key != null ? var.redis_persistent_disk_kms_key : var.default_disk_kms_key
+  disks        = var.redis_persistent_disks
 
   vpc               = local.vpc_name
   subnet            = local.subnet_name
