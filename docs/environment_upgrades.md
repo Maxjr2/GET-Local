@@ -26,9 +26,13 @@ On this page we'll detail how both work. **It's worth noting this guide is suppl
 
 ## Toolkit Upgrades
 
-Before running any upgrades for your environment, upgrade the Toolkit scripts first to ensure compatibility with the latest GitLab versions.
-
 In this section is guidance on upgrading the Toolkit that should be followed throughout.
+
+### Upgrade the Toolkit first
+
+It's strongly recommended upgrading the Toolkit first before [upgrading the environment](#environment-upgrades). 
+
+This is to ensure the latest config, fixes and GitLab configuration are used. An example of this is an unexpected upstream component change that needs to be handled.
 
 ### Toolkit Upgrade Paths and Stops
 
@@ -73,6 +77,8 @@ With the above considerations it's worth calling out specifically that you shoul
 This recommendation is especially so with Production instances. If you're using the Toolkit with non production instances where a risk of data loss is acceptable then the above combination may be desirable.
 
 ## Environment Upgrades
+
+:information_source:&nbsp; It's strongly recommended to always [upgrade the Toolkit first](#upgrade-the-toolkit-first) before upgrading your environment to ensure you have the latest config or fixes.
 
 The Toolkit fully supports handling GitLab upgrades for your environment - with both [standard](https://docs.gitlab.com/ee/update/with_downtime.html) and [Zero Downtime upgrades](https://docs.gitlab.com/ee/update/zero_downtime.html) supported.
 
