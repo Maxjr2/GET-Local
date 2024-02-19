@@ -4,3 +4,6 @@ s3:
   region: {{ aws_region }}
   v4auth: true
   chunksize: {{ (gitlab_object_storage_registry_chunksize_mb | int) * 1024 * 1024 }}
+{% if aws_s3_endpoint != '' %}
+  endpoint: {{ aws_s3_endpoint }}
+{% endif %}

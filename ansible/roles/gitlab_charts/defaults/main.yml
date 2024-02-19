@@ -11,6 +11,7 @@ gcp_gke_location: "{{ gcp_zone }}"
 
 aws_partition: ""
 aws_account: ""
+aws_s3_endpoint: ""
 
 # Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 webservice_default_replica_counts:
