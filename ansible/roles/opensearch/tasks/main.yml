@@ -43,7 +43,8 @@
       bootstrap.memory_lock: 'true'
       cluster.initial_cluster_manager_nodes: "{{ ((opensearch_int_addrs | map('split', '.') | map('first') | list) if internal_addr_use_hostnames else opensearch_int_addrs) | join(',') }}"
       discovery.seed_hosts: "{{ opensearch_int_addrs | join(',') }}"
-      plugins.security.disabled: 'true'
+      DISABLE_INSTALL_DEMO_CONFIG: 'true'
+      DISABLE_SECURITY_PLUGIN: 'true'
     volumes:
       - gitlab_search_osdata:/usr/share/opensearch/data
     ulimits: memlock:-1:-1
