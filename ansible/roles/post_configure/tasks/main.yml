@@ -10,8 +10,8 @@
     timeout: 60
   register: result
   until: result.status == 200
-  retries: 20
-  delay: 5
+  retries: 30
+  delay: 10
   tags: healthcheck
 
 - name: Get details for running GitLab Charts Toolbox Pod
