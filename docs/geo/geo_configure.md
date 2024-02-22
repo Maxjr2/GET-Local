@@ -62,6 +62,8 @@ For both Linux package and Cloud Native Hybrid environments it's required to add
 GCP:
 
 ```yaml
+- key: labels.gitlab_node_prefix
+    separator: ''
 - key: labels.gitlab_geo_site
     separator: ''
 - key: labels.gitlab_geo_full_role
@@ -71,8 +73,10 @@ GCP:
 AWS:
 
 ```yaml
+- key: tags.gitlab_node_prefix
+    separator: ''
 - key: tags.gitlab_geo_site
-  separator: ''
+    separator: ''
 - key: tags.gitlab_geo_full_role
     separator: ''
 ```
