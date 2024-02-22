@@ -27,4 +27,6 @@
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "GeoNode.secondary_nodes.each { |n| n.update(sync_object_storage: true) }"
-  when: cloud_native_hybrid_geo
+  when:
+    - cloud_native_hybrid_geo
+    - not geo_external_primary

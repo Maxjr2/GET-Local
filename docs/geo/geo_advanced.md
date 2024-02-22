@@ -135,7 +135,7 @@ To enable Container registry replication you will need to define `container_regi
 
 - `container_registry_token` - Secret value for the container registry authorization header and for the Geo event notification endpoint to use. Value should be a case-sensitive alphanumeric string that starts with a letter.
 
-## Migrating from an external Primary Site using Geo (Linux Package)
+## Migrating from an external Primary Site using Geo
 
 This section details how to setup Geo replication when the primary site is an external resource that is not provisioned by the Toolkit. This guide is intended to be used when migrating from a non Toolkit provisioned environment to a new instance that will be managed by the Toolkit. In this scenario, Geo is the mechanism to transfer data from one instance to another and is not intended to be used as a standard Geo deployment.
 
@@ -149,12 +149,17 @@ The two sites must be able to communicate with each other over a secure network 
 
 #### Secrets
 
-During the setup of Geo some secrets are copied over from the primary site to the secondary site, the below secrets will need to be manually downloaded from the primary site:
+During the setup of Geo some secrets are copied over from the primary site to the secondary site, the format of the secrets can differ depending on if you are migrating from a Linux Package or Cloud Native Hybrid installation, the below secrets will need to be manually downloaded from the primary site:
 
-- [`gitlab-secrets.json`](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-1-manually-replicate-secret-gitlab-values)
-- [`gitlab-registry.key`](https://docs.gitlab.com/ee/administration/geo/replication/container_registry.html) - Only required if using the container registry
-- [PostgreSQL `server.crt`](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication)
-- [SSH Host keys](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-2-manually-replicate-the-primary-sites-ssh-host-keys)
+- [PostgreSQL server.crt](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication)
+- Linux Package
+  - [gitlab-secrets.json](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-1-manually-replicate-secret-gitlab-values)
+  - [gitlab-registry.key](https://docs.gitlab.com/ee/administration/geo/replication/container_registry.html) - Only required if using the container registry
+  - [SSH Host keys](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-2-manually-replicate-the-primary-sites-ssh-host-keys)
+- [Cloud Native Hybrid](https://docs.gitlab.com/charts/advanced/geo/#copy-secrets-from-the-primary-site-to-the-secondary-site)
+  - `gitlab-geo-gitlab-shell-host-keys`
+  - `gitlab-geo-rails-secret`
+  - `gitlab-geo-registry-secret`
 
 #### Gitaly Storage Paths
 
@@ -184,12 +189,42 @@ The below settings will need to be added to the secondary sites inventory:
 
 - `geo_primary_secrets_file` - Path to the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `geo_primary_secrets_json`.
 - `geo_primary_secrets_json` - Contents of the downloaded primary sites `gitlab-secrets.json`, can be provided instead of `geo_primary_secrets_file`.
+- `geo_primary_psql_crt_file` - Path to the downloaded primary sites PostgreSQL `server.crt`.
+- `geo_primary_postgres_host` - IP address for the Patroni leader / PostgreSQL host.
+- `geo_primary_is_multi_node` - Set to `true` if primary site is multi node (2k+).
+- `geo_primary_postgres_is_ha` - Set to `true` if primary site is using Patroni for PostgreSQL replication and HA (3k+).
+
+#### Linux Package
+
+The below settings are only required when migrating to a Linux Package installation:
+
 - `geo_primary_ssh_host_keys_folder` - Path to a folder that contains the downloaded primary sites ssh host keys.
 - `geo_primary_registry_key_file` - Path to the downloaded primary sites `gitlab-registry.key`, only required if using the container registry.
-- `geo_primary_psql_crt_file` - Path to the downloaded primary sites PostgreSQL `server.crt`
-- `geo_primary_postgres_host` - IP address for the Patroni leader / PostgreSQL host
-- `geo_primary_is_multi_node` - true/false, is the primary site multi node(2k+)
-- `geo_primary_postgres_is_ha` - true/false, is the primary site using Patroni(3k+)
+
+#### Cloud Native Hybrid
+
+The below settings are only required when migrating to a Cloud Native Hybrid installation:
+
+- `geo_primary_ssh_host_keys` - A dictionary of SSH host keys and values to be used as the Chart's SSH Host Keys secret.
+- `geo_primary_registry_key` - A dictionary of the registry `.crt` and `.pem` files to be used as the Chart's Registry authentication certificate, only required if using the Container Registry.
+
+:exclamation:&nbsp; These are sensitive variables. It's strongly recommended taking appropriate precautions to avoid leaking secrets such as using [secret managers or environment variables](../environment_configure.md#sensitive-variable-handling-in-ansible).
+
+```yml
+geo_primary_ssh_host_keys: {
+  ssh_host_ecdsa_key: '',
+  ssh_host_ecdsa_key.pub: '',
+  ssh_host_ed25519_key: '',
+  ssh_host_ed25519_key.pub: '',
+  ssh_host_rsa_key: '',
+  ssh_host_rsa_key.pub: ''
+}
+
+geo_primary_registry_keys: {
+  registry-auth.crt: '',
+  registry-auth.key: ''
+}
+```
 
 ### Running Geo
 
@@ -201,7 +236,7 @@ ansible-playbook -i <secondary inventory> playbooks/gitlab_geo.yml -t secondary
 
 Once completed, you will need to follow the steps to [Add the secondary site](https://docs.gitlab.com/ee/administration/geo/setup/two_single_node_sites.html#add-the-secondary-site) to the primary site, starting from step 4 `Navigate to the primary node GitLab instance`. If using [GitLab-managed object storage replication](https://docs.gitlab.com/ee/administration/geo/replication/object_storage.html#enabling-gitlab-managed-object-storage-replication) then you will also need to enable this now on the primary site.
 
-Once complete, you'll need to restart the GitLab Rails/Sidekiq nodes on the primary and secondary sites, for the secondary site you can run the below command:
+Once complete, if migrating to a Linux Package installation, you'll need to restart the GitLab Rails/Sidekiq nodes on the primary and secondary sites, for the secondary site you can run the below command:
 
 ```bash
 ansible-playbook -i <secondary inventory> playbooks/gitlab_geo.yml -t workhorse
