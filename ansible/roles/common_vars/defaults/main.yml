@@ -438,10 +438,13 @@ geo_migration_task: "{{ 'geo:db:migrate' if ((gitlab_version != '') and (gitlab_
 geo_sql_replication_password: "{{ postgres_password }}"
 geo_sql_replication_password_md5: "{{ (geo_sql_replication_password + 'gitlab_replicator') | md5 }}"
 
-geo_primary_secrets_file: ""
-geo_primary_secrets_json: "{{ lookup('file', geo_primary_secrets_file) | from_json if geo_primary_secrets_file != '' }}"
+geo_external_primary: "{{ geo_primary_secrets_file != '' or geo_primary_secrets_json != '' or geo_primary_ssh_host_keys != '' or geo_primary_ssh_host_keys_folder != '' or geo_primary_registry_keys != '' or geo_primary_registry_key_file != '' or geo_primary_psql_crt_file != '' }}"
 
+geo_primary_secrets_file: ""
+geo_primary_secrets_json: "{{ lookup('file', geo_primary_secrets_file) | from_json if geo_primary_secrets_file != '' else '' }}"
+geo_primary_ssh_host_keys: ""
 geo_primary_ssh_host_keys_folder: ""
+geo_primary_registry_keys: ""
 geo_primary_registry_key_file: ""
 geo_primary_psql_crt_file: ""
 

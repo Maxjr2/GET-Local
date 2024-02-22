@@ -1,5 +1,8 @@
 ---
+- import_playbook: playbook_prep.yml
+  tags: always
+
 - hosts: all:!gitlab_*_node_pool:!ungrouped
+  become: true
   roles:
     - gitlab_geo
-  become: true
