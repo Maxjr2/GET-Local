@@ -14,7 +14,7 @@
 - name: Patroni Workaround - Delete PostgreSQL data dirs on the secondary site
   file:
     state: absent
-    path: /var/opt/gitlab/postgresql/data/
+    path: ~gitlab-psql/data
 
 - name: Patroni Workaround - Remove Patroni from existing cluster
   expect:
