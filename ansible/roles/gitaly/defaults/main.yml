@@ -2,6 +2,7 @@ gitaly_number: "{{ inventory_hostname | regex_search('gitaly-(\\d+)', '\\1') | f
 gitaly_ruby_num_workers: "{{ [(ansible_processor_vcpus * 0.2) | round | int, 2] | max }}"
 
 gitaly_pack_objects_cache: true
+gitaly_node: "gitaly-{{ gitaly_number }}"
 
 gitaly_cluster_storage_path: "/var/opt/gitlab/git-data"
 gitaly_sharded_storage_path: "{{ '/mnt/gitlab' if cloud_provider != 'azure' else '/var/opt/gitlab/git-data' }}"
