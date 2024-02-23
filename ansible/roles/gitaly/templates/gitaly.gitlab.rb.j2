@@ -55,7 +55,7 @@ gitaly['configuration'] = {
   },
   storage: [
     {
-      name: 'gitaly-{{ gitaly_number }}',
+      name: '{{ gitaly_node }}',
       path: '{{ gitaly_cluster_storage_path }}/repositories'
     }
   ],
@@ -95,7 +95,7 @@ gitaly['prometheus_listen_addr'] = "0.0.0.0:9236"
 gitaly['auth_token'] = '{{ praefect_internal_token }}'
 
 git_data_dirs({
-  "gitaly-{{ gitaly_number }}" => {
+  "{{ gitaly_node }}" => {
     "path" => "{{ gitaly_cluster_storage_path }}"
   }
 })
