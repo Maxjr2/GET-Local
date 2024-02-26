@@ -27,6 +27,7 @@ gcp_zone: ""
 ## AWS
 aws_region: ""
 aws_allocation_ids: ""
+aws_s3_endpoint: ""
 
 ################################################################################
 ## Network Settings
