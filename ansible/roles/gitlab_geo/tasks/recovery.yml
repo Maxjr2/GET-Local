@@ -7,7 +7,7 @@
         site_group_name: "{{ geo_primary_site_group_name }}"
         geo_site_prefix: "{{ geo_primary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_primary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
 
     - name: Recovery - Try to Enable Maintenance Mode on Secondary Site
@@ -17,7 +17,7 @@
         site_group_name: "{{ geo_secondary_site_group_name }}"
         geo_site_prefix: "{{ geo_secondary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_secondary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
   tags:
     - maintenance-mode-enable
@@ -31,7 +31,7 @@
         site_group_name: "{{ geo_primary_site_group_name }}"
         geo_site_prefix: "{{ geo_primary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_primary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
 
     - name: Recovery - Re-enable Geo Secondary Site
@@ -40,7 +40,7 @@
         site_group_name: "{{ geo_secondary_site_group_name }}"
         geo_site_prefix: "{{ geo_secondary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_secondary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
   tags: re-enable-primary
 
@@ -94,6 +94,6 @@
         site_group_name: "{{ geo_primary_site_group_name }}"
         geo_site_prefix: "{{ geo_primary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_primary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
   tags: maintenance-mode-disable
