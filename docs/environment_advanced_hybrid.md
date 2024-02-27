@@ -296,6 +296,18 @@ The variables to configure each can be set in Terraform as follows in your [`env
 - `eks_vpc_cni_version` - Version to use for the [EKS VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 - `eks_ebs_csi_driver_version` - Version to use for the [EBS CSI Driver addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 
+#### EKS IAM Access Entries
+
+When an EKS cluster is created, the IAM principal that was used to create the cluster is the only one configured that can access it. With the Toolkit this would be the IAM principal used with Terraform during creation.
+
+Granting access to additional principals in the past required manually editing the `aws-auth` ConfigMap after creation. However, another method has been made available in [Access Entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html).
+
+Access Entries allow for IAM principals to be configured natively via AWS EKS APIs and other interfaces, including Terraform. As such, the Toolkit enables this method by default and allows configuring standard access for specific IAM principals via the following variable in your Terraform [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `eks_access_config_iam_arns` - A list of IAM principal ARNs to grant standard access to the created EKS cluster. Optional, default is `null`.
+
+For more advanced entries this can be configured separately with a Toolkit created EKS cluster. Also note that the `aws-auth` ConfigMap option is also enabled on Toolkit created EKS clusters for backwards compatibility.
+
 #### EKS IAM roles for service accounts (IRSA)
 
 The Toolkit configures the AWS EKS cluster to use [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for authenticating to AWS services as a security best practice.

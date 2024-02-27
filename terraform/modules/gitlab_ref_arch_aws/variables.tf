@@ -746,6 +746,10 @@ variable "eks_enabled_cluster_log_types" {
   type        = list(string)
   default     = []
 }
+variable "eks_access_config_iam_arns" {
+  type    = list(string)
+  default = []
+}
 
 ## Node Group / Addons Versions
 variable "eks_node_group_ami_release_version" {
