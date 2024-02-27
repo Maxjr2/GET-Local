@@ -41,6 +41,10 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     ]
   }
 
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+  }
+
   dynamic "encryption_config" {
     for_each = range(var.eks_envelope_encryption ? 1 : 0)
 
@@ -61,6 +65,13 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     aws_iam_role_policy_attachment.gitlab_eks_role_cluster_policy,
     aws_iam_role_policy_attachment.gitlab_eks_role_vpc_resource_controller_policy,
   ]
+}
+
+resource "aws_eks_access_entry" "gitlab_cluster" {
+  for_each = local.total_node_pool_count > 0 ? toset(var.eks_access_config_iam_arns) : []
+
+  cluster_name  = aws_eks_cluster.gitlab_cluster[0].name
+  principal_arn = each.value
 }
 
 ## Optional KMS Key for EKS Envelope Encryption if enabled and none provided (deprecated)
