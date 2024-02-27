@@ -20,7 +20,7 @@
       vars:
         geo_site_prefix: "{{ geo_secondary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_secondary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
 
     - name: Failover Promote Secondary - Promote to Primary Site
@@ -132,6 +132,6 @@
         site_group_name: "{{ geo_secondary_site_group_name }}"
         geo_site_prefix: "{{ geo_secondary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_secondary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
   tags: maintenance-mode-disable

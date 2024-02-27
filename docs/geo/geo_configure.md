@@ -52,7 +52,7 @@ For Cloud Native Hybrid environments some additional variables will need to be a
 - `cloud_native_hybrid_geo_role` - The role for the current Geo site. Should be set to either `primary` or `secondary`.
 - `geo_primary_site_prefix` - Should match the prefix for each site.
 - `geo_primary_site_gcp_project` - **GCP only** The GCP project ID the site is in.
-- `geo_primary_site_gcp_zone` - **GCP only** The GCP zone the site is in e.g. `europe-west1-c`.
+- `geo_primary_site_gcp_gke_location` - **GCP only** The GCP location, region or zone, the site's GKE cluster is in e.g. `europe-west1`.
 - `geo_secondary_site_aws_region` - **AWS only** The AWS region the site is in e.g. `us-east-2`.
 
 When adding Geo specific settings into your Ansible configurations, depending on the GitLab installation type it can be important as to when the settings were added. When using the Linux package, the settings need to be added before the `gitlab_geo.yml` playbook is run. It's not important if the settings existed before or after the original `all.yml` playbook was ran, Geo is configured entirely by the Geo playbook. However, when using GitLab charts, some of the Geo configuration is handled before the Geo playbook is run, this means the Geo settings will need to be present when running the `all.yml` playbook. If the environment is already deployed before adding Geo, you can simply add the new Geo settings and rerun the `gitlab_charts.yml` playbook.

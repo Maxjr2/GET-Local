@@ -22,7 +22,6 @@ internal_addr_lookup: "{{ internal_hostname_lookup[cloud_provider] if internal_a
 
 ## GCP
 gcp_project: "{{ project_name | default('', true) }}"
-gcp_zone: ""
 
 ## AWS
 aws_region: ""

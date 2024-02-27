@@ -30,7 +30,7 @@
       vars:
         geo_site_prefix: "{{ geo_primary_site_prefix }}"
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
-        geo_site_gcp_zone: "{{ geo_primary_site_gcp_zone }}"
+        geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
 
     - name: Primary App Servers - Set Primary site
