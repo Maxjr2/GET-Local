@@ -320,6 +320,12 @@ resource "aws_s3_bucket_replication_configuration" "gitlab_s3_replication_config
 
     status = "Enabled"
 
+    filter {}
+
+    delete_marker_replication {
+      status = var.object_storage_replication_delete_marker_status
+    }
+
     source_selection_criteria {
       sse_kms_encrypted_objects {
         status = "Enabled"
@@ -331,6 +337,10 @@ resource "aws_s3_bucket_replication_configuration" "gitlab_s3_replication_config
 
       encryption_configuration {
         replica_kms_key_id = var.object_storage_replica_kms_key_id
+      }
+
+      metrics {
+        status = var.object_storage_replication_metrics_status
       }
     }
   }
