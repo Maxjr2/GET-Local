@@ -15,6 +15,10 @@ resource "google_redis_instance" "gitlab_redis" {
   replica_count      = var.memorystore_redis_node_count > 1 ? var.memorystore_redis_node_count : null
   read_replicas_mode = var.memorystore_redis_node_count > 1 ? "READ_REPLICAS_ENABLED" : "READ_REPLICAS_DISABLED"
 
+  redis_configs = {
+    maxmemory-policy = "noeviction"
+  }
+
   labels = var.additional_labels
 
   dynamic "maintenance_policy" {
@@ -145,6 +149,10 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
   redis_version      = local.memorystore_redis_persistent_version
   replica_count      = var.memorystore_redis_persistent_node_count > 1 ? var.memorystore_redis_persistent_node_count : null
   read_replicas_mode = var.memorystore_redis_persistent_node_count > 1 ? "READ_REPLICAS_ENABLED" : "READ_REPLICAS_DISABLED"
+
+  redis_configs = {
+    maxmemory-policy = "noeviction"
+  }
 
   labels = var.additional_labels
 
