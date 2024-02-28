@@ -14,6 +14,27 @@ resource "aws_elasticache_subnet_group" "gitlab" {
 }
 
 # Redis Combined
+locals {
+  elasticache_redis_major_version = regex("(\\d).", var.elasticache_redis_engine_version)[0]
+}
+
+resource "aws_elasticache_parameter_group" "gitlab_redis" {
+  count = var.elasticache_redis_node_count > 0 ? 1 : 0
+
+  name = "${var.prefix}-redis-parameter-group-${local.elasticache_redis_major_version}"
+  # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
+  family = "redis${var.elasticache_redis_engine_version == "6.x" ? var.elasticache_redis_engine_version : local.elasticache_redis_major_version}"
+
+  parameter {
+    name  = "maxmemory-policy"
+    value = "noeviction"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_elasticache_replication_group" "gitlab_redis" {
   count = var.elasticache_redis_node_count > 0 ? 1 : 0
 
@@ -21,6 +42,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   description          = "${var.prefix}-redis"
   node_type            = "cache.${var.elasticache_redis_instance_type}"
   num_cache_clusters   = var.elasticache_redis_node_count
+  parameter_group_name = aws_elasticache_parameter_group.gitlab_redis[0].name
 
   engine_version             = var.elasticache_redis_engine_version
   port                       = var.elasticache_redis_port
@@ -149,6 +171,25 @@ locals {
   elasticache_redis_persistent_maintenance_window       = var.elasticache_redis_persistent_maintenance_window != null ? var.elasticache_redis_persistent_maintenance_window : var.elasticache_redis_maintenance_window
   elasticache_redis_persistent_snapshot_retention_limit = var.elasticache_redis_persistent_snapshot_retention_limit != null ? var.elasticache_redis_persistent_snapshot_retention_limit : var.elasticache_redis_snapshot_retention_limit
   elasticache_redis_persistent_snapshot_window          = var.elasticache_redis_persistent_snapshot_window != null ? var.elasticache_redis_persistent_snapshot_window : var.elasticache_redis_snapshot_window
+
+  elasticache_redis_persistent_major_version = regex("(\\d).", local.elasticache_redis_persistent_engine_version)[0]
+}
+
+resource "aws_elasticache_parameter_group" "gitlab_redis_persistent" {
+  count = var.elasticache_redis_node_count > 0 ? 1 : 0
+
+  name = "${var.prefix}-redis-persistent-parameter-group-${local.elasticache_redis_persistent_major_version}"
+  # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
+  family = "redis${local.elasticache_redis_persistent_engine_version == "6.x" ? local.elasticache_redis_persistent_engine_version : local.elasticache_redis_persistent_major_version}"
+
+  parameter {
+    name  = "maxmemory-policy"
+    value = "noeviction"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
@@ -158,6 +199,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   description          = "${var.prefix}-redis-persistent"
   node_type            = "cache.${var.elasticache_redis_persistent_instance_type}"
   num_cache_clusters   = var.elasticache_redis_persistent_node_count
+  parameter_group_name = aws_elasticache_parameter_group.gitlab_redis_persistent[0].name
 
   engine_version             = local.elasticache_redis_persistent_engine_version
   port                       = local.elasticache_redis_persistent_port
