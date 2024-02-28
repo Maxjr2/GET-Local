@@ -98,6 +98,16 @@ variable "object_storage_replica_kms_key_id" {
   type        = string
   default     = null
 }
+variable "object_storage_replication_metrics_status" {
+  description = "Enable metrics for the S3 replication"
+  type        = string
+  default     = "Disabled"
+}
+variable "object_storage_replication_delete_marker_status" {
+  description = "Enable replication of delete markers for S3 replication"
+  type        = string
+  default     = "Enabled"
+}
 variable "object_storage_kms_key_arn" {
   type    = string
   default = null

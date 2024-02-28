@@ -126,6 +126,11 @@ Using this output, add the below values to the primary sites `environment.tf` fi
 
 - `object_storage_replica_kms_key_id` - The ARN used to encrypt the secondaries object storage buckets.
 
+In addition to the above, the following optional settings are also available to be configured:
+
+- `object_storage_replication_delete_marker_status` - Sets if [deletion markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-marker-replication.html) are replicated. Can be set to `Enabled` or `Disabled`. Optional, default is `Enabled`.
+- `object_storage_replication_metrics_status` - Sets if [replication metrics](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-metrics.html) should be enabled. Can be set to `Enabled` or `Disabled`. Optional, default is `Disabled`.
+
 Once the settings have been added you will need to rerun `terraform apply` for the primary site. This will create the replication rules from the primary's source buckets to the secondaries.
 
 :information_source:&nbsp; Once replication is enabled AWS will only replicate new objects. AWS recommends using [batch replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html) to copy any existing items.
