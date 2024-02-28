@@ -34,7 +34,7 @@
 - name: Start Opensearch container(s)
   docker_container:
     name: opensearch
-    image: "{{ opensearch_docker_image }}:{{ opensearch_version }}"
+    image: "{{ opensearch_docker_image }}"
     pull: true
     restart_policy: always
     state: started
