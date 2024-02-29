@@ -1,6 +1,6 @@
 namespace: "gitlab"
 name: "gitlab_environment_toolkit"
-version: "3.1.1"
+version: "3.2.0"
 readme: "../README.md"
 description: |
   The GitLab Environment Toolkit (GET) is a collection of tools to deploy and operate production
