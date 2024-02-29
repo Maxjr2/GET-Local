@@ -176,7 +176,7 @@ locals {
 }
 
 resource "aws_elasticache_parameter_group" "gitlab_redis_persistent" {
-  count = var.elasticache_redis_node_count > 0 ? 1 : 0
+  count = var.elasticache_redis_persistent_node_count > 0 ? 1 : 0
 
   name = "${var.prefix}-redis-persistent-parameter-group-${local.elasticache_redis_persistent_major_version}"
   # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
