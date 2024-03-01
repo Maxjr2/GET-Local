@@ -51,6 +51,6 @@
     responses:
       (.*)Confirmation: "replicate"
       (.*)Enter the password for gitlab_replicator@(.*): "{{ postgres_password }}"
-    timeout: 300
+    timeout: 900
   when:
     - (not geo_secondary_postgres_is_ha)
