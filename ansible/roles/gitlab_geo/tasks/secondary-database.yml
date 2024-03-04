@@ -35,8 +35,8 @@
 - name: Secondary Database - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
 
-- name: Secondary Database - Restart Postgres
-  command: gitlab-ctl restart
+- name: Secondary Database - Restart {{ 'patroni' if geo_secondary_postgres_is_ha else 'postgresql' }}
+  command: "gitlab-ctl restart {{ 'patroni' if geo_secondary_postgres_is_ha else 'postgresql' }}"
 
 # Required when non-HA database without Patroni is being used on secondary environment
 - name: Secondary Database - Replicate geo database
