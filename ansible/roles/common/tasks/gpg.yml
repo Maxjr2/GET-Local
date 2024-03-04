@@ -1,0 +1,46 @@
+---
+# Update GPG keys
+
+- name: Install gnupg (Debian)
+  apt:
+    name: "gnupg"
+    update_cache: true
+  register: result
+  retries: 20
+  delay: 5
+  until: result is success
+  when: ansible_facts['distribution'] == "Debian"
+
+- name: Update GitLab repository GPG key (Ubuntu / Debian)
+  block:
+    - name: Get signed-by GPG key path from existing repo list file if present
+      shell: awk '/deb \[signed-by=/{ pubkey = $2; sub(/\[signed-by=/, "", pubkey); sub(/\]$/, "", pubkey); print pubkey }' {{ gitlab_repo_list_path[ansible_facts['os_family']] }}
+      register: gitlab_signed_by_gpg_key_path
+
+    - name: Update signed-by GPG key if present
+      shell: curl -s {{ gitlab_gpg_key_url }} | gpg --dearmor > {{ gitlab_signed_by_gpg_key_path.stdout }}
+      when: gitlab_signed_by_gpg_key_path.stdout != ''
+
+    - name: Update GPG key via apt-key if used
+      apt_key:
+        url: "{{ gitlab_gpg_key_url }}"
+        state: present
+      register: result
+      retries: 2
+      delay: 3
+      until: result is success
+      when: gitlab_signed_by_gpg_key_path.stdout == ''
+
+    - name: Run apt update
+      command: sudo apt-get update
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Update GitLab repository GPG key (RHEL)
+  rpm_key:
+    key: "{{ gitlab_gpg_key_url }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 3
+  until: result is success
+  when: ansible_facts['os_family'] == 'RedHat'

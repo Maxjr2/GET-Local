@@ -77,13 +77,13 @@ gitlab_edition: "gitlab-ee"
 gitlab_node_type: "{{ lookup('vars', cloud_provider_labels_name, default = {}).gitlab_node_type | default((group_names | reject('match', '.*_primary|.*_secondary') | first), true) | replace('-', '_') }}"
 
 ## Set to env var, package with version wildcard or just latest
+## Select the nightly build by setting GITLAB_REPO_SCRIPT_URL to "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
 gitlab_repo_package_version_syntax: "{{ '-' if ansible_facts['os_family'] == 'RedHat' else '=' }}"
 gitlab_repo_package: "{{ lookup('env','GITLAB_REPO_PACKAGE') | default(gitlab_edition + gitlab_repo_package_version_syntax + gitlab_version + '*' if gitlab_version != '' else gitlab_edition, true) }}"
-## Select the nightly build by setting GITLAB_REPO_SCRIPT_URL to "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
 gitlab_repo_script_name: {Debian: 'script.deb.sh', RedHat: 'script.rpm.sh'}
 gitlab_repo_script_url: "{{ lookup('env','GITLAB_REPO_SCRIPT_URL') | default('https://packages.gitlab.com/install/repositories/gitlab/' + gitlab_edition + '/' + gitlab_repo_script_name[ansible_facts['os_family']], true) }}"
 gitlab_repo_script_path: "/tmp/gitlab_install_repository.sh"
-gitlab_repo_list_path: "/etc/apt/sources.list.d/gitlab_{{ 'gitlab_' + 'nightly-builds' if 'nightly' in gitlab_repo_script_url else gitlab_edition }}.list"
+gitlab_repo_list_path: {Debian: "/etc/apt/sources.list.d/{{ 'gitlab_' + ('nightly-builds' if 'nightly' in gitlab_repo_script_url else gitlab_edition) }}.list", RedHat: "/etc/yum.repos.d/gitlab_{{ gitlab_edition }}.repo"}
 
 gitlab_deb_force_install: false
 ## Specify absolute path to the local deb package on host

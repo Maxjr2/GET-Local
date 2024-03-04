@@ -15,43 +15,18 @@
         - ansible_hostname != inventory_hostname
       tags: hostname
 
-    - name: Add GitLab repository GPG key
-      block:
-        - name: Install gnupg (Debian)
-          apt:
-            name: "gnupg"
-            update_cache: true
-          register: result
-          retries: 20
-          delay: 5
-          until: result is success
-          when: ansible_facts['distribution'] == "Debian"
+    - name: Check if GitLab repository exists
+      stat:
+        path: "{{ gitlab_repo_list_path[ansible_facts['os_family']] }}"
+      register: gitlab_repo_file
+      tags: gpg
 
-        - name: Add GitLab repository GPG key (Ubuntu / Debian)
-          apt_key:
-            url: https://packages.gitlab.com/gpg.key
-            state: present
-          register: result
-          retries: 2
-          delay: 3
-          until: result is success
-          when: ansible_facts['os_family'] == "Debian"
-
-        - name: Add GitLab repository GPG key (RHEL)
-          rpm_key:
-            key: https://packages.gitlab.com/gpg.key
-            state: present
-          register: result
-          retries: 2
-          delay: 3
-          until: result is success
-          when: ansible_facts['os_family'] == 'RedHat'
+    - name: Configure GitLab repository GPG key
+      import_tasks: gpg.yml
       tags: gpg
       when:
         - omnibus_node
-        - gitlab_repo_package != ''
-        - gitlab_deb_download_url == '' and gitlab_rpm_download_url == ''
-        - gitlab_deb_host_path == '' and gitlab_rpm_host_path == ''
+        - gitlab_repo_file.stat.exists
         - not offline_setup
 
     - name: Setup Packages
@@ -156,18 +131,13 @@
           delay: 5
           until: repo_file_download is success
 
-        - name: Check if repo list file exists
-          stat:
-            path: "{{ gitlab_repo_list_path }}"
-          register: repo_file
-
         - name: Install GitLab repository
           command: "bash {{ gitlab_repo_script_path }}"
           register: result
           retries: 2
           delay: 10
           until: result is success
-          when: repo_file_download.changed or (not repo_file.stat.exists)
+          when: repo_file_download.changed or (not gitlab_repo_file.stat.exists)
 
         # Install GitLab Package via repo. State of latest means always run apt install
         # If gitlab_version is passed then this will always install that version
