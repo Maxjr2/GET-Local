@@ -201,12 +201,6 @@ global:
     key: password
   railsSecrets:
     secret: gitlab-rails-secrets
-  registry:
-{% if container_registry_enable %}
-    enabled: true
-{% else %}
-    enabled: false
-{% endif %}
   shell:
     port: {{ gitlab_shell_ssh_port }}
     authToken:
@@ -394,8 +388,8 @@ global:
       - host: '{{ ip }}'
 {% endfor %}
 {% endif %}
-{% if container_registry_enable %}
   registry:
+{% if container_registry_enable %}
     enabled: true
     # global.registry.bucket is used by GitLab backups
     bucket: "{{ gitlab_object_storage_bucket_names['registry'] }}"
@@ -405,6 +399,8 @@ global:
       secret: gitlab-registry-notification
       key: secret_token
 {% endif %}
+{% else %}
+    enabled: false
 {% endif %}
 {% if cloud_native_hybrid_geo %}
   geo:
@@ -471,6 +467,10 @@ registry:
     annotations:
       eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
 {% endif %}
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 {% else %}
   enabled: false
 {% endif %}
