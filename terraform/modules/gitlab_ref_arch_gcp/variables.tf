@@ -674,23 +674,29 @@ variable "cloud_sql_postgres_availability_type" {
   type    = string
   default = null
 }
-variable "cloud_sql_postgres_require_ssl" {
-  type    = bool
-  default = false
+
+variable "cloud_sql_postgres_ssl_mode" {
+  type        = string
+  default     = null
+  description = "Configures the SSL mode for the instance"
 }
+
 variable "cloud_sql_postgres_encryption_key_name" {
   type    = string
   default = null
 }
+
 variable "cloud_sql_postgres_deletion_protection" {
   type    = bool
   default = false
 }
+
 variable "cloud_sql_postgres_params" {
   description = "Additional Cloud SQL parameter group settings"
   type        = map(any)
   default     = {}
 }
+
 variable "cloud_sql_postgres_backup_configuration" {
   type = object({
     enabled = optional(bool)
@@ -706,6 +712,7 @@ variable "cloud_sql_postgres_backup_configuration" {
 
   default = {}
 }
+
 variable "cloud_sql_postgres_maintenance_window" {
   type = object({
     day          = optional(number)
@@ -755,10 +762,13 @@ variable "cloud_sql_praefect_postgres_disk_size" {
   type    = number
   default = 100
 }
-variable "cloud_sql_praefect_postgres_require_ssl" {
-  type    = bool
-  default = null
+
+variable "cloud_sql_praefect_postgres_ssl_mode" {
+  type        = string
+  default     = null
+  description = "Configures the SSL mode for the instance"
 }
+
 variable "cloud_sql_praefect_postgres_deletion_protection" {
   type    = bool
   default = false
@@ -999,4 +1009,14 @@ variable "kubernetes_zones" {
 
   type    = list(any)
   default = null
+}
+variable "cloud_sql_postgres_require_ssl" {
+  type        = bool
+  default     = false
+  description = "Deprecated. Replaced by cloud_sql_postgres_ssl_mode"
+}
+variable "cloud_sql_praefect_postgres_require_ssl" {
+  type        = bool
+  default     = false
+  description = "Deprecated. Replaced by cloud_sql_praefect_postgres_ssl_mode"
 }

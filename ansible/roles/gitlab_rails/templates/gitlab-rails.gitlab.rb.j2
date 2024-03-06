@@ -217,8 +217,8 @@ sidekiq['listen_address'] = '0.0.0.0'
 {% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
 sidekiq['max_concurrency'] = 20
 {% endif %}
-### Sidekiq - Scale up workers dynamically to 1/4 of CPUS unless single node
 {% if 'gitaly' in groups %}
+### Sidekiq - Scale up workers dynamically to 1/4 of CPUS unless single node
 sidekiq['queue_groups'] = [
 {% for cpu in range([(ansible_processor_vcpus / 4) | int, 1] | max) %}
   "*",

@@ -2,6 +2,7 @@ locals {
   # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks
   # statement_timeout setting not available on GCP Cloud SQL
   cloud_sql_praefect_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, deadlock_timeout = 5000 }
+  cloud_sql_praefect_postgres_ssl_mode       = var.cloud_sql_praefect_postgres_require_ssl ? "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" : var.cloud_sql_praefect_postgres_ssl_mode
 }
 
 resource "google_sql_database_instance" "gitlab_praefect" {
@@ -24,7 +25,8 @@ resource "google_sql_database_instance" "gitlab_praefect" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
-      require_ssl     = var.cloud_sql_praefect_postgres_require_ssl
+      ssl_mode        = local.cloud_sql_praefect_postgres_ssl_mode
+      require_ssl     = local.cloud_sql_praefect_postgres_ssl_mode == "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" ? true : null
     }
 
     dynamic "database_flags" {
