@@ -332,16 +332,15 @@ With the following variable you can configure any [available parameter](https://
 
 ##### GCP Cloud SQL SSL config
 
-GCP Cloud SQL does offer the ability to connect to Postgres over SSL. However, it should be noted this has some considerations:
+It's possible to configure SSL connections to a GCP Cloud SQL instance via the Toolkit via the following variable in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
-- Certificates are self-signed and managed by Cloud SQL. [These will need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) and propagated to the relevant GitLab components separately. This includes client certificates if the `require_ssl` option is enabled (see below).
-- Setting the `require_ssl` option on Cloud SQL will enable mutual 2-way SSL. This will impact Ansible from performing the required [Database Preparation](#database-preparation) steps and as a result users and databases may need to be created separately.
+- `cloud_sql_postgres_ssl_mode`: Configures the [SSL mode](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance#enforcing-ssl) for the Cloud SQL instance. Options are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY` or `TRUSTED_CLIENT_CERTIFICATE_REQUIRED`. Optional, default value is `null`.
+  - Due to limitations in the Terraform provider, if this is set and then subsequently unset the last setting will remain. To disable SSL on an instance set this variable to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` first and then remove.
+  - `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` will enforce mutual 2-way SSL connections. Note that this setup specifically will prevent Ansible from performing the required [Database Preparation](#database-preparation) steps and as a result users and databases may need to be created separately. Client certificates will also need to be downloaded.
 
-If the above is desirable then the `require_ssl` option can be enabled via the following variable:
+:information_source:&nbsp; SSL can also be configured for the Praefect database if provisioned separately via the `cloud_sql_praefect_postgres_ssl_mode` variable.
 
-- `cloud_sql_postgres_require_ssl` - Sets if connections to the database require SSL (Mutual 2-way). Optional, default is `false`
-
-For more information about GCP Cloud SQL SSL [refer to the provider's documentation](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance).
+:information_source:&nbsp; [SSL Certificates on Cloud SQL are self-signed](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance). As such, [certificates may need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) depending on the set-up to allow clients to connect.
 
 ##### GCP Cloud SQL Maintenance config
 
