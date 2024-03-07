@@ -306,7 +306,7 @@ Access Entries allow for IAM principals to be configured natively via AWS EKS AP
 
 - `eks_access_config_iam_arns` - A list of IAM principal ARNs to grant standard access to the created EKS cluster. Optional, default is `null`.
 
-For more advanced entries this can be configured separately with a Toolkit created EKS cluster. Also note that the `aws-auth` ConfigMap option is also enabled on Toolkit created EKS clusters for backwards compatibility.
+:information_source:&nbsp; For more advanced entries this can be configured separately, including the configuration of any [Access Entry Policy Associations](https://docs.aws.amazon.com/eks/latest/userguide/access-policies.html). Also note that the `aws-auth` ConfigMap option is also enabled on Toolkit created EKS clusters for backwards compatibility.
 
 #### EKS IAM roles for service accounts (IRSA)
 
@@ -393,21 +393,6 @@ For EKS a [Cluster is required to be spread across at least 2 Availability Zones
 - Default - Will attach to a number of default subnets. This is configurable via the `eks_default_subnet_count` variable that has a default of `2`.
 - Create - Will create a number of subnets. This is configurable via the `subnet_pub_count` variable that has a default of `2`.
 - Existing - When providing an existing network it's required that it has at least 2 subnets, each on a separate Zone.
-
-#### Defining AWS Auth Roles with `aws_auth_roles`
-
-By default, EKS automatically grants the IAM entity user or role that creates the cluster `system:masters` permissions in the cluster's RBAC configuration in the control plane. All other IAM users or roles require explicit access. This is defined through the `kube-system/aws-auth` config map. More details are available in the EKS documentation on [Managing users or IAM roles for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html), while full details of the expected format of the `aws-auth` configmap can be found in the [`aws-iam-authenticator` source code repository](https://github.com/kubernetes-sigs/aws-iam-authenticator#full-configuration-format).
-
-This approach means that the IAM user or role that was used to provisioning GET will have exclusive access to the EKS cluster. No other users or roles will have access.
-
-In order to grant access to the EKS cluster for other IAM user or roles, consult the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). Note that you will need to [configure authentication to the provisioned Kubernetes cluster](#3-setting-up-authentication-for-the-provisioned-kubernetes-cluster) first.
-
-```shell
-# Configure kubeconfig access to the EKS cluster
-aws eks --region <AWS REGION NAME> update-kubeconfig --name `<CLUSTER NAME>`
-# Update the configmap/aws-auth config map with additional users
-kubectl edit -n kube-system configmap/aws-auth
-```
 
 #### Deprovisioning
 

@@ -42,7 +42,8 @@ resource "aws_eks_cluster" "gitlab_cluster" {
   }
 
   access_config {
-    authentication_mode = "API_AND_CONFIG_MAP"
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   dynamic "encryption_config" {
@@ -65,6 +66,13 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     aws_iam_role_policy_attachment.gitlab_eks_role_cluster_policy,
     aws_iam_role_policy_attachment.gitlab_eks_role_vpc_resource_controller_policy,
   ]
+
+  lifecycle {
+    ignore_changes = [
+      # https://github.com/hashicorp/terraform-provider-aws/issues/35824
+      access_config[0].bootstrap_cluster_creator_admin_permissions,
+    ]
+  }
 }
 
 resource "aws_eks_access_entry" "gitlab_cluster" {
