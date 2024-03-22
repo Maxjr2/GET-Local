@@ -178,7 +178,7 @@ check:docker-image:
   extends: .upload-docker-image-base
   script:
     - docker build -t $CI_REGISTRY_IMAGE:test .
-    - docker run --rm $CI_REGISTRY_IMAGE:test bash -c "terraform version && ansible --version"
+    - docker run --rm $CI_REGISTRY_IMAGE:test bash -c "terraform version && ansible --version && gcloud --version && aws --version && az --version"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
