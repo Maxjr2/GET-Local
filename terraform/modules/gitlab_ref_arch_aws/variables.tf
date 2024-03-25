@@ -974,6 +974,16 @@ variable "rds_postgres_read_replica_multi_az" {
   type    = bool
   default = false
 }
+variable "rds_postgres_enabled_cloudwatch_logs_exports" {
+  description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
+  type        = list(string)
+  default     = []
+}
+variable "rds_postgres_monitoring_role_arn" {
+  description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
+  type        = string
+  default     = null
+}
 
 ## Praefect PostgreSQL
 variable "rds_praefect_postgres_instance_type" {
@@ -1071,6 +1081,16 @@ variable "rds_praefect_postgres_read_replica_multi_az" {
   type    = bool
   default = false
 }
+variable "rds_praefect_postgres_enabled_cloudwatch_logs_exports" {
+  description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
+  type        = list(string)
+  default     = []
+}
+variable "rds_praefect_postgres_monitoring_role_arn" {
+  description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
+  type        = string
+  default     = null
+}
 
 ## Geo Tracking PostgreSQL
 variable "rds_geo_tracking_postgres_instance_type" {
@@ -1167,6 +1187,16 @@ variable "rds_geo_tracking_postgres_read_replica_port" {
 variable "rds_geo_tracking_postgres_read_replica_multi_az" {
   type    = bool
   default = false
+}
+variable "rds_geo_tracking_postgres_enabled_cloudwatch_logs_exports" {
+  description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
+  type        = list(string)
+  default     = []
+}
+variable "rds_geo_tracking_postgres_monitoring_role_arn" {
+  description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
+  type        = string
+  default     = null
 }
 
 ## RDS Performance Insights

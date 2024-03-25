@@ -74,6 +74,9 @@ resource "aws_db_instance" "gitlab" {
     aws_security_group.gitlab_rds[0].id
   ]
 
+  enabled_cloudwatch_logs_exports = length(var.rds_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_role_arn             = var.rds_postgres_monitoring_role_arn
+
   parameter_group_name = aws_db_parameter_group.gitlab[0].name
   replicate_source_db  = var.rds_postgres_replication_database_arn
   apply_immediately    = true
@@ -115,6 +118,9 @@ resource "aws_db_instance" "gitlab_read_replica" {
   vpc_security_group_ids = [
     aws_security_group.gitlab_rds[0].id
   ]
+
+  enabled_cloudwatch_logs_exports = length(var.rds_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_role_arn             = var.rds_postgres_monitoring_role_arn
 
   iam_database_authentication_enabled = aws_db_instance.gitlab[0].iam_database_authentication_enabled
 
