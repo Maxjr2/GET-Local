@@ -298,43 +298,14 @@ cloud_native_hybrid_monitoring_setup: false
 cloud_native_hybrid_cluster_autoscaler_setup: false
 kubeconfig_setup: false
 
+# Charts Settings
+gitlab_charts_release_namespace: default
+
 # Geo
 cloud_native_hybrid_geo: false
 primary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_primary_site_group_name + '_gitlab_rails_primary' not in groups }}"
 secondary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_secondary_site_group_name + '_gitlab_rails_primary' not in groups }}"
 cloud_native_hybrid_geo_role: ""
-
-# Charts Settings
-## GitLab
-gitlab_charts_release_namespace: default
-
-### Webservice
-gitlab_charts_webservice_requests_memory_gb: 5
-gitlab_charts_webservice_limits_memory_gb: 5.25
-gitlab_charts_webservice_requests_cpu: 4
-gitlab_charts_webservice_min_replicas_scaler: 0.75
-gitlab_charts_webservice_max_replicas: ""
-gitlab_charts_webservice_min_replicas: ""
-
-### Sidekiq
-gitlab_charts_sidekiq_requests_memory_gb: 2
-gitlab_charts_sidekiq_limits_memory_gb: 4
-gitlab_charts_sidekiq_requests_cpu: 0.9
-gitlab_charts_sidekiq_min_replicas_scaler: 0.75
-gitlab_charts_sidekiq_max_replicas: ""
-gitlab_charts_sidekiq_min_replicas: ""
-
-## Kube Prometheus Stack
-kube_prometheus_stack_charts_namespace: monitoring
-kube_prometheus_stack_charts_storage_size: 100Gi
-kube_prometheus_stack_charts_storage_class: ""
-kube_prometheus_stack_charts_app_version: "v0.63.0"
-
-kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
-kube_prometheus_stack_charts_custom_scrape_config: []
-
-consul_charts_namespace: consul
-consul_charts_app_version: "1.12.3"
 
 ################################################################################
 ## GitLab Component Custom Config / Tasks / Files

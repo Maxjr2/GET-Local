@@ -40,6 +40,8 @@
             join: "{{ consul_int_addrs }}"
             nodeSelector: |
               workload: support
+          connectInject:
+            enabled: false
 
     - name: Configure internal Consul endpoint
       kubernetes.core.k8s:
@@ -68,6 +70,17 @@
 
     - name: Update kube-prometheus-stack repo
       command: helm repo update prometheus-community
+
+    - name: Get latest kube-prometheus-stack app version if configured
+      block:
+        - name: Get latest kube-prometheus-stack details
+          command: helm search repo prometheus-community/kube-prometheus-stack -o json
+          register: kube_prometheus_stack_charts_latest_app_version
+
+        - name: Set latest kube-prometheus-stack app version if configured
+          set_fact:
+            kube_prometheus_stack_charts_app_version: "{{ (kube_prometheus_stack_charts_latest_app_version.stdout | from_json)[0].app_version }}"
+      when: kube_prometheus_stack_charts_app_version == 'latest'
 
     - name: Get existing kube-prometheus-stack deployment details
       kubernetes.core.helm_info:
