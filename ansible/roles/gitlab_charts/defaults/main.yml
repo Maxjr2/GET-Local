@@ -14,7 +14,16 @@ aws_partition: ""
 aws_account: ""
 aws_profile: ""
 
-# Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
+# Charts Settings
+## Webservice
+gitlab_charts_webservice_requests_memory_gb: 5
+gitlab_charts_webservice_limits_memory_gb: 5.25
+gitlab_charts_webservice_requests_cpu: 4
+gitlab_charts_webservice_min_replicas_scaler: 0.75
+gitlab_charts_webservice_max_replicas: ""
+gitlab_charts_webservice_min_replicas: ""
+
+### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 webservice_default_replica_counts:
   '192': 80
   '96': 35
@@ -22,6 +31,16 @@ webservice_default_replica_counts:
   '24': 10
   '12': 4
   '4': 3
+
+## Sidekiq
+gitlab_charts_sidekiq_requests_memory_gb: 2
+gitlab_charts_sidekiq_limits_memory_gb: 4
+gitlab_charts_sidekiq_requests_cpu: 0.9
+gitlab_charts_sidekiq_min_replicas_scaler: 0.75
+gitlab_charts_sidekiq_max_replicas: ""
+gitlab_charts_sidekiq_min_replicas: ""
+
+### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 sidekiq_default_replica_counts:
   '192': 14
   '96': 14
@@ -30,6 +49,19 @@ sidekiq_default_replica_counts:
   '12': 8
   '4': 4
 
-# Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
+## Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
 cluster_autoscaler_image_tag:
   '1.26': 'v1.26.2'
+
+## Kube Prometheus Stack
+kube_prometheus_stack_charts_namespace: monitoring
+kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.71.2', true) }}"
+
+kube_prometheus_stack_charts_storage_size: 100Gi
+kube_prometheus_stack_charts_storage_class: ""
+
+kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
+kube_prometheus_stack_charts_custom_scrape_config: []
+
+consul_charts_namespace: consul
+consul_charts_app_version: "{{ lookup('env','CONSUL_CHARTS_APP_VERSION') | default('1.16.6', true) }}"
