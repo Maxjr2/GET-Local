@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in `seq 1 26`; do
+for i in `seq 0 26`; do
     nvme_device_name="/dev/nvme${i}n1"
 
     if [ -e  $nvme_device_name ]; then
