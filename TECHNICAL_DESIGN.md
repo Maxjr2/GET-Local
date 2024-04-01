@@ -146,7 +146,7 @@ The latest Terraform version we support is noted [here in the documentation](REA
 
 #### Styling
 
-- Terraform code should follow the [Terraform Style Conventions](https://www.terraform.io/docs/language/syntax/style.html). All code should pass a `terraform fmt` check (automatically checked in CI).
+- Terraform code should follow the [Terraform Style Conventions](https://developer.hashicorp.com/terraform/language/style). All code should pass a `terraform fmt` check (automatically checked in CI).
 - Terraform code should pass the project's lint checks. We utilize [`tflint`](https://github.com/terraform-linters/tflint) and a customized [rules list](.tflint.hcl).
 - Variables should be set in the relevant `variables.tf` file for the module.
 - All names in both resources and variables should follow the [Snake Case](https://en.wikipedia.org/wiki/Snake_case) naming convention.
