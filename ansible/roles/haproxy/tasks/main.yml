@@ -1,18 +1,19 @@
 ---
-- name: Configure Docker
+- name: Configure Docker (geerlingguy.docker)
   include_role:
     name: geerlingguy.docker
-  when: ansible_facts['distribution'] != "Amazon"
+  when:
+    - ansible_facts['distribution'] != "Amazon"
+    - not offline_setup or (docker_add_repo is defined and not docker_add_repo) or (docker_repo_url is defined) # Only attempt in offline setups if user is using custom repo or providing custom repo URL
 
 - name: Configure Docker (RHEL - Amazon Linux)
   shell: "{{ 'amazon-linux-extras' if ansible_facts['distribution_major_version'] == '2' else 'yum' }} install docker -y && systemctl enable docker && systemctl start docker"
   when: ansible_facts['distribution'] == "Amazon"
 
-- name: Configure Node exporter
-  vars:
-    node_exporter_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+- name: Configure Node Exporter (geerlingguy.node_exporter)
   include_role:
     name: geerlingguy.node_exporter
+  when: not offline_setup or node_exporter_download_url is defined
 
 - name: Create /opt/haproxy directory
   file:

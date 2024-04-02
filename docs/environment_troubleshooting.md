@@ -243,28 +243,6 @@ After the cache is reset the setup should work again as normal.
 
 [This can occur for some people if Ansible is trying run multiple tasks at once](https://github.com/ansible/ansible/issues/12259). The safest way to resolve this is to lower the `forks` setting in your `ansible.cfg` file to `20`. The `ansible.cfg` file can be found at `./ansible/ansible.cfg` within your toolkit checkout.
 
-### GitHub Rate Limit exceeded error by Node Exporter role
-
-The Toolkit makes use of the `geerlingguy.node_exporter` Ansible role to install the Prometheus Node Exporter on several nodes where the GitLab Linux package isn't used (such as HAProxy or OpenSearch). This role checks for the latest version of Node Exporter via the GitHub API by default.
-
-However in some cases you may find this check may fail as GitHub has a [rate limit of 60 per hour for unauthenticated requests](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-personal-accounts). This may happen in situations such as running the install multiple times in succession or if the nodes access the internet via the same point such as a NAT. If this happens you would see an error similar to the following:
-
-```sh
-FAILED - RETRYING: [REDACTED_HOSTNAME -> localhost]: Determine latest GitHub release (local) (1 retries left).
-TASK [geerlingguy.node_exporter : Determine latest GitHub release (local)] *****
-...
-fatal: [REDACTED_HOSTNAME -> localhost]: FAILED! => changed=false
-    documentation_url: https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
-    message: 'API rate limit exceeded for [REDACTED_IP]. (But here''s the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)'
-  msg: 'Status code was 403 and not [200]: HTTP Error 403: rate limit exceeded
-```
-
-If this error is happening you can work around this by pinning the Node Exporter version, which in turn will disable this check. This is done by setting the version in your Ansible environment config file [`vars.yml`](environment_configure.md#environment-config-varsyml) with the `node_exporter_version` variable. Here is an example to pin the version to `1.6.1`:
-
-```sh
-node_exporter_version: "1.6.1"
-```
-
 ## Cloud Native Hybrid
 
 In this section are troubleshooting steps for some common Cloud Native Hybrid environment issues.

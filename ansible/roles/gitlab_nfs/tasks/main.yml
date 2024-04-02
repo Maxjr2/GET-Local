@@ -29,8 +29,7 @@
     state: restarted
     enabled: true
 
-- name: Configure Node Exporter on dedicated NFS server
-  vars:
-    node_exporter_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+- name: Configure Node Exporter (geerlingguy.node_exporter)
   include_role:
     name: geerlingguy.node_exporter
+  when: not offline_setup or node_exporter_download_url is defined
