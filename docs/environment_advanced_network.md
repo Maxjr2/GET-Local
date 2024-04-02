@@ -392,6 +392,18 @@ When `offline_setup` is configured the Toolkit will not attempt to set up these 
 
 :information_source:&nbsp; For the most up-to-date list of Python packages it's recommend to check the `python_packages` variable [in this file](../ansible/roles/common/defaults/main.yml).
 
+### Ansible Galaxy Roles
+
+The Toolkit also depends on several [Ansible Galaxy](https://galaxy.ansible.com/ui/) roles to install some dependencies depending on the setup.
+
+When `offline_setup` is configured, the Toolkit will not attempt to run these roles unless specific variables have been provided to configure those roles to work in a local setup accordingly. Read below for more details on each:
+
+- [`geerlingguy.node_exporter`](https://github.com/geerlingguy/ansible-role-node_exporter) - Installs Node Exporter on HAProxy, OpenSearch and NFS nodes.
+  - If `node_exporter_download_url` has been configured to a URL, the Toolkit will assume this is available locally and run the role.
+- [`geerlingguy.docker`](https://github.com/geerlingguy/ansible-role-docker) - Installs Docker on HAProxy and OpenSearch nodes.
+  - If `docker_add_repo` has been configured to `false` the Toolkit will assume a local repo is already present on the node and run the role.
+  - If `docker_repo_url` has been configured to a URL, the Toolkit will assume this is available locally and run the role.
+
 ### GitLab Omnibus Package
 
 [By default](environment_configure.md#gitlab-omnibus-installation-options), the Toolkit will deploy the latest [GitLab EE Omnibus package](https://packages.gitlab.com/gitlab/gitlab-ee) via [the official repo](environment_configure.md#repository).

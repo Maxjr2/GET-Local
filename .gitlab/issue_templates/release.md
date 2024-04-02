@@ -13,8 +13,9 @@ Release steps:
   - [ ] [Ansible python requirements](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/requirements/requirements.txt) - Build and run this [Docker image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/Dockerfile.python_pkgs) for latest list.
   - [ ] HAProxy version - Set to latest **lts** version.
   - [ ] OpenSearch version - Set to latest `2.x` version.
-  - [ ] [Kube Prometheus Stack](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) - Set to latest app version in chart defaults.
-  - [ ] [Consul](https://artifacthub.io/packages/helm/hashicorp/consul) - Set app version to match [Linux package default](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/config/software/consul.rb?ref_type=heads#L21) if newer.
+  - [ ] `geerlingguy.node_exporter` version - Set `node_exporter_version` to the latest version in `group_vars/all.yml`.
+  - [ ] [Kube Prometheus Stack Operator](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) - Set to the latest app version in chart defaults.
+  - [ ] [Consul Operator](https://artifacthub.io/packages/helm/hashicorp/consul) - Set app version to match [Linux package default](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/config/software/consul.rb?ref_type=heads#L21) if newer.
 - [ ] Complete the following Terraform smoke tests to ensure there's no unexpected data loss from VMs being rebuilt by upgrading from last release. (Optional - Only required for Major or Minor releases)
   - [ ] GCP Omnibus Upgrade
   - [ ] GCP Cloud Native Hybrid Upgrade
