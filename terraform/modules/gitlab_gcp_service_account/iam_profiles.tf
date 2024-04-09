@@ -7,13 +7,12 @@ data "google_client_openid_userinfo" "current_userinfo" {
   count = local.create_service_account ? 1 : 0
 }
 
-resource "google_service_account_iam_binding" "gitlab_user_members" {
-  count = local.create_service_account ? 1 : 0
+resource "google_service_account_iam_member" "gitlab_user_members" {
+  for_each = local.create_service_account ? toset(length(var.service_account_user_members) > 0 ? var.service_account_user_members : ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"]) : []
 
   service_account_id = google_service_account.gitlab[0].name
   role               = "roles/iam.serviceAccountUser"
-
-  members = length(var.service_account_user_members) > 0 ? var.service_account_user_members : ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"]
+  member             = each.value
 }
 
 # Object Storage - serviceAccountTokenCreator
