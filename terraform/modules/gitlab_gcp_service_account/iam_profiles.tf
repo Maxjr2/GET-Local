@@ -8,7 +8,7 @@ data "google_client_openid_userinfo" "current_userinfo" {
 }
 
 resource "google_service_account_iam_member" "gitlab_user_members" {
-  for_each = local.create_service_account ? toset(length(var.service_account_user_members) > 0 ? var.service_account_user_members : ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"]) : []
+  for_each = local.create_service_account ? toset(length(var.service_account_user_members) > 0 ? var.service_account_user_members : ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"]) : toset([])
 
   service_account_id = google_service_account.gitlab[0].name
   role               = "roles/iam.serviceAccountUser"
