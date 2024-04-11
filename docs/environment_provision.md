@@ -410,15 +410,15 @@ While this is designed to be seemless there are several options available to adj
 
 ###### Service Account User Members (GCP)
 
-An interesting part of the GCP IAM design is to require a separate specific role for members who wish to _use_ Service Accounts, such as attaching them to VMs. This permission is called [`Service Account User`](https://cloud.google.com/iam/docs/service-account-permissions#user-role) and is separate from the permission used to create Service Accounts and manage their permissions (`Service Account Admin`).
+Part of the GCP IAM design is to require a separate specific role for members who wish to _use_ Service Accounts, such as attaching them to VMs and for [SSH OS login](https://cloud.google.com/compute/docs/oslogin/set-up-oslogin#configure_users). This permission is called [`Service Account User`](https://cloud.google.com/iam/docs/service-account-permissions#user-role) and is separate from the permission used to create Service Accounts and manage their permissions (`Service Account Admin`).
 
-[GCP recommends that this role is not granted at the project level](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) for all Service Accounts. As such, the Toolkit will attach this role specifically for each created Service Account to the member account running Terraform by default.
+[GCP recommends that this role is not granted at the project level](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) for all Service Accounts. As such, the Toolkit will attach this role specifically for each created Service Account to the member account running Terraform by default. 
 
-For cases where there are multiple members expected to run Terraform you may see clashes as Terraform will switch to the running account each run. In this scenario you can configure Terraform to instead set a custom static list of members in the [module's environment config file](#configure-module-settings-environmenttf) via the following variable:
+For cases where there are multiple members expected to run Terraform you may see clashes as Terraform will switch to the running account each run and Ansible fails to log in due to the mismatch. In this scenario you can configure Terraform to instead set a custom static list of members in the [module's environment config file](#configure-module-settings-environmenttf) to include the member account(s) being used by Terraform and Ansible via the following variable:
 
 :exclamation:&nbsp; **This variable must be used with caution**. Any member passed here will have access to the full list of permissions as given by the [`Service Account User` role](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountUser) for every Service Account the Toolkit creates, specifically they will have the ability to impersonate the account.
 
-- `service_account_user_members` - List of GCP IAM identities that will be granted the `Service Account User` role on each created Service Account. Each entrant on the list must follow the [GCP format](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members). If not set the role will be set to the account running Terraform. Optional, default is `[]`.
+- `service_account_user_members` - List of GCP IAM identities that will be granted the `Service Account User` role on each created Service Account. This should include the member accounts being used by Terraform and Ansible (for SSH OS Login). Each entrant on the list must follow the [GCP format](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members). If not set the role will be set to the account running Terraform. Optional, default is `[]`.
 
 ###### Service Account Prefix (GCP)
 
