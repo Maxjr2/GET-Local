@@ -1,14 +1,10 @@
 # IAM Profiles - https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam
 
 # Service Account usage - serviceAccountUser
-## Needed to grant permissions for users to in turn use that Service Account, i.e. Attach it to a VM.
-## Role is strictly only given to the account running Terraform or a configured list to avoid impersonation attacks (https://docs.bridgecrew.io/docs/bc_gcp_iam_3)
-data "google_client_openid_userinfo" "current_userinfo" {
-  count = local.create_service_account ? 1 : 0
-}
-
+## Needed to grant permissions for users to in turn use that Service Account, i.e. Attach it to a VM or to allow SSH OS Login
+## Role is strictly only given to the member accounts passed via service_account_user_members if given to avoid impersonation attacks (https://docs.bridgecrew.io/docs/bc_gcp_iam_3)
 resource "google_service_account_iam_member" "gitlab_user_members" {
-  for_each = local.create_service_account ? toset(length(var.service_account_user_members) > 0 ? var.service_account_user_members : ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"]) : toset([])
+  for_each = local.create_service_account ? toset(var.service_account_user_members) : toset([])
 
   service_account_id = google_service_account.gitlab[0].name
   role               = "roles/iam.serviceAccountUser"
