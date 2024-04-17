@@ -664,7 +664,7 @@ variable "cloud_sql_postgres_root_password" {
 }
 variable "cloud_sql_postgres_disk_type" {
   type    = string
-  default = "PD-HDD"
+  default = null
 }
 variable "cloud_sql_postgres_disk_size" {
   type    = number

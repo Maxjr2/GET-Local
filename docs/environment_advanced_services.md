@@ -284,7 +284,7 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Changing this value will trigger an upgrade and may lead to some downtime. Optional, defaults to `POSTGRES_13`.
   - :information_source:&nbsp; If performing a major upgrade, [it's recommended in the GCP documentation](https://cloud.google.com/sql/docs/postgres/upgrade-major-db-version-inplace#complete_the_major_version_upgrade) to run the `ANALYZE` operation after to avoid performance issues.
 - `cloud_sql_postgres_root_password` - The root password for the instance to be used for the default `postgres` user. If not set the user will not be given a password and access won't be available until a password is given manually. Optional, default is `null`.
-- `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` or `PD-HDD`. Optional, default is `PD-HDD`.
+- `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` (GCP default) or `PD-HDD`. Optional, default is `null`.
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
 - `cloud_sql_postgres_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for Cloud SQL instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `ZONAL`.
 - `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.

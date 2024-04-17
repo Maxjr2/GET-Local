@@ -78,7 +78,8 @@ resource "google_sql_database_instance" "gitlab_praefect" {
   lifecycle {
     ignore_changes = [
       # Can only be set for new instances so ignore any subsequent changes
-      encryption_key_name
+      encryption_key_name,
+      settings[0].disk_type
     ]
   }
 

@@ -78,7 +78,8 @@ resource "google_sql_database_instance" "gitlab" {
   lifecycle {
     ignore_changes = [
       # Can only be set for new instances so ignore any subsequent changes
-      encryption_key_name
+      encryption_key_name,
+      settings[0].disk_type
     ]
   }
 
@@ -95,7 +96,8 @@ resource "google_sql_database_instance" "gitlab_read_replica" {
   master_instance_name = google_sql_database_instance.gitlab[0].name
 
   settings {
-    tier = google_sql_database_instance.gitlab[0].settings[0].tier
+    tier    = google_sql_database_instance.gitlab[0].settings[0].tier
+    edition = google_sql_database_instance.gitlab[0].settings[0].edition
 
     availability_type = var.cloud_sql_postgres_read_replica_availability_type
 
@@ -104,6 +106,14 @@ resource "google_sql_database_instance" "gitlab_read_replica" {
       private_network = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
       ssl_mode        = local.cloud_sql_postgres_ssl_mode
       require_ssl     = local.cloud_sql_postgres_ssl_mode == "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" ? true : null
+    }
+
+    dynamic "database_flags" {
+      for_each = merge(local.cloud_sql_postgres_default_params, var.cloud_sql_postgres_params)
+      content {
+        name  = database_flags.key
+        value = database_flags.value
+      }
     }
   }
 
