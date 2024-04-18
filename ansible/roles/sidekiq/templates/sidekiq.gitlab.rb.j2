@@ -187,11 +187,6 @@ gitlab_rails['db_load_balancing'] = { 'hosts' => {{ postgres_int_addrs }} }
 
 gitlab_rails['auto_migrate'] = false
 
-gitlab_rails['env'] = {
-  # Sidekiq Memory Killer - Disabled by default due to https://gitlab.com/gitlab-org/gitlab/-/issues/225909
-  "SIDEKIQ_MEMORY_KILLER_MAX_RSS" => {{ sidekiq_memory_killer_max_rss }}
-}
-
 # Gitaly
 {% if 'praefect' in groups %}
 ## Gitaly Cluster - Separate Node(s)
