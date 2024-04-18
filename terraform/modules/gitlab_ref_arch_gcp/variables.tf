@@ -655,7 +655,7 @@ variable "cloud_sql_postgres_edition" {
 }
 variable "cloud_sql_postgres_version" {
   type    = string
-  default = "POSTGRES_13"
+  default = "POSTGRES_14"
 }
 variable "cloud_sql_postgres_root_password" {
   type      = string
@@ -747,7 +747,7 @@ variable "cloud_sql_praefect_postgres_edition" {
 }
 variable "cloud_sql_praefect_postgres_version" {
   type    = string
-  default = "POSTGRES_13"
+  default = "POSTGRES_14"
 }
 variable "cloud_sql_praefect_postgres_root_password" {
   type      = string

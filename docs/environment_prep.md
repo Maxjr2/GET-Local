@@ -156,7 +156,7 @@ After the Bucket is created this is all that's required for now. We'll configure
 
 A static IP can be generated in GCP as follows:
 
-- Reserve a static external IP address in your project [as detailed in the GCP docs](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address).
+- Reserve a static external IP address in your project [as detailed in the GCP docs](https://cloud.google.com/vpc/docs/reserve-static-external-ip-address).
 - Use the default options when given a choice and ensure the IP is **regional**.
 - Ensure IP has a unique name.
 
