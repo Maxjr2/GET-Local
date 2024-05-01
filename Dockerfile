@@ -20,8 +20,8 @@ RUN mkdir -p /root/.local/share/mise/bin && \
     curl https://mise.jdx.dev/mise-latest-linux-$(dpkg --print-architecture) > /root/.local/share/mise/bin/mise && \
     chmod +x /root/.local/share/mise/bin/mise 
 
-# Install Terraform (via Mise)
-RUN mise install terraform -y
+# Add Terraform plugin (via Mise)
+RUN mise plugins install terraform -y
 
 # Install Ansible
 ## Install Python Packages (Including Ansible)

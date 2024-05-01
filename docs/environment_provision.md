@@ -992,6 +992,12 @@ docker run -it \
   registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:latest
 ```
 
+### Install Terraform in Docker container
+
+After starting the container you will need to install the specific version of Terraform required for your environment. 
+
+Terraform is not installed by default due to licensing reasons. However, [`mise`](https://mise.jdx.dev/) and a compatible Terraform plugin are provided in the image already for convenience. Refer to the [Install Terraform using `mise` or `asdf`](#install-terraform-using-mise-or-asdf) section on how to use `mise` to install Terraform.
+
 ## 5. Provision
 
 After the config has been set up you're now ready to provision the environment. This is done as follows:
