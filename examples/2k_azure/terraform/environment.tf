@@ -20,7 +20,7 @@ module "gitlab_ref_arch_azure" {
   sidekiq_size       = "Standard_D4s_v3"
 
   haproxy_external_node_count        = 1
-  haproxy_external_size              = "Standard_F2s_v2"
+  haproxy_external_size              = "Standard_F4s_v2"
   haproxy_external_external_ip_names = [var.external_ip_name]
 
   monitor_node_count = 1

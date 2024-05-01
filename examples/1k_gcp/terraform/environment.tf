@@ -6,7 +6,7 @@ module "gitlab_ref_arch_gcp" {
 
   # 1k
   gitlab_rails_node_count   = 1
-  gitlab_rails_machine_type = "n1-highcpu-8"
+  gitlab_rails_machine_type = "n1-standard-8"
 
   haproxy_external_node_count   = 1
   haproxy_external_machine_type = "n1-highcpu-2"
