@@ -21,10 +21,10 @@ module "gitlab_ref_arch_gcp" {
   gitlab_rails_machine_type = "n1-highcpu-32"
 
   haproxy_external_node_count   = 1
-  haproxy_external_machine_type = "n1-highcpu-2"
+  haproxy_external_machine_type = "n1-highcpu-4"
   haproxy_external_external_ips = [var.external_ip]
   haproxy_internal_node_count   = 1
-  haproxy_internal_machine_type = "n1-highcpu-2"
+  haproxy_internal_machine_type = "n1-highcpu-4"
 
   monitor_node_count   = 1
   monitor_machine_type = "n1-highcpu-4"

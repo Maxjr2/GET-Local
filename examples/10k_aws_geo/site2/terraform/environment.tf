@@ -24,10 +24,10 @@ module "gitlab_ref_arch_aws" {
   gitlab_rails_instance_type = "c5.9xlarge"
 
   haproxy_external_node_count                = 1
-  haproxy_external_instance_type             = "c5.large"
+  haproxy_external_instance_type             = "c5n.xlarge"
   haproxy_external_elastic_ip_allocation_ids = [var.external_ip_allocation]
   haproxy_internal_node_count                = 1
-  haproxy_internal_instance_type             = "c5.large"
+  haproxy_internal_instance_type             = "c5n.xlarge"
 
   monitor_node_count    = 1
   monitor_instance_type = "c5.xlarge"

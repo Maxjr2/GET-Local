@@ -66,7 +66,7 @@ GitLab Environment Toolkit team uses the [Reviewers feature](https://docs.gitlab
 
 Labels help to provide a high-level overview for the merge request state. We use the following labels:
 
-- ~"Quality" and ~"section::enablement": default labels
+- ~"Quality" and ~"section::platforms": default labels
 - ~"workflow::in dev": work on merge request is in progress
 - ~"workflow::ready for review": merge request is ready for review
 - ~"workflow::in review": merge request is in the process of being reviewed by maintainers

@@ -5,9 +5,9 @@ module "gitlab_ref_arch_gcp" {
   project = var.project
 
   # 10k Hybrid - k8s Node Pools
-  webservice_node_pool_max_count    = 4
+  webservice_node_pool_max_count    = 3
   webservice_node_pool_min_count    = 1
-  webservice_node_pool_machine_type = "n1-highcpu-32"
+  webservice_node_pool_machine_type = "n1-standard-32"
 
   sidekiq_node_pool_max_count    = 4
   sidekiq_node_pool_min_count    = 1
@@ -31,7 +31,7 @@ module "gitlab_ref_arch_gcp" {
   praefect_postgres_machine_type = "n1-highcpu-2"
 
   haproxy_internal_node_count   = 1
-  haproxy_internal_machine_type = "n1-highcpu-2"
+  haproxy_internal_machine_type = "n1-highcpu-4"
 
   pgbouncer_node_count   = 3
   pgbouncer_machine_type = "n1-highcpu-2"
