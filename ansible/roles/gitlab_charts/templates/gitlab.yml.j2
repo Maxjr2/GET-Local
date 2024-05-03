@@ -125,7 +125,7 @@ gitlab:
   gitlab-shell:
     sshDaemon: "{{ gitlab_shell_ssh_daemon }}"
     service:
-      internalPort: "{{ gitlab_shell_ssh_internal_port }}"
+      internalPort: {{ gitlab_shell_ssh_internal_port }}
 {% endif %}
   gitlab-exporter:
     metrics:
