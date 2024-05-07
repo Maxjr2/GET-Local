@@ -29,7 +29,7 @@ On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architec
 
 ## Overview
 
-As detailed in the docs, a Cloud Native Hybrid Reference Architecture is an alternative approach where select stateless components are deployed in Kubernetes via Helm Charts. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as NGINX and Prometheus.
+As detailed in the docs, a Cloud Native Hybrid Reference Architecture is an alternative approach where select stateless components are deployed in Kubernetes via Helm Charts. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
 
 To achieve this with the Toolkit it can provision the Kubernetes cluster via Terraform and then configure the Helm Chart via Ansible.
 
@@ -54,7 +54,7 @@ By design, the `environment.tf` file is similar to the one used in a [standard e
 
 - `gitlab_rails_x` entries are replaced with `webservice_node_pool_x`. In the charts we run Puma and Workhorse in Webservice pods.
 - `sidekiq_x` entries are replaced with `sidekiq_node_pool_x`
-- `supporting_node_pool_x` entries are added for several additional supporting services needed when running components in Helm Charts, e.g. NGINX.
+- `supporting_node_pool_x` entries are added for several additional supporting services needed when running components in Helm Charts, e.g. Registry.
 - `haproxy_external_x` entries are removed as the Chart deployment handles external load balancing.
 
 Each node pool setting configures the following. To avoid repetition we'll describe each setting once:
@@ -527,20 +527,26 @@ all:
 
 The Toolkit provides several other settings that can customize a Cloud Native Hybrid setup further as follows:
 
+:information_source:&nbsp; Adjusting the scalability and resource management values should only be done in advanced scenarios and may impact the performance of the environment.
+
 - `gitlab_version` - Sets the GitLab version to be installed. The Toolkit finds and selects the equivalent Helm Chart version if configured. This should be set to the full semantic version, e.g. `14.0.0`. If left unset the Toolkit will look to install the latest version. Optional, default is `''`.
 - `gitlab_charts_release_namespace`: Kubernetes namespace the Helm chart will be deployed to. This should only be changed when the namespace is known to be different from the typical default of `default`. Set to `default` by default.
 - `gitlab_charts_webservice_requests_memory_gb`: Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `5` by default.
-- `gitlab_charts_webservice_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `5.25` by default.
+- `gitlab_charts_webservice_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `7` by default.
 - `gitlab_charts_webservice_requests_cpu`: CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Webservice pods in GB. Changing this will affect pod sizing count as well as number of Puma workers and should only be done so for specific reasons. Set to `4` by default.
-- `gitlab_charts_webservice_min_replicas_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale minimum pod replicas against the automatically calculated maximum value. Setting this value may affect the performance of the environment and should only be done so for specific reasons. If pod count is overridden directly by `gitlab_charts_webservice_min_replicas` this value will have no effect. Set to `0.75` by default.
-- `gitlab_charts_webservice_max_replicas`: Override for the number of max Webservice replicas instead of them being automatically calculated. Setting this value may affect the performance of the environment and should only be done so for specific reasons. Defaults to blank.
-- `gitlab_charts_webservice_min_replicas`: Override for the number of min Webservice replicas instead of them being automatically calculated. Setting this value may affect the performance of the environment and should only be done so for specific reasons. Defaults to blank.
+- `gitlab_charts_webservice_min_replicas_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale minimum pod replicas against the automatically calculated maximum value. If pod count is overridden directly by `gitlab_charts_webservice_min_replicas` this value will have no effect. Set to `0.75` by default.
+- `gitlab_charts_webservice_max_unavailable_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale maximum unavailable pod replicas against the automatically calculated maximum value. If pod count is overridden directly by `gitlab_charts_webservice_max_unavailable` this value will have no effect. Set to `0.1` by default.
+- `gitlab_charts_webservice_max_replicas`: Override for the number of max Webservice replicas instead of them being automatically calculated. Defaults to `''`.
+- `gitlab_charts_webservice_min_replicas`: Override for the number of min Webservice replicas instead of them being automatically calculated. Defaults to `''`.
+- `gitlab_charts_webservice_max_unavailable`: Override for the number of max Webservice replicas that can be unavailable at any time instead of being automatically calculated. Defaults to `''`.
 - `gitlab_charts_sidekiq_requests_memory_gb`: Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Sidekiq pod in GB. Set to `2` by default.
 - `gitlab_charts_sidekiq_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Sidekiq pod in GB. Set to `4` by default.
 - `gitlab_charts_sidekiq_requests_cpu`: CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Webservice pods in GB. Changing this will affect pod sizing and should only be done so for specific reasons. Set to `1` by default.
-- `gitlab_charts_sidekiq_min_replicas_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale minimum pod replicas against the automatically calculated maximum value. Setting this value may affect the performance of the environment and should only be done so for specific reasons. If pod count is overridden directly by `gitlab_charts_sidekiq_min_replicas` this value will have no effect. Set to `0.75` by default.
-- `gitlab_charts_sidekiq_max_replicas`: Override for the number of max Sidekiq replicas instead of them being automatically calculated. Setting this value may affect the performance of the environment and should only be done so for specific reasons. Defaults to blank.
-- `gitlab_charts_sidekiq_min_replicas`: Override for the number of min Sidekiq replicas instead of them being automatically calculated. Setting this value may affect the performance of the environment and should only be done so for specific reasons. Defaults to blank.
+- `gitlab_charts_sidekiq_min_replicas_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale minimum pod replicas against the automatically calculated maximum value. If pod count is overridden directly by `gitlab_charts_sidekiq_min_replicas` this value will have no effect. Set to `0.75` by default.
+- `gitlab_charts_sidekiq_max_unavailable_scaler`: Sets the scalar value (`0.0` - `1.0`) to scale maximum unavailable pod replicas against the automatically calculated maximum value. If pod count is overridden directly by `gitlab_charts_sidekiq_max_unavailable` this value will have no effect. Set to `0.1` by default.
+- `gitlab_charts_sidekiq_max_replicas`: Override for the number of max Sidekiq replicas instead of them being automatically calculated. Defaults to `''`.
+- `gitlab_charts_sidekiq_min_replicas`: Override for the number of min Sidekiq replicas instead of them being automatically calculated. Defaults to `''`.
+- `gitlab_charts_sidekiq_max_unavailable`: Override for the number of max Sidekiq replicas that can be unavailable at any time instead of being automatically calculated. Defaults to `''`.
 
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
 

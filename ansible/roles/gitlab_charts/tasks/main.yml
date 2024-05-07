@@ -17,6 +17,10 @@
     - "{{ kube_prometheus_stack_charts_namespace }}"
     - "{{ consul_charts_namespace }}"
   when: cloud_native_hybrid_monitoring_setup
+  tags:
+    - reconfigure
+    - charts
+    - kube-prometheus-stack
 
 - name: Configure chart secrets
   import_tasks: secrets.yml

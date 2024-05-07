@@ -17,28 +17,33 @@ aws_profile: ""
 # Charts Settings
 ## Webservice
 gitlab_charts_webservice_requests_memory_gb: 5
-gitlab_charts_webservice_limits_memory_gb: 5.25
+gitlab_charts_webservice_limits_memory_gb: 7
 gitlab_charts_webservice_requests_cpu: 4
+
 gitlab_charts_webservice_min_replicas_scaler: 0.75
+gitlab_charts_webservice_max_unavailable_scaler: 0.1
 gitlab_charts_webservice_max_replicas: ""
 gitlab_charts_webservice_min_replicas: ""
+gitlab_charts_webservice_max_unavailable: ""
 
 ### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 webservice_default_replica_counts:
-  '192': 80
-  '96': 35
-  '48': 20
-  '24': 10
-  '12': 4
-  '4': 3
+  '192': 77 # 1000 RPS / 50k User - 308 Puma workers (80*4)
+  '96': 35 # 500 RPS / 25k User - 140 Puma workers (35*4)
+  '48': 20 # 200 RPS / 10k User - 80 Puma workers (20*4)
+  '24': 9 # 100 RPS / 5k User - 36 Puma workers (9*4)
+  '12': 4 # 40 RPS / 3k User - 16 Puma workers (4*4)
+  '4': 3 # 20 RPS / 2k User - 12 Puma workers (3*4)
 
 ## Sidekiq
 gitlab_charts_sidekiq_requests_memory_gb: 2
 gitlab_charts_sidekiq_limits_memory_gb: 4
 gitlab_charts_sidekiq_requests_cpu: 0.9
 gitlab_charts_sidekiq_min_replicas_scaler: 0.75
+gitlab_charts_sidekiq_max_unavailable_scaler: 0.1
 gitlab_charts_sidekiq_max_replicas: ""
 gitlab_charts_sidekiq_min_replicas: ""
+gitlab_charts_sidekiq_max_unavailable: ""
 
 ### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
 sidekiq_default_replica_counts:
