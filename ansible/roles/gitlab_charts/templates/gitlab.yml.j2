@@ -25,6 +25,11 @@ gitlab:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
 {% endif %}
+{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
+    serviceAccount:
+      annotations:
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-webservice@{{ gcp_project }}.iam.gserviceaccount.com"
+{% endif %}
     metrics:
       enabled: true
       serviceMonitor:
@@ -69,6 +74,11 @@ gitlab:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
 {% endif %}
+{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
+    serviceAccount:
+      annotations:
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com" 
+{% endif %}
     metrics:
       enabled: true
       podMonitor:
@@ -88,6 +98,11 @@ gitlab:
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
+{% endif %}
+{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
+    serviceAccount:
+      annotations:
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com" 
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
@@ -393,8 +408,8 @@ global:
     enabled: true
     # global.registry.bucket is used by GitLab backups
     bucket: "{{ gitlab_object_storage_bucket_names['registry'] }}"
-# Needed on Primary and Secondary sites to ensure secret is synced
-{% if (container_registry_token is defined) %}
+# Needed for Geo on Primary and Secondary sites for container registry replication
+{% if (geo_container_registry_notification_secret != '') %}
     notificationSecret:
       secret: gitlab-registry-notification
       key: secret_token
@@ -413,13 +428,11 @@ global:
       password:
         secret: gitlab-geo-tracking-postgres-password
         key: password
-{% if container_registry_enable %}
+{% if container_registry_enable and cloud_native_hybrid_geo_role == 'secondary' and geo_primary_registry_url != '' %}
     registry:
       replication:
         enabled: true
-{% if cloud_native_hybrid_geo_role == 'secondary' %}
-        primaryApiUrl: "{{ container_registry_external_url }}"
-{% endif %}
+        primaryApiUrl: "{{ geo_primary_registry_url }}"
 {% endif %}
 {% endif %}
 
@@ -466,6 +479,11 @@ registry:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
+{% endif %}
+{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com" 
 {% endif %}
   metrics:
     enabled: true

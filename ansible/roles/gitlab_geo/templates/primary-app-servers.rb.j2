@@ -3,7 +3,7 @@ geo_primary_role['enable'] = true
 {% endif %}
 gitlab_rails['geo_node_name'] = "{{ geo_primary_site_name }}"
 
-{% if container_registry_enable and container_registry_token is defined %}
+{% if container_registry_enable and geo_container_registry_notification_secret != '' %}
 registry['notifications'] = [
   {
     'name' => 'geo_event',
@@ -12,12 +12,12 @@ registry['notifications'] = [
     'threshold' => 5,
     'backoff' => '1s',
     'headers' => {
-      'Authorization' => ['{{ container_registry_token }}']
+      'Authorization' => ['{{ geo_container_registry_notification_secret }}']
     }
   }
 ]
 {% endif %}
 
-{% if container_registry_token is defined %}
-registry['notification_secret'] = "{{ container_registry_token }}"
+{% if geo_container_registry_notification_secret != '' %}
+registry['notification_secret'] = "{{ geo_container_registry_notification_secret }}"
 {% endif %}

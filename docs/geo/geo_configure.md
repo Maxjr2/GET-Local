@@ -50,10 +50,10 @@ For Cloud Native Hybrid environments some additional variables will need to be a
 
 - `cloud_native_hybrid_geo` - True/False flag to add addition settings into Charts for Geo.
 - `cloud_native_hybrid_geo_role` - The role for the current Geo site. Should be set to either `primary` or `secondary`.
-- `geo_primary_site_prefix` - Should match the prefix for each site.
-- `geo_primary_site_gcp_project` - **GCP only** The GCP project ID the site is in.
-- `geo_primary_site_gcp_gke_location` - **GCP only** The GCP location, region or zone, the site's GKE cluster is in e.g. `europe-west1`.
-- `geo_secondary_site_aws_region` - **AWS only** The AWS region the site is in e.g. `us-east-2`.
+- `geo_primary_site_prefix`/`geo_secondary_site_prefix` - Should match the prefix for each site.
+- `geo_primary_site_gcp_project`/`geo_secondary_site_gcp_project` - **GCP only** The GCP project ID the site is in.
+- `geo_primary_site_gcp_gke_location`/`geo_secondary_site_gcp_gke_location` - **GCP only** The GCP location, region or zone, the site's GKE cluster is in e.g. `europe-west1`.
+- `geo_primary_site_aws_region`/`geo_secondary_site_aws_region` - **AWS only** The AWS region the site is in e.g. `us-east-2`.
 
 When adding Geo specific settings into your Ansible configurations, depending on the GitLab installation type it can be important as to when the settings were added. When using the Linux package, the settings need to be added before the `gitlab_geo.yml` playbook is run. It's not important if the settings existed before or after the original `all.yml` playbook was ran, Geo is configured entirely by the Geo playbook. However, when using GitLab charts, some of the Geo configuration is handled before the Geo playbook is run, this means the Geo settings will need to be present when running the `all.yml` playbook. If the environment is already deployed before adding Geo, you can simply add the new Geo settings and rerun the `gitlab_charts.yml` playbook.
 
@@ -81,12 +81,21 @@ AWS:
     separator: ''
 ```
 
-Once all the settings are added, the steps for [GitLab Environment Toolkit - Configuring the environment with Ansible](../environment_configure.md) should be followed for each site. Once complete you will have multiple independent instances of GitLab.
+Once all the settings are added, the steps for [GitLab Environment Toolkit - Configuring the environment with Ansible](../environment_configure.md) should be followed for each site. After completion, you will have multiple independent instances of GitLab.
 
-Once done we can then run the command `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo.yml`.
+Once done we can then run the command to enable Geo itself - `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo.yml`.
 
-:information_source:&nbsp; It should be noted, when passing in multiple inventories the second inventory's variables will take precedence over the first.
+:information_source:&nbsp; Note that due to the way the GitLab Chart works, Cloud Native Hybrid sites will not work until the full Geo setup has been completed.
+
+:information_source:&nbsp; When passing in multiple inventories the second inventory's variables will take precedence over the first.
 
 Once complete the two sites will now be part of the same Geo deployment.
 
 :information_source:&nbsp; When setting up multiple Geo secondaries you will need to rerun the above command replacing the secondary path for each secondary inventory. After the first run, the primary will be set up and its tasks can be skipped for each consecutive secondary with the following command `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo.yml -t secondary`.
+
+### Upgrades
+
+To perform upgrades of each environment of a Geo setup you would follow the same steps above. Namely:
+
+- Run the main Ansible `all.yml` playbook on each site
+- Run the `gitlab-geo.yml` playbook again after each site has been upgraded

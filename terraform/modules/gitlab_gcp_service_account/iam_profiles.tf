@@ -21,3 +21,12 @@ resource "google_service_account_iam_member" "object_storage_profile_token_creat
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = google_service_account.gitlab[0].member
 }
+
+# GKE Workload Identity - workloadIdentityUser
+resource "google_service_account_iam_member" "workload_identity_member" {
+  count = local.create_service_account && var.service_account_workload_identity_member != null ? 1 : 0
+
+  service_account_id = google_service_account.gitlab[0].name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = var.service_account_workload_identity_member
+}

@@ -132,7 +132,6 @@ output "gitlab_ref_arch_gcp" {
 In addition to the above there are some optional settings that can configure the GKE setup as follows:
 
 - `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
-- `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to allow Kubernetes service accounts to act as a user-managed [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
 - `gke_deletion_protection` - Configures [deletion protection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#deletion_protection) in Terraform. Default is `false`.
 
 #### GKE Cluster Availability Type (Regional / Zonal / Autoscaling)
@@ -179,6 +178,26 @@ The enabling and disabling of this setting is subject to the above and within th
 - `gke_master_authorized_networks_config_cidr_blocks` - Limit endpoint access to given CIDR blocks. For a public cluster this would be external public IP ranges. For a private cluster this would be valid internal IP ranges. Optional, default is `[]`.
 
 For more information refer to the [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters).
+
+#### GKE Workload Identity
+
+[GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) can optionally be configured with the Toolkit. This is to allow deployments to authenticate directly via their own [Service Accounts](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts) to GCP services instead of using node accounts as a further security best practice.
+
+:information_source:&nbsp; GKE Workload Identity is only supported from GitLab 17.0.
+
+Enabling Workload Identity will instruct the Toolkit to not only enable that option on the Cluster but to also create all the required GCP Service Accounts for the nodes and specific workloads respectively. This can be done in Terraform via the following setting in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to deployments to authenticate directly via their own service accounts. Optional, default is `false`.
+
+:information_source:&nbsp; If enabling this setting for an existing cluster note that a subsequent Ansible run will be required with the [`gcp_gke_workload_identity_setup` variable](#google-cloud-platform-gcp-1) enabled to ensure the new configuration is being used.
+
+##### GitLab Chart Namespace
+
+In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable in Ansible.
+
+However, if using GKE Workload Identity, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `gke_gitlab_charts_namespace` variable.
+
+As such, if you do choose to change the namespace for GitLab components you should change both the `gke_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
 
 #### GKE Toolbox Backups - Service Account Key
 
@@ -316,7 +335,7 @@ While this should work out of the box for most setups there are a few scenarios 
 
 ##### GitLab Chart Namespace
 
-In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable.
+In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable in Ansible.
 
 However, since the Toolkit uses IRSA, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `eks_gitlab_charts_namespace` variable.
 
@@ -436,6 +455,8 @@ For environments using GKE the following additional settings are available:
 
 - `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups. **Required.**
 - `gcp_gke_location` - Name of Region or Zone the GCP Kubernetes cluster is in, depending on if it's Regional or Zonal respectively. Only required for Cloud Native Hybrid installs when `kubeconfig_setup` is set to true.
+- `gcp_gke_workload_identity_setup` - Sets up deployments to use [GKE Workload Identity](#gke-workload-identity) for authentication via Service Account annotations. This must be set to `true` if the equivalent Terraform `gke_enable_workload_identity` setting has been enabled.
+  - `gcp_service_account_prefix` - If `gcp_gke_workload_identity_setup` has been set to `true` and the [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) was changed in Terraform from the default of `gl` this needs to also be set in Ansible to ensure the correct setup.
 
 A full `vars.yml` file config example for GKE based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) is as follows:
 

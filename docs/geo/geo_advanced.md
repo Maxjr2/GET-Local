@@ -121,19 +121,14 @@ The RDS recovery process involves deleting the old primary RDS instance, this is
 - Remove `rds_postgres_password`.
 - Remove `rds_postgres_backup_retention_period`.
 
-## Container Registry
+## Container Registry Replication
 
-The Toolkit configures the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) as documented in [Container Registry (GCP, AWS)](../environment_advanced.md#container-registry-gcp-aws) section. No additional configuration for a Geo setup is required if you used default registry URL configuration.
+The Toolkit configures the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) as documented in [Container Registry (GCP, AWS)](../environment_advanced.md#container-registry-gcp-aws) section.
 
-If you configured a custom value in `container_registry_external_url` for the primary site, you need to also add `geo_primary_registry_url` variable in both the primary and secondary inventories:
+To enable [Container Registry replication](https://docs.gitlab.com/ee/administration/geo/replication/container_registry.html#configure-container-registry-replication) some additional settings are required as follows in Ansible via the [Environment `vars.yml` file](../environment_configure.md#environment-config-varsyml):
 
-- `geo_primary_registry_url` - The Primary site's URL that the registry will be available on. Default is `https://registry.<geo_primary_external_host>`.
-
-### Container Registry Replication
-
-To enable Container registry replication you will need to define `container_registry_token` in your `vars.yml` file. For Cloud Native Hybrid environments you will need to specify this setting in both the primary and secondary inventories. For environments built with the Linux package, you can specify it in just the primary inventory.
-
-- `container_registry_token` - Secret value for the container registry authorization header and for the Geo event notification endpoint to use. Value should be a case-sensitive alphanumeric string that starts with a letter.
+- `geo_container_registry_notification_secret` (Primary and Secondary) - Secret value for the container registry authorization header and for the Geo event notification endpoint to use. Value should be set to the same value that is a case-sensitive alphanumeric string on both Primary and Secondary sites.
+- `geo_primary_registry_url` - The Primary site's Registry URL. When using the default on the primary this will be `https://registry.<geo_primary_external_host>`.
 
 ## Migrating from an external Primary Site using Geo
 
@@ -157,9 +152,9 @@ During the setup of Geo some secrets are copied over from the primary site to th
   - [gitlab-registry.key](https://docs.gitlab.com/ee/administration/geo/replication/container_registry.html) - Only required if using the container registry
   - [SSH Host keys](https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-2-manually-replicate-the-primary-sites-ssh-host-keys)
 - [Cloud Native Hybrid](https://docs.gitlab.com/charts/advanced/geo/#copy-secrets-from-the-primary-site-to-the-secondary-site)
-  - `gitlab-geo-gitlab-shell-host-keys`
-  - `gitlab-geo-rails-secret`
-  - `gitlab-geo-registry-secret`
+  - `gitlab-gitlab-shell-host-keys`
+  - `gitlab-rails-secret`
+  - `gitlab-registry-secret`
 
 #### Gitaly Storage Paths
 
@@ -193,6 +188,7 @@ The below settings will need to be added to the secondary sites inventory:
 - `geo_primary_postgres_host` - IP address for the Patroni leader / PostgreSQL host.
 - `geo_primary_is_multi_node` - Set to `true` if primary site is multi node (2k+).
 - `geo_primary_postgres_is_ha` - Set to `true` if primary site is using Patroni for PostgreSQL replication and HA (3k+).
+- `geo_primary_registry_url` - The Primary site's Container Registry URL for replication.
 
 #### Linux Package
 

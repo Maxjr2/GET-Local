@@ -36,7 +36,7 @@ The process to build the environments follows the documentation for [Geo for mul
 1. [Provision at least 2 environments with Terraform](geo_provision.md)
     - Each environment will share some common labels to identify them as being part of the same Geo deployment
     - Each environment will be identified with a unique site name
-2. [Configure the environments with Ansible](geo_configure.md)
+1. [Configure the environments with Ansible](geo_configure.md)
     - Each environment will work as a separate environment until Geo is configured
-3. Configure Geo on the Primary and Secondary sites
+1. Configure Geo on the Primary and Secondary sites
     - One environment will be identified as being a Primary site and all others will be a Secondary

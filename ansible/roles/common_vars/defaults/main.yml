@@ -377,7 +377,7 @@ gitlab_license_text: "{{ lookup('file', gitlab_license_file) if gitlab_license_f
 
 maintenance_mode_message: "GitLab is undergoing maintenance"
 
-geo_primary_external_url: "{{ external_url }}"
+geo_primary_external_url: ""
 geo_primary_internal_url: "{{ geo_primary_external_url | default('') }}"
 geo_secondary_external_url: "{{ secondary_external_url if secondary_external_url is defined }}"
 geo_secondary_internal_url: "{{ geo_secondary_external_url | default('') }}"
@@ -411,15 +411,20 @@ geo_sql_replication_password_md5: "{{ (geo_sql_replication_password + 'gitlab_re
 
 geo_external_primary: "{{ geo_primary_secrets_file != '' or geo_primary_secrets_json != '' or geo_primary_ssh_host_keys != '' or geo_primary_ssh_host_keys_folder != '' or geo_primary_registry_keys != '' or geo_primary_registry_key_file != '' or geo_primary_psql_crt_file != '' }}"
 
+geo_primary_postgres_host: ""
+
+geo_container_registry_notification_secret: "{{ container_registry_token if container_registry_token is defined else '' }} "
+
+# Custom Primary Secrets
 geo_primary_secrets_file: ""
 geo_primary_secrets_json: "{{ lookup('file', geo_primary_secrets_file) | from_json if geo_primary_secrets_file != '' else '' }}"
-geo_primary_ssh_host_keys: ""
+## Omnibus
 geo_primary_ssh_host_keys_folder: ""
-geo_primary_registry_keys: ""
 geo_primary_registry_key_file: ""
 geo_primary_psql_crt_file: ""
-
-geo_primary_postgres_host: ""
+## CNH
+geo_primary_ssh_host_keys: ""
+geo_primary_registry_keys: ""
 
 # Geo Tracking Postgres
 geo_tracking_postgres_host: "{% if geo_secondary_praefect_postgres_host != '' and postgres_external %}{{ geo_secondary_praefect_postgres_host }}{% elif cloud_native_hybrid_geo and postgres_external %}{{ praefect_postgres_host }}{% else %}{{ geo_secondary_site_postgres_int_ip }}{% endif %}"
@@ -430,4 +435,4 @@ geo_tracking_postgres_database: "gitlabhq_geo_production"
 geo_tracking_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 
 # Registry
-geo_primary_registry_url: "https://registry.{{ geo_primary_external_url | regex_replace('^https?:\/\/') }}"
+geo_primary_registry_url: "{{ ('https://registry.' + geo_primary_external_url | regex_replace('^https?:\/\/')) if geo_primary_external_url != '' else '' }}"
