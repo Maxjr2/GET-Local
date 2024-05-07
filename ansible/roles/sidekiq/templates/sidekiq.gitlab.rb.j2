@@ -221,7 +221,7 @@ geo_confs.each { |conf|
   from_file conf
 }
 
-custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.sidekiq.*.rb"))
+custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{sidekiq,common}.*.rb"))
 custom_confs.each { |conf|
   from_file conf
 }
