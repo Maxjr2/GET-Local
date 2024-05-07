@@ -14,15 +14,6 @@ variable "geo_deployment" {
   default = null
 }
 
-variable "geo_primary_site_object_storage_buckets" {
-  type    = list(string)
-  default = []
-}
-variable "geo_primary_site_object_storage_prefix" {
-  type    = string
-  default = null
-}
-
 # GCP Settings
 variable "machine_image" {
   type    = string
@@ -514,6 +505,10 @@ variable "gke_location" {
 variable "gke_release_channel" {
   type    = string
   default = "STABLE"
+}
+variable "gke_gitlab_charts_namespace" {
+  type    = string
+  default = "default"
 }
 variable "gke_enable_workload_identity" {
   type    = bool

@@ -18,7 +18,7 @@ resource "google_container_cluster" "gitlab_cluster" {
   enable_shielded_nodes    = true
   node_config {
     # Temporary service account for initial node pool
-    service_account = module.gitlab_gke_supporting_service_account[0].email
+    service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_supporting_service_account[0].email
   }
 
   deletion_protection = var.gke_deletion_protection
@@ -127,7 +127,7 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
     disk_size_gb      = coalesce(var.webservice_node_pool_disk_size, var.default_disk_size)
     boot_disk_kms_key = var.webservice_node_pool_disk_kms_key != null ? var.webservice_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
-    service_account = module.gitlab_gke_webservice_service_account[0].email
+    service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_webservice_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -201,7 +201,7 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
     disk_size_gb      = coalesce(var.sidekiq_node_pool_disk_size, var.default_disk_size)
     boot_disk_kms_key = var.sidekiq_node_pool_disk_kms_key != null ? var.sidekiq_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
-    service_account = module.gitlab_gke_sidekiq_service_account[0].email
+    service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_sidekiq_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -275,7 +275,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
     disk_size_gb      = coalesce(var.supporting_node_pool_disk_size, var.default_disk_size)
     boot_disk_kms_key = var.supporting_node_pool_disk_kms_key != null ? var.supporting_node_pool_disk_kms_key : var.gke_default_disk_kms_key
 
-    service_account = module.gitlab_gke_supporting_service_account[0].email
+    service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_supporting_service_account[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
 
     shielded_instance_config {
@@ -316,49 +316,6 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   }
 }
 
-## Service Accounts
-### Webservice
-module "gitlab_gke_webservice_service_account" {
-  count  = min(var.webservice_node_pool_count + var.webservice_node_pool_max_count, 1)
-  source = "../gitlab_gcp_service_account"
-
-  # Ensure account ID is 30 characters or less by trimming and only using alnum characters
-  account_id   = "${var.service_account_prefix}-gke-webservice"
-  display_name = "${var.prefix}-gke-webservice"
-
-  service_account_profiles     = ["object_storage"]
-  service_account_user_members = var.service_account_user_members
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-webservice", null)
-}
-
-### Sidekiq
-module "gitlab_gke_sidekiq_service_account" {
-  count  = min(var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count, 1)
-  source = "../gitlab_gcp_service_account"
-
-  # Ensure account ID is 30 characters or less by trimming and only using alnum characters
-  account_id   = "${var.service_account_prefix}-gke-sidekiq"
-  display_name = "${var.prefix}-gke-sidekiq"
-
-  service_account_profiles     = ["object_storage"]
-  service_account_user_members = var.service_account_user_members
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-sidekiq", null)
-}
-
-### Supporting
-module "gitlab_gke_supporting_service_account" {
-  count  = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
-  source = "../gitlab_gcp_service_account"
-
-  # Ensure account ID is 30 characters or less by trimming and only using alnum characters
-  account_id   = "${var.service_account_prefix}-gke-supporting"
-  display_name = "${var.prefix}-gke-supporting"
-
-  service_account_profiles     = ["object_storage"]
-  service_account_user_members = var.service_account_user_members
-  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
-}
-
 ## Firewall
 resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
   name    = "${var.prefix}-kubernetes-vms-internal"
@@ -387,24 +344,13 @@ output "kubernetes" {
     "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_webservice_service_account[0].email, "")
     "kubernetes_sidekiq_node_group_service_account_email"    = try(module.gitlab_gke_sidekiq_service_account[0].email, "")
     "kubernetes_supporting_node_group_service_account_email" = try(module.gitlab_gke_supporting_service_account[0].email, "")
+    "kubernetes_node_group_service_account_email"            = try(module.gitlab_gke_node_service_account[0].email, "")
+    "kubernetes_toolbox_service_account_email"               = try(module.gitlab_gke_toolbox_service_account[0].email, "")
+    "kubernetes_registry_service_account_email"              = try(module.gitlab_gke_registry_service_account[0].email, "")
 
     # Node Group / Addon Versions
     "kubernetes_webservice_node_group_version" = try(google_container_node_pool.gitlab_webservice_pool[0].version, "")
     "kubernetes_sidekiq_node_group_version"    = try(google_container_node_pool.gitlab_sidekiq_pool[0].version, "")
     "kubernetes_supporting_node_group_version" = try(google_container_node_pool.gitlab_supporting_pool[0].version, "")
   }
-}
-
-## Refactors
-moved {
-  from = google_service_account.gitlab_gke_webservice_service_account
-  to   = module.gitlab_gke_webservice_service_account[0].google_service_account.gitlab
-}
-moved {
-  from = google_service_account.gitlab_gke_sidekiq_service_account
-  to   = module.gitlab_gke_sidekiq_service_account[0].google_service_account.gitlab
-}
-moved {
-  from = google_service_account.gitlab_gke_supporting_service_account
-  to   = module.gitlab_gke_supporting_service_account[0].google_service_account.gitlab
 }

@@ -29,14 +29,14 @@
     - charts
     - secrets
 
-- name: Run secrets chart tasks
+- name: Run custom secrets chart tasks
   block:
-    - name: Check if Secrets Chart tasks file exists
+    - name: Check if Custom Secrets Chart tasks file exists
       stat:
         path: "{{ gitlab_charts_secrets_tasks_file }}"
       register: gitlab_charts_secrets_tasks_file_path
 
-    - name: Run Secrets Chart tasks
+    - name: Run Custom Secrets Chart tasks
       include_tasks: "{{ gitlab_charts_secrets_tasks_file }}"
       when: gitlab_charts_secrets_tasks_file_path.stat.exists
   tags:

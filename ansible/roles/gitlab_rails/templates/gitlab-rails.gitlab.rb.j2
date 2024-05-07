@@ -4,7 +4,7 @@ external_url '{{ external_url_sanitised }}'
 
 puma['listen'] = '0.0.0.0'
 
-{% if gitlab_root_password != '' %}
+{% if gitlab_root_password is defined and gitlab_root_password != '' %}
 gitlab_rails['initial_root_password'] = "{{ gitlab_root_password }}"
 {% endif %}
 

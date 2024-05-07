@@ -41,3 +41,10 @@ variable "service_account_user_members" {
   type    = list(string)
   default = []
 }
+
+variable "service_account_workload_identity_member" {
+  description = "Member identity of a Kubernetes Service Account to be granted the workloadIdentityUser for created Service Account"
+
+  type    = string
+  default = null
+}

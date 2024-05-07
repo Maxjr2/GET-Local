@@ -9,18 +9,6 @@
     geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
     geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
 
-- name: Redeploy Secondary Charts - Recreate GitLab Charts Secrets for Cloud Native Hybrid environments
-  vars:
-    kubeconfig_setup: false
-  include_role:
-    name: gitlab_charts
-    tasks_from: secrets
-    apply:
-      become: false
-      delegate_to: localhost
-      run_once: true
-  when: geo_recovery is not defined or not geo_recovery
-
 - name: Redeploy Secondary Charts - Get GitLab Charts values for Cloud Native Hybrid environments
   become: false
   delegate_to: localhost
