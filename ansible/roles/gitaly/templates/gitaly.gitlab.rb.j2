@@ -113,7 +113,7 @@ git_data_dirs({
 
 {% endif %}
 
-custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.gitaly.*.rb"))
+custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{gitaly,common}.*.rb"))
 custom_confs.each { |conf|
   from_file conf
 }

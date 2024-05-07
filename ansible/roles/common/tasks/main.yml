@@ -263,6 +263,30 @@
       tags: packages
       when: not offline_setup
 
+    - name: Configure Custom Config
+      block:
+        - name: Check if custom config exists
+          stat:
+            path: "{{ common_custom_config_file }}"
+          delegate_to: localhost
+          become: false
+          register: common_custom_config_file_path
+
+        - name: Setup Custom Config
+          template:
+            src: "{{ common_custom_config_file }}"
+            dest: "/etc/gitlab/gitlab.common.custom.rb"
+            mode: "0644"
+          when: common_custom_config_file_path.stat.exists
+
+        - name: Remove old Custom Config if not configured
+          file:
+            path: "/etc/gitlab/gitlab.common.custom.rb"
+            state: absent
+          when: not common_custom_config_file_path.stat.exists
+      when: omnibus_node
+      tags: reconfigure
+
     - name: Run Custom Tasks
       block:
         - name: Check if Custom Tasks file exists

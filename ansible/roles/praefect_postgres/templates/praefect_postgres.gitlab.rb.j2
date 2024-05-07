@@ -25,7 +25,7 @@ consul['monitoring_service_discovery'] = true
 postgres_exporter['listen_address'] = '0.0.0.0:9187'
 node_exporter['listen_address'] = '0.0.0.0:9100'
 
-custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.praefect_postgres.*.rb"))
+custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{praefect_postgres,common}.*.rb"))
 custom_confs.each { |conf|
   from_file conf
 }

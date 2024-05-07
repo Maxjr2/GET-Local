@@ -312,6 +312,7 @@ cloud_native_hybrid_geo_role: ""
 ################################################################################
 
 ## Custom Config
+common_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/common.rb.j2"
 consul_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/consul.rb.j2"
 postgres_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/postgres.rb.j2"
 pgbouncer_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/pgbouncer.rb.j2"
