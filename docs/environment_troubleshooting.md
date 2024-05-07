@@ -353,7 +353,7 @@ Another solution suggested is to deploy [Karpenter](https://karpenter.sh/) manua
 
 #### Unable to adjust Node Pool sizes due to Minimum / Desired Size limitations after deployment
 
-[Due to limitations with AWS EKS](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1568) there are times when attempting to adjust Node Pool sizes may fail due to limitations with Desired Size. Specifically if the adjustment has the Minimum Size higher than the current Desired Size it will fail as follows:
+[Due to limitations with AWS EKS](https://github.com/hashicorp/terraform-provider-aws/issues/31613) there are times when attempting to adjust Node Pool sizes may fail due to limitations with Desired Size. Specifically if the adjustment has the Minimum Size higher than the current Desired Size it will fail as follows:
 
 ```tf
 Error: error updating EKS Node Group (<REDACTED>:gitlab_supporting_pool_20220721011642956500000011) config: InvalidParameterException: Minimum capacity 3 can't be greater than desired size 2

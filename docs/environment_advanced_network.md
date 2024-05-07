@@ -208,7 +208,7 @@ There are several possible combinations supported. The Toolkit will dynamically 
 
 - Public Subnets - The default. All resources are placed in public subnets and have public IPs.
   - When `subnet_pub_count` is higher than `0` and `subnet_priv_count` is `0`.
-- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External, EKS Cluster + EKS Supporting Node that runs NGinx).
+- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External, EKS Cluster).
   - When `subnet_pub_count` is higher than `0` and `subnet_priv_count` is higher than `0`.
   - :information_source:&nbsp; **In this setup the number of Public and Private subnets must be the same**. This is to ensure [NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) can be configured for each private subnet on the corresponding public subnet to allow Internet access.
 - Private Subnets - A fully offline environment. All resources are placed in private subnets, additional setup will be required for GitLab to install, such as private OS package repos for example, along with resources such as private links to access.
