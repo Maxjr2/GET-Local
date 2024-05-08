@@ -15,9 +15,25 @@ locals {
   eks_cluster_subnet_ids      = !local.default_network ? local.all_subnet_ids : local.eks_default_subnet_ids
   eks_backend_node_subnet_ids = !local.default_network ? local.backend_subnet_ids : local.eks_default_subnet_ids
 
-  # AMI selection
-  eks_ami_type                   = var.eks_ami_id != null ? "CUSTOM" : "AL2_x86_64"
-  eks_node_group_release_version = var.eks_ami_id != null ? null : (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_ami_release_version[0].value) : var.eks_node_group_ami_release_version)
+  # Node Group AMI selection (Optimized or Custom)
+  eks_node_group_custom_ami_id = var.eks_node_group_custom_ami_id != null ? var.eks_node_group_custom_ami_id : var.eks_ami_id
+  eks_node_group_ami_type      = local.eks_node_group_custom_ami_id != null ? "CUSTOM" : (var.eks_node_group_ami_type != null ? var.eks_node_group_ami_type : strcontains(aws_eks_cluster.gitlab_cluster[0].version, "1.2") ? "AL2_x86_64" : "AL2023_x86_64_STANDARD")
+
+  ## Standard AMI version selection
+  eks_node_group_ami_ssm_search_params_list = var.eks_node_group_ami_release_version == "latest" ? {
+    "AL2_x86_64"             = "amazon-linux-2",
+    "AL2_ARM_64"             = "amazon-linux-2-arm64",
+    "AL2023_x86_64_STANDARD" = "amazon-linux-2023/x86_64/standard",
+    "AL2023_ARM_64_STANDARD" = "amazon-linux-2023/arm64/standard"
+  } : null
+  eks_node_group_ami_ssm_search_param = var.eks_node_group_ami_release_version == "latest" ? local.eks_node_group_ami_ssm_search_params_list[local.eks_node_group_ami_type] : null
+  eks_node_group_ami_release_version  = local.eks_node_group_custom_ami_id != null ? null : (var.eks_node_group_ami_release_version == "latest" ? nonsensitive(data.aws_ssm_parameter.eks_node_group_ami_release_version[0].value) : var.eks_node_group_ami_release_version)
+
+  ## Custom AMI Userdata
+  eks_custom_ami_userdata_templates = local.eks_node_group_custom_ami_id != null ? {
+    "bootstrap" = templatefile("${path.module}/templates/bootstrap.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name }),
+    "nodeadm"   = templatefile("${path.module}/templates/nodeadm.yml.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name, endpoint = aws_eks_cluster.gitlab_cluster[0].endpoint, certificateAuthority = aws_eks_cluster.gitlab_cluster[0].certificate_authority[0].data, cidr = aws_eks_cluster.gitlab_cluster[0].kubernetes_network_config[0].service_ipv4_cidr }),
+  } : null
 }
 
 # Cluster
@@ -101,11 +117,11 @@ resource "aws_kms_alias" "gitlab_cluster_key" {
 }
 
 # Node Pools
-## Default EKS AL2 Release Version
-data "aws_ssm_parameter" "eks_ami_release_version" {
+## Default EKS Release Version
+data "aws_ssm_parameter" "eks_node_group_ami_release_version" {
   count = var.eks_node_group_ami_release_version == "latest" ? min(local.total_node_pool_count, 1) : 0
 
-  name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.gitlab_cluster[0].version}/amazon-linux-2/recommended/release_version"
+  name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.gitlab_cluster[0].version}/${local.eks_node_group_ami_ssm_search_param}/recommended/release_version"
 }
 
 ## Webservice
@@ -115,7 +131,7 @@ resource "aws_launch_template" "gitlab_webservice" {
   name = "${var.prefix}-eks-webservice-launch-template"
 
   instance_type = var.webservice_node_pool_instance_type
-  image_id      = var.eks_ami_id
+  image_id      = local.eks_node_group_custom_ami_id
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -160,7 +176,7 @@ resource "aws_launch_template" "gitlab_webservice" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = local.eks_node_group_custom_ami_id != null ? base64encode(local.eks_custom_ami_userdata_templates[var.eks_node_group_custom_ami_userdata_type]) : null
 }
 
 resource "aws_eks_node_group" "gitlab_webservice_pool" {
@@ -175,8 +191,8 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     id      = aws_launch_template.gitlab_webservice[0].id
     version = aws_launch_template.gitlab_webservice[0].latest_version
   }
-  ami_type             = local.eks_ami_type
-  release_version      = local.eks_node_group_release_version
+  ami_type             = local.eks_node_group_ami_type
+  release_version      = local.eks_node_group_ami_release_version
   force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {
@@ -220,7 +236,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
   name = "${var.prefix}-eks-sidekiq-launch-template"
 
   instance_type = var.sidekiq_node_pool_instance_type
-  image_id      = var.eks_ami_id
+  image_id      = local.eks_node_group_custom_ami_id
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -265,7 +281,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = local.eks_node_group_custom_ami_id != null ? base64encode(local.eks_custom_ami_userdata_templates[var.eks_node_group_custom_ami_userdata_type]) : null
 }
 
 resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
@@ -280,8 +296,8 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     id      = aws_launch_template.gitlab_sidekiq[0].id
     version = aws_launch_template.gitlab_sidekiq[0].latest_version
   }
-  ami_type             = local.eks_ami_type
-  release_version      = local.eks_node_group_release_version
+  ami_type             = local.eks_node_group_ami_type
+  release_version      = local.eks_node_group_ami_release_version
   force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {
@@ -325,7 +341,7 @@ resource "aws_launch_template" "gitlab_supporting" {
   name = "${var.prefix}-eks-supporting-launch-template"
 
   instance_type = var.supporting_node_pool_instance_type
-  image_id      = var.eks_ami_id
+  image_id      = local.eks_node_group_custom_ami_id
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -370,7 +386,7 @@ resource "aws_launch_template" "gitlab_supporting" {
 
   update_default_version = true
 
-  user_data = var.eks_ami_id != null ? base64encode(templatefile("${path.module}/templates/userdata.sh.tpl", { cluster_name = aws_eks_cluster.gitlab_cluster[0].name })) : null
+  user_data = local.eks_node_group_custom_ami_id != null ? base64encode(local.eks_custom_ami_userdata_templates[var.eks_node_group_custom_ami_userdata_type]) : null
 }
 
 resource "aws_eks_node_group" "gitlab_supporting_pool" {
@@ -385,8 +401,8 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     id      = aws_launch_template.gitlab_supporting[0].id
     version = aws_launch_template.gitlab_supporting[0].latest_version
   }
-  ami_type             = local.eks_ami_type
-  release_version      = local.eks_node_group_release_version
+  ami_type             = local.eks_node_group_ami_type
+  release_version      = local.eks_node_group_ami_release_version
   force_update_version = var.eks_node_group_ami_force_update_version
 
   scaling_config {

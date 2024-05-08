@@ -735,10 +735,6 @@ variable "eks_version" {
   type    = string
   default = null
 }
-variable "eks_ami_id" {
-  type    = string
-  default = null
-}
 variable "eks_default_subnet_count" {
   type    = number
   default = 2
@@ -761,7 +757,12 @@ variable "eks_access_config_iam_arns" {
   default = []
 }
 
-## Node Group / Addons Versions
+## Node Group AMI
+variable "eks_node_group_ami_type" {
+  description = "Optimised AMI type to use based on machine spec. Can be one of 'AL2_x86_64', 'AL2_ARM_64', 'AL2023_x86_64_STANDARD' or 'AL2023_ARM_64_STANDARD'. Will default to AWS x86 default for EKS version. Ignored if eks_node_group_custom_ami_id is set. For more information visit https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType"
+  type        = string
+  default     = null
+}
 variable "eks_node_group_ami_release_version" {
   type    = string
   default = null
@@ -770,6 +771,18 @@ variable "eks_node_group_ami_force_update_version" {
   type    = bool
   default = null
 }
+
+variable "eks_node_group_custom_ami_id" {
+  type    = string
+  default = null
+}
+variable "eks_node_group_custom_ami_userdata_type" {
+  description = "Userdata type to use for given eks_node_group_custom_ami_id. Can be either 'bootstrap' or 'nodeadm' (AL2023). For more information visit https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data"
+  type        = string
+  default     = "bootstrap"
+}
+
+## Addons Versions
 variable "eks_kube_proxy_version" {
   type    = string
   default = null
@@ -1601,8 +1614,14 @@ variable "elb_internal_praefect_port" {
   default = 2305
 }
 
-
 variable "additional_tags" {
   type    = map(any)
   default = {}
+}
+
+# Deprecated - To be removed in 4.x
+variable "eks_ami_id" {
+  description = "Deprecated. Replaced by eks_node_group_custom_ami_id"
+  type        = string
+  default     = null
 }

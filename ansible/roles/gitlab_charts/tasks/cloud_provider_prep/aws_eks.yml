@@ -3,6 +3,7 @@
   block:
     - name: Get AWS Caller Info
       amazon.aws.aws_caller_info:
+        aws_profile: "{{ aws_profile if aws_profile != '' else omit }}"
       register: aws_caller_info
 
     - name: Extract AWS Partition from Caller Info

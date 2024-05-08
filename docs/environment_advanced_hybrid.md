@@ -267,7 +267,7 @@ output "gitlab_ref_arch_aws" {
 }
 ```
 
-#### EKS Version and Upgrades
+#### EKS Version
 
 By default, the Toolkit will leave it up to [AWS to manage the Kubernetes version for the cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#version).
 
@@ -275,11 +275,39 @@ However, you can also specify the version as well as control upgrades if desired
 
 - `eks_version` - The Kubernetes version that the cluster should use if direct control is desired. Increase this value to perform an upgrade directly. Note that when set this also upgrades the Node Group VM's to use the latest AMI version for the cluster (see below for more info). Default is `null`.
 
-##### EKS Component Version Management - Node Group AMI / Addons
+#### EKS Node Group AMI Type and Versions
 
-When AWS releases a new version of EKS Node Group [AMIs](https://docs.aws.amazon.com/eks/latest/userguide/eks-linux-ami-versions.html) (OS Version) or Addons for the EKS Cluster version, it doesn't automatically upgrade them. To help with this the Toolkit can manage these upgrades for you.
+It's possible to configure what AMIs are to be used for the EKS Node Groups. There are numerous options available in this area that can interact in complex ways. The Toolkit aims to streamline this area and supports two options - Optimized AMI Type (Default) and Custom AMI ID. Refer to each section below for more information.
 
-:information_source:&nbsp; Note that it isn't the same as EKS Cluster version (although a new Cluster version will typically come with new versions for its dependents) as AWS may still release versions of these components for the current Cluster.
+##### Optimized AMI Type (Default)
+
+AWS provides numerous [optimized Amazon Linux AMIs](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html). These are divided by Amazon Linux version, CPU architecture and EKS version. The Toolkit supports Amazon Linux AMIs as well as optional automatic upgrades where a new AMI version is released for the selected type.
+
+:information_source:&nbsp; This is the default option in the Toolkit. It will automatically select the Amazon Linux AMI type that is the default for the EKS version, either Amazon Linux 2 or 2023.
+
+This can be configured further in Terraform via the following settings in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `eks_node_group_ami_type` - Optimized AMI type to use based on machine spec. Can be one of `AL2_x86_64`, `AL2_ARM_64`, `AL2023_x86_64_STANDARD` or `AL2023_ARM_64_STANDARD`. Will default to AWS x86 default for EKS version. Ignored if `eks_node_group_custom_ami_id` is set. Default is `AL2_x86_64` for EKS versions lower than `1.30` and `AL2023_x86_64_STANDARD` for versions equal to or higher.
+  - :information_source:&nbsp; Note that if deploying on ARM machine types this setting will always need to be configured to the corresponding type.
+- `eks_node_group_ami_release_version` - The [AMI release version](https://docs.aws.amazon.com/eks/latest/userguide/eks-linux-ami-versions.html) to use for the selected AMI type EKS. Can either be set to a specific version or just `latest` to enable automatic upgrades on subsequent Terraform runs. Defaults to `null`.
+- `eks_node_group_ami_force_update_version` - If `eks_node_group_ami_release_version` is set to `latest` this additional variable can be set to `true` to force versions updates that ignores any pod draining blocks due to pod distribution budgets. Defaults to `null`.
+
+##### Custom AMI ID
+
+As an alternative it's also possible to set a specific custom AMI ID to be used for the Node Groups if desired. 
+
+:information_source:&nbsp; Creating such an image is outside the scope of this documentation, refer to the [official AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html) for more information.
+
+When deploying EKS Node Groups with a custom AMI ID a [`user data` script](https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data) is required to be run on the nodes for them to join the cluster correctly. The Toolkit supports the `bootstrap` and `nodeadm` user data types and will configure this automatically for you as directed.
+
+The above can be configured in Terraform via the following settings in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `eks_node_group_custom_ami_id` - The AMI ID of the custom image to be used for the Node Groups. Defaults to `null`.
+- `eks_node_group_custom_ami_userdata_type` - The type of `user data` script to configure. Can be one of `bootstrap` or `nodeadm`. Defaults to `bootstrap`.
+
+#### EKS Addon Versions
+
+The Toolkit will enable several [EKS Addons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html) as required. AWS regularly releases new versions for these addons accordingly outside the main EKS cluster versions, and it's possible to configure the Toolkit to upgrade the addons specifically on subsequent Terraform runs as desired.
 
 It's recommended to manage these versions via the Toolkit to ensure Terraform is aware of them in its state to avoid any issues. As such, there are variables available for each to control what version they run on along with the option to just select whatever is the latest with the following caveats:
 
@@ -289,8 +317,6 @@ It's recommended to manage these versions via the Toolkit to ensure Terraform is
 
 The variables to configure each can be set in Terraform as follows in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
-- `eks_node_group_ami_release_version` - The [AMI release version](https://docs.aws.amazon.com/eks/latest/userguide/eks-linux-ami-versions.html) to use for the EKS Node Group VMs. Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
-  - `eks_node_group_ami_force_update_version` - If `eks_node_group_ami_release_version` is set to `latest` this additional variable can be set to `true` to force versions updates that ignores any pod draining blocks due to pod distribution budgets. Defaults to `null`.
 - `eks_kube_proxy_version` - Version to use for the [EKS Kube Proxy addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 - `eks_coredns_version` - Version to use for the [EKS CoreDNS addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
 - `eks_vpc_cni_version` - Version to use for the [EKS VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
