@@ -16,8 +16,9 @@ locals {
   eks_backend_node_subnet_ids = !local.default_network ? local.backend_subnet_ids : local.eks_default_subnet_ids
 
   # Node Group AMI selection (Optimized or Custom)
-  eks_node_group_custom_ami_id = var.eks_node_group_custom_ami_id != null ? var.eks_node_group_custom_ami_id : var.eks_ami_id
-  eks_node_group_ami_type      = local.eks_node_group_custom_ami_id != null ? "CUSTOM" : (var.eks_node_group_ami_type != null ? var.eks_node_group_ami_type : strcontains(aws_eks_cluster.gitlab_cluster[0].version, "1.2") ? "AL2_x86_64" : "AL2023_x86_64_STANDARD")
+  eks_node_group_custom_ami_id    = var.eks_node_group_custom_ami_id != null ? var.eks_node_group_custom_ami_id : var.eks_ami_id
+  eks_node_group_default_ami_type = local.total_node_pool_count > 0 ? (strcontains(aws_eks_cluster.gitlab_cluster[0].version, "1.2") ? "AL2_x86_64" : "AL2023_x86_64_STANDARD") : null
+  eks_node_group_ami_type         = local.eks_node_group_custom_ami_id != null ? "CUSTOM" : (var.eks_node_group_ami_type != null ? var.eks_node_group_ami_type : local.eks_node_group_default_ami_type)
 
   ## Standard AMI version selection
   eks_node_group_ami_ssm_search_params_list = var.eks_node_group_ami_release_version == "latest" ? {
