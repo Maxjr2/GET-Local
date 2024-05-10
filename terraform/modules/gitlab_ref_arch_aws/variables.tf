@@ -1240,7 +1240,7 @@ variable "elasticache_redis_kms_key_arn" {
 }
 variable "elasticache_redis_engine_version" {
   type    = string
-  default = "6.x"
+  default = "7.0"
 }
 variable "elasticache_redis_password" {
   type      = string
