@@ -818,7 +818,7 @@ variable "memorystore_redis_memory_size_gb" {
 }
 variable "memorystore_redis_version" {
   type    = string
-  default = "REDIS_6_X"
+  default = "REDIS_7_0"
 }
 variable "memorystore_redis_transit_encryption_mode" {
   type    = string

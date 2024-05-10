@@ -524,7 +524,7 @@ Next are optional variables. The following variables can be set once with the `e
 
 - `elasticache_redis_password` - The password of the Redis instance. Must follow the [requirements as mandated by AWS](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html#auth-overview). **Required**.
   - Optionally `elasticache_redis_cache_password` or `elasticache_redis_persistent_password` can be used to override for separate services.
-- `elasticache_redis_engine_version` - The version of the Redis instance. Should only be changed to versions that are supported by GitLab. Optional, default is `6.x`.
+- `elasticache_redis_engine_version` - The version of the Redis instance. Should only be changed to versions that are supported by GitLab. Optional, default is `7.0`.
   - Optionally `elasticache_redis_cache_engine_version` or `elasticache_redis_persistent_engine_version` can be used to override for separate services.
 - `elasticache_redis_port` - The port of the Redis instance. Should only be changed if required. Optional, default is `6379`.
   - Optionally `elasticache_redis_cache_port` or `elasticache_redis_persistent_port` can be used to override for separate services.
@@ -603,7 +603,7 @@ For required variables they need to be set for each Redis service you are provis
 
 For optional variables they work in a default like manner. When configuring for any Redis types the main `memorystore_redis_*` variable can be set once and this will apply to all but you can also additionally override this behaviour with specific variables as follows:
 
-- `memorystore_redis_version` - The version of the Redis instance. Should only be changed to versions [that are supported by GitLab](https://docs.gitlab.com/ee/install/requirements.html#redis-versions). Optional, default is `6.x`.
+- `memorystore_redis_version` - The version of the Redis instance. Should only be changed to versions [that are supported by GitLab](https://docs.gitlab.com/ee/install/requirements.html#redis-versions). Optional, default is `7.0`.
   - Optionally `memorystore_redis_cache_version` or `memorystore_redis_persistent_version` can be used to override for separate services.
 - `memorystore_redis_transit_encryption_mode` - The [TLS mode of the Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#tlscertificate) instance for the [In-transit encryption](https://cloud.google.com/memorystore/docs/redis/in-transit-encryption). Optional, default is `DISABLED`. To enable set to `SERVER_AUTHENTICATION`.
   - Optionally `memorystore_redis_cache_transit_encryption_mode` or `memorystore_redis_persistent_transit_encryption_mode` can be used to override for separate services.
