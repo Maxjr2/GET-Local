@@ -243,6 +243,32 @@ After the cache is reset the setup should work again as normal.
 
 [This can occur for some people if Ansible is trying run multiple tasks at once](https://github.com/ansible/ansible/issues/12259). The safest way to resolve this is to lower the `forks` setting in your `ansible.cfg` file to `20`. The `ansible.cfg` file can be found at `./ansible/ansible.cfg` within your toolkit checkout.
 
+### "Update GitLab settings" task failure
+
+The following error can occur when GET is running the task `ApplicationSetting.last.update` in GitLab Rails. For example:
+
+```sh
+TASK [post_configure : Disable Write to "authorized_keys" file setting via GitLab Rails] ***
+fatal: [localhost -> gitlab-rails-1(1.2.3.4)]: FAILED! => changed=true
+  cmd:
+  - gitlab-rails
+  - runner
+  - 'ApplicationSetting.last.update(authorized_keys_enabled: false)'
+  msg: non-zero return code
+  rc: 1
+  stderr: |-
+    Please specify a valid ruby command or the path of a script to run.
+    Run 'rails runner -h' for help.
+
+    undefined method `diff_max_files' for #<ApplicationSetting:0x00007f99dff105d8>
+    Did you mean?  diff_max_patch_bytes
+```
+
+This error is usually caused by incomplete database migrations that happened during the GitLab upgrade. The issue is outside of the Toolkit and related to GitLab itself. To debug, the following steps can be done:
+
+1. Run the command manually in the [Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html) to get further error output
+1. Check the [status of database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations) - all migrations should be `up`. If some migrations have the `down` status, follow [Run incomplete database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#run-incomplete-database-migrations) guidance or contact the Support team for assistance. [Database migration logs](https://docs.gitlab.com/ee/administration/logs/#migrationslog) can be checked for the progress of migrations.
+
 ## Cloud Native Hybrid
 
 In this section are troubleshooting steps for some common Cloud Native Hybrid environment issues.
