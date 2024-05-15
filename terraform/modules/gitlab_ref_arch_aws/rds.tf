@@ -102,6 +102,13 @@ resource "aws_db_instance" "gitlab" {
 
   copy_tags_to_snapshot = true
   tags                  = var.rds_postgres_tags
+
+  lifecycle {
+    ignore_changes = [
+      storage_encrypted,
+      kms_key_id
+    ]
+  }
 }
 
 resource "aws_db_instance" "gitlab_read_replica" {
@@ -140,6 +147,13 @@ resource "aws_db_instance" "gitlab_read_replica" {
   backup_retention_period = 0
 
   tags = var.rds_postgres_tags
+
+  lifecycle {
+    ignore_changes = [
+      storage_encrypted,
+      kms_key_id
+    ]
+  }
 }
 
 output "rds_postgres_connection" {

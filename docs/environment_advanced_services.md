@@ -154,8 +154,7 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - `rds_postgres_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
 - `rds_postgres_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
 - `rds_postgres_storage_type` - The type of storage to use. Optional, default is `io1`.
-- `rds_postgres_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt the database instance. If not provided `default_kms_key_arm` or the default AWS KMS key will be used in that order. Optional, default is `null`.
-  - **Warning** Changing this value after the initial creation will result in the database being recreated and will lead to **data loss**.
+- `rds_postgres_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
 - `rds_postgres_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access RDS over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
 - [`rds_postgres_backup_retention_period`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#backup_retention_period) - The number of days to retain backups for. Must be between 0 and 35. Must be greater than 0 when Read Replicas are to be used (Including Geo primary instances). Optional, default is `null`.
 - [`rds_postgres_backup_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#backup_window) - The daily time range where backups will be taken, e.g. `09:46-10:16`. Optional, default is `null`.
@@ -288,7 +287,7 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
 - `cloud_sql_postgres_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for Cloud SQL instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `ZONAL`.
 - `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.
-- `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK disk encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
+- `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
 
 :information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` prefix instead.
 
@@ -516,9 +515,8 @@ For required variables they need to be set for each Redis service you are provis
   - `elasticache_redis_cache_instance_type` or `elasticache_redis_persistent_instance_type` when setting up separate services.
 - `elasticache_redis_node_count` - The number of replicas of the Redis instance to have for failover purposes. This should be set to at least `2` or higher for HA and `1` if this isn't a requirement. **Required**.
   - `elasticache_redis_cache_node_count` or `elasticache_redis_persistent_node_count` when setting up separate services.
-- `elasticache_redis_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt the Redis instance. If not provided `default_kms_key_arm` or the default AWS KMS key will be used in that order. Optional, default is `null`.
+- `elasticache_redis_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
   - `elasticache_redis_cache_kms_key_arn` or `elasticache_redis_persistent_kms_key_arn` when setting up separate services.
-  - **Warning** Changing this value after the initial creation will result in the Redis instance being recreated and may lead to **data loss**.
 
 Next are optional variables. The following variables can be set once with the `elasticache_redis_*` prefix, which will apply to every provisioned service, but you can also additionally override this behaviour with specific variables as follows:
 
@@ -609,7 +607,7 @@ For optional variables they work in a default like manner. When configuring for 
   - Optionally `memorystore_redis_cache_transit_encryption_mode` or `memorystore_redis_persistent_transit_encryption_mode` can be used to override for separate services.
   - If you would like to enable TLS, you need to follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config) after environment is provisioned.
   - :information_source:&nbsp; Note that the service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
-- `memorystore_redis_customer_managed_key` - The GCP Key resource name for [CMEK disk encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
+- `memorystore_redis_customer_managed_key` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
   - Optionally `memorystore_redis_cache_customer_managed_key` or `memorystore_redis_persistent_customer_managed_key` can be used to override for separate services.
 - [`memorystore_redis_weekly_maintenance_window_day`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#day) - The day of week that maintenance updates occur, e.g. `MONDAY`. Optional, default is `null`.
   - Optionally `memorystore_redis_cache_weekly_maintenance_window_day` or `memorystore_redis_persistent_weekly_maintenance_window_day` can be used to override for separate services.
@@ -735,7 +733,7 @@ The variables for this service start with the prefix `opensearch_service_*` and 
 - `opensearch_service_volume_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
 - `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
 - `opensearch_service_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Can be set to either `1`, `2` or `3`. Optional, default is `2`.
-- `opensearch_service_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt the OpenSearch domain. If not provided `default_kms_key_arm` or the default AWS KMS key will be used in that order. Optional, default is `null`.
+- `opensearch_service_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
 - `opensearch_service_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access OpenSearch over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
 - `opensearch_service_linked_role_create` - Sets if the Toolkit should manage the [OpenSearch service-link role](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html). Will create or destroy the role when set to `true`. Set to `false` if the role already exists in the AWS account. Refer to the [specific section below](#aws-opensearch-service-linked-iam-role) for more info. Optional, default is `false`.
 - `opensearch_service_tags` - A map of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to OpenSearch domain. Optional, default is `{}`.

@@ -41,6 +41,13 @@ resource "aws_ebs_volume" "gitlab" {
     Name                       = each.key
     gitlab_node_data_disk_role = "${var.prefix}-${var.node_type}-${each.value.name}"
   }
+
+  lifecycle {
+    ignore_changes = [
+      encrypted,
+      kms_key_id
+    ]
+  }
 }
 
 resource "aws_volume_attachment" "gitlab" {

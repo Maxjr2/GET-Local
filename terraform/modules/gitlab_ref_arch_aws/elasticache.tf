@@ -68,6 +68,13 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   ]
 
   tags = var.elasticache_redis_tags
+
+  lifecycle {
+    ignore_changes = [
+      at_rest_encryption_enabled,
+      kms_key_id
+    ]
+  }
 }
 
 output "elasticache_redis_connection" {
@@ -149,6 +156,13 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   ]
 
   tags = var.elasticache_redis_cache_tags
+
+  lifecycle {
+    ignore_changes = [
+      at_rest_encryption_enabled,
+      kms_key_id
+    ]
+  }
 }
 
 output "elasticache_redis_cache_connection" {
@@ -225,6 +239,13 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   ]
 
   tags = var.elasticache_redis_persistent_tags
+
+  lifecycle {
+    ignore_changes = [
+      at_rest_encryption_enabled,
+      kms_key_id
+    ]
+  }
 }
 
 output "elasticache_redis_persistent_connection" {

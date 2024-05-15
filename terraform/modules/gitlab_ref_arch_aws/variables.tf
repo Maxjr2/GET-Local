@@ -43,7 +43,7 @@ variable "default_disk_encrypt" {
   type    = bool
   default = true
 }
-variable "default_kms_key_arn" {
+variable "default_disk_kms_key_arn" {
   type    = string
   default = null
 }
@@ -761,6 +761,10 @@ variable "eks_access_config_iam_arns" {
   type    = list(string)
   default = []
 }
+variable "eks_default_disk_kms_key_arn" {
+  type    = string
+  default = null
+}
 
 ## Node Group AMI
 variable "eks_node_group_ami_type" {
@@ -834,6 +838,10 @@ variable "webservice_node_pool_disk_size" {
   type    = string
   default = null
 }
+variable "webservice_node_pool_disk_kms_key_arn" {
+  type    = string
+  default = null
+}
 ## Cluster Autoscaling (Optional)
 variable "webservice_node_pool_max_count" {
   type    = number
@@ -857,6 +865,10 @@ variable "sidekiq_node_pool_disk_size" {
   type    = string
   default = null
 }
+variable "sidekiq_node_pool_disk_kms_key_arn" {
+  type    = string
+  default = null
+}
 ## Cluster Autoscaling (Optional)
 variable "sidekiq_node_pool_max_count" {
   type    = number
@@ -877,6 +889,10 @@ variable "supporting_node_pool_instance_type" {
   default = ""
 }
 variable "supporting_node_pool_disk_size" {
+  type    = string
+  default = null
+}
+variable "supporting_node_pool_disk_kms_key_arn" {
   type    = string
   default = null
 }
@@ -1630,9 +1646,13 @@ variable "eks_ami_id" {
   type        = string
   default     = null
 }
-
 variable "external_ssh_port" {
   description = "Deprecated. Replaced by gitlab_shell_ssh_port"
   type        = number
   default     = 2222
+}
+variable "default_kms_key_arn" {
+  description = "Deprecated. Replaced by default_disk_kms_key_arn, object_storage_kms_key_arn, eks_default_disk_kms_key_arn, rds_postgres_kms_key_arn, elasticache_redis_kms_key_arn and opensearch_service_kms_key_arn"
+  type        = string
+  default     = null
 }

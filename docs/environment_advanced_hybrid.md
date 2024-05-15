@@ -214,9 +214,25 @@ There are two options available to pass the key to Ansible to be subsequently co
 
 Note that you can also create a separate Service Account and key if desired as long as it has the correct permissions as given above.
 
-#### GKE Secrets Envelope Encryption
+#### GKE Storage Encryption
 
-As an additional security layer for Kubernetes secrets, which are already encrypted on disk automatically, you can optionally enable [envelope encryption of Kubernetes secrets in GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#envelope_encryption) with your own KMS key. This is also known as Application-layer secrets encryption or Database encryption in GKE.
+[GCP by default encrypts storage with service provided encryption keys](https://cloud.google.com/docs/security/encryption/default-encryption#googles_default_encryption) across all services.
+
+##### GKE Disk Encryption (CMEK)
+
+The Toolkit allows for you to configure GKE Node Pool disk encryption with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) instead of the service defaults.
+
+:information_source:&nbsp; Refer to the main [Customer managed encryption keys (CMEK) (GCP)](environment_provision.md#customer-managed-encryption-keys-cmek-gcp) section for more information on key requirements and setup.
+
+This can be configured in Terraform via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf) with the following variables:
+
+- `gke_default_disk_kms_key` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
+  - `*_node_pool_disk_kms_key` - The GCP Key resource name to use for specific GKE Node Pools. Will override `gke_default_disk_kms_key` if specified. Default is `null`.
+    - Available component options: `webservice`, `sidekiq`, `supporting`.
+
+##### GKE Secrets Envelope Encryption (CMEK)
+
+As an additional security layer for Kubernetes secrets, which are already encrypted on disk automatically, you can optionally enable [envelope encryption of Kubernetes secrets in GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#envelope_encryption) with your own [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek). This is also known as Application-layer secrets encryption or Database encryption in GKE.
 
 This feature requires a [Cloud KMS key to be created separately](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating-key). Once created, the feature can be enabled via the following variable in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
@@ -411,7 +427,24 @@ Amazon EKS control plane logging provides audit and diagnostic logs directly fro
 
 :information_source:&nbsp; Note that there are additional costs to enable this feature. Refer to the above docs for more info.
 
-#### EKS Secrets Envelope Encryption
+#### EKS Storage Encryption
+
+The Toolkit will enable encryption by default for EKS Storage by enabling via service provided keys.
+[AWS by default encrypts storage with service provided encryption keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html) across all services.
+
+##### EKS Disk Encryption (CMEK)
+
+The Toolkit allows for you to configure EKS Node Group disk encryption with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) instead of the service defaults.
+
+:information_source:&nbsp; Refer to the main [Customer managed encryption keys (CMEK) (AWS)](environment_provision.md#customer-managed-encryption-keys-cmek-aws) section for more information on key requirements and setup. Also note that any key used for EKS Node Group VM disks [requires additional policy to be set](https://docs.aws.amazon.com/autoscaling/ec2/userguide/key-policy-requirements-EBS-encryption.html) to allow the `AWSServiceRoleForAutoScaling` service-linked role access.
+
+This can be configured in Terraform via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf) with the following variables:
+
+- `eks_default_disk_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws). If not set AWS provided keys will be used instead. Optional, default is `null`.
+  - `*_node_pool_disk_kms_key_arn` - The AWS KMS key ARN to be used for specific EKS Node Group VM disks. Will override `eks_default_disk_kms_key_arn` if specified. Default is `null`.
+    - Available component options: `webservice`, `sidekiq`, `supporting`.
+
+##### EKS Secrets Envelope Encryption (CMEK)
 
 As an additional security layer for Kubernetes secrets, which are already encrypted on disk automatically, you can optionally enable [envelope encryption of Kubernetes secrets in EKS](https://aws.amazon.com/blogs/containers/using-eks-encryption-provider-support-for-defense-in-depth/) with your own KMS key.
 
@@ -422,7 +455,7 @@ Note however there are several limitations to this feature, such as manually hav
 Enabling the feature is controlled via the following variables:
 
 - `eks_envelope_encryption` - Enables EKS Envelope Encryption. Optional, default is `false`.
-- `eks_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt Kubernetes secrets. Note that the key should have the correct policy to allow access for the cluster's IAM role, [refer to the AWS docs for more info](https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html#enable-kms). If not provided `default_kms_key_arm` or a Toolkit managed AWS KMS key will be used in that order. Optional, default is `null`.
+- `eks_envelope_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt Kubernetes secrets. Note that the key should have the correct policy to allow access for the cluster's IAM role, [refer to the AWS docs for more info](https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html#enable-kms). If not provided `default_kms_key_arm` or a Toolkit managed AWS KMS key will be used in that order. Optional, default is `null`.
   - Due to limitations with this feature, it's strongly recommended that you use your own KMS key with the correct policies that align with your security requirements.
 
 #### Networking (AWS)

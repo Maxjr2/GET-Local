@@ -12,6 +12,14 @@ resource "google_storage_bucket" "gitlab_object_storage_buckets" {
     enabled = var.object_storage_versioning
   }
 
+  dynamic "encryption" {
+    for_each = range(var.object_storage_kms_key != null ? 1 : 0)
+
+    content {
+      default_kms_key_name = var.object_storage_kms_key
+    }
+  }
+
   labels = var.object_storage_labels
 }
 

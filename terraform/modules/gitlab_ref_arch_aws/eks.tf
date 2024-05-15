@@ -140,6 +140,7 @@ resource "aws_launch_template" "gitlab_webservice" {
       volume_size           = coalesce(var.webservice_node_pool_disk_size, var.default_disk_size)
       volume_type           = var.default_disk_type
       encrypted             = true
+      kms_key_id            = var.webservice_node_pool_disk_kms_key_arn != null ? var.webservice_node_pool_disk_kms_key_arn : var.eks_default_disk_kms_key_arn
       delete_on_termination = true
     }
   }
@@ -245,6 +246,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
       volume_size           = coalesce(var.sidekiq_node_pool_disk_size, var.default_disk_size)
       volume_type           = var.default_disk_type
       encrypted             = true
+      kms_key_id            = var.sidekiq_node_pool_disk_kms_key_arn != null ? var.sidekiq_node_pool_disk_kms_key_arn : var.eks_default_disk_kms_key_arn
       delete_on_termination = true
     }
   }
@@ -350,6 +352,7 @@ resource "aws_launch_template" "gitlab_supporting" {
       volume_size           = coalesce(var.supporting_node_pool_disk_size, var.default_disk_size)
       volume_type           = var.default_disk_type
       encrypted             = true
+      kms_key_id            = var.supporting_node_pool_disk_kms_key_arn != null ? var.supporting_node_pool_disk_kms_key_arn : var.eks_default_disk_kms_key_arn
       delete_on_termination = true
     }
   }
