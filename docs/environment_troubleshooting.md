@@ -269,6 +269,27 @@ This error is usually caused by incomplete database migrations that happened dur
 1. Run the command manually in the [Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html) to get further error output
 1. Check the [status of database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations) - all migrations should be `up`. If some migrations have the `down` status, follow [Run incomplete database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#run-incomplete-database-migrations) guidance or contact the Support team for assistance. [Database migration logs](https://docs.gitlab.com/ee/administration/logs/#migrationslog) can be checked for the progress of migrations.
 
+### Python install failure due to `module 'tarfile' has no attribute 'data_filter'` on RHEL 8
+
+The following error could occur on RHEL 8 based distros due to a [security update](https://rpmfind.net/linux/RPM/centos/8-stream/appstream/x86_64/Packages/python3-pip-9.0.3-23.el8.noarch.html) to the specific variant of Python that comes installed:
+
+```sh
+    :stderr: WARNING: Running pip install with root privileges is generally not a good idea. Try `__main__.py install --user` instead.
+    Exception:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.6/site-packages/pip/utils/__init__.py", line 565, in untar_file
+        tarfile.data_filter(member.replace(name=fn), location)
+    AttributeError: module 'tarfile' has no attribute 'data_filter'
+```
+
+This update introduced a new dependency on the [`python-libs` package](https://rpmfind.net/linux/RPM/centos/8-stream/baseos/x86_64/Packages/python3-libs-3.6.8-56.el8.x86_64.html) but was notably not linked correctly in the package manager config so subsequently didn't update as expected.
+
+This issue looks to have subsequently been fixed but if you see the above error this can be addressed by running the following package command on the box and then running GET Ansible again:
+
+```sh
+yum update python3-pip python-libs
+```
+
 ## Cloud Native Hybrid
 
 In this section are troubleshooting steps for some common Cloud Native Hybrid environment issues.
