@@ -15,6 +15,7 @@ module "gitlab_rails" {
   disk_delete_on_termination = var.gitlab_rails_disk_delete_on_termination != null ? var.gitlab_rails_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.gitlab_rails_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  elastic_ip_allocation_ids  = var.gitlab_rails_elastic_ip_allocation_ids
 
   iam_instance_policy_arns = flatten([
     local.gitlab_s3_policy_create ? [aws_iam_policy.gitlab_s3_policy[0].arn] : [],
@@ -31,7 +32,11 @@ module "gitlab_rails" {
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
     try(aws_security_group.gitlab_external_ssh[0].id, null),
-    var.gitlab_rails_security_group_ids
+    var.gitlab_rails_security_group_ids,
+    length(var.gitlab_rails_elastic_ip_allocation_ids) > 0 && var.haproxy_external_node_count == 0 ? [
+      try(aws_security_group.gitlab_external_git_ssh[0].id, null),
+      try(aws_security_group.gitlab_external_http_https[0].id, null)
+    ] : []
   ])
 
   geo_site       = var.geo_site

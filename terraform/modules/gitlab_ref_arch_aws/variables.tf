@@ -274,6 +274,11 @@ variable "gitlab_rails_security_group_ids" {
   type        = list(string)
   default     = []
 }
+variable "gitlab_rails_elastic_ip_allocation_ids" {
+  description = "List of Elastic IP Allocation IDs to apply to GitLab Rails node"
+  type        = list(string)
+  default     = []
+}
 
 variable "haproxy_external_node_count" {
   type    = number
@@ -1560,9 +1565,9 @@ variable "ssh_allowed_ingress_cidr_blocks" {
   type    = list(any)
   default = []
 }
-variable "external_ssh_port" {
+variable "gitlab_shell_ssh_port" {
   type    = number
-  default = 2222
+  default = null
 }
 
 variable "internal_allowed_ingress_security_group_ids" {
@@ -1624,4 +1629,10 @@ variable "eks_ami_id" {
   description = "Deprecated. Replaced by eks_node_group_custom_ami_id"
   type        = string
   default     = null
+}
+
+variable "external_ssh_port" {
+  description = "Deprecated. Replaced by gitlab_shell_ssh_port"
+  type        = number
+  default     = 2222
 }

@@ -19,7 +19,8 @@ module "gitlab_rails" {
   external_ip_type    = var.external_ip_type
   setup_external_ip   = var.setup_external_ips
 
-  application_security_group = azurerm_application_security_group.ssh
+  external_ip_names          = var.gitlab_rails_external_ip_names
+  application_security_group = length(var.gitlab_rails_external_ip_names) > 0 && var.haproxy_external_node_count == 0 ? azurerm_application_security_group.gitlab_rails[0] : azurerm_application_security_group.ssh
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment

@@ -284,6 +284,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_disk_type` - The [GCP disk type](https://cloud.google.com/compute/docs/disks/performance#type_comparison) that should be used for the root disk. For Gitaly and OpenSearch machines this defaults to `pd-ssd`. If not set, this defaults to `default_disk_type`, which is set to `pd-standard`.
   - :information_source:&nbsp; Disk IOPS performance in GCP is determined not only by the disk type but also several other factors such as CPU and storage size. [Refer to the GCP documentation for more information](https://cloud.google.com/compute/docs/disks/performance).
 - `haproxy_external_external_ips` - Set the external HAProxy load balancer to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP.
+- `gitlab_rails_external_ips` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP. This setting should be used when deploying single Rails node without external load balancer.
 
 In addition to the above, the following optional settings are also available:
 
@@ -605,6 +606,7 @@ Next in the file are the various machine settings, separated the same as the Ref
     - `gitaly_disk_iops` - The amount of total IOPS to provision for the Gitaly node root disks. Defaults to `8000`.
 - `*_disk_delete_on_termination` - (Optional) Whether the root volume should be destroyed on instance termination. Defaults to `true`.
 - `haproxy_external_elastic_ip_allocation_ids` - Set the external HAProxy load balancer to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID.
+- `gitlab_rails_elastic_ip_allocation_ids` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID. This setting should be used when deploying single Rails node without external load balancer.
 
 In addition to the above, the following optional settings are also available:
 
@@ -861,6 +863,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_storage_account_type` - The [Azure disk storage account type](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types) that should be used for the root disk. For Gitaly machines this defaults to `Premium_LRS` (Premium SSD). If not set, this defaults to `default_disk_type`, which is set to `Standard_LRS` (Standard HDD).
   - :information_source:&nbsp; Disk IOPS performance in Azure is determined not only by the disk type but also several other factors such as storage size. [Refer to the Azure documentation for more information](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size).
 - `haproxy_external_external_ip_names` - Set the external HAProxy load balancer to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name.
+- `gitlab_rails_external_ip_names` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name. This setting should be used when deploying single Rails node without external load balancer.
 
 In addition to the above, the following optional settings are also available:
 
