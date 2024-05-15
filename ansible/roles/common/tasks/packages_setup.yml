@@ -4,7 +4,6 @@
   apt:
     name: "{{ system_packages_deb }}"
     update_cache: true
-    state: "latest"
   register: result
   retries: 60
   delay: 5
@@ -39,7 +38,6 @@
   yum:
     name: "{{ system_packages_rhel }}"
     update_cache: true
-    state: "latest"
   register: result
   retries: 60
   delay: 5
@@ -67,7 +65,6 @@
   yum:
     name: "{{ system_packages_amazon[ansible_facts['distribution_major_version']] }}"
     update_cache: true
-    state: "latest"
   register: result
   retries: 60
   delay: 5
