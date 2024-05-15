@@ -1,11 +1,15 @@
+locals {
+  gitlab_shell_ssh_port = var.haproxy_external_node_count > 0 && var.gitlab_shell_ssh_port == null ? 2222 : (var.external_ssh_port != 2222 ? var.external_ssh_port : var.gitlab_shell_ssh_port)
+}
+
 # External Firewall rules
 ## Create if nodes present and public IPs OR private IPs and specific CIDR range given
 resource "google_compute_firewall" "gitlab_http_https" {
-  count   = (var.haproxy_external_node_count + var.monitor_node_count) > 0 && (var.setup_external_ips || length(var.http_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
+  count   = var.haproxy_external_node_count + var.monitor_node_count + length(var.gitlab_rails_external_ips) > 0 && (var.setup_external_ips || length(var.http_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-http-https"
   network = local.vpc_name
 
-  description = "Allow external load balancer access for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
+  description = "Allow external load balancer or Rails node access for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
   allow {
     protocol = "tcp"
@@ -17,15 +21,15 @@ resource "google_compute_firewall" "gitlab_http_https" {
 }
 
 resource "google_compute_firewall" "gitlab_ssh" {
-  count   = var.haproxy_external_node_count > 0 && (var.setup_external_ips || length(var.ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
+  count   = local.gitlab_shell_ssh_port != null && (var.setup_external_ips || length(var.ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-ssh"
   network = local.vpc_name
 
-  description = "Allow access to GitLab SSH via external load balancer for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
+  description = "Allow access to GitLab SSH via external load balancer or Rails node for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
   allow {
     protocol = "tcp"
-    ports    = [var.external_ssh_port]
+    ports    = [local.gitlab_shell_ssh_port]
   }
 
   source_ranges = coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)

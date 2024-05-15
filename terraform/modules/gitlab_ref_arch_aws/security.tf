@@ -1,3 +1,7 @@
+locals {
+  gitlab_shell_ssh_port = var.haproxy_external_node_count > 0 && var.gitlab_shell_ssh_port == null ? 2222 : (var.external_ssh_port != 2222 ? var.external_ssh_port : var.gitlab_shell_ssh_port)
+}
+
 resource "aws_key_pair" "ssh_key" {
   count = var.ssh_public_key != null ? 1 : 0
 
@@ -89,7 +93,7 @@ resource "aws_security_group" "gitlab_external_ssh" {
 }
 
 resource "aws_security_group" "gitlab_external_git_ssh" {
-  count = min(var.haproxy_external_node_count, 1)
+  count = local.gitlab_shell_ssh_port != null ? 1 : 0
 
   name_prefix = "${var.prefix}-external-git-ssh-"
   vpc_id      = data.aws_vpc.selected.id
@@ -98,8 +102,8 @@ resource "aws_security_group" "gitlab_external_git_ssh" {
   # kics-scan ignore-block
   ingress {
     description = "External Git SSH access for ${var.prefix}"
-    from_port   = var.external_ssh_port
-    to_port     = var.external_ssh_port
+    from_port   = local.gitlab_shell_ssh_port
+    to_port     = local.gitlab_shell_ssh_port
     protocol    = "tcp"
     cidr_blocks = coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
   }
@@ -117,7 +121,7 @@ resource "aws_security_group" "gitlab_external_git_ssh" {
 # kics: Terraform AWS - HTTP Port Open - Context dependent, only allowed on HAProxy External
 # kics-scan ignore-block
 resource "aws_security_group" "gitlab_external_http_https" {
-  count = min(var.haproxy_external_node_count + var.monitor_node_count, 1)
+  count = (var.haproxy_external_node_count + var.monitor_node_count + length(var.gitlab_rails_elastic_ip_allocation_ids)) > 0 ? 1 : 0
 
   name_prefix = "${var.prefix}-external-http-https-"
   vpc_id      = data.aws_vpc.selected.id

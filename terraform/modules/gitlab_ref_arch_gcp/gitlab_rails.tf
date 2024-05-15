@@ -18,6 +18,7 @@ module "gitlab_rails" {
   subnet            = local.subnet_name
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
+  external_ips      = var.gitlab_rails_external_ips
 
   service_account_prefix       = var.service_account_prefix
   service_account_user_members = var.service_account_user_members
@@ -28,6 +29,8 @@ module "gitlab_rails" {
   geo_deployment = var.geo_deployment
 
   label_secondaries = true
+
+  tags = length(var.gitlab_rails_external_ips) > 0 && var.haproxy_external_node_count == 0 ? ["${var.prefix}-web", "${var.prefix}-ssh"] : []
 
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot

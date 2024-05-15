@@ -139,6 +139,11 @@ variable "gitlab_rails_disk_size" {
   type    = string
   default = null
 }
+variable "gitlab_rails_external_ip_names" {
+  description = "List of External IP names to apply to GitLab Rails node"
+  type        = list(string)
+  default     = []
+}
 
 variable "haproxy_external_node_count" {
   type    = number
@@ -375,9 +380,9 @@ variable "ssh_allowed_ingress_cidr_blocks" {
   default = []
 }
 
-variable "external_ssh_port" {
+variable "gitlab_shell_ssh_port" {
   type    = number
-  default = 2222
+  default = null
 }
 variable "external_ssh_allowed_ingress_cidr_blocks" {
   type    = list(any)
@@ -398,4 +403,12 @@ variable "setup_external_ips" {
 variable "nat_gateway_idle_timeout_in_minutes" {
   type    = number
   default = 4
+}
+
+## Deprecated - To be removed in 4.0.0
+
+variable "external_ssh_port" {
+  description = "Deprecated. Replaced by gitlab_shell_ssh_port"
+  type        = number
+  default     = 2222
 }

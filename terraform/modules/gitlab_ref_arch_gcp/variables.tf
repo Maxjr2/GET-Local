@@ -190,6 +190,11 @@ variable "gitlab_rails_disks" {
   type    = list(any)
   default = []
 }
+variable "gitlab_rails_external_ips" {
+  description = "List of External IPs to apply to GitLab Rails node"
+  type        = list(string)
+  default     = []
+}
 
 variable "haproxy_external_node_count" {
   type    = number
@@ -920,9 +925,9 @@ variable "ssh_allowed_ingress_cidr_blocks" {
   default = []
 }
 
-variable "external_ssh_port" {
+variable "gitlab_shell_ssh_port" {
   type    = number
-  default = 2222
+  default = null
 }
 variable "external_ssh_allowed_ingress_cidr_blocks" {
   type    = list(any)
@@ -1014,4 +1019,10 @@ variable "cloud_sql_praefect_postgres_require_ssl" {
   type        = bool
   default     = false
   description = "Deprecated. Replaced by cloud_sql_praefect_postgres_ssl_mode"
+}
+
+variable "external_ssh_port" {
+  type        = number
+  default     = 2222
+  description = "Deprecated. Replaced by gitlab_shell_ssh_port"
 }
