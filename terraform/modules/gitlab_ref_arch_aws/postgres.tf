@@ -11,7 +11,7 @@ module "postgres" {
   disk_size                  = coalesce(var.postgres_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.postgres_disk_type, var.default_disk_type)
   disk_encrypt               = coalesce(var.postgres_disk_encrypt, var.default_disk_encrypt)
-  disk_kms_key_arn           = var.postgres_disk_kms_key_arn != null ? var.postgres_disk_kms_key_arn : var.default_kms_key_arn
+  disk_kms_key_arn           = var.postgres_disk_kms_key_arn != null ? var.postgres_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.postgres_disk_delete_on_termination != null ? var.postgres_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.postgres_data_disks
   subnet_ids                 = local.backend_subnet_ids

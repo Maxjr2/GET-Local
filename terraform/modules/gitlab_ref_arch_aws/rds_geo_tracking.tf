@@ -93,7 +93,9 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
 
   lifecycle {
     ignore_changes = [
-      username
+      username,
+      storage_encrypted,
+      kms_key_id
     ]
   }
 }
@@ -134,6 +136,14 @@ resource "aws_db_instance" "gitlab_geo_tracking_read_replica" {
   backup_retention_period = 0
 
   tags = var.rds_geo_tracking_postgres_tags
+
+  lifecycle {
+    ignore_changes = [
+      username,
+      storage_encrypted,
+      kms_key_id
+    ]
+  }
 }
 
 output "rds_geo_tracking_postgres_connection" {

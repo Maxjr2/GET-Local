@@ -331,35 +331,37 @@ The Toolkit can enable [versioning in Google Cloud Storage buckets](https://clou
 
 ##### Storage Encryption (GCP)
 
-[GCP by default encrypts storage with service provided encryption keys](https://cloud.google.com/docs/security/encryption/default-encryption#googles_default_encryption) with no further action required.
+[GCP by default encrypts storage with service provided encryption keys](https://cloud.google.com/docs/security/encryption/default-encryption#googles_default_encryption) across all services.
 
-Additional options are detailed in this section.
+However, it's also possible to encrypt with custom keys, known as Customer managed encryption keys (CMEK). Refer to the below section for more information.
 
 ###### Customer managed encryption keys (CMEK) (GCP)
 
 The Toolkit allows for you to configure encrypting storage with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) on GCP.
 
-Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
-
-- Keys must be available in Cloud KMS and in the same location as the intended environment and services
-- The [Cloud KMS CryptoKey Encrypter/Decrypter](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.cryptoKeyEncrypterDecrypter) role must be granted on the required Service Agent or Service Account depending on the service:
-  - Compute Engine / Kubernetes Engine - [Compute Service Agent](https://cloud.google.com/compute/docs/disks/customer-managed-encryption#required-roles)
-  - Cloud SQL - [System Service Account](https://cloud.google.com/sql/docs/postgres/configure-cmek#service-account)
-  - Memorystore - [System Service Account](https://cloud.google.com/memorystore/docs/redis/use-cmek#granting_the_service_account_access_to_the_key)
-- Keys must be in the same location as the intended service.
-- Keys can only be configured for new environments.
+:exclamation:&nbsp; Enabling CMEK is an advanced set up and is strongly recommended to only be done if you are aware of its limitations and consequences. This is typically a one way decision and subsequent mismanagement of keys can result in consequences such as data loss. Refer to the [Cloud Provider's documentation](https://cloud.google.com/kms/docs/cmek) for more information.
 
 :information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the GCP service's respective documentation for further guidance.
 
-:information_source:&nbsp; Using CMEK with Google Cloud Object Storage is [_not_ supported by GitLab](https://docs.gitlab.com/ee/administration/object_storage.html#google-cloud-storage-gcs) at this time. Please refer to this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441782) for latest details.
+Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
+
+- Keys must be available in Cloud KMS and in the same location as the intended environment and services.
+- The [Cloud KMS CryptoKey Encrypter/Decrypter](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.cryptoKeyEncrypterDecrypter) role must be granted on the key(s) for the associated Service Agent or Service Account depending on the service:
+  - Compute Engine / Kubernetes Engine - [Compute Service Agent](https://cloud.google.com/compute/docs/disks/customer-managed-encryption#required-roles).
+  - Cloud Storage - [Cloud Storage Service Agent](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys).
+  - Cloud SQL - [System Service Account](https://cloud.google.com/sql/docs/postgres/configure-cmek#service-account).
+  - Memorystore - [System Service Account](https://cloud.google.com/memorystore/docs/redis/use-cmek#granting_the_service_account_access_to_the_key).
+- Using CMEK with Google Cloud Object Storage is supported for [GitLab versions `16.11` and higher](https://docs.gitlab.com/ee/administration/object_storage.html#google-cloud-storage-gcs).
+- CMEK can only be configured for new environments builds on all applicable services except Object Storage, which can be changed, but [additional manual actions will be required](https://cloud.google.com/storage/docs/encryption/customer-managed-keys#key-replacement).
 
 Once the Key(s) are created they can be configured in Terraform via the [module's environment config file](#configure-module-settings-environmenttf) with the following variables:
 
 :information_source:&nbsp; GCP Key resource names will be in the format `projects/<project-id>/locations/<location>/keyRings/<keyring-name>/cryptoKeys/<key-name>`
 
 - `default_disk_kms_key` - The GCP Key resource name to use for all disk storages across GCE Component VMs. Defaults to `null`.
-  - `*_disk_kms_key` - The GCP Key resource name to use for specific GCE Component VMs. Will override `default_disk_kms_key` if specified. Default is `null`.
+  - `*_disk_kms_key` - The GCP Key resource name to use for specific component VM disks. Will override `default_disk_kms_key` if specified. Default is `null`.
     - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq`, `monitor`, `opensearch_vm`, `gitlab_nfs`, `haproxy_external` and `haproxy_internal`.
+- `object_storage_kms_key` - The GCP Key resource name to use for all Object Storage buckets. Defaults to `null`.
 - `gke_default_disk_kms_key` - The GCP Key resource name to use for all disk storages across GKE Node Pools. Defaults to `null`.
   - `*_node_pool_disk_kms_key` - The GCP Key resource name to use for specific GKE Node Pools. Will override `gke_default_disk_kms_key` if specified. Default is `null`.
     - Available component options: `webservice`, `sidekiq`, `supporting`.
@@ -656,25 +658,43 @@ The above is also the precedence of how the Toolkit will handle this. For exampl
 
 There are several variables available to configure in the [module's environment config file](#configure-module-settings-environmenttf) for the encryption strategy desired. To cover the scenarios above we'll split each into its own section and how to configure blow.
 
-:exclamation:&nbsp; **{- Changing encryption settings setup on an existing environment must be treated with the utmost caution-}**. **Doing so is typically considered a significant change and will trigger the recreation of the affected storages and services leading to data loss**.
+:exclamation:&nbsp; **{- Changing encryption settings setup on an existing environment must be treated with the utmost caution-}**. **Doing so is typically considered a significant change and may trigger the recreation of the affected storages and services leading to data loss**.
 
 ###### Default Encryption
 
-Encryption is enabled by default for all storages and services using either AWS managed or created KMS keys.
+Encryption is enabled by default for all storages and services using either AWS managed keys.
 
-:information_source:&nbsp; For backwards compatibility, encryption of Root Block Device disks can be controlled via the `default_disk_encrypt` setting. It's also possible to specify this setting for each component, e.g. `gitaly_disk_encrypt`. **{- Changing these settings on an existing environment will trigger the recreation of all nodes and will lead to data loss-}**. Snapshots should be taken before doing this and then restored onto the new encrypted disks, refer to the [AWS docs for more info](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html#encrypt-unencrypted).
+For S3 Object Storage, which has various options, the selected default encryption type is [`SSE-KMS`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html) with [S3 Bucket Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html) enabled.
 
 ###### Customer managed encryption keys (CMEK) (AWS)
 
-Encryption for all storage and services with your own KMS keys, also known as customer-managed encryption keys (CMEK), is supported by the Toolkit.
+The Toolkit allows for you to configure encrypting storage with [Customer-managed encryption keys (CMEK)](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-cmk) on AWS instead of service provided keys.
 
-Note that these keys must be [available in AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) beforehand. Once available, you can configure them to be used with the following variables be configured with the following variables. Note that for individual storages or services the same variable suffix is used throughout, for readability this is defined once only:
-
-- `default_kms_key_arn` - The AWS KMS key ARN to use for all storages and services unless configured otherwise. Defaults to `null`.
-  - This setting is also used for [Cloud Native Hybrid EKS clusters](environment_advanced_hybrid.md) and / or any [cloud services](environment_advanced_services.md) and Cloud Native Hybrid EKS clusters.
-- `*_kms_key_arn` - The AWS KMS key ARN to be used for a specific storage. For example `gitaly_disk_kms_key_arn` will configure a specific key for all its disk(s) and `object_storage_kms_key_arn` configures a key for all buckets.
+:exclamation:&nbsp; Enabling CMEK is an advanced set up and is strongly recommended to only be done if you are aware of its limitations and consequences. This is typically a one way decision and subsequent mismanagement of keys can result in consequences such as data loss. Refer to the [Cloud Provider's documentation](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for more information.
 
 :information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the AWS service's respective documentation for further guidance.
+
+Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
+
+- Keys must be available in AWS KMS and in the same location as the intended environment and services.
+- Keys must be configured with the correct policies for the following services as required:
+  - [EKS Node Group Disks](https://docs.aws.amazon.com/autoscaling/ec2/userguide/key-policy-requirements-EBS-encryption.html) - Policy required on Key to allow the `AWSServiceRoleForAutoScaling` service-linked role access.
+- CMEK can only be configured for new environments builds on all applicable services except [S3 Object Storage](https://docs.aws.amazon.com/AmazonS3/latest/userguide/specifying-kms-encryption.html) and [OpenSearch service](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/encryption-at-rest.html), which can be changed, but additional manual actions will be required for existing data.
+
+Once the Key(s) are created they can be configured in Terraform via the [module's environment config file](#configure-module-settings-environmenttf) with the following variables:
+
+- `default_disk_kms_key_arn` - The AWS KMS key ARN to be used for a specific component VM disks. Default is `null`.
+  - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq`, `monitor`, `opensearch_vm`, `gitlab_nfs`, `haproxy_external` and `haproxy_internal`.
+- `object_storage_kms_key_arn` - The AWS KMS key ARN to be used for a S3 Object Storage buckets. Default is `null`.
+- :information_source:&nbsp; Refer to documentation for specific Cloud Services on how to configure CMEK for each accordingly.
+- `eks_default_disk_kms_key_arn` - The AWS KMS key ARN to be used for EKS Node Group VM disks. Default is `null`.
+  - `*_node_pool_disk_kms_key_arn` - The AWS KMS key ARN to be used for specific EKS Node Group VM disks. Will override `eks_default_disk_kms_key_arn` if specified. Default is `null`.
+    - Available component options: `webservice`, `sidekiq`, `supporting`.
+- `rds_postgres_kms_key_arn` - The AWS KMS key ARN to be used to encrypt the database instance on first creation. Optional, default is `null`.
+  - `rds_praefect_postgres_kms_key_arn` or `rds_geo_tracking_postgres_kms_key_arn` when setting up separate databases.
+- `elasticache_redis_kms_key_arn` - The AWS KMS key ARN to be used to encrypt the Redis instance on first creation. Optional, default is `null`.
+  - `elasticache_redis_cache_kms_key_arn` or `elasticache_redis_persistent_kms_key_arn` when setting up separate services.
+- `opensearch_service_kms_key_arn` - The AWS KMS key ARN to be used to encrypt the OpenSearch domain. Optional, default is `null`.
 
 #### Configure Authentication (AWS)
 

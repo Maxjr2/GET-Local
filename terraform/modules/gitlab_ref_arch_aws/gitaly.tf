@@ -12,7 +12,7 @@ module "gitaly" {
   disk_type                  = coalesce(var.gitaly_disk_type, var.default_disk_type)
   disk_iops                  = var.gitaly_disk_iops
   disk_encrypt               = coalesce(var.gitaly_disk_encrypt, var.default_disk_encrypt)
-  disk_kms_key_arn           = var.gitaly_disk_kms_key_arn != null ? var.gitaly_disk_kms_key_arn : var.default_kms_key_arn
+  disk_kms_key_arn           = var.gitaly_disk_kms_key_arn != null ? var.gitaly_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.gitaly_disk_delete_on_termination != null ? var.gitaly_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.gitaly_data_disks
   subnet_ids                 = local.backend_subnet_ids

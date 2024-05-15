@@ -11,7 +11,7 @@ module "redis" {
   disk_size                  = coalesce(var.redis_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_disk_type, var.default_disk_type)
   disk_encrypt               = coalesce(var.redis_disk_encrypt, var.default_disk_encrypt)
-  disk_kms_key_arn           = var.redis_disk_kms_key_arn != null ? var.redis_disk_kms_key_arn : var.default_kms_key_arn
+  disk_kms_key_arn           = var.redis_disk_kms_key_arn != null ? var.redis_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_disk_delete_on_termination != null ? var.redis_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_data_disks
   subnet_ids                 = local.backend_subnet_ids
@@ -54,7 +54,7 @@ module "redis_cache" {
   disk_size                  = coalesce(var.redis_cache_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_cache_disk_type, var.default_disk_type)
   disk_encrypt               = coalesce(var.redis_cache_disk_encrypt, var.default_disk_encrypt)
-  disk_kms_key_arn           = var.redis_cache_disk_kms_key_arn != null ? var.redis_cache_disk_kms_key_arn : var.default_kms_key_arn
+  disk_kms_key_arn           = var.redis_cache_disk_kms_key_arn != null ? var.redis_cache_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_cache_disk_delete_on_termination != null ? var.redis_cache_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_cache_data_disks
   subnet_ids                 = local.backend_subnet_ids
@@ -95,7 +95,7 @@ module "redis_persistent" {
   disk_size                  = coalesce(var.redis_persistent_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_persistent_disk_type, var.default_disk_type)
   disk_encrypt               = coalesce(var.redis_persistent_disk_encrypt, var.default_disk_encrypt)
-  disk_kms_key_arn           = var.redis_persistent_disk_kms_key_arn != null ? var.redis_persistent_disk_kms_key_arn : var.default_kms_key_arn
+  disk_kms_key_arn           = var.redis_persistent_disk_kms_key_arn != null ? var.redis_persistent_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_persistent_disk_delete_on_termination != null ? var.redis_persistent_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_persistent_data_disks
   subnet_ids                 = local.backend_subnet_ids

@@ -54,7 +54,9 @@ resource "aws_instance" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      ami
+      ami,
+      root_block_device[0].encrypted,
+      root_block_device[0].kms_key_id
     ]
   }
 }

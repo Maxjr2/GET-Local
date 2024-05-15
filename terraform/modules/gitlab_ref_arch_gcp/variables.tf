@@ -89,6 +89,10 @@ variable "object_storage_versioning" {
   type        = bool
   default     = false
 }
+variable "object_storage_kms_key" {
+  type    = string
+  default = null
+}
 
 # Machines
 variable "consul_node_count" {
