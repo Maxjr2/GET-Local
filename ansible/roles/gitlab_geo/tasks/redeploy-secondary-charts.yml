@@ -18,23 +18,6 @@
     release_namespace: "{{ gitlab_charts_release_namespace }}"
   register: gitlab_info
 
-- name: Redeploy Secondary Charts - Uninstall GitLab Charts for Cloud Native Hybrid environments
-  become: false
-  delegate_to: localhost
-  run_once: true
-  kubernetes.core.helm:
-    name: gitlab
-    release_state: absent
-    release_namespace: "{{ gitlab_charts_release_namespace }}"
-    wait: true
-  register: result
-  retries: 1
-  delay: 5
-  until: result is success
-  when:
-    - geo_recovery is not defined or not geo_recovery
-    - not geo_secondary_skip_hybrid_redeploy
-
 - name: Redeploy Secondary Charts - Set gitlab_values
   become: false
   delegate_to: localhost
@@ -42,8 +25,7 @@
   set_fact:
     gitlab_values: "{{ item.value }}"
   loop: "{{ lookup('dict', gitlab_info.status) }}"
-  when:
-    - "'values' in item.key"
+  when: "'values' in item.key"
 
 - name: Redeploy Secondary Charts - Update Geo Role from primary to secondary
   become: false
@@ -51,8 +33,7 @@
   run_once: true
   set_fact:
     gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'role': 'secondary' }}}, recursive=True ) }}"
-  when:
-    - geo_recovery is defined and geo_recovery
+  when: geo_recovery is defined and geo_recovery
 
 - name: Redeploy Secondary Charts - Update Registry primary API Url
   become: false
@@ -60,8 +41,15 @@
   run_once: true
   set_fact:
     gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'registry':{'replication':{'primaryApiUrl': geo_primary_registry_url }}}}}, recursive=True ) }}"
-  when:
-    - container_registry_enable
+  when: container_registry_enable
+
+- name: Show charts values if configured
+  become: false
+  delegate_to: localhost
+  run_once: true
+  debug:
+    msg: "{{ gitlab_values }}"
+  when: gitlab_charts_show_values
 
 - name: Redeploy Secondary Charts - Add GitLab Charts repo
   become: false
@@ -73,8 +61,8 @@
 
 - name: Redeploy Secondary Charts - Update GitLab Charts repo
   become: false
-  run_once: true
   delegate_to: localhost
+  run_once: true
   command: "helm repo update {{ gitlab_charts_repo_name }}"
 
 - name: Get GitLab Charts version if App version specified
@@ -101,7 +89,33 @@
     name: gitlab
     chart_ref: gitlab/gitlab
     chart_version: "{{ gitlab_charts_version | default(None) }}"
-    update_repo_cache: true
     release_namespace: "{{ gitlab_charts_release_namespace }}"
-    force: true
     values: "{{ gitlab_values }}"
+  register: helm_install_result
+  failed_when:
+    - (helm_install_result.msg is defined and 'Failure when executing Helm command' in helm_install_result.msg) or
+      ('FAILED' in helm_install_result.stderr)
+
+- name: Restart GitLab deployments to pick up latest secrets
+  become: false
+  delegate_to: localhost
+  run_once: true
+  command: "kubectl rollout restart deployment/{{ item }} -n {{ gitlab_charts_release_namespace }}"
+  loop:
+    - gitlab-webservice-default
+    - gitlab-sidekiq-all-in-1-v2
+    - gitlab-gitlab-shell
+    - gitlab-toolbox
+
+- name: Restart NGinx daemonset to pick up latest secrets
+  become: false
+  delegate_to: localhost
+  run_once: true
+  command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ gitlab_charts_release_namespace }}"
+
+- name: Restart GitLab Registry deployment if present to pick up latest secrets
+  become: false
+  delegate_to: localhost
+  run_once: true
+  command: "kubectl rollout restart deployment/gitlab-registry -n {{ gitlab_charts_release_namespace }}"
+  when: container_registry_enable

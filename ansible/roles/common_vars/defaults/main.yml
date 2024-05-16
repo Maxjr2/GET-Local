@@ -398,8 +398,6 @@ geo_secondary_site_postgres_int_ip: "{{ (groups[geo_secondary_site_postgres_grou
 geo_secondary_postgres_host: ""
 geo_secondary_praefect_postgres_host: ""
 
-geo_secondary_skip_hybrid_redeploy: false
-
 geo_disable_secondary_proxying: false
 geo_enable_object_storage_replication: true
 

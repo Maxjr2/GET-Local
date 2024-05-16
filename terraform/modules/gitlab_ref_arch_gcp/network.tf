@@ -72,3 +72,10 @@ resource "google_service_networking_connection" "gitlab_private_service_access" 
   # https://github.com/hashicorp/terraform-provider-google/issues/16275
   deletion_policy = "ABANDON"
 }
+
+output "network" {
+  value = {
+    "vpc_name"        = local.vpc_name
+    "vpc_subnet_name" = local.subnet_name
+  }
+}
