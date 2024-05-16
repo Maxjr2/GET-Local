@@ -43,7 +43,7 @@ Host machine:
 Target machine(s):
 
 - GitLab version: `14.0.0` and upwards.
-- OS: Ubuntu 20.04 / 22.04, Debian 11, RHEL 8, Amazon Linux 2 / 2023
+- OS: Ubuntu 20.04 / 22.04, Debian 11, RHEL 8 / 9, Amazon Linux 2 / 2023
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.
   - ARM based hardware is supported for Linux package (Omnibus) environments.
