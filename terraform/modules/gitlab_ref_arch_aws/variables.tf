@@ -985,6 +985,10 @@ variable "rds_postgres_maintenance_window" {
   type    = string
   default = null
 }
+variable "rds_postgres_ca_cert_identifier" {
+  type    = string
+  default = null
+}
 variable "rds_postgres_params" {
   description = "Additional RDS parameter group settings"
   type        = map(any)
@@ -1092,6 +1096,10 @@ variable "rds_praefect_postgres_maintenance_window" {
   type    = string
   default = null
 }
+variable "rds_praefect_postgres_ca_cert_identifier" {
+  type    = string
+  default = null
+}
 variable "rds_praefect_postgres_params" {
   description = "Additional RDS Praefect parameter group settings"
   type        = map(any)
@@ -1196,6 +1204,10 @@ variable "rds_geo_tracking_postgres_delete_automated_backups" {
   default = true
 }
 variable "rds_geo_tracking_postgres_maintenance_window" {
+  type    = string
+  default = null
+}
+variable "rds_geo_tracking_postgres_ca_cert_identifier" {
   type    = string
   default = null
 }

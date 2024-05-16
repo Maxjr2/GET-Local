@@ -47,49 +47,51 @@ resource "aws_db_instance" "gitlab_praefect" {
   count = local.rds_praefect_postgres_create ? 1 : 0
 
   identifier     = "${var.prefix}-rds-praefect"
+  instance_class = "db.${var.rds_praefect_postgres_instance_type}"
   engine         = "postgres"
   engine_version = var.rds_praefect_postgres_version
-  instance_class = "db.${var.rds_praefect_postgres_instance_type}"
-  multi_az       = var.rds_praefect_postgres_multi_az
-  storage_type   = var.rds_praefect_postgres_storage_type
-  iops           = var.rds_praefect_postgres_storage_type == "io1" && var.rds_praefect_postgres_iops == null ? 1000 : var.rds_postgres_iops
 
   db_name  = var.rds_praefect_postgres_database_name
-  port     = var.rds_praefect_postgres_port
   username = var.rds_praefect_postgres_username
   password = var.rds_praefect_postgres_password
 
-  iam_database_authentication_enabled = true
+  port     = var.rds_praefect_postgres_port
+  multi_az = var.rds_praefect_postgres_multi_az
 
   db_subnet_group_name = aws_db_subnet_group.gitlab_praefect[0].name
   vpc_security_group_ids = [
     aws_security_group.gitlab_rds_praefect[0].id
   ]
 
-  enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
-  monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
+  ca_cert_identifier = var.rds_praefect_postgres_ca_cert_identifier
 
-  parameter_group_name = aws_db_parameter_group.gitlab_praefect[0].name
-  apply_immediately    = true
-
+  storage_type          = var.rds_praefect_postgres_storage_type
+  iops                  = var.rds_praefect_postgres_storage_type == "io1" && var.rds_praefect_postgres_iops == null ? 1000 : var.rds_postgres_iops
   allocated_storage     = var.rds_praefect_postgres_allocated_storage
   max_allocated_storage = var.rds_praefect_postgres_max_allocated_storage
   storage_encrypted     = true
   kms_key_id            = coalesce(var.rds_praefect_postgres_kms_key_arn, var.default_kms_key_arn, try(data.aws_kms_key.aws_praefect_rds[0].arn, null))
 
-  backup_window           = var.rds_praefect_postgres_backup_window
-  backup_retention_period = var.rds_praefect_postgres_backup_retention_period
-  maintenance_window      = var.rds_praefect_postgres_maintenance_window
+  parameter_group_name = aws_db_parameter_group.gitlab_praefect[0].name
+  apply_immediately    = true
 
   allow_major_version_upgrade = true
   auto_minor_version_upgrade  = var.rds_praefect_postgres_auto_minor_version_upgrade
 
-  skip_final_snapshot = true
+  iam_database_authentication_enabled = true
 
+  backup_window            = var.rds_praefect_postgres_backup_window
+  backup_retention_period  = var.rds_praefect_postgres_backup_retention_period
   delete_automated_backups = var.rds_praefect_postgres_delete_automated_backups
+  maintenance_window       = var.rds_praefect_postgres_maintenance_window
 
+  skip_final_snapshot   = true
   copy_tags_to_snapshot = true
-  tags                  = var.rds_praefect_postgres_tags
+
+  enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
+
+  tags = var.rds_praefect_postgres_tags
 
   lifecycle {
     ignore_changes = [
@@ -104,8 +106,6 @@ resource "aws_db_instance" "gitlab_praefect_read_replica" {
 
   identifier     = "${format("%.38s", var.prefix)}-rds-praefect-read-rep-${count.index + 1}"
   instance_class = aws_db_instance.gitlab_praefect[0].instance_class
-  iops           = aws_db_instance.gitlab_praefect[0].iops
-  storage_type   = aws_db_instance.gitlab_praefect[0].storage_type
 
   port     = var.rds_praefect_postgres_read_replica_port
   multi_az = var.rds_praefect_postgres_read_replica_multi_az
@@ -114,25 +114,30 @@ resource "aws_db_instance" "gitlab_praefect_read_replica" {
     aws_security_group.gitlab_rds_praefect[0].id
   ]
 
-  enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
-  monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
+  ca_cert_identifier = var.rds_praefect_postgres_ca_cert_identifier
 
-  iam_database_authentication_enabled = aws_db_instance.gitlab_praefect[0].iam_database_authentication_enabled
+  storage_type          = aws_db_instance.gitlab_praefect[0].storage_type
+  iops                  = aws_db_instance.gitlab_praefect[0].iops
+  max_allocated_storage = aws_db_instance.gitlab_praefect[0].max_allocated_storage
+  storage_encrypted     = true
+  kms_key_id            = aws_db_instance.gitlab_praefect[0].kms_key_id
 
   parameter_group_name = aws_db_parameter_group.gitlab_praefect[0].name
   replicate_source_db  = aws_db_instance.gitlab_praefect[0].identifier
   apply_immediately    = true
 
-  max_allocated_storage = aws_db_instance.gitlab_praefect[0].max_allocated_storage
-  storage_encrypted     = true
-  kms_key_id            = aws_db_instance.gitlab_praefect[0].kms_key_id
-
   allow_major_version_upgrade = aws_db_instance.gitlab_praefect[0].allow_major_version_upgrade
   auto_minor_version_upgrade  = aws_db_instance.gitlab_praefect[0].auto_minor_version_upgrade
 
-  skip_final_snapshot     = true
-  copy_tags_to_snapshot   = true
+  iam_database_authentication_enabled = aws_db_instance.gitlab_praefect[0].iam_database_authentication_enabled
+
   backup_retention_period = 0
+
+  skip_final_snapshot   = true
+  copy_tags_to_snapshot = true
+
+  enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
 
   tags = var.rds_praefect_postgres_tags
 
@@ -153,6 +158,7 @@ output "rds_praefect_postgres_connection" {
     "rds_praefect_database_arn"       = try(aws_db_instance.gitlab_praefect[0].arn, "")
     "rds_praefect_kms_key_arn"        = try(aws_db_instance.gitlab_praefect[0].kms_key_id, "")
     "rds_praefect_version"            = try(aws_db_instance.gitlab_praefect[0].engine_version_actual, "")
+    "rds_praefect_ca_cert_identifier" = try(aws_db_instance.gitlab_praefect[0].ca_cert_identifier, "")
     "rds_praefect_read_replica_hosts" = try(aws_db_instance.gitlab_praefect_read_replica[*].address, "")
   }
 }
