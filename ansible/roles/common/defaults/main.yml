@@ -12,7 +12,7 @@ system_packages_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_UPGRADE') | default(f
 system_packages_autoremove: "{{ lookup('env','SYSTEM_PACKAGES_AUTOREMOVE') | default(false, true) }}"
 system_packages_auto_security_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_AUTO_SECURITY_UPGRADE') | default(true, true) }}"
 
-# Python packages must target Python 3.6 for OS compatibility (RHEL 8) and be compatible with any OS installed Python packages
+# Python packages must target Python 3.6 for OS compatibility (RHEL 8 / 9) and be compatible with any OS installed Python packages
 python_packages: [google-auth==2.22.0, netaddr==0.8.0, PyYAML==6.0.1, docker==5.0.3, pexpect==4.8.0, psycopg2==2.9.8]
 
 # Secrets
