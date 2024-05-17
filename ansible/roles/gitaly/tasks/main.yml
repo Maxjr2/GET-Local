@@ -21,7 +21,7 @@
       template:
         src: "{{ gitaly_custom_config_file }}"
         dest: "/etc/gitlab/gitlab.gitaly.custom.rb"
-        mode: "0644"
+        mode: '0600'
       when: gitaly_custom_config_file_path.stat.exists
 
     - name: Remove old Custom Config if not configured
@@ -127,7 +127,7 @@
   file:
     path: /etc/gitlab/skip-auto-reconfigure
     state: touch
-    mode: u=rw,g=r,o=r
+    mode: '0644'
 
 - name: Run Custom Tasks
   block:

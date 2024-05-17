@@ -134,7 +134,7 @@
       template:
         src: "{{ gitlab_rails_custom_config_file }}"
         dest: "/etc/gitlab/gitlab.gitlab_rails.custom.rb"
-        mode: "0644"
+        mode: '0600'
       tags:
         - reconfigure
         - db_migrate
@@ -163,7 +163,7 @@
   template:
     src: "{{ gitlab_rails_custom_config_file }}"
     dest: "/etc/gitlab/gitlab.gitlab_rails.custom.rb"
-    mode: "0644"
+    mode: '0600'
   when: gitlab_rails_custom_config_file_path.stat.exists
   tags: reconfigure
 
@@ -286,7 +286,7 @@
   file:
     path: /etc/gitlab/skip-auto-reconfigure
     state: touch
-    mode: u=rw,g=r,o=r
+    mode: '0644'
 
 - name: Run Custom Tasks
   block:
