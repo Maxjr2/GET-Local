@@ -111,7 +111,7 @@ Setting up common files is straightforward. All that's required is for you to ha
 
 1. Place the files you wish to be copied for each component node group in a location that's reachable by Ansible. Similar to Custom Tasks we recommend you place your files or folder in the inventory under the `files/` folder, E.G. `ansible/environments/<env_name>/files/<component>/`.
 1. Configure Ansible to copy the files and where to via the `*_custom_files_paths` setting (see structure below) in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file.
-    - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
+    - Available component options: `common`, `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
 
 :information_source:&nbsp; Files are always copied before any components are configured.
 
