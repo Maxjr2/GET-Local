@@ -351,6 +351,7 @@ uninstall_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/uninsta
 
 ## Custom Files
 
+common_custom_files_paths: []
 consul_custom_files_paths: []
 postgres_custom_files_paths: []
 pgbouncer_custom_files_paths: []

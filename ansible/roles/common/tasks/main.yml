@@ -287,6 +287,14 @@
       when: omnibus_node
       tags: reconfigure
 
+    - name: Copy over any Custom Files
+      copy:
+        src: "{{ item.src_path }}"
+        dest: "{{ item.dest_path }}"
+        mode: "{{ item.mode if item.mode is defined else 'preserve' }}"
+      loop: "{{ common_custom_files_paths }}"
+      tags: reconfigure
+
     - name: Run Custom Tasks
       block:
         - name: Check if Custom Tasks file exists
