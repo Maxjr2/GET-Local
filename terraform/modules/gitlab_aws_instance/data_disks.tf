@@ -44,6 +44,7 @@ resource "aws_ebs_volume" "gitlab" {
 
   lifecycle {
     ignore_changes = [
+      availability_zone,
       encrypted,
       kms_key_id
     ]
