@@ -171,34 +171,41 @@ global:
 {% if 'artifacts' in gitlab_object_storage_list %}
     artifacts:
       bucket: "{{ gitlab_object_storage_bucket_names['artifacts'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'lfs' in gitlab_object_storage_list %}
     lfs:
       bucket: "{{ gitlab_object_storage_bucket_names['lfs'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'packages' in gitlab_object_storage_list %}
     packages:
       bucket: "{{ gitlab_object_storage_bucket_names['packages'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'uploads' in gitlab_object_storage_list %}
     uploads:
       bucket: "{{ gitlab_object_storage_bucket_names['uploads'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'external_diffs' in gitlab_object_storage_list %}
     externalDiffs:
       enabled: true
       bucket: "{{ gitlab_object_storage_bucket_names['external_diffs'] }}"
       when: outdated
+      proxy_download: false
 {% endif %}
 {% if 'dependency_proxy' in gitlab_object_storage_list %}
     dependencyProxy:
       enabled: true
       bucket: "{{ gitlab_object_storage_bucket_names['dependency_proxy'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'terraform_state' in gitlab_object_storage_list %}
     terraformState:
       enabled: true
       bucket: "{{ gitlab_object_storage_bucket_names['terraform_state'] }}"
+      proxy_download: false
 {% endif %}
 {% if 'ci_secure_files' in gitlab_object_storage_list and (gitlab_version == '' or gitlab_version is version('15.7', '>=')) %}
     ciSecureFiles:
