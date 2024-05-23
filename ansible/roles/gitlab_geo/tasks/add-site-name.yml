@@ -23,7 +23,7 @@
       delegate_to: localhost
       run_once: true
       kubernetes.core.k8s_exec:
-        pod: "{{ task_runner_pod }}"
+        pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "n = GeoNode.find_or_initialize_by(name: '{{ geo_secondary_site_name }}'); n.assign_attributes(url: '{{geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}'); n.save!"

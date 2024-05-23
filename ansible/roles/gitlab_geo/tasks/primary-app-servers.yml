@@ -39,7 +39,7 @@
       run_once: true
       register: result
       kubernetes.core.k8s_exec:
-        pod: "{{ task_runner_pod }}"
+        pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: gitlab-rake geo:set_primary_node
       failed_when:
@@ -51,7 +51,7 @@
       delegate_to: localhost
       run_once: true
       kubernetes.core.k8s_exec:
-        pod: "{{ task_runner_pod }}"
+        pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "GeoNode.find_by(name: '{{ geo_primary_site_name }}').update(internal_url: '{{ geo_primary_internal_url }}')"
