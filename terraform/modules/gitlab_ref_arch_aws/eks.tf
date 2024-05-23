@@ -215,12 +215,13 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
   }, var.additional_tags)
 
-  # Ensure that IAM Role policies and Addons are created beforehand as required by Node Pool
+  # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
     aws_iam_role_policy_attachment.gitlab_eks_node_role_node_policy,
     aws_iam_role_policy_attachment.gitlab_eks_node_role_ec2_container_registry_read_only_policy,
     aws_eks_addon.kube_proxy,
     aws_eks_addon.vpc_cni,
+    aws_nat_gateway.gitlab_vpc_sn_priv_ng,
   ]
 
   lifecycle {
@@ -320,13 +321,13 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
   }, var.additional_tags)
-
-  # Ensure that IAM Role policies and Addons are created beforehand as required by Node Pool
+  # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
     aws_iam_role_policy_attachment.gitlab_eks_node_role_node_policy,
     aws_iam_role_policy_attachment.gitlab_eks_node_role_ec2_container_registry_read_only_policy,
     aws_eks_addon.kube_proxy,
     aws_eks_addon.vpc_cni,
+    aws_nat_gateway.gitlab_vpc_sn_priv_ng,
   ]
 
   lifecycle {
@@ -427,12 +428,13 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
   }, var.additional_tags)
 
-  # Ensure that IAM Role policies and Addons are created beforehand as required by Node Pool
+  # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
     aws_iam_role_policy_attachment.gitlab_eks_node_role_node_policy,
     aws_iam_role_policy_attachment.gitlab_eks_node_role_ec2_container_registry_read_only_policy,
     aws_eks_addon.kube_proxy,
     aws_eks_addon.vpc_cni,
+    aws_nat_gateway.gitlab_vpc_sn_priv_ng,
   ]
 
   lifecycle {
@@ -538,9 +540,12 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
-  # Ensure that OpenID provider is created beforehand as required by addon
+  # Ensure that OpenID provider and Node Pools are created beforehand as required by addon
   depends_on = [
-    aws_iam_openid_connect_provider.gitlab_cluster_openid
+    aws_iam_openid_connect_provider.gitlab_cluster_openid,
+    aws_eks_node_group.gitlab_webservice_pool,
+    aws_eks_node_group.gitlab_sidekiq_pool,
+    aws_eks_node_group.gitlab_supporting_pool,
   ]
 }
 
