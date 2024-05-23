@@ -3,5 +3,6 @@
 
 - hosts: postgres
   become: true
+  gather_facts: false
   roles:
     - postgres

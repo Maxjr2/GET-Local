@@ -1,6 +1,5 @@
 ---
-- import_playbook: playbook_prep.yml
-
 - hosts: localhost
+  gather_facts: false
   roles:
     - post_configure

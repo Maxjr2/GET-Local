@@ -2,6 +2,7 @@
 - import_playbook: playbook_prep.yml
 
 - hosts: praefect_postgres
+  become: true
+  gather_facts: false
   roles:
     - praefect_postgres
-  become: true

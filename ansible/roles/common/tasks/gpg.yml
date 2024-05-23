@@ -1,6 +1,5 @@
 ---
 # Update GPG keys
-
 - name: Install gnupg (Debian)
   apt:
     name: "gnupg"

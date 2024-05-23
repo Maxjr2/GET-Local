@@ -68,40 +68,6 @@
         timeout: 60
   when: advanced_search_clean_install | bool
 
-- name: Get and save Environment Settings
-  block:
-    - name: Get and save Environment Settings via GitLab Rails
-      command: |
-        gitlab-rails runner 'print ApplicationSetting.last.attributes.select {|k,v| !k.include?("encrypted") }.to_json'
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
-      delegate_facts: true
-      become: true
-      register: env_settings_response_rails
-      when: "'gitlab_rails' in groups"
-
-    - name: Save Environment Settings
-      set_fact:
-        gitlab_environment_settings: '{{ env_settings_response_rails.stdout | from_json }}'
-      when: "'gitlab_rails' in groups"
-
-    - name: Get and save Environment Settings via GitLab Toolbox pod
-      kubernetes.core.k8s_exec:
-        pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
-        command: |
-          gitlab-rails runner 'print ApplicationSetting.last.attributes.select {|k,v| !k.include?("encrypted") }.to_json'
-      register: env_settings_response_pod
-      when:
-        - toolbox_pod is defined
-        - "'gitlab_rails' not in groups"
-
-    - name: Save Environment Settings
-      set_fact:
-        gitlab_environment_settings: '{{ env_settings_response_pod.stdout | from_json }}'
-      when:
-        - toolbox_pod is defined
-        - "'gitlab_rails' not in groups"
-
 - name: Configure Advanced Search Indexing and URL setting
   block:
     - name: Enable GitLab Advanced Search indexing setting via GitLab Rails
@@ -139,7 +105,9 @@
     - name: Pause for 60 secs to allow Sidekiq caches to be updated
       wait_for:
         timeout: 60
-  when: gitlab_environment_settings.elasticsearch_url != (advanced_search_hosts | join(',')) or not gitlab_environment_settings.elasticsearch_indexing
+  when: (gitlab_environment_settings.elasticsearch_url != (advanced_search_hosts | join(',')) or
+        not gitlab_environment_settings.elasticsearch_indexing) or
+        advanced_search_clean_install | bool
 
 - name: Perform Advanced Search Indexing
   block:
@@ -187,41 +155,8 @@
             - toolbox_pod is defined
             - "'gitlab_rails' not in groups"
       when: advanced_search_enable | bool
-  when: not gitlab_environment_settings.elasticsearch_indexing
-
-- name: Get and save Environment Settings
-  block:
-    - name: Get and save Environment Settings via GitLab Rails
-      command: |
-        gitlab-rails runner 'print ApplicationSetting.last.attributes.select {|k,v| !k.include?("encrypted") }.to_json'
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
-      delegate_facts: true
-      become: true
-      register: env_settings_response
-      when: "'gitlab_rails' in groups"
-
-    - name: Save Environment Settings
-      set_fact:
-        gitlab_environment_settings: '{{ env_settings_response_rails.stdout | from_json }}'
-      when: "'gitlab_rails' in groups"
-
-    - name: Get and save Environment Settings via GitLab Toolbox pod
-      kubernetes.core.k8s_exec:
-        pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
-        command: |
-          gitlab-rails runner 'print ApplicationSetting.last.attributes.select {|k,v| !k.include?("encrypted") }.to_json'
-      register: env_settings_response_pod
-      when:
-        - toolbox_pod is defined
-        - "'gitlab_rails' not in groups"
-
-    - name: Save Environment Settings
-      set_fact:
-        gitlab_environment_settings: '{{ env_settings_response_pod.stdout | from_json }}'
-      when:
-        - toolbox_pod is defined
-        - "'gitlab_rails' not in groups"
+  when: not gitlab_environment_settings.elasticsearch_indexing or
+        advanced_search_clean_install | bool
 
 - name: Enable Advanced Search
   block:
@@ -242,4 +177,5 @@
         - "'gitlab_rails' not in groups"
   when:
     - advanced_search_enable | bool
-    - not gitlab_environment_settings.elasticsearch_search
+    - not gitlab_environment_settings.elasticsearch_search or
+      advanced_search_clean_install | bool

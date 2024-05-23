@@ -5,6 +5,7 @@
     - redis
     - redis_cache_*
     - redis_persistent_*
+  become: true
+  gather_facts: false
   roles:
     - redis
-  become: true

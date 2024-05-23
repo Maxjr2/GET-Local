@@ -2,6 +2,7 @@
 - import_playbook: playbook_prep.yml
 
 - hosts: opensearch
+  become: true
+  gather_facts: false
   roles:
     - opensearch
-  become: true

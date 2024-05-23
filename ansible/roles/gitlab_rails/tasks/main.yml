@@ -116,7 +116,7 @@
   tags:
     - reconfigure
     - db_migrate
-    - postgres_external
+    - postgres_external_prep
 
 - name: Run Database Migrations
   block:

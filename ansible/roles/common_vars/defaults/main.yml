@@ -8,6 +8,8 @@ internal_cidr_16: "{{ (ansible_default_ipv4.address + '/16') | ansible.utils.ipa
 inventory_dir_failsafe: "{{ (ansible_inventory_sources[0] | dirname) if ansible_inventory_sources[0] is search('.ini|.yml|.yaml') else ansible_inventory_sources[0] }}"
 inventory_path: "{{ inventory_dir | default(inventory_dir_failsafe, true) }}"
 
+ansible_facts_gathered: false
+
 ################################################################################
 ## Cloud Provider Settings
 ################################################################################

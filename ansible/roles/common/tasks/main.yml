@@ -1,11 +1,27 @@
 ---
 - name: Perform Common Tasks
   block:
-    - name: Populate service facts
-      service_facts:
+    - name: Gather facts (common)
+      block:
+        - name: Gather facts (common)
+          setup:
 
-    - name: Populate package facts
-      package_facts:
+        - name: Mark facts gathered
+          set_fact:
+            ansible_facts_gathered: true
+      when: not ansible_facts_gathered
+      tags: always
+
+    - name: Gather other facts (common)
+      block:
+        - name: Gather service facts (common)
+          service_facts:
+          when: ansible_facts.services is not defined
+
+        - name: Gather package facts (common)
+          package_facts:
+          when: ansible_facts.packages is not defined
+      tags: always
 
     - name: Set Internal Hostname to match inventory
       hostname:
@@ -13,7 +29,9 @@
       when:
         - cloud_provider == 'aws'
         - ansible_hostname != inventory_hostname
-      tags: hostname
+      tags:
+        - hostname
+        - common_prep
 
     - name: Check if GitLab repository exists
       stat:
@@ -23,16 +41,18 @@
 
     - name: Configure GitLab repository GPG key
       import_tasks: gpg.yml
-      tags: gpg
       when:
         - omnibus_node
         - gitlab_repo_file.stat.exists
         - not offline_setup
+      tags:
+        - gpg
+        - common_prep
 
     - name: Setup Packages
       import_tasks: packages_setup.yml
-      tags: packages
       when: not offline_setup
+      tags: packages
 
     # https://about.gitlab.com/blog/2019/11/15/tracking-down-missing-tcp-keepalives/
     - name: Configure TCP keepalive settings
@@ -42,7 +62,9 @@
         sysctl_set: true
         state: present
         reload: true
-      tags: sysctl
+      tags:
+        - sysctl
+        - common_prep
 
     - name: Mount any data disks
       block:
@@ -55,7 +77,9 @@
           import_tasks: data_disks.yml
           when: group_data_disks | length > 0
       when: cloud_provider != 'none'
-      tags: data_disks
+      tags:
+        - data_disks
+        - common_prep
 
     # Create select GitLab folders if missing. Allows for setup before reconfigure.
     - name: Create select GitLab dirs if missing
@@ -70,7 +94,9 @@
         - { path: '/etc/gitlab/ssl', mode: '0755' }
         - { path: '/etc/gitlab/trusted-certs', mode: '0755' }
       when: omnibus_node
-      tags: reconfigure
+      tags:
+        - reconfigure
+        - common_prep
 
     # Workaround for https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6364
     - name: Create skip-unmigrated-data-check file
@@ -78,13 +104,17 @@
         path: /etc/gitlab/skip-unmigrated-data-check
         state: touch
       when: omnibus_node
-      tags: reconfigure
+      tags:
+        - reconfigure
+        - common_prep
 
     - name: Get GitLab json config file stats if it exists
       stat:
         path: "/opt/gitlab/embedded/nodes/{{ ansible_fqdn }}.json"
       register: gitlab_json_config_file
-      tags: reconfigure
+      tags:
+        - reconfigure
+        - common_prep
 
     - name: Delete GitLab json config file if malformed
       file:
@@ -93,7 +123,9 @@
       when:
         - gitlab_json_config_file.stat.exists
         - gitlab_json_config_file.stat.size < 500
-      tags: reconfigure
+      tags:
+        - reconfigure
+        - common_prep
 
     - name: Unlock GitLab package installs
       command: "{{ 'yum versionlock delete' if ansible_facts['os_family'] == 'RedHat' else 'aptitude unhold' }} {{ gitlab_edition }}"
@@ -106,7 +138,7 @@
         - ('no matches' not in result.stderr)
       when:
         - omnibus_node
-        - "'gitlab-ee' in packages"
+        - "'gitlab-ee' in ansible_facts.packages"
 
     - name: Install GitLab package via repo if configured
       block:
@@ -256,12 +288,15 @@
             name: sshguard
             state: restarted
           when: sshguard_whitelist.changed
-      when: "'sshguard' in services"
+      when: "'sshguard' in ansible_facts.services"
+      tags:
+        - reconfigure
+        - common_prep
 
     - name: Upgrade Packages
       import_tasks: packages_upgrade.yml
-      tags: packages
       when: not offline_setup
+      tags: packages
 
     - name: Configure Custom Config
       block:

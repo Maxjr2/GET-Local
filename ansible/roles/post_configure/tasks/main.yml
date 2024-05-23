@@ -25,51 +25,22 @@
           delegate_to: localhost
           run_once: true
 
-    - name: Check for Toolbox Deployment
-      kubernetes.core.k8s_info:
-        kind: Deployment
-        label_selectors:
-          - app in (task-runner, toolbox)
-      register: toolbox_deployment_list
+    - name: Check Toolbox Deployment & Pod is ready
+      shell: |
+        kubectl wait --for=condition=available --timeout=360s deployment/gitlab-toolbox -n {{ gitlab_charts_release_namespace }}
+        kubectl wait --for=condition=ready --timeout=360s pod -l app=toolbox -n {{ gitlab_charts_release_namespace }}
 
-    - name: Save Toolbox deployment name
-      set_fact:
-        toolbox_deployment: "{{ toolbox_deployment_list | json_query('resources[0].metadata.name') }}"
-      when: toolbox_deployment_list.resources | length != 0
-
-    - name: Wait for Toolbox deployment to become ready
-      kubernetes.core.k8s_info:
-        kind: Deployment
-        name: "{{ toolbox_deployment }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
-        wait: true
-        wait_condition:
-          type: Available
-          status: "True"
-        wait_timeout: 360
-
-    - name: Check for Toolbox pods
+    - name: Retrieve Toolbox pod details
       kubernetes.core.k8s_info:
         kind: Pod
         label_selectors:
-          - app in (task-runner, toolbox)
+          - app=toolbox
       register: toolbox_pod_list
 
     - name: Save Toolbox pod name
       set_fact:
         toolbox_pod: "{{ toolbox_pod_list | json_query('resources[0].metadata.name') }}"
       when: toolbox_pod_list.resources | length != 0
-
-    - name: Wait for Toolbox pod to become ready
-      kubernetes.core.k8s_info:
-        kind: Pod
-        name: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
-        wait: true
-        wait_condition:
-          type: Ready
-          status: "True"
-        wait_timeout: 360
   when:
     - cloud_native_hybrid_environment
     - "'gitlab_rails' not in groups"
@@ -78,11 +49,57 @@
     - reconfigure
     - opensearch
 
+- name: Get and save Environment Settings and License details
+  block:
+    - name: Get and save Environment Settings and License plan via GitLab Rails
+      command: |
+        gitlab-rails runner "
+          env_settings = ApplicationSetting.last.attributes.select {|k,v| !k.include?('encrypted') }
+          env_settings['current_license_plan'] = License.current&.plan
+
+          print env_settings.to_json
+        "
+      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_facts: true
+      become: true
+      register: env_settings_response_rails
+      when: "'gitlab_rails' in groups"
+
+    - name: Save Environment Settings
+      set_fact:
+        gitlab_environment_settings: '{{ env_settings_response_rails.stdout | from_json }}'
+      when: "'gitlab_rails' in groups"
+
+    - name: Get and save Environment Settings and License plan via GitLab Toolbox pod
+      kubernetes.core.k8s_exec:
+        pod: "{{ toolbox_pod }}"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          gitlab-rails runner "
+            env_settings = ApplicationSetting.last.attributes.select {|k,v| !k.include?('encrypted') }
+            env_settings['current_license_plan'] = License.current&.plan
+
+            print env_settings.to_json
+          "
+      register: env_settings_response_pod
+      when:
+        - toolbox_pod is defined
+        - "'gitlab_rails' not in groups"
+
+    - name: Save Environment Settings
+      set_fact:
+        gitlab_environment_settings: '{{ env_settings_response_pod.stdout | from_json }}'
+      when:
+        - toolbox_pod is defined
+        - "'gitlab_rails' not in groups"
+
 - name: Perform GitLab post configuration
   block:
     - name: Configure License
       import_tasks: license.yml
-      when: gitlab_license_plan is not defined
+      when:
+        - gitlab_environment_settings.current_license_plan not in ['premium', 'ultimate']
+        - gitlab_edition != 'gitlab-ce'
       tags:
         - license
         - opensearch
@@ -95,7 +112,8 @@
       import_tasks: advanced_search.yml
       when:
         - ('opensearch' in groups or advanced_search_external)
-        - gitlab_license_plan != '' and gitlab_license_plan in ['premium', 'ultimate']
+        - gitlab_environment_settings.current_license_plan in ['premium', 'ultimate']
+        - gitlab_edition != 'gitlab-ce'
       tags: opensearch
 
 - name: Run Custom Tasks
