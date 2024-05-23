@@ -23,7 +23,7 @@
       delegate_to: localhost
       run_once: true
       kubernetes.core.k8s_exec:
-        pod: "{{ task_runner_pod }}"
+        pod: "{{ toolbox_pod }}"
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: |
           gitlab-rails runner "GeoNode.secondary_nodes.each { |n| n.update(sync_object_storage: true) }"

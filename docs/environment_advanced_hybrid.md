@@ -181,15 +181,15 @@ For more information refer to the [GCP documentation](https://cloud.google.com/k
 
 #### GKE Workload Identity
 
-[GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) can optionally be configured with the Toolkit. This is to allow deployments to authenticate directly via their own [Service Accounts](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts) to GCP services instead of using node accounts as a further security best practice.
+:information_source:&nbsp; GKE Workload Identity is only supported from GitLab `17.0`.
 
-:information_source:&nbsp; GKE Workload Identity is only supported from GitLab 17.0.
+[GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) can optionally be configured with the Toolkit. This is to allow deployments to authenticate directly via their own [Service Accounts](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts) to GCP services instead of using node accounts as a further security best practice.
 
 Enabling Workload Identity will instruct the Toolkit to not only enable that option on the Cluster but to also create all the required GCP Service Accounts for the nodes and specific workloads respectively. This can be done in Terraform via the following setting in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
 - `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to deployments to authenticate directly via their own service accounts. Optional, default is `false`.
 
-:information_source:&nbsp; If enabling this setting for an existing cluster note that a subsequent Ansible run will be required with the [`gcp_gke_workload_identity_setup` variable](#google-cloud-platform-gcp-1) enabled to ensure the new configuration is being used.
+:information_source:&nbsp; [Subsequent configuration via Ansible](#google-cloud-platform-gcp-1) will be required to configure Workload Identity fully. Namely, the `gcp_gke_workload_identity_setup` variable will need to be set as well as the `gcp_service_account_prefix` setting if [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) has been changed.
 
 ##### GitLab Chart Namespace
 
@@ -199,13 +199,15 @@ However, if using GKE Workload Identity, Terraform also needs to be aware of the
 
 As such, if you do choose to change the namespace for GitLab components you should change both the `gke_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
 
-#### GKE Toolbox Backups - Service Account Key
+#### GKE Toolbox Backups - Service Account Key (<`17.0`)
 
 With a Cloud Native Hybrid environment, [GitLab backups are taken via the Charts Toolbox pod](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
 
-When running on GKE an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
+:information_source:&nbsp; For GitLab version `17.0` and higher, [Application Default Credentials](https://docs.gitlab.com/charts/advanced/external-object-storage/#backups) are used by default and no further configuration will be required.
 
-The Service Account requires the `roles/storage.objectAdmin` role to be given for each of the Object Storage Buckets to be used. The Toolkit creates a role for this purpose already with the suffix `-gke-supporting` so creating the account is not required. However, as Service Account keys are sensitive credential files the Toolkit doesn't generate the key specifically. As such, one manual step that is required is to [generate a key](https://cloud.google.com/iam/docs/keys-create-delete) for this account and pass it accordingly to Ansible.
+For GitLab versions lower than `17.0`, an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
+
+The Service Account requires the `roles/storage.objectAdmin` role to be given for each of the Object Storage Buckets to be used. The Toolkit creates a role for this purpose already with the suffix `-gke-supporting` so creating the account is not required. However, as Service Account keys are sensitive credential files the Toolkit doesn't generate the key specifically. As such, one manual step that is required in this scenario is to [generate a key](https://cloud.google.com/iam/docs/keys-create-delete) for this account and pass it accordingly to Ansible.
 
 There are two options available to pass the key to Ansible to be subsequently configured, either by passing the json string directly or the location of the keyfile on the disk of the Ansible host. For both approaches this is configured in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) as follows:
 
