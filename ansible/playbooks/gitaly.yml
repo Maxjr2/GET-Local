@@ -2,6 +2,7 @@
 - import_playbook: playbook_prep.yml
 
 - hosts: gitaly
+  become: true
+  gather_facts: false
   roles:
     - gitaly
-  become: true

@@ -1,5 +1,6 @@
 ---
 - hosts: all:!gitlab_*_node_pool:!ungrouped
+  become: true
+  gather_facts: false
   roles:
     - common
-  become: true

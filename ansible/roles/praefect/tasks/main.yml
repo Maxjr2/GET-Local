@@ -89,7 +89,7 @@
   tags:
     - reconfigure
     - db_migrate
-    - postgres_external
+    - postgres_external_prep
 
 - name: Perform database migrations
   block:

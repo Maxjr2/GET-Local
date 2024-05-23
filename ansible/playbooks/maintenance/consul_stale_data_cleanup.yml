@@ -1,0 +1,13 @@
+---
+# Remove stale Consul data caused by server_rejoin_age_max
+# https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8378
+- hosts: consul
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Remove stale Consul data
+      file:
+        path: /var/opt/gitlab/consul/data
+        state: absent

@@ -3,5 +3,6 @@
 
 - hosts: gitlab_rails
   become: true
+  gather_facts: false
   roles:
     - gitlab_rails

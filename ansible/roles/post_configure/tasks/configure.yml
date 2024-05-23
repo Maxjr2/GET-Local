@@ -13,9 +13,36 @@
         namespace: "{{ gitlab_charts_release_namespace }}"
         command: "gitlab-rails runner 'ApplicationSetting.last.update(authorized_keys_enabled: false)'"
       register: result
-      retries: 24
+      retries: 3
       delay: 5
       until: result is success
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"
+  when: gitlab_environment_settings.authorized_keys_enabled
+
+- name: Enable 'gitlab_environment_toolkit_instance' setting
+  block:
+    - name: Enable 'gitlab_environment_toolkit_instance' setting via GitLab Rails
+      command: "gitlab-rails runner 'ApplicationSetting.last.update(gitlab_environment_toolkit_instance: true)'"
+      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_facts: true
+      become: true
+      when: "'gitlab_rails' in groups"
+
+    - name: Enable 'gitlab_environment_toolkit_instance' setting via GitLab Toolbox pod
+      kubernetes.core.k8s_exec:
+        pod: "{{ toolbox_pod }}"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: "gitlab-rails runner 'ApplicationSetting.last.update(gitlab_environment_toolkit_instance: true)'"
+      register: result
+      retries: 3
+      delay: 5
+      until: result is success
+      when:
+        - toolbox_pod is defined
+        - "'gitlab_rails' not in groups"
+  when:
+    - gitlab_version == '' or gitlab_version is version('17.0', '>=')
+    - gitlab_environment_settings.gitlab_environment_toolkit_instance is defined and
+      not gitlab_environment_settings.gitlab_environment_toolkit_instance

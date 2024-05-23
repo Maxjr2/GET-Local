@@ -26,7 +26,7 @@
 
     - name: Save license plan
       set_fact:
-        gitlab_license_plan: "{{ configure_license_response.stdout }}"
+        gitlab_environment_settings: "{{ gitlab_environment_settings | combine( { 'current_license_plan': configure_license_response.stdout }, recursive=True ) }}"
   when: "'gitlab_rails' in groups"
   tags: license
 
@@ -58,7 +58,7 @@
 
     - name: Save license plan
       set_fact:
-        gitlab_license_plan: "{{ configure_license_response.stdout }}"
+        gitlab_environment_settings: "{{ gitlab_environment_settings | combine( { 'current_license_plan': configure_license_response.stdout }, recursive=True ) }}"
   when:
     - toolbox_pod is defined
     - "'gitlab_rails' not in groups"

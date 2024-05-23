@@ -2,5 +2,6 @@
 - import_playbook: playbook_prep.yml
 
 - hosts: localhost
+  gather_facts: false
   roles:
     - { role: gitlab_charts, when: "cloud_native_hybrid_environment" }

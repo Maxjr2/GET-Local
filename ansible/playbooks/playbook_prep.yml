@@ -2,10 +2,22 @@
 # For individual playbooks against specific hosts that require information from others
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
+  gather_facts: false
   order: sorted
   roles:
     - common_vars
   tasks:
+    - name: Gather facts (playbook_prep)
+      block:
+        - name: Gather facts (playbook_prep)
+          setup:
+
+        - name: Mark facts gathered
+          set_fact:
+            ansible_facts_gathered: true
+      tags: always
+      when: not ansible_facts_gathered
+
     - name: Load Secrets if existing
       include_role:
         name: common

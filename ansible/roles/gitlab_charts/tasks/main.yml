@@ -117,22 +117,11 @@
   tags:
     - reconfigure
     - db_migrate
-    - postgres_external
+    - postgres_external_prep
   run_once: true
 
 - name: Calculate Pod Counts based on Environment size
   block:
-    - name: Gather Gitaly group facts
-      setup:
-        filter: ansible_processor_vcpus
-      register: result
-      retries: 3
-      delay: 2
-      until: result is success
-      delegate_to: "{{ item }}"
-      delegate_facts: true
-      with_items: "{{ groups['gitaly'] }}"
-
     - name: Get Gitaly CPU count
       set_fact:
         gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
