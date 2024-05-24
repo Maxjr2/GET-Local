@@ -989,6 +989,10 @@ variable "rds_postgres_ca_cert_identifier" {
   type    = string
   default = null
 }
+variable "rds_postgres_iam_database_authentication_enabled" {
+  type    = bool
+  default = true
+}
 variable "rds_postgres_params" {
   description = "Additional RDS parameter group settings"
   type        = map(any)
@@ -1100,6 +1104,10 @@ variable "rds_praefect_postgres_ca_cert_identifier" {
   type    = string
   default = null
 }
+variable "rds_praefect_postgres_iam_database_authentication_enabled" {
+  type    = bool
+  default = true
+}
 variable "rds_praefect_postgres_params" {
   description = "Additional RDS Praefect parameter group settings"
   type        = map(any)
@@ -1210,6 +1218,10 @@ variable "rds_geo_tracking_postgres_maintenance_window" {
 variable "rds_geo_tracking_postgres_ca_cert_identifier" {
   type    = string
   default = null
+}
+variable "rds_geo_tracking_postgres_iam_database_authentication_enabled" {
+  type    = bool
+  default = true
 }
 variable "rds_geo_tracking_postgres_params" {
   description = "Additional RDS Geo Tracking parameter group settings"
