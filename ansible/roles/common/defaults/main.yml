@@ -12,8 +12,14 @@ system_packages_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_UPGRADE') | default(f
 system_packages_autoremove: "{{ lookup('env','SYSTEM_PACKAGES_AUTOREMOVE') | default(false, true) }}"
 system_packages_auto_security_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_AUTO_SECURITY_UPGRADE') | default(true, true) }}"
 
-# Python packages must target Python 3.6 for OS compatibility (RHEL 8 / 9) and be compatible with any OS installed Python packages
-python_packages: [google-auth==2.22.0, netaddr==0.8.0, PyYAML==6.0.1, docker==5.0.3, pexpect==4.8.0, psycopg2==2.9.8]
+# Python packages should target minimum active Python version (3.8) but also must allow for lower targets for Python 3.6 (RHEL 8) and 3.7 (AL2).
+# Pin Requests temporaily due to ongoing issues with latest release - https://github.com/psf/requests/issues/6707
+python_packages: [netaddr<=1.21.1, PyYAML<=6.0.1, docker<=7.0.0, pexpect<=4.9.0, psycopg2<=2.9.9, requests<=2.31.0]
+python_packages_amazon:
+  # Install urllib3 1.x for Amazon Linux 2 - https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html#ssl-module-is-compiled-with-openssl-1-0-2-k-fips
+  '2': "{{ python_packages + ['urllib3<2.0.0'] }}"
+  # Pin Docker python as 6+ has a requirement of requests of >2.26. AL2023 has 2.25 installed by default via OS package - https://docs.aws.amazon.com/linux/al2023/ug/amzn2-al2023-ami.html.
+  '2023': "{{ (python_packages | difference(['docker<=7.0.0', 'requests<=2.31.0'])) + ['docker==5.0.3'] }}"
 
 # Secrets
 gitlab_secrets_write: true
