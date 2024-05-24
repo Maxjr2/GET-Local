@@ -211,7 +211,7 @@ The latest Ansible version we support is noted [here in the documentation](READM
 The following rules apply for Toolkit releases and support between them:
 
 - The Toolkit follows [Semantic Versions](https://semver.org/) where we release Major, Minor and Patch versions via [project releases](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases).
-- Releases are not tied directly to GitLab versions, we currently support GitLab versions from `14.0` onwards.
+- Releases are not tied directly to GitLab versions, we currently support GitLab versions from `15.0` onwards.
 - Breaking changes such as minimum supported GitLab version may be changed in Major releases with adequate notice and an upgrade path given to users.
 - We aim to support Backwards Compatibility between minor releases. Although some small breaking changes may be added with adequate notice if the need is justified.
 - Backwards Compatibility is not guaranteed for in development code on the main branch.

@@ -37,12 +37,12 @@ The requirements for the Toolkit are as follows:
 
 Host machine:
 
-- Terraform `1.5.0` - `1.5.5`
+- Terraform `1.5.5` and upwards
 - Ansible `9.0` and upwards (Python `3.10`+)
 
 Target machine(s):
 
-- GitLab version: `14.0.0` and upwards.
+- GitLab version: `15.0.0` and upwards.
 - OS: Ubuntu 20.04 / 22.04, Debian 11, RHEL 8 / 9, Amazon Linux 2 / 2023
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.

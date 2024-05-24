@@ -127,14 +127,14 @@ output "gitlab_ref_arch_gcp" {
 }
 ```
 
-:information_source:&nbsp; With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional / Zonal / Autoscaling)](#gke-cluster-availability-type-regional--zonal--autoscaling) for more information.
+:information_source:&nbsp; With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional, Zonal and Autoscaling)](#gke-cluster-availability-type-regional-zonal-and-autoscaling) for more information.
 
 In addition to the above there are some optional settings that can configure the GKE setup as follows:
 
 - `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
 - `gke_deletion_protection` - Configures [deletion protection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#deletion_protection) in Terraform. Default is `false`.
 
-#### GKE Cluster Availability Type (Regional / Zonal / Autoscaling)
+#### GKE Cluster Availability Type (Regional, Zonal and Autoscaling)
 
 GKE has several options available when it comes to a [Cluster's availability type](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters#availability). This covers both the control plane and the node pools themselves. There are two options available as follows:
 
@@ -486,7 +486,7 @@ In a nutshell authentication must be setup for the `kubectl` command on the mach
 
 The easiest way to do this is via the selected cloud providers tooling after the cluster has been provisioned:
 
-- Google Cloud Platform (GCP) can be setup and selected via the `gcloud get-credentials` command. This differs depending on the availability type of thecluster provisioned:
+- Google Cloud Platform (GCP) can be setup and selected via the `gcloud get-credentials` command. This differs depending on the availability type of the cluster provisioned:
   - Regional - `gcloud container clusters get-credentials <CLUSTER NAME> --project <GCP PROJECT NAME> --region <GCP REGION NAME>`
   - Zonal - `gcloud container clusters get-credentials <CLUSTER NAME> --project <GCP PROJECT NAME> --zone <GCP ZONE NAME>`.
   - Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.

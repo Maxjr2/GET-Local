@@ -76,3 +76,10 @@
   pip:
     name: "{{ python_packages }}"
     extra_args: "--upgrade-strategy only-if-needed"
+  when: ansible_facts['distribution'] != 'Amazon'
+
+- name: Install python packages (Amazon Linux)
+  pip:
+    name: "{{ python_packages_amazon[ansible_facts['distribution_major_version']] }}"
+    extra_args: "--upgrade-strategy only-if-needed"
+  when: ansible_facts['distribution'] == 'Amazon'

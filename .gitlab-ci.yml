@@ -49,8 +49,6 @@ gemnasium-dependency_scanning:
 gemnasium-python-dependency_scanning:
   rules:
     - !reference [.on_merge_request_and_merged_events, rules]
-  image:
-    name: $CI_TEMPLATE_REGISTRY_HOST/security-products/gemnasium-python:4-python-3.10
 
 secret_detection:
   rules:
@@ -114,7 +112,7 @@ check:ansible-lint:
 check:markdownlint:
   stage: test
   image:
-    name: node:lts-alpine3.14
+    name: node:lts-alpine3.19
     entrypoint: [ "" ]
   script:
     - npm add -g markdownlint markdownlint-cli
@@ -125,7 +123,7 @@ check:markdownlint:
 check:markdown-external-link-check:
   stage: test
   image:
-    name: ghcr.io/tcort/markdown-link-check:3.11.0
+    name: ghcr.io/tcort/markdown-link-check:3.12.2
     entrypoint: [""]
   script:
     - /src/markdown-link-check *.md docs/*.md
@@ -163,7 +161,7 @@ upload-terraform-module:
   stage: upload
   image: alpine
   services:
-    - docker:24.0.6-dind
+    - docker:26-dind
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
