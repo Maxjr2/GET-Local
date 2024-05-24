@@ -84,7 +84,7 @@ resource "aws_db_instance" "gitlab" {
   allow_major_version_upgrade = true
   auto_minor_version_upgrade  = var.rds_postgres_auto_minor_version_upgrade
 
-  iam_database_authentication_enabled = true
+  iam_database_authentication_enabled = var.rds_postgres_iam_database_authentication_enabled
 
   backup_window            = local.rds_postgres_is_primary ? var.rds_postgres_backup_window : null
   backup_retention_period  = local.rds_postgres_is_primary ? var.rds_postgres_backup_retention_period : null

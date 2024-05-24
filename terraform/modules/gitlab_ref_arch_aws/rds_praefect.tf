@@ -78,7 +78,7 @@ resource "aws_db_instance" "gitlab_praefect" {
   allow_major_version_upgrade = true
   auto_minor_version_upgrade  = var.rds_praefect_postgres_auto_minor_version_upgrade
 
-  iam_database_authentication_enabled = true
+  iam_database_authentication_enabled = var.rds_praefect_postgres_iam_database_authentication_enabled
 
   backup_window            = var.rds_praefect_postgres_backup_window
   backup_retention_period  = var.rds_praefect_postgres_backup_retention_period
