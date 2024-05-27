@@ -125,7 +125,7 @@ resource "azurerm_network_security_rule" "ssh_rule" {
   source_port_range                          = "*"
   destination_port_ranges                    = ["22"]
   source_address_prefixes                    = coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
-  destination_application_security_group_ids = [azurerm_application_security_group.ssh.id, length(var.gitlab_rails_external_ip_names) > 0 ? azurerm_application_security_group.gitlab_rails[0].id : null]
+  destination_application_security_group_ids = compact([azurerm_application_security_group.ssh.id, length(var.gitlab_rails_external_ip_names) > 0 ? azurerm_application_security_group.gitlab_rails[0].id : null])
   resource_group_name                        = var.resource_group_name
   network_security_group_name                = azurerm_network_security_group.gitlab.name
 }
