@@ -3,5 +3,5 @@ geo_postgresql['enable'] = true
 geo_postgresql['listen_address'] = '0.0.0.0'
 geo_postgresql['sql_user_password'] = '{{ (geo_tracking_postgres_password + 'gitlab_geo') | md5 }}'
 geo_postgresql['md5_auth_cidr_addresses'] = {{ geo_tracking_postgres_md5_auth_cidr_blocks }}
-
+geo_postgresql['trust_auth_cidr_addresses'] = {{ geo_tracking_postgres_trust_auth_cidr_blocks }}
 gitlab_rails['db_host'] = '0.0.0.0'
