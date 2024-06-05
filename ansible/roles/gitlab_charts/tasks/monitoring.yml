@@ -94,7 +94,7 @@
       when: kube_prometheus_stack_charts_existing_info.status is defined
 
     - name: Update CRDs on existing kube-prometheus-stack deployment
-      command: "kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v{{ kube_prometheus_stack_charts_app_version | replace('v', '') }}/example/prometheus-operator-crd/monitoring.coreos.com_{{ item }}.yaml -n {{ kube_prometheus_stack_charts_namespace }}"
+      command: "kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v{{ kube_prometheus_stack_charts_app_version | replace('v', '') }}/example/prometheus-operator-crd/monitoring.coreos.com_{{ item }}.yaml"
       loop:
         - alertmanagerconfigs
         - alertmanagers
