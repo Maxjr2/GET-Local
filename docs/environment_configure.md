@@ -206,7 +206,7 @@ compose:
 
 Finally, the last thing to configure is authentication. This is required to allow Ansible to access GCP to build its dynamic inventory.
 
-Ansible provides several ways to authenticate with [GCP](https://docs.ansible.com/ansible/latest/scenario_guides/guide_gce.html#credentials), you can select any method that is desired.
+Ansible provides several ways to authenticate with [GCP](https://docs.ansible.com/ansible/9/scenario_guides/guide_gce.html#credentials), you can select any method that is desired.
 
 All the methods given involve the Service Account file you generated previously. We've found the authentication methods that work best with the Toolkit in terms of ease of use are as follows:
 
@@ -295,7 +295,7 @@ Finally, the last thing to configure is authentication. This is required to allo
 
 Ansible provides several ways to authenticate with [Azure](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html#parameter-auth_source), you can select any method that is desired.
 
-If you are planning to run the toolkit locally, use [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) authentication method; The credentials will be sourced from the Azure CLI profile. Otherwise, you can use either [Service Principal Credentials](https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html#using-service-principal) or [Active Directory Username/Password](https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html#using-active-directory-username-password). Refer to [Authenticating to Azure](https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html#authenticating-with-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as [Environment Variables](https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html#using-environment-variables) following the Ansible instructions for the specific authentication type.
+If you are planning to run the toolkit locally, use [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) authentication method; The credentials will be sourced from the Azure CLI profile. Otherwise, you can use either [Service Principal Credentials](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-service-principal) or [Active Directory Username/Password](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-active-directory-username-password). Refer to [Authenticating to Azure](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#authenticating-with-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as [Environment Variables](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-environment-variables) following the Ansible instructions for the specific authentication type.
 
 ### Configure Variables
 
