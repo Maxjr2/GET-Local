@@ -907,46 +907,22 @@ variable "memorystore_redis_persistent_weekly_maintenance_window_start_time" {
 }
 
 # Networking
-## Create new network
+## Created network
 variable "create_network" {
   type    = bool
   default = false
 }
-
-## Default network
-variable "default_allowed_ingress_cidr_blocks" {
-  type    = list(string)
-  default = ["0.0.0.0/0"]
-}
-
-variable "http_allowed_ingress_cidr_blocks" {
-  type    = list(any)
-  default = []
-}
-
-variable "ssh_allowed_ingress_cidr_blocks" {
-  type    = list(any)
-  default = []
-}
-
-variable "gitlab_shell_ssh_port" {
-  type    = number
-  default = null
-}
-variable "external_ssh_allowed_ingress_cidr_blocks" {
-  type    = list(any)
-  default = []
-}
-
-variable "icmp_allowed_ingress_cidr_blocks" {
-  type    = list(any)
-  default = []
-}
-
-## Created network
-variable "subnet_cidr" {
+variable "create_network_subnet_cidr_block" {
   type    = string
   default = "10.86.0.0/16"
+}
+variable "create_network_peer" {
+  type    = string
+  default = null
+}
+variable "create_network_peer_subnet_cidr_block" {
+  type    = string
+  default = null
 }
 
 ## Existing network
@@ -976,6 +952,35 @@ variable "gke_zones" {
   description = "Zones to use for all GKE resources. Overrides var.zones if present."
 
   type    = list(any)
+  default = null
+}
+
+## Security Groups
+variable "default_allowed_ingress_cidr_blocks" {
+  type    = list(string)
+  default = ["0.0.0.0/0"]
+}
+
+variable "http_allowed_ingress_cidr_blocks" {
+  type    = list(any)
+  default = []
+}
+variable "ssh_allowed_ingress_cidr_blocks" {
+  type    = list(any)
+  default = []
+}
+
+variable "external_ssh_allowed_ingress_cidr_blocks" {
+  type    = list(any)
+  default = []
+}
+variable "icmp_allowed_ingress_cidr_blocks" {
+  type    = list(any)
+  default = []
+}
+
+variable "gitlab_shell_ssh_port" {
+  type    = number
   default = null
 }
 
@@ -1029,4 +1034,10 @@ variable "external_ssh_port" {
   type        = number
   default     = 2222
   description = "Deprecated. Replaced by gitlab_shell_ssh_port"
+}
+
+variable "subnet_cidr" {
+  type        = string
+  default     = null
+  description = "Deprecated. Replaced by create_network_subnet_cidr_block"
 }

@@ -137,15 +137,15 @@ Once the settings have been added you will need to rerun `terraform apply` for t
 
 ## VPC Peering
 
-Currently, the Toolkit supports configuring VPC peering only for AWS, [support for GCP](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/657) is planned to be added later.
+The Toolkit can configure VPC peering which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. This is required if the Geo sites are located on different VPC networks.
+
+When setting up VPC peering it is always required to have different subnet CIDR blocks on each network.
+
+:information_source:&nbsp; Peering is only available when using a single secondary site.
 
 ### VPC Peering (AWS)
 
-The Toolkit can configure [AWS VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. This is required if the Geo sites are located in different AWS regions.
-
 :information_source:&nbsp; Peering can only be configured directly by the Toolkit when using a [created network](../environment_advanced_network.md#created-aws) with `create_network = true` on all Geo sites. For existing networks, peering should be configured separately.
-
-:information_source:&nbsp; Peering is only available when using a single secondary site.
 
 AWS VPC peering requires a handshake, a VPC must first request the peering and the other has to then accept it. As such, this requires Terraform to be executed a couple of times to go through this process.
 
@@ -163,7 +163,7 @@ To set up VPC peering:
    }
    ```
 
-2. Using the Terraform output in the last step, add the below values to the secondary site's `environment.tf` file. These values are used so that the secondary site is able to set up a peering connection with the primary site's VPC.
+1. Using the Terraform output in the last step, add the below values to the secondary site's `environment.tf` file. These values are used so that the secondary site is able to set up a peering connection with the primary site's VPC.
 
    - `peer_region` - The AWS region used for the primary site. This won't be in the output for Terraform but is something that is defined as part of the environment config.
    - `peer_vpc_id` - The VPC ID of the primary site.
@@ -171,7 +171,7 @@ To set up VPC peering:
 
    :information_source:&nbsp; When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
 
-3. On the secondary site, provision it by running `terraform apply`. This will output some values that are required by the primary site to complete the peering setup.
+1. On the secondary site, provision it by running `terraform apply`. This will output some values that are required by the primary site to complete the peering setup.
 
    ```json
    "network" = {
@@ -183,9 +183,52 @@ To set up VPC peering:
    }
    ```
 
-4. Using the Terraform output in the last step, add the below values to the primary site's `environment.tf` file.
+1. Using the Terraform output in the last step, add the below values to the primary site's `environment.tf` file.
 
    - `peer_connection_id` - The ID of the peer connection created.
    - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC on the secondary site.
 
-5. On the primary site, rerun `terraform apply`. This will accept the peering request created by the secondary site as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your Geo sites to communicate internally.
+1. On the primary site, rerun `terraform apply`. This will accept the peering request created by the secondary site as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your Geo sites to communicate internally.
+
+### VPC Peering (GCP)
+
+To setup VPC peering with GCP a VPC peering connection must be setup in both networks to allow traffic to flow in both directions.
+
+To set up VPC peering:
+
+1. First run terraform for both sites to create the initial networks, each network needs to exist before peering can be setup. At this point no extra settings need to be added to either sites Terraform settings. However, it is recommended to create new networks for each site with config similar to below:
+
+```tf
+create_network                        = true
+create_network_subnet_cidr_block      = "<CIDR block>"
+```
+
+1. Once the command has completed you will need to get some information from the output for each site.
+
+```tf
+# Site 1
+"network" = {
+  "vpc_name" = "site-1-vpc"
+  "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<GCP Project ID>/global/networks/site-1-vpc"
+  "vpc_subnet_name" = "site-1-subnet"
+}
+
+# Site 2
+"network" = {
+  "vpc_name" = "site-2-vpc"
+  "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<GCP Project ID>/global/networks/site-2-vpc"
+  "vpc_subnet_name" = "example-2-subnet"
+}
+```
+
+2. With the information gathered in the previous step, update both Terraform inventories with the below settings to configure peering. Each site will need to point to the other sites VPC. After running a `terraform apply` the new settings will add a new peering connection for each network, as well as a firewall rule to allow traffic from the peering network.
+
+```tf
+# Site 1
+create_network_peer_subnet_cidr_block = <Site 2 CIDR>
+create_network_peer                   = "projects/<GCP Project ID>/global/networks/site-2-vpc"
+
+# Site 2
+create_network_peer_subnet_cidr_block = <Site 1 CIDR>
+create_network_peer                   = "projects/<GCP Project ID>/global/networks/site-1-vpc"
+```
