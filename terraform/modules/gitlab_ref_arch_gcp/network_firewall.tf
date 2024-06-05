@@ -100,3 +100,26 @@ resource "google_compute_firewall" "internal" {
   priority      = 65534
   source_ranges = [data.google_compute_subnetwork.selected[0].ip_cidr_range]
 }
+
+resource "google_compute_firewall" "internal_peer" {
+  count   = local.create_network && var.create_network_peer_subnet_cidr_block != null ? 1 : 0
+  name    = "${var.prefix}-internal-peer"
+  network = local.vpc_name
+
+  description = "Allow internal traffic on the ${local.vpc_name} network from peer network with cidr block ${var.create_network_peer_subnet_cidr_block}"
+
+  # kics: Terraform GCP - RDP Access Is Not Restricted - False positive, source CIDR is locked down
+  # kics-scan ignore-block
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+
+  priority      = 65534
+  source_ranges = [var.create_network_peer_subnet_cidr_block]
+}

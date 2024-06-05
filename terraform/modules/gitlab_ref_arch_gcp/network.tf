@@ -23,14 +23,21 @@ resource "google_compute_network" "gitlab_vpc" {
   name                    = "${var.prefix}-vpc"
   auto_create_subnetworks = false
 }
-
 resource "google_compute_subnetwork" "gitlab_vpc_subnet" {
   count = local.create_network ? 1 : 0
 
   name                     = "${var.prefix}-subnet"
-  ip_cidr_range            = var.subnet_cidr
+  ip_cidr_range            = var.subnet_cidr != null ? var.subnet_cidr : var.create_network_subnet_cidr_block
   network                  = google_compute_network.gitlab_vpc[0].name
   private_ip_google_access = true
+}
+resource "google_compute_network_peering" "gitlab_vpc_peer" {
+  count = local.create_network && var.create_network_peer != null ? 1 : 0
+
+  name                                = "${var.prefix}-peer"
+  network                             = data.google_compute_network.gitlab_network.self_link
+  peer_network                        = var.create_network_peer
+  import_subnet_routes_with_public_ip = true
 }
 
 # External IPs
@@ -50,7 +57,7 @@ resource "google_compute_router_nat" "nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
-# Private Service Access
+# Private Service Access (Cloud SQL)
 resource "google_compute_global_address" "gitlab_private_service_ip_range" {
   count = var.cloud_sql_postgres_machine_tier != "" ? 1 : 0
 
@@ -77,5 +84,6 @@ output "network" {
   value = {
     "vpc_name"        = local.vpc_name
     "vpc_subnet_name" = local.subnet_name
+    "vpc_self_link"   = data.google_compute_network.gitlab_network.self_link
   }
 }

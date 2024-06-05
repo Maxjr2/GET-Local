@@ -78,7 +78,7 @@ module "gitlab_ref_arch_gcp" {
 
 In addition to the above the following _optional_ settings change how the network is configured:
 
-- `subnet_cidr`- A [CIDR block](https://cloud.google.com/vpc/docs/vpc#manually_created_subnet_ip_ranges) that will be used for the created subnet. This shouldn't need to be changed in most scenarios unless you want to use a specific CIDR blocks. Default is `"10.86.0.0/16"`
+- `create_network_subnet_cidr_block`- A [CIDR block](https://cloud.google.com/vpc/docs/vpc#manually_created_subnet_ip_ranges) that will be used for the created subnet. This shouldn't need to be changed in most scenarios unless you want to use a specific CIDR blocks. Default is `"10.86.0.0/16"`
 
 ### Existing (GCP)
 
