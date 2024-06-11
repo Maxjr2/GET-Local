@@ -851,6 +851,11 @@ variable "webservice_node_pool_min_count" {
   type    = number
   default = 0
 }
+## Cluster Updates (Optional)
+variable "webservice_node_pool_max_unavailable" {
+  type    = number
+  default = 0
+}
 
 ## Sidekiq
 variable "sidekiq_node_pool_count" {
@@ -878,6 +883,11 @@ variable "sidekiq_node_pool_min_count" {
   type    = number
   default = 0
 }
+## Cluster Updates (Optional)
+variable "sidekiq_node_pool_max_unavailable" {
+  type    = number
+  default = 0
+}
 
 ## Supporting
 variable "supporting_node_pool_count" {
@@ -902,6 +912,11 @@ variable "supporting_node_pool_max_count" {
   default = 0
 }
 variable "supporting_node_pool_min_count" {
+  type    = number
+  default = 0
+}
+## Cluster Updates (Optional)
+variable "supporting_node_pool_max_unavailable" {
   type    = number
   default = 0
 }
