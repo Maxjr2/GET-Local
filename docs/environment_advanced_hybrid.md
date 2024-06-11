@@ -61,8 +61,9 @@ Each node pool setting configures the following. To avoid repetition we'll descr
 
 - `*_node_pool_max_count` / `*_node_pool_min_count` - The maximum and minimum node pool machines that will be provisioned via Cluster Autoscaling.
   - `*_node_pool_count` - Static number of node pool machines to provision with no autoscaling. This should not be set if configuring `*_node_pool_max_count` / `*_node_pool_min_count`.
-- `*_node_pool_machine_type` - **GCP only** The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for each machine in the node pool
-- `*_node_pool_instance_type` - **AWS only** The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) (size) for each machine in the node pool
+- `*_node_pool_machine_type` - **GCP only** The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for each machine in the node pool.
+- `*_node_pool_instance_type` - **AWS only** The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) (size) for each machine in the node pool.
+- `*_node_pool_max_unavailable` - **AWS only** The [AWS Update Config `maxUnavailable`](https://docs.aws.amazon.com/eks/latest/APIReference/API_NodegroupUpdateConfig.html) machines in the node pool during an update. Optional, defaults to 1 if not set, matching AWS' default behaviour.
 
 Below are examples for a `environment.tf` file with all config for each cloud provider based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) with additional Cloud Specific guidances as required:
 

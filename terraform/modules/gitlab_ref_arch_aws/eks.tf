@@ -203,6 +203,10 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     max_size     = local.webservice_node_pool_autoscaling ? var.webservice_node_pool_max_count : var.webservice_node_pool_count
   }
 
+  update_config {
+    max_unavailable = max(var.webservice_node_pool_max_unavailable, 1)
+  }
+
   labels = {
     workload = "webservice"
   }
@@ -310,6 +314,10 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     max_size     = local.sidekiq_node_pool_autoscaling ? var.sidekiq_node_pool_max_count : var.sidekiq_node_pool_count
   }
 
+  update_config {
+    max_unavailable = max(var.sidekiq_node_pool_max_unavailable, 1)
+  }
+
   labels = {
     workload = "sidekiq"
   }
@@ -414,6 +422,10 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     desired_size = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
     min_size     = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
     max_size     = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_max_count : var.supporting_node_pool_count
+  }
+
+  update_config {
+    max_unavailable = max(var.supporting_node_pool_max_unavailable, 1)
   }
 
   labels = {
