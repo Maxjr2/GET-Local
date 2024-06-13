@@ -3,18 +3,12 @@ include:
   - template: Jobs/Secret-Detection.latest.gitlab-ci.yml
   - template: Jobs/Container-Scanning.latest.gitlab-ci.yml
   - template: Jobs/SAST-IaC.latest.gitlab-ci.yml
-  - project: 'gitlab-org/quality/pipeline-common'
-    file:
-      - '/ci/danger-review.yml'
+  - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@1.2.0
 
 stages:
   - test
   - upload
   - container_scan
-
-danger-review:
-  variables:
-    GITLAB_DANGERFILES_VERSION: "~> 3.0"
 
 #################################
 ##            RULES            ##
