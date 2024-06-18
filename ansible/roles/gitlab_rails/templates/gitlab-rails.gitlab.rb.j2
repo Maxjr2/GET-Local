@@ -49,17 +49,23 @@ nginx['real_ip_trusted_addresses'] = [
 {% endfor %}
 ]
 
-{% if (external_url_ssl and 'haproxy_external' in groups) %}
+{% if external_url_ssl %}
+## SSL Config
+{% if gitlab_single_node_without_lb %}
+## GitLab Rails Single Node External SSL
+{% if external_ssl_source == 'letsencrypt' %}
+letsencrypt['enable'] = true
+letsencrypt['contact_emails'] = {{ [external_ssl_letsencrypt_issuer_email] }}
+{% endif %}
+
+{% else %}
+## External Load Balancer SSL termination
+## With HAProxy or custom Load balancer
 nginx['listen_port'] = 80
 nginx['listen_https'] = false
 nginx['hsts_max_age'] = 0
 
 letsencrypt['enable'] = false
-{% elif external_url_ssl %}
-
-{% if external_ssl_source == 'letsencrypt' %}
-letsencrypt['enable'] = true
-letsencrypt['contact_emails'] = {{ [external_ssl_letsencrypt_issuer_email] }}
 {% endif %}
 {% endif %}
 

@@ -12,6 +12,7 @@ all:
     prefix: "<environment_prefix>"
     external_url: "<external_url>"
     gitlab_license_file: "<gitlab_license_file_path>"
+    gitlab_single_node_without_lb: true
 
     # Passwords / Secrets
     gitlab_root_password: '<gitlab_root_password>'
