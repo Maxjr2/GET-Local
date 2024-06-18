@@ -376,6 +376,7 @@ General settings are config used across the playbooks to configure GitLab:
 - `gitlab_license_file` - Local path to a valid GitLab License file. Toolkit will upload the license to the environment. Note that this is an optional setting.
   - If you purchased a GitLab subscription, use `gitlab_subscription_activation_code` instead of `gitlab_license_file` variable. An [activation code](https://docs.gitlab.com/ee/user/admin_area/license.html#activate-gitlab-ee) can be obtained from the Customers Portal.
 - `gitlab_license_text` - An alternative to `gitlab_license_file` if the license is not stored in a local file, pass the license contents directly to Ansible. Either `gitlab_license_text`, or `gitlab_license_file`, or neither, should be set, but not both. This approach can be used to retrieve the license via a lookup. Note that this is an optional setting.
+- `gitlab_single_node_without_lb` - The flag configures the Toolkit to handle a Single Node environment of GitLab without a separate Load Balancer. Defaults to `false`. Should be set to `true` when deploying a single GitLab Rails node without an external Load Balancer.
 
 Component settings are specific component for GitLab components, e.g. Postgres:
 

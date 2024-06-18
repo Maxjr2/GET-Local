@@ -4,7 +4,7 @@ As such, there are *dozens* of potential environment permutations the Toolkit ca
 
 In this section you'll find a selection of config examples of some of the more common permutations to start off with. We're not able to provide examples for every permutation, but the following should cover most bases that you can use as a reference in tandem with the documentation to build out your specific environment:
 
-- [1k - GCP](1k_gcp) - A 1k Reference Architecture on GCP. Standalone with load balancer frontend.
+- [1k - GCP](1k_gcp) - A 1k Reference Architecture on GCP. Standalone without load balancer frontend.
 - [1k - AWS](1k_aws) - A 1k Reference Architecture on AWS. Standalone with load balancer frontend.
 - [2k - Azure](2k_azure) - A 2k Reference Architecture on Azure. Standalone with separated backend components.
 - [3k - GCP](3k_gcp) - A 3k Reference Architecture on GCP. HA with combined Redis queues.
