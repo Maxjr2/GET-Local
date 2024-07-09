@@ -74,7 +74,7 @@ backend praefect
 {% if 'postgres' in groups %}
 backend patroni-leader
     mode tcp
-    option httpchk
+    option httpchk GET /leader
     http-check expect status 200
 
 {% for ip in postgres_int_addrs %}
