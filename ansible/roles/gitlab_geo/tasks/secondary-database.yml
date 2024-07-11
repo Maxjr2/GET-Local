@@ -44,7 +44,7 @@
     command: |
       gitlab-ctl replicate-geo-database \
         --slot-name={{ 'geo_secondary' if geo_primary_postgres_is_ha else inventory_hostname | regex_replace("-", "_") }} \
-        --host={{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }} \
+        --host={{ geo_primary_postgres_host }} \
         --sslmode=verify-ca \
         --force \
         --skip-backup
