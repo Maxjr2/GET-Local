@@ -58,6 +58,8 @@ For Cloud Native Hybrid environments some additional variables will need to be a
 
 When adding Geo specific settings into your Ansible configurations, depending on the GitLab installation type it can be important as to when the settings were added. When using the Linux package, the settings need to be added before the `gitlab_geo.yml` playbook is run. It's not important if the settings existed before or after the original `all.yml` playbook was ran, Geo is configured entirely by the Geo playbook. However, when using GitLab charts, some of the Geo configuration is handled before the Geo playbook is run, this means the Geo settings will need to be present when running the `all.yml` playbook. If the environment is already deployed before adding Geo, you can simply add the new Geo settings and rerun the `gitlab_charts.yml` playbook.
 
+:information_source:&nbsp; If the settings for the secondary site are added before the original `all.yml` run then the secondary site will not be able to be logged into before Geo is configured, this does not effect the overall process for setting up Geo.
+
 For both Linux package and Cloud Native Hybrid environments it's required to add new `keyed_groups` to your Dynamic Inventory config file for your chosen cloud provider:
 
 GCP:
