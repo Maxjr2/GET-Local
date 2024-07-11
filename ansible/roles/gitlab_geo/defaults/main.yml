@@ -29,3 +29,5 @@ geo_secondary_site_aws_region: ""
 geo_run_patroni_workaround: true
 
 gitlab_charts_show_values: false
+
+geo_primary_postgres_host: "{{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }}"

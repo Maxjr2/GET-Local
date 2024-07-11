@@ -1,6 +1,6 @@
 {% if geo_secondary_postgres_is_ha %}
 patroni['standby_cluster']['enable'] = true
-patroni['standby_cluster']['host'] = '{{ internal_lb_host }}'
+patroni['standby_cluster']['host'] = '{{ geo_primary_postgres_host }}'
 patroni['standby_cluster']['port'] = 5432
 patroni['standby_cluster']['primary_slot_name'] = 'geo_secondary'
 patroni['replication_password'] = '{{ postgres_password }}'
