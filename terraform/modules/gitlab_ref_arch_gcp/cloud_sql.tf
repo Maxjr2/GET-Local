@@ -45,6 +45,8 @@ resource "google_sql_database_instance" "gitlab" {
 
         start_time = var.cloud_sql_postgres_backup_configuration["start_time"]
 
+        location = var.cloud_sql_postgres_backup_configuration["location"]
+
         point_in_time_recovery_enabled = var.cloud_sql_postgres_backup_configuration["point_in_time_recovery_enabled"]
         transaction_log_retention_days = var.cloud_sql_postgres_backup_configuration["transaction_log_retention_days"]
 
