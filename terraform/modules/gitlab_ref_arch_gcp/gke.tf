@@ -102,6 +102,8 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
   cluster        = google_container_cluster.gitlab_cluster[0].name
   node_locations = local.node_pool_locations
 
+  location = var.gke_location
+
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
   initial_node_count = var.webservice_node_pool_min_count > 0 ? var.webservice_node_pool_min_count : var.webservice_node_pool_count
@@ -176,6 +178,7 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
   cluster        = google_container_cluster.gitlab_cluster[0].name
   node_locations = local.node_pool_locations
 
+  location = var.gke_location
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
   initial_node_count = var.sidekiq_node_pool_min_count > 0 ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
@@ -250,6 +253,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   cluster        = google_container_cluster.gitlab_cluster[0].name
   node_locations = local.node_pool_locations
 
+  location = var.gke_location
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
   initial_node_count = var.supporting_node_pool_min_count > 0 ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
