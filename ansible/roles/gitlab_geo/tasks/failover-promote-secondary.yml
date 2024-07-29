@@ -109,6 +109,13 @@
         values: "{{ gitlab_values }}"
   when: cloud_native_hybrid_geo
 
+- name: Removing the former secondary’s tracking database
+  command: rm -rf /var/opt/gitlab/geo-postgresql
+  when:
+    - ('postgres_primary' in group_names) or
+      ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups and not postgres_external)
+    - (geo_secondary_site_group_name in group_names)
+
 - name: Disable Maintenance mode after GitLab has restarted
   block:
     - name: Failover Promote Secondary - Wait for GitLab to be available
