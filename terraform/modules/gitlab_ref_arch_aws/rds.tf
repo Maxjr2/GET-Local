@@ -100,6 +100,10 @@ resource "aws_db_instance" "gitlab" {
   performance_insights_enabled          = var.rds_postgres_performance_insights_enabled
   performance_insights_retention_period = var.rds_postgres_performance_insights_retention_period
 
+  timeouts {
+    create = var.rds_postgres_create_timeout
+  }
+
   tags = var.rds_postgres_tags
 
   lifecycle {
@@ -147,6 +151,10 @@ resource "aws_db_instance" "gitlab_read_replica" {
 
   enabled_cloudwatch_logs_exports = length(var.rds_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_postgres_enabled_cloudwatch_logs_exports) : null
   monitoring_role_arn             = var.rds_postgres_monitoring_role_arn
+
+  timeouts {
+    create = var.rds_postgres_read_replica_create_timeout
+  }
 
   tags = var.rds_postgres_tags
 
