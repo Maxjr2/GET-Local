@@ -91,6 +91,10 @@ resource "aws_db_instance" "gitlab_praefect" {
   enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
   monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
 
+  timeouts {
+    create = var.rds_praefect_postgres_create_timeout
+  }
+
   tags = var.rds_praefect_postgres_tags
 
   lifecycle {
@@ -138,6 +142,10 @@ resource "aws_db_instance" "gitlab_praefect_read_replica" {
 
   enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
   monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
+
+  timeouts {
+    create = var.rds_praefect_postgres_read_replica_create_timeout
+  }
 
   tags = var.rds_praefect_postgres_tags
 

@@ -1018,6 +1018,11 @@ variable "rds_postgres_tags" {
   type        = map(any)
   default     = {}
 }
+variable "rds_postgres_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
+}
 
 variable "rds_postgres_read_replica_count" {
   type    = number
@@ -1030,6 +1035,11 @@ variable "rds_postgres_read_replica_port" {
 variable "rds_postgres_read_replica_multi_az" {
   type    = bool
   default = false
+}
+variable "rds_postgres_read_replica_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
 }
 variable "rds_postgres_enabled_cloudwatch_logs_exports" {
   description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
@@ -1133,6 +1143,11 @@ variable "rds_praefect_postgres_tags" {
   type        = map(any)
   default     = {}
 }
+variable "rds_praefect_postgres_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
+}
 
 variable "rds_praefect_postgres_read_replica_count" {
   type    = number
@@ -1145,6 +1160,11 @@ variable "rds_praefect_postgres_read_replica_port" {
 variable "rds_praefect_postgres_read_replica_multi_az" {
   type    = bool
   default = false
+}
+variable "rds_praefect_postgres_read_replica_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
 }
 variable "rds_praefect_postgres_enabled_cloudwatch_logs_exports" {
   description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
@@ -1248,6 +1268,11 @@ variable "rds_geo_tracking_postgres_tags" {
   type        = map(any)
   default     = {}
 }
+variable "rds_geo_tracking_postgres_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
+}
 
 variable "rds_geo_tracking_postgres_read_replica_count" {
   type    = number
@@ -1260,6 +1285,11 @@ variable "rds_geo_tracking_postgres_read_replica_port" {
 variable "rds_geo_tracking_postgres_read_replica_multi_az" {
   type    = bool
   default = false
+}
+variable "rds_geo_tracking_postgres_read_replica_create_timeout" {
+  description = "How long to wait for the create to finish before timing out"
+  type        = string
+  default     = "2h"
 }
 variable "rds_geo_tracking_postgres_enabled_cloudwatch_logs_exports" {
   description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
