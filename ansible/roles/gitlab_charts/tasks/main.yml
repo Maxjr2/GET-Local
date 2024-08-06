@@ -232,6 +232,22 @@
     - charts_values
     - kube-prometheus-stack
 
+- name: Verify GitLab Charts
+  kubernetes.core.helm_pull:
+    chart_ref: "{{ gitlab_charts_repo_name }}/gitlab"
+    chart_version: "{{ gitlab_charts_version | default(None) }}"
+    destination: /tmp
+    verify_chart: true
+    verify_chart_keyring: "{{ gitlab_charts_gpg_key_file_path }}"
+  register: helm_verify_result
+  failed_when:
+    - (helm_verify_result.msg is defined and 'sha256 sum does not match' in helm_verify_result.msg)  or
+      ('FAILED' in helm_verify_result.stderr)
+  when: gitlab_charts_gpg_key_file_path is defined
+  tags:
+    - reconfigure
+    - charts
+
 - name: Install GitLab Charts
   kubernetes.core.helm:
     name: gitlab
