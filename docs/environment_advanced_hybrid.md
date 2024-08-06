@@ -508,6 +508,7 @@ First let's detail the general settings that apply to any Cloud Provider:
 - `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
   - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
+- `gitlab_charts_gpg_key_file_path` - This is a key to a generated and exported Gitlab public gpg key, instructions on how to create one are in [GitLab Helm chart provenance](https://docs.gitlab.com/charts/installation/chart-provenance.html).
 
 Next are specific Cloud Provider examples that will also detail any specific settings for each provider along with a section on various other additional settings that may be used.
 
