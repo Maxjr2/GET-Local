@@ -202,7 +202,9 @@ The below settings are only required when migrating to a Linux Package installat
 The below settings are only required when migrating to a Cloud Native Hybrid installation:
 
 - `geo_primary_ssh_host_keys` - A dictionary of SSH host keys and values to be used as the Chart's SSH Host Keys secret.
-- `geo_primary_registry_key` - A dictionary of the registry `.crt` and `.pem` files to be used as the Chart's Registry authentication certificate, only required if using the Container Registry.
+- `geo_primary_registry_keys` - A dictionary of the registry `.crt` and `.pem` files to be used as the Chart's Registry authentication certificate, only required if using the Container Registry.
+
+:information_source:&nbsp; Note that these values should be base-64 encoded representations of the file contents. For example: `cat ssh_host_ecdsa_key | base64`.
 
 :exclamation:&nbsp; These are sensitive variables. It's strongly recommended taking appropriate precautions to avoid leaking secrets such as using [secret managers or environment variables](../environment_configure.md#sensitive-variable-handling-in-ansible).
 
