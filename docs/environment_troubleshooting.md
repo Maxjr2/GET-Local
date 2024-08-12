@@ -290,6 +290,18 @@ This issue looks to have subsequently been fixed but if you see the above error 
 yum update python3-pip python-libs
 ```
 
+### Let's Encrypt `acme.sh` renewal failures on HAProxy Linux Package nodes
+
+A bug was introduced with [GitLab Environment Toolkit `3.1.0`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases/3.1.0) with the switch to `acme.sh` as the tool to generate Let's Encrypt SSL certificates on HAProxy Linux Package nodes that prevented automatic renewals from happening due to a permissions issue.
+
+This was [addressed](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/merge_requests/1247) in [`3.2.0`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases/3.2.0) and renewals should work again after running Ansible on this version or later.
+
+If you're unable to upgrade or for some reason the certs still have not renewed, this can be manually worked around by running the following command on the HAProxy External node:
+
+```sh
+/opt/acme.sh/acme.sh --renew --domain <external_host>
+```
+
 ## Cloud Native Hybrid
 
 In this section are troubleshooting steps for some common Cloud Native Hybrid environment issues.
