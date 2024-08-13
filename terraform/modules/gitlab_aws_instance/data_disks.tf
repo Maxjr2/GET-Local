@@ -37,10 +37,10 @@ resource "aws_ebs_volume" "gitlab" {
   encrypted  = true
   kms_key_id = var.disk_kms_key_arn
 
-  tags = {
+  tags = merge({
     Name                       = each.key
     gitlab_node_data_disk_role = "${var.prefix}-${var.node_type}-${each.value.name}"
-  }
+  }, var.additional_tags)
 
   lifecycle {
     ignore_changes = [

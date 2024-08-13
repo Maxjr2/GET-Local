@@ -79,10 +79,10 @@ resource "google_container_cluster" "gitlab_cluster" {
     }
   }
 
-  resource_labels = {
+  resource_labels = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
-  }
+  }, var.additional_labels)
 
   lifecycle {
     ignore_changes = [
@@ -154,10 +154,10 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       workload = "webservice"
     }
 
-    resource_labels = {
+    resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-webservice-node-pool"
-    }
+    }, var.additional_labels)
   }
 
   lifecycle {
@@ -229,10 +229,10 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
       workload = "sidekiq"
     }
 
-    resource_labels = {
+    resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-sidekiq-node-pool"
-    }
+    }, var.additional_labels)
   }
 
   lifecycle {
@@ -304,10 +304,10 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       workload = "support"
     }
 
-    resource_labels = {
+    resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-supporting-node-pool"
-    }
+    }, var.additional_labels)
   }
 
   lifecycle {

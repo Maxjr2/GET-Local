@@ -24,9 +24,10 @@ resource "google_compute_instance" "gitlab" {
 
   boot_disk {
     initialize_params {
-      image = var.machine_image
-      size  = var.disk_size
-      type  = var.disk_type
+      image  = var.machine_image
+      size   = var.disk_size
+      type   = var.disk_type
+      labels = var.additional_labels
     }
     kms_key_self_link = var.disk_kms_key
   }
@@ -126,6 +127,8 @@ resource "google_compute_disk" "gitlab" {
   type = each.value.type
   size = each.value.size
   zone = each.value.zone
+
+  labels = var.additional_labels
 
   dynamic "disk_encryption_key" {
     for_each = range(var.disk_kms_key != null ? 1 : 0)

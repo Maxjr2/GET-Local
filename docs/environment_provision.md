@@ -298,6 +298,7 @@ In addition to the above, the following optional settings are also available:
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `pd-standard`.
 - `allow_stopping_for_update` - Controls whether Terraform can restart VMs when making changes if required. Should only be disabled for additional resilience. Defaults to `true`.
+- `additional_labels` - A dictionary of additional [labels](https://cloud.google.com/compute/docs/labeling-resources) to assign to VMs (including disks), Kubernetes and Cloud Services. Optional, default is `{}`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
@@ -619,7 +620,7 @@ In addition to the above, the following optional settings are also available:
 - `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `gp3`.
-- `additional_tags` - Additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VM (including root disks) or Kubernetes resources. Optional, default is `{}`
+- `additional_tags` - A dictionary of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VMs (including disks) or Kubernetes resources. Optional, default is `{}`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
@@ -892,6 +893,7 @@ In addition to the above, the following optional settings are also available:
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `Standard_LRS`.
 - `external_ip_type` - [The type of Public IP](https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses) that will be created for each VM. Can be either `Standard` (recommended) or `Basic`. Default is `Basic` for backwards compatibility.
+- `additional_tags` - A dictionary of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VMs. Optional, default is `{}`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
