@@ -80,11 +80,7 @@ This recommendation is especially so with Production instances. If you're using 
 
 :information_source:&nbsp; It's strongly recommended to always [upgrade the Toolkit first](#upgrade-the-toolkit-first) before upgrading your environment to ensure you have the latest config or fixes.
 
-The Toolkit fully supports handling GitLab upgrades for your environment - with both [standard](https://docs.gitlab.com/ee/update/with_downtime.html) and [Zero Downtime upgrades](https://docs.gitlab.com/ee/update/zero_downtime.html) supported.
-
-By design the Toolkit will perform upgrades much in the same way as the first build - any _provisioning_ changes are handled by Terraform and _configuration_ changes handled by Ansible.
-
-Typically, this should be seamless and running the same commands just as you did in the main runs should only be required to perform any GitLab upgrades but be aware of the guidance below as applicable.
+The Toolkit fully supports handling GitLab upgrades for your environment - with both [Upgrades with downtime](https://docs.gitlab.com/ee/update/with_downtime.html) and [Zero Downtime upgrades](https://docs.gitlab.com/ee/update/zero_downtime.html) supported.
 
 ### Follow GitLab Upgrade Paths
 
@@ -99,21 +95,35 @@ Upgrades to Postgres version differ depending on the source as follows:
 - Cloud Providers ([RDS](environment_advanced_services.md#aws-rds-version), [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)) - Version handling and upgrades can differ notably depending on the provider. The Toolkit exposes the relevant variable to change what version should be used by the provider, but it's recommended to refer to the provider's documentation for what values are available and how upgrades are processed.
 - Linux package (Omnibus) - Upgrades to the database can be done by following the [documentation](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
 
-### Zero Downtime Updates
+### Upgrades with Downtime
 
-For Zero Downtime Updates, the Toolkit translates the [documented manual process](https://docs.gitlab.com/ee/update/zero_downtime.html) to achieve the same effect as much as possible.
+For Upgrades with Downtime, the process is straightforward and follows the same steps as the initial environment setup. The Toolkit will perform upgrades much in the same way as the first build - any _provisioning_ changes are handled by Terraform and _configuration_ changes handled by Ansible.
 
-:information_source:&nbsp; Note that Zero Downtime Updates are **not available** for Cloud Native Hybrid environments as they aren't supported in the [GitLab Charts](https://docs.gitlab.com/charts/installation/upgrade.html).
+Typically, this should be seamless and running the same commands just as you did in the main runs is sufficient to perform GitLab upgrades.
 
-It should be noted that achieving true Zero Downtime during an update is difficult and involving. There are various ways to approach this, all with pros and cons, and typically in most cases there will always be at least very small moments of downtime depending on that approach.
+To perform an upgrade with downtime:
+
+1. Add or update `gitlab_version` in your [`vars.yml`](environment_configure.md#environment-config-varsyml) to the GitLab version you are updating to. The Toolkit will target the latest version otherwise.
+1. `cd` to the `ansible/` directory if not already there.
+1. Run `ansible-playbook` with the intended environment's inventory against the `all.yml` playbook
+
+    `ansible-playbook -i environments/10k/inventory playbooks/all.yml`
+
+### Zero Downtime Upgrades
+
+For Zero Downtime Upgrades, the Toolkit translates the [documented manual process](https://docs.gitlab.com/ee/update/zero_downtime.html) to achieve the same effect as much as possible.
+
+:information_source:&nbsp; Note that Zero Downtime Upgrades are **not available** for Cloud Native Hybrid environments as they aren't supported in the [GitLab Charts](https://docs.gitlab.com/charts/installation/upgrade.html).
+
+It should be noted that achieving true Zero Downtime during an upgrade is difficult and involving. There are various ways to approach this, all with pros and cons, and typically in most cases there will always be at least very small moments of downtime depending on that approach.
 
 The Toolkit, being an automative solution, can't perform all the same actions a manual process can do such as removing nodes from load balancers as custom load balancers are supported. It therefore takes the approach of depending on existing automatic mechanisms in the environment setup such as load balancing and failovers to achieve the same effect in practice. In rigorous testing, it's been found this approach has minimal downtime while being faster to achieve.
 
-At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS, or Praefect PostgreSQL ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be updated separately in a maintenance period.
+At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS, or Praefect PostgreSQL ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be upgraded separately in a maintenance period.
 
-For Geo environments, the zero downtime update process must be completed on the primary site first, and then repeated on each secondary site.
+For Geo environments, the zero downtime upgrade process must be completed on the primary site first, and then repeated on each secondary site.
 
-Running the zero downtime update process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
+Running the zero downtime upgrade process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
 
 1. Add or update `gitlab_version` in your [`vars.yml`](environment_configure.md#environment-config-varsyml) to the GitLab version you are updating to. The Toolkit will target the latest version otherwise and this may be too high for a Zero Downtime upgrade.
 1. `cd` to the `ansible/` directory if not already there.
@@ -121,23 +131,23 @@ Running the zero downtime update process with the Toolkit is done in the same wa
 
     `ansible-playbook -i environments/10k/inventory playbooks/zero_downtime_update.yml`
 
-1. If you have a Praefect Postgres instance deployed via the Toolkit, you will need to run the following command to update it _with_ downtime:
+1. If you have a Praefect Postgres instance deployed via the Toolkit, you will need to run the following command to upgrade it _with_ downtime:
 
     `ansible-playbook -i environments/10k/inventory playbooks/praefect_postgres.yml`
 
-1. If you have HAProxy load balancers deployed via the Toolkit, you will need to run the following command to update them _with_ downtime:
+1. If you have HAProxy load balancers deployed via the Toolkit, you will need to run the following command to upgrade them _with_ downtime:
 
     `ansible-playbook -i environments/10k/inventory playbooks/haproxy.yml`
 
-1. If you have a monitoring node deployed via the Toolkit, you will need to run the following command to update it _with_ downtime:
+1. If you have a monitoring node deployed via the Toolkit, you will need to run the following command to upgrade it _with_ downtime:
 
     `ansible-playbook -i environments/10k/inventory playbooks/monitor.yml`
 
-1. If you are using OpenSearch deployed via the Toolkit, you will need to run the following command to update it _with_ downtime:
+1. If you are using OpenSearch deployed via the Toolkit, you will need to run the following command to upgrade it _with_ downtime:
 
     `ansible-playbook -i environments/10k/inventory playbooks/opensearch.yml`
 
-The update process can take a couple of hours to complete, and the full runtime will depend on the number of nodes in the deployment.
+The upgrade process can take a couple of hours to complete, and the full runtime will depend on the number of nodes in the deployment.
 
 ### Environment Downgrades
 
