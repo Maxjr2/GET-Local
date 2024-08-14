@@ -99,10 +99,10 @@ With the above set create the Service Account as follows:
 
 In addition to creating the Service Account, set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access) for the account to enable SSH access to the created VMs on GCP, which is required by Ansible. This is done as follows:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in your preferred SSH key location.
 
-   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
-   [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
+   :information_source:&nbsp; Ansible will require access to this key later via OS default setup or specific config. If the key has a passphrase, setting up an SSH Agent for Ansible is also recommended to avoid prompts.
+
 1. With the `gcloud` command set it to point at your intended project
 
    :information_source:&nbsp; You need the project's [ID](https://support.google.com/googleapi/answer/7014113?hl=en) here and not the name. You can find it in project's dashboard in GCP Console.
