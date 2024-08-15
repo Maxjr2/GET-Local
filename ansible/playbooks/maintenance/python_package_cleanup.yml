@@ -1,0 +1,12 @@
+---
+# Remove no longer needed Python packages
+- hosts: all:!gitlab_*_node_pool:!ungrouped
+  become: true
+  order: sorted
+  roles:
+    - common_vars
+  tasks:
+    - name: Remove unneeded Python packages
+      pip:
+        name: [google-auth, openshift, PyYAML, docker]
+        state: absent

@@ -302,6 +302,26 @@ If you're unable to upgrade or for some reason the certs still have not renewed,
 /opt/acme.sh/acme.sh --renew --domain <external_host>
 ```
 
+### Deprecation: Ansible support for RHEL 8 / Amazon Linux 2 targets from release `10.0` (Ansible Core `2.17`)
+
+With the release of Ansible `10.0` (Ansible Core `2.17`) several large changes were made with Python support on target hosts that as a result has removed support for RHEL 8 and Amazon Linux 2 targets:
+
+- [Targets running Python versions lower than `3.7` are no longer supported](https://github.com/ansible-collections/news-for-maintainers/issues/54). This impacts all EL 8 distros, namely RHEL 8, which come with `3.6` installed.
+- [Targets that depend on the Yum package manager are also no longer supported](https://github.com/ansible/ansible/issues/83428#issuecomment-2161516707) due to Ansible removing its own yum module due to it depending on Python 2. This impacts all EL 7 distros, namely Amazon Linux 2.
+
+This means any of the OS targets above will no longer be supported by Ansible after community version `9.x` and Core version `2.16` reach end of life [Nov 2024](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and [May 2025](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix) respectively.
+
+**As a result support for RHEL 8 and Amazon Linux 2 with the Toolkit are deprecated and support will end by May 2025.**
+
+Users targeting these OSes will need to install Ansible `9.x` / Ansible Core `2.16` for Ansible to continue working. For reference attempting to run Ansible `10.x` / Ansible Core `2.17` or higher on these OSes will trigger the following errors:
+
+- RHEL 8 - `SyntaxError: future feature annotations is not defined`
+- Amazon Linux 2 - Errors relating to package manager such as `Module not found: rpm`
+
+Due to the above it's recommended that users upgrade to newer version of RHEL / Amazon Linux 2 at your earliest convenience to ensure continued support.
+
+**Note that this deprecation only pertains to the GitLab Environment Toolkit and Ansible**. The GitLab application itself is not impacted by this notice. For the latest information on supported operating systems for the GitLab application, head to this [documentation page](https://docs.gitlab.com/ee/administration/package_information/supported_os.html).
+
 ## Cloud Native Hybrid
 
 In this section are troubleshooting steps for some common Cloud Native Hybrid environment issues.
