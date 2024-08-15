@@ -35,7 +35,11 @@ On this page we'll detail how you can configure each type of encryption with the
 
 ## External SSL
 
-With [External SSL termination](https://docs.gitlab.com/ee/administration/load_balancer.html#load-balancers-terminate-ssl-without-backend-ssl), the external entry point for the environment will encrypt connections to and from all users.
+The Toolkit can set up [External SSL termination](https://docs.gitlab.com/ee/administration/load_balancer.html#load-balancers-terminate-ssl-without-backend-ssl) for environments where it controls the external entry point for the environment as follows:
+
+- Linux Package (Omnibus) - HAProxy
+- Linux Package (Omnibus) - GitLab Rails NGINX (Single Node with no Load Balancer only)
+- Cloud Native Hybrid - NGINX Ingress
 
 The Toolkit supports two sources of certificates for External SSL termination: **User provided** or automated via [**Let's Encrypt**](https://letsencrypt.org/). Below are the details on how to set this up with either source.
 
@@ -43,7 +47,7 @@ The Toolkit supports two sources of certificates for External SSL termination: *
 
 For users who already have certificates for their intended GitLab environment the Toolkit can use these as given to set up External SSL termination.
 
-At a high level the Toolkit will simply take the certificate and key files and use them to configure HAProxy (Standard) or NGINX Ingress (Cloud Native Hybrid) respectively to use them. Below are the steps to configure this.
+At a high level the Toolkit will simply take the certificate and key files and use them to configure HAProxy (Linux Package (Omnibus)), GitLab Rails (Linux Package (Omnibus)) or NGINX Ingress (Cloud Native Hybrid) respectively to use them. Below are the steps to configure this.
 
 #### Setup user provided certificates for Toolkit use
 
@@ -89,7 +93,11 @@ Once the config is in place you're ready to [configure the environment](#configu
 
 [Let's Encrypt](https://letsencrypt.org/) allows users to generate signed SSL certificates for free. The Toolkit allows for these generated certificates to be used for External SSL termination instead of user provided ones.
 
-At a high level the Toolkit will either directly use [`acme.sh`](https://github.com/acmesh-official/acme.sh) to generate the files then configure HAProxy (Linux Package (Omnibus)) or configure Helm to use its `certmanager` and configure NGINX Ingress (Cloud Native Hybrid) instead. Below are the steps to configure this.
+At a high level the Toolkit will use differing methods to generate the files as follows:
+
+- Linux Package (Omnibus) - HAProxy External: [`acme.sh`](https://github.com/acmesh-official/acme.sh)
+- Linux Package (Omnibus) - GitLab Rails NGINX: [Internal](https://docs.gitlab.com/omnibus/settings/ssl/#enable-the-lets-encrypt-integration)
+- Cloud Native Hybrid - NGINX Ingress: [Internal `cert-manager`](https://docs.gitlab.com/charts/installation/tls.html#option-1-cert-manager-and-lets-encrypt)
 
 #### Configure Variables
 
@@ -120,8 +128,9 @@ With the files and config in place all that's left is to update the environment.
 
 As an alternative you can also just reconfigure the specific nodes, depending on the type of environment, that will avoid doing a version update of GitLab as follows:
 
-- Standard - `ansible-playbook -i environments/10k/inventory playbooks/haproxy.yml playbooks/gitaly.yml playbooks/gitlab_rails.yml -t reconfigure`
-- Cloud Native Hybrid - `ansible-playbook -i environments/10k/inventory playbooks/gitaly.yml playbooks/gitlab_charts.yml -t reconfigure`
+- Linux Package (Omnibus) - HAProxy External: `ansible-playbook -i environments/10k/inventory playbooks/haproxy.yml playbooks/gitaly.yml playbooks/gitlab_rails.yml -t reconfigure`
+- Linux Package (Omnibus) - GitLab Rails NGINX: `ansible-playbook -i environments/10k/inventory playbooks/gitlab_rails.yml -t reconfigure`
+- Cloud Native Hybrid: `ansible-playbook -i environments/10k/inventory playbooks/gitaly.yml playbooks/gitlab_charts.yml -t reconfigure`
 
 ## Internal SSL
 
@@ -180,13 +189,46 @@ For each component the general steps to configure Internal SSL encryption is as 
 
 ### Configuring Internal SSL directly for select components
 
-As mentioned above, the Toolkit needs to handle encryption directly for select components that require additional setup such as networking. At the time of writing this applies only to Gitaly / Gitaly Cluster, but this may expand in the future.
+As mentioned above, the Toolkit needs to handle encryption directly for select components that require additional setup such as networking.
 
-Refer to the relevant section below on how to configure encryption directly for the component.
+Refer to the relevant section below on how to configure encryption directly for the select components.
+
+#### GitLab Rails NGINX
+
+The Toolkit can configure internal SSL setup between an external load balancer and GitLab Rails NGINX.
+
+:information_source:&nbsp; Note that this will set up SSL encryption for all components served through NGINX depending on setup such as Container Registry.
+
+Certificates still need to be prepared but once ready follow the below to configure.
+
+##### Configure Variables
+
+Configuring Internal SSL for GitLab Rails NGINX is similar to other components in the Toolkit. Ansible will copy over the files and then configure them accordingly.
+
+The variables that need to be set in the Inventory Variables [`vars.yml`](environment_configure.md#environment-config-varsyml) file that configures the Toolkit to use Internal SSL.
+
+- `gitlab_rails_nginx_ssl_cert_file` - Path to the GitLab Rails NGINX certificate file to upload. Default is `''`.
+- `gitlab_rails_nginx_ssl_key_file` - Path to the GitLab Rails NGINX key file to upload. Default is `''`.
+- `gitlab_rails_nginx_ssl_ca_file` - Path to the GitLab Rails NGINX CA file to upload to relevant clients. Default is `''`.
+
+An example of how the config would look is as follows:
+
+```yml
+all:
+  vars:
+    [...]
+    external_url: "https://<hostname>"
+    external_ssl_source: "letsencrypt"
+    external_ssl_letsencrypt_issuer_email: "admin@example.com"
+
+    gitlab_rails_nginx_ssl_cert_file: "<path_to_cert_file>"
+    gitlab_rails_nginx_ssl_key_file: "<path_to_key_file>"
+    gitlab_rails_nginx_ssl_ca_file: "<path_to_ca_file>"
+```
 
 #### Gitaly / Gitaly Cluster
 
-The Toolkit handles Internal SSL setup for Gitaly / Gitaly Cluster as it needs to manage the networking between the component and its clients / load balancer.
+The Toolkit can configure internal SSL setup setup for Gitaly / Gitaly Cluster as it needs to manage the networking between the component and its clients / load balancer.
 
 Certificates still need to be prepared but once ready follow the below to configure.
 
@@ -199,15 +241,15 @@ The variables that need to be set in the Inventory Variables [`vars.yml`](enviro
 Gitaly (for both Sharded or Cluster):
 
 - `gitaly_ssl_cert_file` - Path to the Gitaly Certificate file to upload. Default is `''`.
-- `gitaly_ssl_key_file` - Path to the Gitaly Key file to upload. Default is `''`.
-- `gitaly_ssl_ca_file` - Path to the Gitaly CA file to upload. Default is `''`.
+- `gitaly_ssl_key_file` - Path to the Gitaly key file to upload. Default is `''`.
+- `gitaly_ssl_ca_file` - Path to the Gitaly CA file to upload to relevant clients. Default is `''`.
 - `gitaly_ssl_port` - The port Gitaly will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `9999`.
 
 Praefect (for Cluster):
 
 - `praefect_ssl_cert_file` - Path to the Praefect Certificate file to upload. Default is `''`.
-- `praefect_ssl_key_file` - Path to the Praefect Key file to upload. Default is `''`.
-- `praefect_ssl_ca_file` - Path to the Praefect CA file to upload. Default is `''`.
+- `praefect_ssl_key_file` - Path to the Praefect key file to upload. Default is `''`.
+- `praefect_ssl_ca_file` - Path to the Praefect CA file to upload to relevant clients. Default is `''`.
 - `praefect_ssl_port` - The port Praefect will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `3035`.
 
 In addition to the above there are some other settings you may need to set depending on your setup as follows:

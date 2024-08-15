@@ -104,10 +104,8 @@ gitlab_rpm_target_path: "{{ lookup('env','GITLAB_TARGET_RPM_PATH') | default('/t
 
 gitlab_admin_email: "admin@example.com"
 
-gitlab_single_node_without_lb: false
-
 gitlab_shell_ssh_daemon: "openssh"  # openssh or gitlab-sshd
-gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment or (gitlab_single_node_without_lb and gitlab_shell_ssh_daemon == 'openssh') else '2222' }}"
+gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment or (groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups and gitlab_shell_ssh_daemon == 'openssh') else '2222' }}"
 gitlab_shell_ssh_internal_port: "{{ '2222' if (gitlab_shell_ssh_daemon == 'gitlab-sshd' or cloud_native_hybrid_environment) else '22' }}"
 gitlab_shell_ssh_key_path: "{{ '/var/opt/gitlab/gitlab-sshd' if gitlab_shell_ssh_daemon == 'gitlab-sshd' else '/etc/ssh/' }}"
 
@@ -153,6 +151,12 @@ gitlab_rails_int_addrs: "{{ (groups['gitlab_rails'] | sort | map('extract', host
 gitlab_rails_monitoring_cidr_blocks: ['0.0.0.0/0']
 gitlab_rails_nginx_real_ip_trusted_cidr_blocks: []
 
+## GitLab Rails NGINX SSL
+gitlab_rails_nginx_ssl_cert_file: ""
+gitlab_rails_nginx_ssl_key_file: ""
+gitlab_rails_nginx_ssl_ca_file: ""
+gitlab_rails_nginx_ssl: "{{ gitlab_rails_nginx_ssl_cert_file != '' and gitlab_rails_nginx_ssl_key_file != '' }}"
+
 # GitLab Postgres / PGBouncer
 postgres_primary_int_addr: "{{ (groups['postgres_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'postgres_primary' in groups else '' }}"
 postgres_int_addrs: "{{ (groups['postgres'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'postgres' in groups else [] }}"
@@ -179,7 +183,6 @@ postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 gitaly_int_addrs: "{{ (groups['gitaly'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly' in groups else [] }}"
 gitaly_primary_int_addr: "{{ (groups['gitaly_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'gitaly_primary' in groups else '' }}"
 gitaly_secondary_int_addrs: "{{ (groups['gitaly_secondary'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly_secondary' in groups else [] }}"
-gitaly_callback_internal_api_url: "{{ ('http://' + internal_lb_host) if 'haproxy_internal' in groups and 'gitlab_rails' in groups else external_url_sanitised }}"
 
 ## Gitaly SSL
 gitaly_ssl_cert_file: ""

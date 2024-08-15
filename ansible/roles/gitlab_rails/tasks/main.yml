@@ -24,28 +24,8 @@
   loop: "{{ gitlab_rails_custom_files_paths }}"
   tags: reconfigure
 
-- name: Copy Praefect or Gitaly CA files if configured
-  block:
-    - name: Copy Praefect Internal SSL CA file if configured
-      copy:
-        src: "{{ praefect_ssl_ca_file }}"
-        dest: '/etc/gitlab/trusted-certs/praefect_ca.pem'
-        mode: '0644'
-      when:
-        - "'praefect' in groups"
-        - praefect_ssl
-        - praefect_ssl_ca_file != ''
-
-    - name: Copy Gitaly Internal SSL CA file if configured
-      copy:
-        src: "{{ gitaly_ssl_ca_file }}"
-        dest: '/etc/gitlab/trusted-certs/gitaly_ca.pem'
-        mode: '0644'
-      when:
-        - "'praefect' not in groups"
-        - "'gitaly' in groups"
-        - gitaly_ssl
-        - gitaly_ssl_ca_file != ''
+- name: Copy over any configured SSL certificates
+  import_tasks: ssl.yml
   tags: reconfigure
 
 - name: Check if custom config exists
