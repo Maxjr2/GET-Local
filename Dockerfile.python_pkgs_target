@@ -1,130 +1,145 @@
-ARG pkg_old_list="google-auth==2.22.0 netaddr==0.8.0 PyYAML==6.0.1 docker==5.0.3 pexpect==4.8.0 psycopg2==2.9.8"
-ARG pkg_latest_list="netaddr PyYAML docker pexpect psycopg2 requests<=2.31.0"
+ARG pkg_list="pexpect<=4.9.0 psycopg2<=3.2.1"
 
 # Target oldest support version
 FROM python:3.8-slim-bullseye as python_default
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree
 
-RUN touch /root/py_list.txt && printf "Target - $(python3 --version)\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/==/<=/g' | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN touch /root/py_list.txt && printf "Target - $(python3 --version)\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/==/<=/g' | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Ubuntu 20.04
 FROM ubuntu:20.04 as python_ubuntu20
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 COPY --from=python_default /root/ /root/
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree
 
-RUN printf "Ubuntu 20.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Ubuntu 20.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Ubuntu 22.04
 FROM ubuntu:22.04 as python_ubuntu22
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 COPY --from=python_ubuntu20 /root/ /root/
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree
 
-RUN printf "Ubuntu 22.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Ubuntu 22.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+
+# Ubuntu 24.04
+FROM ubuntu:24.04 as python_ubuntu24
+
+ARG pkg_list
+
+COPY --from=python_ubuntu22 /root/ /root/
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages $pkg_list
+RUN pip3 install --break-system-packages pipdeptree
+
+RUN printf "Ubuntu 24.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Debian 11
 FROM debian:11 as python_debian11
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
-COPY --from=python_ubuntu22 /root/ /root/
+COPY --from=python_ubuntu24 /root/ /root/
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree
 
-RUN printf "Debian 11 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Debian 11 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+
+# Debian 12
+FROM debian:12 as python_debian12
+
+ARG pkg_list
+
+COPY --from=python_debian11 /root/ /root/
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages $pkg_list
+RUN pip3 install --break-system-packages pipdeptree
+
+RUN printf "Debian 12 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 8
 FROM rockylinux:8 as python_rl8
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
-COPY --from=python_debian11 /root/ /root/
+COPY --from=python_debian12 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel python3-libs gcc gcc-c++ libpq-devel
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pip-chill
 
-RUN printf "RHEL 8 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(netaddr|PyYAML|docker|pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "RHEL 8 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 9
 FROM rockylinux:9 as python_rl9
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 COPY --from=python_rl8 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel python3-libs gcc libpq-devel
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree
 
-RUN printf "RHEL 9 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "RHEL 9 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Amazon Linux 2
 FROM amazonlinux:2 as python_al2
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 COPY --from=python_rl9 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel gcc postgresql-devel openssl
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_latest_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list && pip3 install --upgrade-strategy only-if-needed "requests<=2.32.3,urllib3<2.0.0"
 RUN pip3 install pip-chill
 
-RUN printf "Amazon Linux 2 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(netaddr|PyYAML|docker|pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Amazon Linux 2 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Amazon Linux 2023
 FROM amazonlinux:2023 as python_al2023
 
-ARG pkg_old_list
-ARG pkg_latest_list
+ARG pkg_list
 
 COPY --from=python_al2 /root/ /root/
 
 RUN yum install -y python3-pip python3-requests python3-devel python3-wheel python3-setuptools gcc libpq-devel
 
-RUN pip3 install $pkg_old_list
-RUN pip3 install --upgrade-strategy only-if-needed $(echo "$pkg_latest_list" | sed -r 's/docker/docker==5.0.3/g')
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
 RUN pip3 install pipdeptree==2.16.1
 
-RUN printf "Amazon Linux 2023 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p netaddr,PyYAML,docker,pexpect,psycopg2) | sed -r 's/ /, /g')\n" >> /root/py_list.txt
+RUN printf "Amazon Linux 2023 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n" >> /root/py_list.txt
 
 CMD cat /root/py_list.txt

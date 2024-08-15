@@ -38,12 +38,13 @@ The requirements for the Toolkit are as follows:
 Host machine:
 
 - Terraform `1.5.5` and upwards
-- Ansible `9.0` and upwards (Python `3.10`+)
+- Ansible `10.0` and upwards (Ansible core `2.17`, Python `3.10`+)
 
 Target machine(s):
 
 - GitLab version: `15.0.0` and upwards.
-- OS: Ubuntu 20.04 / 22.04, Debian 11, RHEL 8 / 9, Amazon Linux 2 / 2023
+- OS: Ubuntu 20.04 / 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
+  - :information_source:&nbsp; RHEL 8 and Amazon Linux 2 support is deprecated due to Ansible support removal. See [this section for more information](docs/environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.
   - ARM based hardware is supported for Linux package (Omnibus) environments.

@@ -197,7 +197,11 @@ For the Toolkit, variables must be placed in one of three places depending on th
 
 #### Version Support
 
-The latest Ansible version we support is noted [here in the documentation](README.md#requirements). We regularly update the version to match the latest maintained versions accordingly.
+The Toolkit will aim to support the latest actively maintained versions of the Ansible [community](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and [core](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix) versions.
+
+Older versions that are still actively maintained are also supported but typically will reach end of life quickly due to the Ansible release cadence so it's recommended to always update to the latest version where possible.
+
+For the latest information, the [requirements section of the README](README.md#requirements) states what versions of Ansible are currently supported.
 
 #### Styling
 
