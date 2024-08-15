@@ -20,7 +20,7 @@ user['gid'] = 9000
 web_server['uid'] = 9001
 web_server['gid'] = 9001
 
-# Nginx Config
+# NGINX Config
 nginx['enable'] = true
 nginx['status']['options'] = {
   "server_tokens" => "off",
@@ -49,32 +49,62 @@ nginx['real_ip_trusted_addresses'] = [
 {% endfor %}
 ]
 
-{% if external_url_ssl %}
-## SSL Config
-{% if gitlab_single_node_without_lb %}
-## GitLab Rails Single Node External SSL
-{% if external_ssl_source == 'letsencrypt' %}
+# NGINX SSL Config - External Single Node (No Load Balancer) / Internal SSL
+{% if gitlab_rails_nginx_external_ssl_letsencrypt %}
+## External NGINX SSL - Single Node (Let's Encrypt)
 letsencrypt['enable'] = true
 letsencrypt['contact_emails'] = {{ [external_ssl_letsencrypt_issuer_email] }}
+
+{% elif gitlab_rails_nginx_external_ssl_user %}
+## External NGINX SSL - Single Node (User Provided)
+nginx['ssl_certificate'] = "/etc/gitlab/ssl/{{ external_host }}.crt"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/{{ external_host }}.key"
+
+letsencrypt['enable'] = false
+
+{% elif gitlab_rails_nginx_ssl %}
+## Internal NGINX SSL (User Provided)
+nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab_rails_nginx.pem"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab_rails_nginx.pem.key"
+
+{% if not external_url_ssl %}
+# Configure NGINX to listen on HTTPS internally if external SSL is not configured
+nginx['listen_https'] = true
+nginx['listen_port'] = 443
 {% endif %}
 
+letsencrypt['enable'] = false
+
 {% else %}
-## External Load Balancer SSL termination
-## With HAProxy or custom Load balancer
+## External Load Balancer SSL Termination / Non SSL
 nginx['listen_port'] = 80
 nginx['listen_https'] = false
-nginx['hsts_max_age'] = 0
 
 letsencrypt['enable'] = false
 {% endif %}
-{% endif %}
 
+# Container Registry
 {% if container_registry_enable %}
 registry['enable'] = true
 registry_external_url "{{ container_registry_external_url }}"
 
+# Registry NGINX SSL Config
+{% if gitlab_rails_nginx_external_ssl_user %}
+## External NGINX SSL - Single Node (User Provided)
+registry_nginx['ssl_certificate'] = "/etc/gitlab/ssl/{{ external_host }}.crt"
+registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/{{ external_host }}.key"
+
+{% elif gitlab_rails_nginx_ssl %}
+## Internal NGINX SSL (User Provided)
+registry_nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab_rails_nginx.pem"
+registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab_rails_nginx.pem.key"
+
+{% elif not gitlab_rails_nginx_external_ssl_letsencrypt %}
+## External Load Balancer SSL Termination
 registry_nginx['listen_port'] = 80
 registry_nginx['listen_https'] = false
+{% endif %}
+
 {% else %}
 registry['enable'] = false
 {% endif %}
@@ -295,11 +325,11 @@ postgresql['version'] = {{ postgres_version }}
 prometheus['enable'] = false
 {% endif %}
 
-gitlab_workhorse['env'] = {
 {%- if geo_disable_secondary_proxying %}
+gitlab_workhorse['env'] = {
   "GEO_SECONDARY_PROXY" => "0",
-{% endif %}
 }
+{% endif %}
 
 {% if 'praefect' in groups %}
 ## Gitaly Cluster - Separate Node(s)

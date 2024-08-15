@@ -377,7 +377,7 @@ In the Charts this is done via a specific Job named `migrations`. If it's failin
 
 Due to limitations around [AWS EKS networking](https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html) a cluster requires at least two subnets and each of those subnets requires their own Elastic IP when deploying a load balancer.
 
-As such, when deploying the Charts if you've not provided a number of Elastic Allocation IDs (via `aws_allocation_ids`) that match the number of subnets **exactly** the NGinx load balancer controller will fail to deploy and GitLab will not be accessible.
+As such, when deploying the Charts if you've not provided a number of Elastic Allocation IDs (via `aws_allocation_ids`) that match the number of subnets **exactly** the NGINX load balancer controller will fail to deploy and GitLab will not be accessible.
 
 This can be fixed by adjusting the number of allocation IDs and redeploying the GitLab Helm chart.
 

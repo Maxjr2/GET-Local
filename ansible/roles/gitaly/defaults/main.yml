@@ -6,3 +6,5 @@ gitaly_node: "gitaly-{{ gitaly_number }}"
 
 gitaly_cluster_storage_path: "/var/opt/gitlab/git-data"
 gitaly_sharded_storage_path: "{{ '/mnt/gitlab' if cloud_provider != 'azure' else '/var/opt/gitlab/git-data' }}"
+
+gitaly_callback_internal_api_url: "{{ (('https://' if gitlab_rails_nginx_ssl else 'http://') + internal_lb_host) if 'haproxy_internal' in groups and 'gitlab_rails' in groups else external_url_sanitised }}"

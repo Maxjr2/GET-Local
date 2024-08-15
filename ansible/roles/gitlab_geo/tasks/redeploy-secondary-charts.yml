@@ -107,7 +107,7 @@
     - gitlab-gitlab-shell
     - gitlab-toolbox
 
-- name: Restart NGinx daemonset to pick up latest secrets
+- name: Restart NGINX daemonset to pick up latest secrets
   become: false
   delegate_to: localhost
   run_once: true

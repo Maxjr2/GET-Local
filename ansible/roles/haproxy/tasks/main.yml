@@ -54,11 +54,24 @@
     - reconfigure
     - restart
 
-- name: Create /opt/haproxy/ssl directory if External SSL configured
+- name: Create HAProxy certificate directories
   file:
-    path: /opt/haproxy/ssl
+    path: "{{ item }}"
     state: directory
+  loop:
+    - /opt/haproxy/ssl
+    - /opt/haproxy/trusted-certs
   tags: reconfigure
+
+- name: Copy GitLab Rails NGINX SSL CA files if configured
+  copy:
+    src: "{{ gitlab_rails_nginx_ssl_ca_file }}"
+    dest: '/opt/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem'
+    owner: '99' # HAProxy Docker User ID
+    mode: '0600'
+  when:
+    - gitlab_rails_nginx_ssl
+    - gitlab_rails_nginx_ssl_ca_file != ''
 
 - name: Start HAProxy External Docker
   docker_container:

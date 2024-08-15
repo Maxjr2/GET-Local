@@ -1,6 +1,6 @@
 {% if 'gitlab_rails' in groups %}
 frontend internal-gitlab-rails-tcp-in
-    bind *:80
+    bind *:{{ '443' if gitlab_rails_nginx_ssl else '80' }}
     mode tcp
     option tcplog
     option clitcpka
@@ -45,7 +45,7 @@ backend gitlab-rails
     option srvtcpka
 
 {% for ip in gitlab_rails_int_addrs %}
-    server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
+    server gitlab-rails{{loop.index}} {{ ip }}:{{ '443' if gitlab_rails_nginx_ssl else '80' }} check inter 3s fall 1
 {% endfor %}
 {% endif %}
 

@@ -1,0 +1,5 @@
+---
+
+# NGINX Single Node SSL flags
+gitlab_rails_nginx_external_ssl_letsencrypt: "{{ external_url_ssl and external_ssl_source == 'letsencrypt' and groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups }}"
+gitlab_rails_nginx_external_ssl_user: "{{ external_url_ssl and external_ssl_source == 'user' and groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups }}"
