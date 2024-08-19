@@ -3,8 +3,8 @@
 roles ['patroni_role', 'pgbouncer_role']
 
 # Patroni uses one extra slot per node when initiating the replication
-patroni['postgresql']['max_replication_slots'] = {{ (((groups['postgres'] | length) * 2) * (geo_replication_slot_modifier | int)) }}
-patroni['postgresql']['max_wal_senders'] = {{ (((groups['postgres'] | length) * 2) * (geo_replication_slot_modifier | int)) + 1 }}
+patroni['postgresql']['max_replication_slots'] = {{ ((groups['postgres'] | length) * 2) }}
+patroni['postgresql']['max_wal_senders'] = {{ ((groups['postgres'] | length) * 2) + 1 }}
 
 patroni['remove_data_directory_on_rewind_failure'] = {{ patroni_remove_data_directory_on_rewind_failure | lower }}
 patroni['remove_data_directory_on_diverged_timelines'] = {{ patroni_remove_data_directory_on_diverged_timelines | lower }}

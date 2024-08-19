@@ -189,6 +189,7 @@ The below settings will need to be added to the secondary sites inventory:
 - `geo_primary_is_multi_node` - Set to `true` if primary site is multi node (2k+).
 - `geo_primary_postgres_is_ha` - Set to `true` if primary site is using Patroni for PostgreSQL replication and HA (3k+).
 - `geo_primary_registry_url` - The Primary site's Container Registry URL for replication.
+- `geo_primary_postgres_count` - The number of Patroni nodes present on the primary site.
 
 #### Linux Package
 

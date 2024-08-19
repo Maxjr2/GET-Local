@@ -12,13 +12,12 @@ patroni['password'] = '{{ patroni_password }}'
 
 {% else %}
 
-{% if not geo_secondary_postgres_is_ha %}
 geo_secondary_role['enable'] = true
-{% endif %}
 
 {% if geo_primary_postgres_is_ha %}
-postgresql['max_wal_senders'] = {{ (((groups['postgres'] | length) * 2) * (geo_replication_slot_modifier | int)) + 1 }}
+postgresql['max_wal_senders'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
 {% endif %}
+
 
 {% endif %}
 

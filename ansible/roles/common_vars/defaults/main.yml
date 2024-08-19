@@ -399,7 +399,6 @@ geo_secondary_site_group_name: "geo_secondary_site"
 geo_primary_site_name: "Primary Site"
 geo_secondary_site_name: "Secondary Site"
 
-geo_replication_slot_modifier: "{{ 2 if geo_primary_site_group_name in group_names or geo_secondary_site_group_name in group_names else 1 }}"
 geo_primary_site_postgres_group_name: "{% if geo_primary_site_group_name + '_postgres_primary' in groups %}{{ geo_primary_site_group_name }}_postgres_primary{% elif geo_primary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_primary_site_group_name }}_gitlab_rails_primary{% elif 'postgres_primary' in groups%}postgres_primary{% else %}gitlab_rails_primary{% endif %}"
 geo_primary_site_postgres_int_ip: "{{ (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
 geo_secondary_site_postgres_group_name: "{% if geo_secondary_site_group_name + '_postgres_primary' in groups %}{{ geo_secondary_site_group_name }}_postgres_primary{% elif geo_secondary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_secondary_site_group_name }}_gitlab_rails_primary{% else %}{% endif %}"
@@ -410,8 +409,6 @@ geo_secondary_praefect_postgres_host: ""
 
 geo_disable_secondary_proxying: false
 geo_enable_object_storage_replication: true
-
-geo_max_replication_slots: 1
 
 geo_migration_task: "{{ 'geo:db:migrate' if ((gitlab_version != '') and (gitlab_version is version('14.6', '<'))) else 'db:migrate:geo' }}"
 
