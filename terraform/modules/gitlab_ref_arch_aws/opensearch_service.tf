@@ -1,5 +1,9 @@
 locals {
   opensearch_service_subnet_ids = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.opensearch_service_default_subnet_count)
+
+  # When multi-az is enabled AZ count must be 2 or 3 and given number of subnets must match
+  opensearch_service_multi_az       = var.opensearch_service_node_count > 1 ? var.opensearch_service_multi_az : false
+  opensearch_service_multi_az_count = length(local.opensearch_service_subnet_ids) == 2 ? 2 : 3
 }
 
 resource "aws_iam_service_linked_role" "gitlab_opensearch_role" {
@@ -26,14 +30,15 @@ resource "aws_opensearch_domain" "gitlab" {
     warm_count   = var.opensearch_service_warm_node_count
     warm_type    = var.opensearch_service_warm_instance_type
 
-    zone_awareness_enabled = var.opensearch_service_multi_az
+    zone_awareness_enabled = local.opensearch_service_multi_az
     zone_awareness_config {
-      availability_zone_count = length(local.opensearch_service_subnet_ids) >= 3 ? 3 : 2
+      availability_zone_count = local.opensearch_service_multi_az_count
     }
   }
 
   vpc_options {
-    subnet_ids = local.opensearch_service_subnet_ids
+    # Number of subnets given must match availability_zone_count for multi-az setups. Else set to 1.
+    subnet_ids = slice(local.opensearch_service_subnet_ids, 0, local.opensearch_service_multi_az ? local.opensearch_service_multi_az_count : 1)
 
     security_group_ids = [aws_security_group.gitlab_opensearch_service[0].id]
   }

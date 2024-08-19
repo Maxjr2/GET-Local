@@ -722,18 +722,18 @@ The Toolkit supports provisioning an [AWS OpenSearch](https://aws.amazon.com/ope
 
 :information_source:&nbsp; [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in the AWS account before setup. [Refer to the specific section below for more info](#aws-opensearch-service-linked-iam-role).
 
-:information_source:&nbsp; [AWS OpenSearch](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html) specifically only supports 1, 2 or 3 Availability Zones.
+:information_source:&nbsp; AWS OpenSearch has strict networking requirements when deploying in a Multi AZ fashion. See [this section](#aws-opensearch-service-multi-az-networking-requirements) for more information.
 
 The variables for this service start with the prefix `opensearch_service_*` and should replace any previous `opensearch_vm_*` variables in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). The available variables are as follows:
 
-- `opensearch_service_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. This should be set to at least `2` or higher and should match the number of intended subnets. **Required**.
+- `opensearch_service_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. For Multi-AZ setups the node count must match the [requirements](#aws-opensearch-service-multi-az-networking-requirements). **Required**.
 - `opensearch_service_instance_type`- The [AWS Instance Type](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html) for the OpenSearch domain to use without the `.search` suffix. For example, to use a `c5.4xlarge` OpenSearch instance type, the value of this variable should be `c5.4xlarge`. **Required**.
 - `opensearch_service_engine_version` - The [engine and version](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version) of the OpenSearch domain. Should only be changed to versions that are supported by GitLab. The setting should be given in the format `<ENGINE_VERSION>`, e.g. `OpenSearch_1.1`. If not set will use the AWS default. Optional.
   - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher.
 - `opensearch_service_volume_size` - The volume size per data node. Optional, default is `500`.
 - `opensearch_service_volume_type` - The type of storage to use per data node. Optional, default is `io1`.
 - `opensearch_service_volume_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
-- `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
+- `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ, which has additional [requirements](#aws-opensearch-service-multi-az-networking-requirements). Should only be disabled when HA isn't required. Will be automatically disabled when `opensearch_service_node_count` has been set to `1`. Optional, default is `true`.
 - `opensearch_service_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Can be set to either `1`, `2` or `3`. Optional, default is `2`.
 - `opensearch_service_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
 - `opensearch_service_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access OpenSearch over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
@@ -760,6 +760,14 @@ A key limitation of this service managed role is that **only one can exist in th
 Due to this limitation the Toolkit will _not_ attempt to create this role for you due to the likelihood of clashes, and it's strongly recommended that this role is created separately beforehand.
 
 However, the Toolkit can be configured to manage this role for you via the `opensearch_service_linked_role_create` variable in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). This should only be set to `true` if you are confident that there won't be any other OpenSearch domains being created in this account.
+
+##### AWS OpenSearch service Multi-AZ networking requirements
+
+AWS OpenSearch has strict requirements when it comes to [networking for Multi-AZ clusters](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-multiaz.html#managedomains-za-summary). The following requirements must be followed:
+
+- An Availability Zone Count must be set and can only be 2 or 3. (1 can be set for non Multi-AZ clusters)
+- The configured number of Availability Zone Count and the number of Subnets passed must match exactly
+- The number of nodes set must be a clean divisor of Availability Zone Count. For example if you have 3 AZs configure the node count can be 3, 6, and so on.
 
 ### Configuring with Ansible
 
