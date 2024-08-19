@@ -3,6 +3,8 @@ geo_secondary_is_multi_node: "{{ geo_secondary_site_group_name + '_postgres_prim
 geo_primary_postgres_is_ha: "{{ geo_primary_site_group_name + '_postgres_secondary' in groups or postgres_external }}"
 geo_secondary_postgres_is_ha: "{{ geo_secondary_site_group_name + '_postgres_secondary' in groups or postgres_external }}"
 
+geo_primary_postgres_count: "{{ (groups[geo_primary_site_group_name + '_postgres_primary'] | length) + (groups[geo_primary_site_group_name + '_postgres_secondary'] | length) }}"
+
 geo_secondary_site_postgres_primary_nodename: "{{ (groups[geo_secondary_site_postgres_group_name] | map('extract', hostvars, ['ansible_nodename']) | join('')) }}"
 
 geo_secondary_site_rails_primary_int_ip: "{{ (groups[geo_secondary_site_group_name + '_gitlab_rails_primary'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
@@ -31,3 +33,8 @@ geo_run_patroni_workaround: true
 gitlab_charts_show_values: false
 
 geo_primary_postgres_host: "{{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }}"
+
+geo_secondary_site_count: "{{ geo_replication_slot_modifier if geo_replication_slot_modifier > 2 else geo_max_replication_slots }}"
+# Deprecated - TODO Remove in 4.x
+geo_max_replication_slots: 1
+geo_replication_slot_modifier: 2

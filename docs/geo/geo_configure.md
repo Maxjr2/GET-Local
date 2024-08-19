@@ -44,6 +44,7 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 - `geo_primary_site_name`/`geo_secondary_site_name` - A name plain text name for each site, this will be displayed in the main Geo settings page.
 - `geo_primary_registry_url` - The URL for the container registry. Optional, will default to `https://registry.{{ Geo primary URL }}`
 - `geo_run_patroni_workaround` - When adding a new secondary site it is sometimes required to run some extra steps for Patroni to connect to the primary site. This is only required to be run as part of an initial setup and should be set to `false` for all subsequent runs. Defaults to `true`.
+- `geo_secondary_site_count` - The number of secondary sites that will be replicating from the primary site. Defaults to 1.
 
 You can also remove the GitLab license from the sites that will not be set as the primary before running the `ansible-playbook` command. To remove the license from the secondary site you can just remove the `gitlab_license_file` or `gitlab_subscription_activation_code` setting from the secondary `vars.yml` file.
 

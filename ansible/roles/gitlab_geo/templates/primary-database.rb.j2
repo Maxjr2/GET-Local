@@ -3,7 +3,10 @@ postgresql['sql_replication_password'] = "{{ geo_sql_replication_password_md5 }}
 patroni['replication_slots'] = {
     'geo_secondary' => { 'type' => 'physical' }
 }
-patroni['postgresql']['max_replication_slots'] = {{ geo_max_replication_slots }}
+
+patroni['postgresql']['max_replication_slots'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
+patroni['postgresql']['max_wal_senders'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
+
 patroni['replication_password'] = '{{ geo_sql_replication_password }}'
 
 {% if patroni_password is defined %}
