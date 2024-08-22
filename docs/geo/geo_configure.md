@@ -95,7 +95,7 @@ Once done we can then run the command to enable Geo itself - `ansible-playbook -
 
 Once complete the two sites will now be part of the same Geo deployment.
 
-:information_source:&nbsp; When setting up multiple Geo secondaries you will need to rerun the above command replacing the secondary path for each secondary inventory. After the first run, the primary will be set up and its tasks can be skipped for each consecutive secondary with the following command `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo.yml -t secondary`.
+To set up multiple Geo secondary sites, see [Geo - Advanced - Multiple Geo Secondary Sites](./geo_advanced.md#multiple-geo-secondary-sites).
 
 ### Upgrades
 

@@ -43,7 +43,7 @@
   expect:
     command: |
       gitlab-ctl replicate-geo-database \
-        --slot-name={{ 'geo_secondary' if geo_primary_postgres_is_ha else inventory_hostname | regex_replace("-", "_") }} \
+        --slot-name={{ geo_primary_slot_name if geo_primary_postgres_is_ha else inventory_hostname | regex_replace("-", "_") }} \
         --host={{ geo_primary_postgres_host }} \
         --sslmode=verify-ca \
         --force \
