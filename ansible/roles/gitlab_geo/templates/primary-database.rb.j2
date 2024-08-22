@@ -1,7 +1,9 @@
 postgresql['sql_replication_password'] = "{{ geo_sql_replication_password_md5 }}"
 {% if geo_primary_postgres_is_ha %}
 patroni['replication_slots'] = {
-    'geo_secondary' => { 'type' => 'physical' }
+{% for replication_slot in geo_primary_replication_slots %}
+    '{{ replication_slot }}' => { 'type' => 'physical' },
+{% endfor %}
 }
 
 patroni['postgresql']['max_replication_slots'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}

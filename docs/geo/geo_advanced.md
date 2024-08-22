@@ -240,3 +240,24 @@ Once complete, if migrating to a Linux Package installation, you'll need to rest
 ```bash
 ansible-playbook -i <secondary inventory> playbooks/gitlab_geo.yml -t workhorse
 ```
+
+## Multiple Geo Secondary Sites
+
+When setting up Geo secondary sites it is possible to add more than one secondary to a primary site. For environments based on the 1k or 2k reference architectures, replication will be managed by PostgreSQL. When adding a new secondary site you will need to add `geo_secondary_site_count` to your primary sites inventory. This needs to be set to the number of secondary sites that will be attached to the primary site. This defaults to 1 and only needs to be updated when adding more than 1 secondary site.
+
+For environments based on reference architectures 3k+, replication is handled by Patroni. When adding a new secondary site you will need to add/update the below settings in the primary site as well as the new secondary site.
+
+:information_source:&nbsp; The below settings are only required when adding new secondary sites when the database is being managed by GitLab. For external databases, replication would be set up externally.
+
+### Primary site settings
+
+- `geo_secondary_site_count` - The number of secondary sites that will be connected to the primary site. Defaults to 1.
+- `geo_primary_replication_slots` - A list of replication slot names. Each secondary site requires a unique slot name for replication. Defaults to `["geo_secondary"]`.
+
+### Secondary site settings
+
+- `geo_primary_slot_name` - The replication slot to use for replication. This should match one of the values in `geo_primary_replication_slots`. Defaults to `"geo_secondary"`.
+
+For all reference architecture sizes, once the primary and secondary inventories have been updated, follow the normal [Geo process](./README.md) for adding a secondary site.
+
+:information_source:&nbsp; You will need to run the Geo playbook for each Geo secondary and should not add all secondaries into 1 command.

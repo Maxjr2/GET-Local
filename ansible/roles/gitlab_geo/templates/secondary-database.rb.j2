@@ -2,7 +2,7 @@
 patroni['standby_cluster']['enable'] = true
 patroni['standby_cluster']['host'] = '{{ geo_primary_postgres_host }}'
 patroni['standby_cluster']['port'] = 5432
-patroni['standby_cluster']['primary_slot_name'] = 'geo_secondary'
+patroni['standby_cluster']['primary_slot_name'] = '{{ geo_primary_slot_name }}'
 patroni['replication_password'] = '{{ postgres_password }}'
 
 {% if patroni_password is defined %}
@@ -17,7 +17,6 @@ geo_secondary_role['enable'] = true
 {% if geo_primary_postgres_is_ha %}
 postgresql['max_wal_senders'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
 {% endif %}
-
 
 {% endif %}
 

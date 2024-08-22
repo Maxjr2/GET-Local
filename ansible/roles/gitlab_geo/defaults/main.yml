@@ -35,6 +35,11 @@ gitlab_charts_show_values: false
 geo_primary_postgres_host: "{{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }}"
 
 geo_secondary_site_count: "{{ geo_replication_slot_modifier if geo_replication_slot_modifier > 2 else geo_max_replication_slots }}"
+
+geo_primary_replication_slots: ["geo_secondary"]
+geo_primary_slot_name: "geo_secondary"
+
+# Depricated
 # Deprecated - TODO Remove in 4.x
 geo_max_replication_slots: 1
 geo_replication_slot_modifier: 2
