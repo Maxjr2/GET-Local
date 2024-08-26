@@ -15,7 +15,7 @@ locals {
         device_name                    = data_disk.device_name
         availability_zone              = aws_instance.gitlab[i].availability_zone
         instance_id                    = aws_instance.gitlab[i].id
-        instance_name                  = aws_instance.gitlab[i].tags_all["Name"]
+        instance_name                  = local.instance_names[i]
         instance_num                   = i
         instance_disk_num              = index(var.data_disks, data_disk)
         skip_destroy                   = lookup(data_disk, "skip_destroy", null)
