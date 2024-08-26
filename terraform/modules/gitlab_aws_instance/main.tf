@@ -9,6 +9,12 @@ terraform {
   }
 }
 
+locals {
+  instance_names = [
+    for index in range(var.node_count) : "${var.prefix}-${var.node_type}-${index + 1}"
+  ]
+}
+
 resource "aws_instance" "gitlab" {
   count                  = var.node_count
   instance_type          = var.instance_type
@@ -43,7 +49,7 @@ resource "aws_instance" "gitlab" {
   }
 
   tags = merge({
-    Name                  = "${var.prefix}-${var.node_type}-${count.index + 1}"
+    Name                  = local.instance_names[count.index]
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
     gitlab_node_level     = var.label_secondaries == true ? (count.index == 0 ? "${var.node_type}-primary" : "${var.node_type}-secondary") : null
