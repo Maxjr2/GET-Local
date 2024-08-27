@@ -1,7 +1,9 @@
 locals {
   rds_geo_tracking_postgres_create = var.rds_geo_tracking_postgres_instance_type != ""
 
-  rds_geo_tracking_postgres_subnet_ids    = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.rds_geo_tracking_default_subnet_count)
+  rds_geo_tracking_postgres_default_subnet_ids = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.rds_geo_tracking_default_subnet_count) : null
+  rds_geo_tracking_postgres_subnet_ids         = coalesce(var.rds_geo_tracking_postgres_subnet_ids, local.backend_subnet_ids, local.rds_geo_tracking_postgres_default_subnet_ids)
+
   rds_geo_tracking_postgres_major_version = floor(var.rds_geo_tracking_postgres_version)
 
   # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks

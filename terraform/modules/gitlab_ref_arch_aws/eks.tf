@@ -11,9 +11,9 @@ locals {
   supporting_node_pool_autoscaling = var.supporting_node_pool_max_count > 0
 
   # Subnet selection
-  eks_default_subnet_ids      = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.eks_default_subnet_count) : []
-  eks_cluster_subnet_ids      = !local.default_network ? local.all_subnet_ids : local.eks_default_subnet_ids
-  eks_backend_node_subnet_ids = !local.default_network ? local.backend_subnet_ids : local.eks_default_subnet_ids
+  eks_default_subnet_ids    = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.eks_default_subnet_count) : null
+  eks_cluster_subnet_ids    = coalesce(var.eks_subnet_ids, local.all_subnet_ids, local.eks_default_subnet_ids)
+  eks_node_group_subnet_ids = coalesce(var.eks_node_group_subnet_ids, local.backend_subnet_ids, local.eks_default_subnet_ids)
 
   # Node Group AMI selection (Optimized or Custom)
   eks_node_group_custom_ami_id    = var.eks_node_group_custom_ami_id != null ? var.eks_node_group_custom_ami_id : var.eks_ami_id
@@ -186,7 +186,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
 
   node_group_name_prefix = "${format("%.25s", var.prefix)}-webservice-" # Create a unique name to allow nodepool replacements
   cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
-  subnet_ids             = local.eks_backend_node_subnet_ids
+  subnet_ids             = local.eks_node_group_subnet_ids
   node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
 
   launch_template {
@@ -297,7 +297,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
 
   node_group_name_prefix = "${format("%.28s", var.prefix)}-sidekiq-" # Create a unique name to allow nodepool replacements
   cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
-  subnet_ids             = local.eks_backend_node_subnet_ids
+  subnet_ids             = local.eks_node_group_subnet_ids
   node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
 
   launch_template {
@@ -407,7 +407,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
 
   node_group_name_prefix = "${format("%.25s", var.prefix)}-supporting-" # Create a unique name to allow nodepool replacements
   cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
-  subnet_ids             = local.eks_backend_node_subnet_ids
+  subnet_ids             = local.eks_node_group_subnet_ids
   node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
 
   launch_template {
