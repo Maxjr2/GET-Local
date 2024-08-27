@@ -1,7 +1,9 @@
 locals {
   rds_postgres_create = var.rds_postgres_instance_type != ""
 
-  rds_postgres_subnet_ids    = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.rds_postgres_default_subnet_count)
+  rds_postgres_default_subnet_ids = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.rds_postgres_default_subnet_count) : null
+  rds_postgres_subnet_ids         = coalesce(var.rds_postgres_subnet_ids, local.backend_subnet_ids, local.rds_postgres_default_subnet_ids)
+
   rds_postgres_major_version = floor(var.rds_postgres_version)
 
   rds_postgres_is_primary = var.rds_postgres_replication_database_arn == null

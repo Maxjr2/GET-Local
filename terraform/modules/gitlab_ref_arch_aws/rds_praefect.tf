@@ -1,7 +1,9 @@
 locals {
   rds_praefect_postgres_create = var.rds_praefect_postgres_instance_type != ""
 
-  rds_praefect_postgres_subnet_ids    = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.rds_praefect_postgres_default_subnet_count)
+  rds_praefect_postgres_default_subnet_ids = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.rds_praefect_postgres_default_subnet_count) : null
+  rds_praefect_postgres_subnet_ids         = coalesce(var.rds_praefect_postgres_subnet_ids, local.backend_subnet_ids, local.rds_praefect_postgres_default_subnet_ids)
+
   rds_praefect_postgres_major_version = floor(var.rds_praefect_postgres_version)
 
   # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks

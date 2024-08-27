@@ -1,8 +1,9 @@
 locals {
-  elasticache_redis_subnet_ids = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.elasticache_redis_default_subnet_count)
+  elasticache_redis_default_subnet_ids = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.elasticache_redis_default_subnet_count) : null
+  elasticache_redis_subnet_ids         = coalesce(var.elasticache_redis_subnet_ids, local.backend_subnet_ids, local.elasticache_redis_default_subnet_ids)
 }
 
-resource "aws_elasticache_subnet_group" "gitlab" {
+resource "aws_elasticache_subnet_group" "gitlab_redis" {
   count = sum([var.elasticache_redis_node_count, var.elasticache_redis_cache_node_count, var.elasticache_redis_persistent_node_count]) > 0 ? 1 : 0
 
   name       = "${var.prefix}-redis-subnet-group"
@@ -62,7 +63,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   final_snapshot_identifier = var.elasticache_redis_final_snapshot_identifier
   snapshot_name             = var.elasticache_redis_snapshot_name
 
-  subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
+  subnet_group_name = aws_elasticache_subnet_group.gitlab_redis[0].name
   security_group_ids = [
     aws_security_group.gitlab_elasticache_redis[0].id
   ]
@@ -150,7 +151,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   final_snapshot_identifier = var.elasticache_redis_cache_final_snapshot_identifier
   snapshot_name             = var.elasticache_redis_cache_snapshot_name
 
-  subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
+  subnet_group_name = aws_elasticache_subnet_group.gitlab_redis[0].name
   security_group_ids = [
     aws_security_group.gitlab_elasticache_redis_cache[0].id
   ]
@@ -233,7 +234,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   final_snapshot_identifier = var.elasticache_redis_persistent_final_snapshot_identifier
   snapshot_name             = var.elasticache_redis_persistent_snapshot_name
 
-  subnet_group_name = aws_elasticache_subnet_group.gitlab[0].name
+  subnet_group_name = aws_elasticache_subnet_group.gitlab_redis[0].name
   security_group_ids = [
     aws_security_group.gitlab_elasticache_redis_persistent[0].id
   ]
@@ -246,6 +247,12 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
       kms_key_id
     ]
   }
+}
+
+## Moved
+moved {
+  from = aws_elasticache_subnet_group.gitlab[0]
+  to   = aws_elasticache_subnet_group.gitlab_redis[0]
 }
 
 output "elasticache_redis_persistent_connection" {

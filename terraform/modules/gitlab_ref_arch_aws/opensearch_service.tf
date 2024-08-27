@@ -1,5 +1,6 @@
 locals {
-  opensearch_service_subnet_ids = local.backend_subnet_ids != null ? local.backend_subnet_ids : slice(tolist(local.default_subnet_ids), 0, var.opensearch_service_default_subnet_count)
+  opensearch_service_default_subnet_ids = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.opensearch_service_default_subnet_count) : null
+  opensearch_service_subnet_ids         = coalesce(var.opensearch_service_subnet_ids, local.backend_subnet_ids, local.opensearch_service_default_subnet_ids)
 
   # When multi-az is enabled AZ count must be 2 or 3 and given number of subnets must match
   opensearch_service_multi_az       = var.opensearch_service_node_count > 1 ? var.opensearch_service_multi_az : false
@@ -31,8 +32,12 @@ resource "aws_opensearch_domain" "gitlab" {
     warm_type    = var.opensearch_service_warm_instance_type
 
     zone_awareness_enabled = local.opensearch_service_multi_az
-    zone_awareness_config {
-      availability_zone_count = local.opensearch_service_multi_az_count
+    dynamic "zone_awareness_config" {
+      for_each = range(local.opensearch_service_multi_az ? 1 : 0)
+
+      content {
+        availability_zone_count = local.opensearch_service_multi_az_count
+      }
     }
   }
 

@@ -761,12 +761,17 @@ variable "eks_access_config_iam_arns" {
   type    = list(string)
   default = []
 }
+variable "eks_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by the EKS Cluster"
+  type        = list(string)
+  default     = null
+}
 variable "eks_default_disk_kms_key_arn" {
   type    = string
   default = null
 }
 
-## Node Group AMI
+## Node Group
 variable "eks_node_group_ami_type" {
   description = "Optimised AMI type to use based on machine spec. Can be one of 'AL2_x86_64', 'AL2_ARM_64', 'AL2023_x86_64_STANDARD' or 'AL2023_ARM_64_STANDARD'. Will default to AWS x86 default for EKS version. Ignored if eks_node_group_custom_ami_id is set. For more information visit https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType"
   type        = string
@@ -789,6 +794,12 @@ variable "eks_node_group_custom_ami_userdata_type" {
   description = "Userdata type to use for given eks_node_group_custom_ami_id. Can be either 'bootstrap' or 'nodeadm' (AL2023). For more information visit https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data"
   type        = string
   default     = "bootstrap"
+}
+
+variable "eks_node_group_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by the EKS Node Groups"
+  type        = list(string)
+  default     = null
 }
 
 ## Addons Versions
@@ -968,6 +979,11 @@ variable "rds_postgres_default_subnet_count" {
   type    = number
   default = 2
 }
+variable "rds_postgres_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by RDS instance"
+  type        = list(string)
+  default     = null
+}
 variable "rds_postgres_iops" {
   type    = number
   default = null
@@ -1097,6 +1113,11 @@ variable "rds_praefect_postgres_default_subnet_count" {
   type    = number
   default = 2
 }
+variable "rds_praefect_postgres_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by RDS instance"
+  type        = list(string)
+  default     = null
+}
 variable "rds_praefect_postgres_iops" {
   type    = number
   default = null
@@ -1222,6 +1243,11 @@ variable "rds_geo_tracking_default_subnet_count" {
   type    = number
   default = 2
 }
+variable "rds_geo_tracking_postgres_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by RDS instance"
+  type        = list(string)
+  default     = null
+}
 variable "rds_geo_tracking_postgres_iops" {
   type    = number
   default = null
@@ -1344,6 +1370,11 @@ variable "elasticache_redis_port" {
 variable "elasticache_redis_multi_az" {
   type    = bool
   default = true
+}
+variable "elasticache_redis_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by the Elasticache instance"
+  type        = list(string)
+  default     = null
 }
 variable "elasticache_redis_maintenance_window" {
   type    = string
@@ -1541,6 +1572,11 @@ variable "opensearch_service_multi_az" {
 variable "opensearch_service_default_subnet_count" {
   type    = number
   default = 2
+}
+variable "opensearch_service_subnet_ids" {
+  description = "List of existing subnet IDs in VPC to be used by the OpenSearch Cluster"
+  type        = list(string)
+  default     = null
 }
 variable "opensearch_service_kms_key_arn" {
   type    = string
