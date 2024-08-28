@@ -87,15 +87,15 @@ Upgrade your Python version to `3.9` or higher and try installing again to fix.
 
 ### Ansible unable to parse Inventory
 
-You may see an error appear when running Ansible that it couldn't parse the passed Inventory source, for example `Failed to parse environments/<env_name>/files as an inventory source`.
+You may see an error appear when running Ansible that it couldn't parse the passed Inventory source, for example `Failed to parse environments/<env_name>/files as an inventory source`. This error can be vague unfortunately and it's sometimes not clear what specifically has been missed for the provider plugin.
 
-1. This can happen when the wrong path is given, if there's a misconfiguration in the Inventory files, or if the inventory contains extra files that should be stored in a different location e.g. [custom config files](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_advanced.md#custom-config).
+Some common causes are as follows:
 
-   When using the Toolkit, [an Inventory will consist of several files](environment_configure.md#2-set-up-the-environments-inventory-and-config) that detail both node details and config for Ansible to use. When Ansible is passed a folder it takes all files present and combines them accordingly.
-
-   If the above error is showing, check that you're passing the Inventory folder (note not any specific file) and that there are no mistakes in any of the files present.
-
-1. Missing credentials can also cause this error, with an additional error `Failed to parse <path>/<configuration>.yml with auto plugin: Failed to describe instances: Unable to locate credentials`. This will be generated if you need to set the variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` [for AWS](environment_prep.md#1-setup-provider-authentication-environment-variables), for example.
+- When the wrong path to the Inventory folder or a path to only the Inventory file and not its folder is given.
+- If the inventory folder contains extra files that should be stored in a different location e.g. [custom config files](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_advanced.md#custom-config).
+- If there's a misconfiguration or YAML formatting error in the Inventory files.
+- If the wrong Inventory file naming format is used for the specific cloud provider. Expected formats are the following - AWS: `*.aws_ec2.yml`, GCP: `**.gcp.yml`, Azure: `*.azure_rm.yml`
+- Missing credentials - This will show with the additional error line `Failed to parse <path>/<configuration>.yml with auto plugin: Failed to describe instances: Unable to locate credentials`. This will be generated if you need to set the variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` [for AWS](environment_prep.md#1-setup-provider-authentication-environment-variables), for example.
 
 ### Ansible can't find any hosts
 
