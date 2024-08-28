@@ -31,6 +31,11 @@ resource "aws_elasticache_parameter_group" "gitlab_redis" {
     value = "noeviction"
   }
 
+  parameter {
+    name  = "timeout"
+    value = "60"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -119,6 +124,11 @@ resource "aws_elasticache_parameter_group" "gitlab_redis_cache" {
     value = "5"
   }
 
+  parameter {
+    name  = "timeout"
+    value = "60"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -200,6 +210,11 @@ resource "aws_elasticache_parameter_group" "gitlab_redis_persistent" {
   parameter {
     name  = "maxmemory-policy"
     value = "noeviction"
+  }
+
+  parameter {
+    name  = "timeout"
+    value = "60"
   }
 
   lifecycle {
