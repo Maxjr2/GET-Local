@@ -17,6 +17,7 @@ resource "google_redis_instance" "gitlab_redis" {
 
   redis_configs = {
     maxmemory-policy = "noeviction"
+    timeout          = "120"
   }
 
   labels = var.additional_labels
@@ -84,6 +85,7 @@ resource "google_redis_instance" "gitlab_redis_cache" {
 
   redis_configs = {
     maxmemory-policy = "allkeys-lru"
+    timeout          = "120"
   }
 
   labels = var.additional_labels
@@ -152,6 +154,7 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
 
   redis_configs = {
     maxmemory-policy = "noeviction"
+    timeout          = "120"
   }
 
   labels = var.additional_labels
