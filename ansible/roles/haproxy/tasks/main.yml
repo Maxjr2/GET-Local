@@ -35,7 +35,7 @@
     image: "{{ haproxy_docker_image }}"
     pull: true
     recreate: true
-    restart_policy: unless-stopped
+    restart_policy: always
     state: started
     ports: ['80:80', '6432:6432', '1936:1936', '5432:5432', "{{ (praefect_ssl_port + ':' + praefect_ssl_port) if praefect_ssl else '2305:2305' }}"]
     volumes:
@@ -79,7 +79,7 @@
     image: "{{ haproxy_docker_image }}"
     pull: true
     recreate: true
-    restart_policy: unless-stopped
+    restart_policy: always
     state: started
     ports: ['80:80', '443:443', '1936:1936', "{{ gitlab_shell_ssh_port }}:{{ gitlab_shell_ssh_port }}"]
     volumes:
