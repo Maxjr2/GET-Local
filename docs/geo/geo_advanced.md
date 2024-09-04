@@ -81,7 +81,7 @@ Once you get to the [Promote the secondary site](https://docs.gitlab.com/ee/admi
 
 After failover has occurred it's important to update your inventories to reflect the new roles they now perform and to avoid misconfiguration on subsequent runs. The original primary and secondary inventories need updating. For all environment types you will need to update the settings mentioned in the [Adding Geo specific config](geo_configure.md) section.
 
-Finally, if using AWS RDS, in the Terraform config for the original secondary site you will need to remove the `rds_postgres_replication_database_arn` variable to prevent any misconfiguration happening on the next Terraform run.
+Finally, if using AWS RDS or GCP Cloud SQL, in the Terraform config for the original secondary site you will need to remove the `rds_postgres_replication_database_arn` or `cloud_sql_postgres_master_instance_name` variables respectively to prevent any misconfiguration happening on the next Terraform run.
 
 ### Recovery
 
@@ -93,7 +93,7 @@ Once done you can perform the recovery process by running the command `ansible-p
 
 ### AWS RDS
 
-The failover and recovery process when using RDS is largely the same as the non RDS process. However it will also require the use of Terraform.
+The failover and recovery process when using RDS is largely the same as the standard process. However it will also require the use of Terraform.
 
 :information_source:&nbsp; Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
 
@@ -105,7 +105,7 @@ To perform a failover the following terraform settings will need to be updated f
 - Set `rds_postgres_password` to your Postgres password.
 - Set `rds_postgres_backup_retention_period` to a value between 0 and 35.
 
-Terraform will complete straight away, however the process can take a few minutes to complete and you will need to wait for AWS to show the database as `Available` before continuing. Once completed, the following additional settings will need to be updated and then the failover process can be followed as normal:
+Terraform will complete straight away, however the process can take a few minutes to complete within AWS, you will need to wait for the database to show as `Available` in AWS before continuing. Once completed, the following additional settings will need to be updated in Ansible and then the failover process can be followed as normal:
 
 - `postgres_host`
 - `geo_secondary_postgres_host`
@@ -120,6 +120,33 @@ The RDS recovery process involves deleting the old primary RDS instance, this is
 - Set `rds_postgres_kms_key_arn` to the KMS key used for the primary site's RDS instance.
 - Remove `rds_postgres_password`.
 - Remove `rds_postgres_backup_retention_period`.
+
+### GCP Cloud SQL
+
+The failover and recovery process when using Cloud SQL is largely the same as the standard process. However it will also require the use of Terraform.
+
+:information_source:&nbsp; Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
+
+#### Failover
+
+To perform a failover the following Terraform settings will need to be updated for the secondary site that will be promoted:
+
+- Set `cloud_sql_postgres_master_instance_name` to `null`.
+- Ensure `cloud_sql_postgres_root_password` has **not** been set. The password will already be in place for the replica and attempting to set again triggers a clash on the Cloud Provider. This can be set again as desired _after_ the replica has promoted accordingly.
+
+Terraform will take a few moments to complete and the replica should now be promoted to be its own independent instance. Once completed, the following additional settings will need to be updated in Ansible and then the failover process can be followed as normal:
+
+- `postgres_host`
+- `geo_secondary_postgres_host`
+- `geo_secondary_praefect_postgres_host`
+- `geo_tracking_postgres_host`
+
+#### Recovery
+
+The Cloud SQL recovery process involves deleting the old primary Cloud SQL instance, this is done by removing the `cloud_sql_postgres_machine_tier` setting from the `environment.tf` file for the site currently being recovered and running `terraform apply`. Once deleted, Add the `cloud_sql_postgres_machine_tier` setting back into `environment.tf` along with the following settings:
+
+- Set `cloud_sql_postgres_master_instance_name` to the ARN for the new primary site.
+- Remove `cloud_sql_postgres_root_password`.
 
 ## Container Registry Replication
 

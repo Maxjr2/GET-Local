@@ -9,7 +9,7 @@ resource "google_redis_instance" "gitlab_redis" {
   auth_enabled            = true
   transit_encryption_mode = var.memorystore_redis_transit_encryption_mode
   customer_managed_key    = var.memorystore_redis_customer_managed_key
-  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
+  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   redis_version      = var.memorystore_redis_version
   replica_count      = var.memorystore_redis_node_count > 1 ? var.memorystore_redis_node_count : null
@@ -77,7 +77,7 @@ resource "google_redis_instance" "gitlab_redis_cache" {
   auth_enabled            = true
   transit_encryption_mode = local.memorystore_redis_cache_transit_encryption_mode
   customer_managed_key    = local.memorystore_redis_cache_customer_managed_key
-  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
+  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   redis_version      = local.memorystore_redis_cache_version
   replica_count      = var.memorystore_redis_cache_node_count > 1 ? var.memorystore_redis_cache_node_count : null
@@ -146,7 +146,7 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
   auth_enabled            = true
   transit_encryption_mode = local.memorystore_redis_persistent_transit_encryption_mode
   customer_managed_key    = local.memorystore_redis_persistent_customer_managed_key
-  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
+  authorized_network      = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   redis_version      = local.memorystore_redis_persistent_version
   replica_count      = var.memorystore_redis_persistent_node_count > 1 ? var.memorystore_redis_persistent_node_count : null

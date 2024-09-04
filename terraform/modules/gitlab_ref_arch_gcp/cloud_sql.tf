@@ -3,6 +3,7 @@ locals {
   # statement_timeout setting not available on GCP Cloud SQL
   cloud_sql_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, deadlock_timeout = 5000 }
   cloud_sql_postgres_ssl_mode       = var.cloud_sql_postgres_require_ssl ? "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" : var.cloud_sql_postgres_ssl_mode
+  cloud_sql_postgres_is_primary     = var.cloud_sql_postgres_master_instance_name == null
 }
 
 resource "google_sql_database_instance" "gitlab" {
@@ -11,7 +12,10 @@ resource "google_sql_database_instance" "gitlab" {
   name             = "${var.prefix}-cloud-sql"
   database_version = var.cloud_sql_postgres_version
 
-  root_password = var.cloud_sql_postgres_root_password
+  root_password = local.cloud_sql_postgres_is_primary ? var.cloud_sql_postgres_root_password : null
+
+  master_instance_name = var.cloud_sql_postgres_master_instance_name
+  instance_type        = local.cloud_sql_postgres_is_primary ? "CLOUD_SQL_INSTANCE" : "READ_REPLICA_INSTANCE"
 
   settings {
     tier    = "db-${var.cloud_sql_postgres_machine_tier}"
@@ -24,7 +28,7 @@ resource "google_sql_database_instance" "gitlab" {
 
     ip_configuration {
       ipv4_enabled    = false
-      private_network = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
+      private_network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
       ssl_mode        = local.cloud_sql_postgres_ssl_mode
       require_ssl     = local.cloud_sql_postgres_ssl_mode == "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" ? true : null
     }
@@ -105,7 +109,7 @@ resource "google_sql_database_instance" "gitlab_read_replica" {
 
     ip_configuration {
       ipv4_enabled    = false
-      private_network = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network.id
+      private_network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
       ssl_mode        = local.cloud_sql_postgres_ssl_mode
       require_ssl     = local.cloud_sql_postgres_ssl_mode == "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" ? true : null
     }
@@ -128,6 +132,7 @@ resource "google_sql_database_instance" "gitlab_read_replica" {
 
 output "cloud_sql_postgres_connection" {
   value = {
+    "cloud_sql_name"               = try(google_sql_database_instance.gitlab[0].name, "")
     "cloud_sql_host"               = try(google_sql_database_instance.gitlab[0].ip_address[0].ip_address, "")
     "cloud_sql_version"            = try(google_sql_database_instance.gitlab[0].maintenance_version, "")
     "cloud_sql_read_replica_hosts" = try(google_sql_database_instance.gitlab_read_replica[*].ip_address[0].ip_address, "")

@@ -82,13 +82,14 @@ In addition to the above the following _optional_ settings change how the networ
 
 ### Existing (GCP)
 
-For this advanced setup, you must have an existing network stack for the environment to use.
+For this advanced setup, you must have an existing network stack for the environment to use that meets the following requirements:
 
-Ensure the network stack is configured correctly. Generally, a stack should include the same elements as listed in the **Created** section for the environment to work properly. Refer to the GCP docs for more info and specifics on how to do this.
+- An existing VPC in the target project
+- That the VPC has subnets in the desired regions
 
-Note that when this is configured the module will configure some GCP Firewall rules in your VPC to enable network access for the environment.
+:information_source:&nbsp; When configured, the module will set up several GCP Firewall rules in the VPC to enable the correct network for the GitLab environment depending on the setup.
 
-With an existing stack configure the following config should be added to the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
+To configure this setup the following config should be added to the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
 - `vpc_name` - The name of your existing VPC.
 - `subnet_name` - The name of your existing Subnet. The subnet should be located in the same existing VPC.

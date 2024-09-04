@@ -695,6 +695,11 @@ variable "cloud_sql_postgres_deletion_protection" {
   default = false
 }
 
+variable "cloud_sql_postgres_master_instance_name" {
+  type    = string
+  default = null
+}
+
 variable "cloud_sql_postgres_params" {
   description = "Additional Cloud SQL parameter group settings"
   type        = map(any)
@@ -806,6 +811,81 @@ variable "cloud_sql_praefect_postgres_backup_configuration" {
   default = {}
 }
 variable "cloud_sql_praefect_postgres_maintenance_window" {
+  type = object({
+    day          = optional(number)
+    hour         = optional(number)
+    update_track = optional(string)
+  })
+
+  default = {}
+}
+
+## Geo Tracking (Cloud SQL)
+variable "cloud_sql_geo_tracking_postgres_machine_tier" {
+  type    = string
+  default = ""
+}
+variable "cloud_sql_geo_tracking_postgres_edition" {
+  type    = string
+  default = "ENTERPRISE"
+}
+variable "cloud_sql_geo_tracking_postgres_version" {
+  type    = string
+  default = "POSTGRES_14"
+}
+variable "cloud_sql_geo_tracking_postgres_root_password" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+variable "cloud_sql_geo_tracking_postgres_disk_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_geo_tracking_postgres_disk_size" {
+  type    = number
+  default = 100
+}
+
+variable "cloud_sql_geo_tracking_postgres_ssl_mode" {
+  type        = string
+  default     = null
+  description = "Configures the SSL mode for the instance"
+}
+
+variable "cloud_sql_geo_tracking_postgres_deletion_protection" {
+  type    = bool
+  default = false
+}
+variable "cloud_sql_geo_tracking_postgres_availability_type" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_geo_tracking_postgres_encryption_key_name" {
+  type    = string
+  default = null
+}
+variable "cloud_sql_geo_tracking_postgres_params" {
+  description = "Additional Cloud SQL geo_tracking parameter group settings"
+  type        = map(any)
+  default     = {}
+}
+variable "cloud_sql_geo_tracking_postgres_backup_configuration" {
+  type = object({
+    enabled = optional(bool)
+
+    start_time = optional(string)
+    location   = optional(string)
+
+    point_in_time_recovery_enabled = optional(bool)
+    transaction_log_retention_days = optional(number)
+
+    retained_backups = optional(number)
+  })
+
+  default = {}
+}
+variable "cloud_sql_geo_tracking_postgres_maintenance_window" {
   type = object({
     day          = optional(number)
     hour         = optional(number)
@@ -937,6 +1017,13 @@ variable "subnet_name" {
 
 ## External IPs
 variable "setup_external_ips" {
+  type    = bool
+  default = true
+}
+
+variable "setup_private_services_access" {
+  description = "Toggle to disable Private Services Access setup on selected VPC if already present. Only applies when Cloud SQL is provisioned."
+
   type    = bool
   default = true
 }

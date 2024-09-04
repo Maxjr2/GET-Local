@@ -435,10 +435,14 @@ geo_primary_registry_keys: ""
 
 # Geo Tracking Postgres
 geo_tracking_postgres_host: "{% if geo_secondary_praefect_postgres_host != '' and postgres_external %}{{ geo_secondary_praefect_postgres_host }}{% elif cloud_native_hybrid_geo and postgres_external %}{{ praefect_postgres_host }}{% else %}{{ geo_secondary_site_postgres_int_ip }}{% endif %}"
+geo_tracking_postgres_port: "{{ '5432' if geo_tracking_postgres_external else '5431' }}"
 geo_tracking_postgres_user: "gitlab_geo"
-geo_tracking_postgres_port: "5431"
 geo_tracking_postgres_password: "{{ postgres_password }}"
+geo_tracking_postgres_admin_username: "{{ geo_tracking_postgres_user if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_admin_username }}"
+geo_tracking_postgres_admin_password: "{{ geo_tracking_postgres_password if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_admin_password }}"
 geo_tracking_postgres_database: "gitlabhq_geo_production"
+geo_tracking_postgres_external: "{{ 'postgres' not in groups and 'praefect_postgres' not in groups and geo_tracking_postgres_host != '' }}"
+geo_tracking_postgres_external_prep: "{{ true if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_external_prep }}"
 geo_tracking_postgres_trust_auth_cidr_blocks: ['0.0.0.0/0']
 geo_tracking_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 

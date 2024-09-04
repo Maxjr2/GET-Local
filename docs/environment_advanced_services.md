@@ -185,7 +185,7 @@ Once the variables are set in your file you can proceed to provision the service
 
 Once provisioned you'll see several new outputs at the end of the process. Key from this is the `rds_host` output, which contains the address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
 
-##### AWS RDS Version
+##### AWS RDS - Version
 
 When it comes to the version of PostgreSQL being deployed in AWS RDS, it's first worth noting that [AWS has several rules in place that can impact this on the server side](https://aws.amazon.com/rds/faqs/#Database_Engine_Versions), such as removing minor versions after a year or enabling minor upgrades by default. These rules can in turn can cause issues with Terraform, and its state as they happen automatically.
 
@@ -207,7 +207,7 @@ Configuring how RDS version is selected in the Toolkit is done via the following
 
 :information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `rds_praefect_postgres_*` prefix instead.
 
-##### AWS RDS Parameters
+##### AWS RDS - Parameters
 
 It's possible to configure [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html) via the Toolkit if desired.
 
@@ -227,13 +227,15 @@ With the following variable you can configure any [available parameter](https://
 
 - `rds_postgres_params` - A map of [Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) to configure in RDS. Any param set here will take precedence. Optional, default is `{}`.
 
-:information_source:&nbsp; Parameters for Praefect or Geo Tracking RDS databases can also be done with the same setting above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively instead.
+:information_source:&nbsp; Parameters for Praefect or Geo Tracking RDS databases can also be done with the same setting above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively.
 
-##### AWS RDS Read Replicas
+##### AWS RDS - Read Replicas
 
 The standard setup above will deploy an [RDS instance with a standby replica](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html) in a different Availability Zone to provide HA in case of a failure. This replica is only used for HA though and can't be reached.
 
 As an additional feature RDS also offers the ability to spin up separate [Read Replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
+
+:information_source:&nbsp; Note this Read Replicas are only desired for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
 
 Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
 
@@ -243,29 +245,22 @@ Read Replicas, as implied, mimic their main database in most ways, so the number
 
 :information_source:&nbsp; AWS requires that the main RDS database for which Read Replicas are being configured for must have its Backup Retention Period value (e.g. `rds_postgres_backup_retention_period`) set to 1 or higher.
 
-:information_source:&nbsp; Read replicas for Praefect or Geo Tracking RDS databases can also be done with the same settings above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively instead.
-
 Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `rds_read_replica_hosts` output (also `rds_praefect_read_replica_hosts` / `rds_geo_read_replica_hosts`), which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
 
-##### Geo
+##### AWS RDS - Geo
 
 When setting up Geo with RDS you must specify some extra settings to enable replication from the primary RDS instance to the secondary.
 
-###### Primary Site
+- `rds_postgres_backup_retention_period` (**Primary site**) must have a value (in days) greater than 0 to enable it as a replication source.
+- `rds_postgres_replication_database_arn` (**Secondary site**) must be set to the ARN for the primary sites RDS instance. The ARN will be shown in the output of the primary sites Terraform run.
+- `rds_postgres_kms_key_arn` (**Secondary site**) should be set to the same KMS key ARN that was used to encrypt the primary sites RDS instance, the key will be shown in the output of the primary sites Terraform run.
 
-`rds_postgres_backup_retention_period` must have a value (in days) greater than 0 to enable it as a replication source.
+When using RDS with Geo, the secondary site will require separate RDS instance(s) for Praefect Postgres and the Geo Tracking databases. The Tracking database and Praefect database can share a single separate instance or can be separated out into their own instances.
 
-###### Secondary Site
-
-- `rds_postgres_kms_key_arn` should be set to the same KMS key ARN that was used to encrypt the primary sites RDS instance, the key will be shown in the output of the primary sites Terraform run.
-- `rds_postgres_replication_database_arn` must be set to the ARN for the primary sites RDS instance. The ARN will be shown in the output of the primary sites Terraform run.
-
-When using RDS with Geo, the secondary site will require separate RDS instance(s) for Praefect Postgres and the Geo Tracking database. The Tracking database and Praefect database can share a single separate instance or can be separated out into their own instances.
-
-To configure these you can copy all the same variables listed above and replace `rds_postgres_*` with `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` respectively with the following considerations:
+To configure these you can copy all the same variables listed [above](#aws-rds) and replace `rds_postgres_*` with `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` respectively with the following considerations:
 
 - If you want the 2 databases to share a single instance then you only need to specify `rds_praefect_postgres_*` settings, which will also be used for the Geo Tracking database.
-- If you're not using Gitaly Cluster (and therefore Praefect) then you must provide `rds_geo_tracking_postgres_*` settings.
+- If you're not using Gitaly Cluster (and therefore Praefect) then you must provide `rds_geo_tracking_postgres_*` settings, where the Geo tracking database will then be placed.
 - Similar to the main Postgres instance the only properties required to create an instance are `*_instance_type` and `*_password`.
 
 The primary site can use a single RDS instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 RDS instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
@@ -291,7 +286,7 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.
 - `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
 
-:information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` prefix instead.
+:information_source:&nbsp; If a separate Database Instance for Praefect or Geo Tracking is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` or `cloud_sql_geo_tracking_postgres_*` prefixes respectively.
 
 To set up a standard GCP Cloud SQL PostgreSQL service for a 10k environment with the required variables, it should look like the following in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
@@ -310,7 +305,7 @@ Once the variables are set in your file you can proceed to provision the service
 
 Once provisioned the database will be configured, and you'll see several new outputs at the end of the process. Key from this is the `cloud_sql_host` output, which contains the [Private IP](https://cloud.google.com/sql/docs/postgres/configure-private-ip#connect_to_an_instance_using_its_private_ip) address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
 
-##### GCP Cloud SQL Parameters
+##### GCP Cloud SQL - Parameters
 
 It's possible to configure [Cloud SQL Postgres parameters](https://cloud.google.com/sql/docs/postgres/flags) via the Toolkit if desired.
 
@@ -329,9 +324,9 @@ With the following variable you can configure any [available parameter](https://
 
 - `cloud_sql_postgres_params` - A map of [Postgres parameters](https://cloud.google.com/sql/docs/postgres/flags#list-flags-postgres) to configure in Cloud SQL. Any param set here will take precedence. Optional, default is `{}`.
 
-:information_source:&nbsp; Parameters for the Praefect database can also be done if provisioned via the `cloud_sql_praefect_postgres_params` variable.
+:information_source:&nbsp; Parameters for the Praefect and Geo Tracking database can also be done if provisioned via the `cloud_sql_praefect_postgres_params` and `cloud_sql_geo_tracking_postgres_params` variables respectively.
 
-##### GCP Cloud SQL SSL config
+##### GCP Cloud SQL - SSL config
 
 It's possible to configure SSL connections to a GCP Cloud SQL instance via the Toolkit via the following variable in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
@@ -339,11 +334,11 @@ It's possible to configure SSL connections to a GCP Cloud SQL instance via the T
   - Due to limitations in the Terraform provider, if this is set and then subsequently unset the last setting will remain. To disable SSL on an instance set this variable to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` first and then remove.
   - `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` will enforce mutual 2-way SSL connections. Note that this setup specifically will prevent Ansible from performing the required [Database Preparation](#database-preparation) steps and as a result users and databases may need to be created separately. Client certificates will also need to be downloaded.
 
-:information_source:&nbsp; SSL can also be configured for the Praefect database if provisioned separately via the `cloud_sql_praefect_postgres_ssl_mode` variable.
+:information_source:&nbsp; SSL can also be configured for the Praefect or Geo Tracking databases if provisioned separately via the `cloud_sql_praefect_postgres_ssl_mode` or `cloud_sql_geo_tracking_postgres_ssl_mode` variables respectively.
 
 :information_source:&nbsp; [SSL Certificates on Cloud SQL are self-signed](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance). As such, [certificates may need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) depending on the set-up to allow clients to connect.
 
-##### GCP Cloud SQL Maintenance config
+##### GCP Cloud SQL - Maintenance config
 
 The Toolkit allows for configuring various Maintenance settings for a GCP Cloud SQL instance.
 
@@ -369,7 +364,7 @@ module "gitlab_ref_arch_gcp" {
 }
 ```
 
-##### GCP Cloud SQL Backup config
+##### GCP Cloud SQL - Backup config
 
 The Toolkit allows for configuring various Backup settings for a GCP Cloud SQL instance.
 
@@ -401,13 +396,23 @@ module "gitlab_ref_arch_gcp" {
 }
 ```
 
-##### GCP Cloud SQL Read Replicas
+##### GCP Cloud SQL - Private Services Access config
+
+The Toolkit sets up GCP Cloud SQL with a [private IP](https://cloud.google.com/sql/docs/postgres/private-ip) only for the environment via GCP's [Private Services Access](https://cloud.google.com/vpc/docs/private-services-access) functionality.
+
+This setup requires that an IP address range and connection are configured on the selected VPC. The Toolkit will proceed to do this whenever Cloud SQL has been configured.
+
+This setup however only needs to be done _once_ per VPC. As such if you're deploying Cloud SQL to a VPC that already has Private Services Access configured you may see a clash in Terraform as a result. In such a case you can disable this setup accordingly via the following variable in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
+
+- `setup_private_services_access` - Controls if the Toolkit will attempt to set up Private Services Access as required for select GCP services. Set to `false` if the target VPC already has this configured. Optional, default is `true`.
+
+##### GCP Cloud SQL - Read Replicas
 
 The standard setup above will deploy a standalone GCP Cloud SQL instance that optionally can also be configured to have an availability replica for HA purposes. This replica is only used for HA though and can't be reached or read from.
 
 As an additional feature Cloud SQL also offers the ability to spin up separate [Read Replicas](https://cloud.google.com/sql/docs/postgres/replication/create-replica) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
 
-:information_source:&nbsp; Note this Read Replicas are only available for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
+:information_source:&nbsp; Note this Read Replicas are only desired for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
 
 Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
 
@@ -416,6 +421,33 @@ Read Replicas, as implied, mimic their main database in most ways, so the number
 - `cloud_sql_postgres_read_replica_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for read replica instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `null`.
 
 Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `cloud_sql_read_replica_hosts` output, which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
+
+##### GCP Cloud SQL - Geo
+
+It's possible to set up Cloud SQL Read Replicas in different regions for use with Geo but be aware of the following considerations and limitations on the Cloud Provider:
+
+- **Replicas can only be configured within the same VPC and the same Project**.
+  - :information_source:&nbsp; Replicas can still be configured in different regions by configuring the replica to use a [subnet](https://cloud.google.com/vpc/docs/subnets) in the corresponding region.
+  - :information_source:&nbsp; It's recommended to either use the [Default](environment_advanced_network.md#default-gcp) or [Existing](environment_advanced_network.md#existing-gcp) network options for this setup to separate the VPC out from any specific Geo site state as you may in the future need to remove a site and this will be complicated if the VPC is specifically associated with it in a single Terraform state. The specific Subnet and Region will be determined either by what Region the Terraform provider has been configured with or by the specific Existing Subnet if it's been configured.
+  - :information_source:&nbsp; If a Cloud SQL replica is desired elsewhere, the Toolkit can be used to set up the instances, but setting up a custom replication solution using PostgreSQL logical replication will be required. Refer to the [Cloud SQL External Replica](https://cloud.google.com/sql/docs/postgres/replication/configure-external-replica) and [GitLab Geo External PostgreSQL](https://docs.gitlab.com/ee/administration/geo/setup/external_database.html) documentation for more information.
+- When using Customer-managed encryption keys (CMEK) you are required to use [a _different_ key for the replica when in another region](https://cloud.google.com/sql/docs/postgres/cmek#restrictions)
+
+To configure a read replica, set the following on the Secondary site's [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`) as required:
+
+- `cloud_sql_postgres_master_instance_name` must be set to the name for the primary site's Cloud SQL instance that resides within the same VPC and Project. The name will be shown in the output of the primary site's Terraform run.
+- `cloud_sql_postgres_encryption_key_name` should be set if CMEK is desired to a key that exists in the target region. If left unset the GCP default key for that region will be used.
+
+:information_source:&nbsp; `cloud_sql_postgres_root_password` is not required for this setup as the password will be replicated from the primary instance.
+
+When using Cloud SQL with Geo, the secondary site will require separate Cloud SQL instance(s) for Praefect Postgres and the Geo Tracking databases. The Tracking database and Praefect database can share a single separate instance or can be separated out into their own instances.
+
+To configure these you can copy all the same variables listed [above](#gcp-cloud-sql) and replace `gcp_cloud_sql_postgres_*` with `cloud_sql_praefect_postgres_*` or `cloud_sql_geo_tracking_postgres_*` respectively with the following considerations:
+
+- If you want the 2 databases to share a single instance then you only need to specify `cloud_sql_praefect_postgres_*` settings, which will also be used for the Geo Tracking database.
+- If you're not using Gitaly Cluster (and therefore Praefect) then you must provide `cloud_sql_geo_tracking_postgres_*` settings, where the Geo tracking database will then be placed.
+- Similar to the main Postgres instance the only properties required to create an instance are `*_machine_tier`.
+
+The primary site can use a single Cloud SQL instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 Cloud SQL instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
 
 ### Configuring with Ansible
 
@@ -478,12 +510,12 @@ Due to the complexity of this area and restrictions in Ansible it's not possible
 
 #### Geo
 
-When setting up Geo with RDS you must specify some extra settings to configure the RDS instances being used. To configure these you can copy all the same variables listed above and replace `postgres_*` with `praefect_postgres_*` or `geo_tracking_postgres_*` respectively with the below considerations.
+When setting up Geo with AWS RDS or GCP Cloud SQL you must specify some extra settings to configure the instances being used. To configure these you can copy all the same variables listed above and replace `postgres_*` with `praefect_postgres_*` or `geo_tracking_postgres_*` respectively with the below considerations.
 
-- `geo_secondary_postgres_host` - Should always be specified and needs to point to the secondary sites GitLab RDS instance.
-- `geo_tracking_postgres_host` - By default this will use the same database used for Praefect. If Gitaly cluster is not being used then this must be set to a separate RDS instance than the main GitLab instance.
-- `geo_tracking_postgres_port` - By default the Geo tracking database uses port `5431`, if the Geo tracking database is sharing an RDS instance with Praefect this needs to be set to the same value as `praefect_postgres_port` (`5432` by default).
-- `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate RDS instance being used for Praefect.
+- `geo_secondary_postgres_host` - Should always be specified and needs to point to the secondary site's database instance.
+- `geo_tracking_postgres_host` - By default this will use the same database used for Praefect. If Gitaly Cluster is not being used then this must be set to a separate database instance than the main GitLab instance.
+- `geo_tracking_postgres_port` - By default the Geo tracking database uses port `5431`, if the Geo tracking database is sharing a database instance with Praefect this needs to be set to the same value as `praefect_postgres_port` (`5432` by default).
+- `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate database instance being used for Praefect.
 
 ## Redis
 
@@ -720,24 +752,24 @@ Like the main provisioning docs there are sections for each supported provider o
 
 The Toolkit supports provisioning an [AWS OpenSearch](https://aws.amazon.com/opensearch-service/) service domain (instance) with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-:information_source:&nbsp; [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in the AWS account before setup. [Refer to the specific section below for more info](#aws-opensearch-service-linked-iam-role).
+:information_source:&nbsp; [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in the AWS account before setup. [Refer to the specific section below for more info](#aws-opensearch-service---service-linked-iam-role).
 
-:information_source:&nbsp; AWS OpenSearch has strict networking requirements when deploying in a Multi AZ fashion. See [this section](#aws-opensearch-service-multi-az-networking-requirements) for more information.
+:information_source:&nbsp; AWS OpenSearch has strict networking requirements when deploying in a Multi AZ fashion. See [this section](#aws-opensearch-service---multi-az-networking-requirements) for more information.
 
 The variables for this service start with the prefix `opensearch_service_*` and should replace any previous `opensearch_vm_*` variables in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). The available variables are as follows:
 
-- `opensearch_service_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. For Multi-AZ setups the node count must match the [requirements](#aws-opensearch-service-multi-az-networking-requirements). **Required**.
+- `opensearch_service_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. For Multi-AZ setups the node count must match the [requirements](#aws-opensearch-service---multi-az-networking-requirements). **Required**.
 - `opensearch_service_instance_type`- The [AWS Instance Type](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html) for the OpenSearch domain to use without the `.search` suffix. For example, to use a `c5.4xlarge` OpenSearch instance type, the value of this variable should be `c5.4xlarge`. **Required**.
 - `opensearch_service_engine_version` - The [engine and version](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version) of the OpenSearch domain. Should only be changed to versions that are supported by GitLab. The setting should be given in the format `<ENGINE_VERSION>`, e.g. `OpenSearch_1.1`. If not set will use the AWS default. Optional.
   - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher.
 - `opensearch_service_volume_size` - The volume size per data node. Optional, default is `500`.
 - `opensearch_service_volume_type` - The type of storage to use per data node. Optional, default is `io1`.
 - `opensearch_service_volume_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
-- `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ, which has additional [requirements](#aws-opensearch-service-multi-az-networking-requirements). Should only be disabled when HA isn't required. Will be automatically disabled when `opensearch_service_node_count` has been set to `1`. Optional, default is `true`.
+- `opensearch_service_multi_az` - Specifies if the OpenSearch domain is multi-AZ, which has additional [requirements](#aws-opensearch-service---multi-az-networking-requirements). Should only be disabled when HA isn't required. Will be automatically disabled when `opensearch_service_node_count` has been set to `1`. Optional, default is `true`.
 - `opensearch_service_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Can be set to either `1`, `2` or `3`. Optional, default is `2`.
 - `opensearch_service_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
 - `opensearch_service_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access OpenSearch over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
-- `opensearch_service_linked_role_create` - Sets if the Toolkit should manage the [OpenSearch service-link role](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html). Will create or destroy the role when set to `true`. Set to `false` if the role already exists in the AWS account. Refer to the [specific section below](#aws-opensearch-service-linked-iam-role) for more info. Optional, default is `false`.
+- `opensearch_service_linked_role_create` - Sets if the Toolkit should manage the [OpenSearch service-link role](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html). Will create or destroy the role when set to `true`. Set to `false` if the role already exists in the AWS account. Refer to the [specific section below](#aws-opensearch-service---service-linked-iam-role) for more info. Optional, default is `false`.
 - `opensearch_service_tags` - A map of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to OpenSearch domain. Optional, default is `{}`.
 
 In addition to the above there are several optional features available in AWS OpenSearch that the Toolkit can also configure via the following variables:
@@ -751,7 +783,7 @@ Once the variables are set in your file you can proceed to provision the service
 
 Once provisioned you'll see several new outputs at the end of the process. Key from this is the `opensearch_host` output, which contains the address for the OpenSearch domain that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
 
-##### AWS OpenSearch service-linked IAM role
+##### AWS OpenSearch service - Service-linked IAM role
 
 [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in your AWS account named `AWSServiceRoleForAmazonOpenSearchService`.
 
@@ -761,7 +793,7 @@ Due to this limitation the Toolkit will _not_ attempt to create this role for yo
 
 However, the Toolkit can be configured to manage this role for you via the `opensearch_service_linked_role_create` variable in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). This should only be set to `true` if you are confident that there won't be any other OpenSearch domains being created in this account.
 
-##### AWS OpenSearch service Multi-AZ networking requirements
+##### AWS OpenSearch service - Multi-AZ networking requirements
 
 AWS OpenSearch has strict requirements when it comes to [networking for Multi-AZ clusters](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-multiaz.html#managedomains-za-summary). The following requirements must be followed:
 

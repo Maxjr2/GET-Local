@@ -14,8 +14,8 @@ module "redis" {
   disk_kms_key = var.redis_disk_kms_key != null ? var.redis_disk_kms_key : var.default_disk_kms_key
   disks        = var.redis_disks
 
-  vpc               = local.vpc_name
-  subnet            = local.subnet_name
+  vpc               = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnet            = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
 
@@ -54,8 +54,8 @@ module "redis_cache" {
   disk_kms_key = var.redis_cache_disk_kms_key != null ? var.redis_cache_disk_kms_key : var.default_disk_kms_key
   disks        = var.redis_cache_disks
 
-  vpc               = local.vpc_name
-  subnet            = local.subnet_name
+  vpc               = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnet            = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
 
@@ -92,8 +92,8 @@ module "redis_persistent" {
   disk_kms_key = var.redis_persistent_disk_kms_key != null ? var.redis_persistent_disk_kms_key : var.default_disk_kms_key
   disks        = var.redis_persistent_disks
 
-  vpc               = local.vpc_name
-  subnet            = local.subnet_name
+  vpc               = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnet            = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
 
