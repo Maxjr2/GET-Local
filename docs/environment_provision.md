@@ -367,7 +367,7 @@ Once the Key(s) are created they can be configured in Terraform via the [module'
   - `*_node_pool_disk_kms_key` - The GCP Key resource name to use for specific GKE Node Pools. Will override `gke_default_disk_kms_key` if specified. Default is `null`.
     - Available component options: `webservice`, `sidekiq`, `supporting`.
 - `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name to be used for storage encryption of a [Google Cloud SQL](environment_advanced_services.md#gcp-cloud-sql) instance created by the Toolkit.
-  - Optionally `cloud_sql_praefect_postgres_encryption_key_name` can be used to configure for separate services.
+  - Optionally `cloud_sql_praefect_postgres_encryption_key_name` or `cloud_sql_geo_tracking_postgres_encryption_key_name` can be used to configure for separate services.
 - `memorystore_redis_customer_managed_key` - The GCP Key resource name to be used for storage encryption of a [GCP Memorystore](environment_advanced_services.md#gcp-memorystore) instance created by the Toolkit.
   - Optionally `memorystore_redis_cache_customer_managed_key` or `memorystore_redis_persistent_customer_managed_key` can be used to configure for separate services.
 

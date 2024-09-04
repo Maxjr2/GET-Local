@@ -85,7 +85,6 @@
     - praefect_postgres_external
     - praefect_postgres_external_prep
     - "'praefect_primary' in group_names"
-    - (geo_secondary_site_group_name not in groups)
   tags:
     - reconfigure
     - db_migrate

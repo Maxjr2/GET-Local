@@ -23,8 +23,8 @@ resource "google_container_cluster" "gitlab_cluster" {
 
   deletion_protection = var.gke_deletion_protection
 
-  network    = local.vpc_name
-  subnetwork = local.subnet_name
+  network    = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnetwork = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
 
   # Require VPC Native cluster
   # https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_gke_with_terraform#vpc-native-clusters
@@ -323,7 +323,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 ## Firewall
 resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
   name    = "${var.prefix}-kubernetes-vms-internal"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
   count   = min(local.total_node_pool_count, 1)
 
   description = "Allow internal access between GitLab Kubernetes containers and VMs"

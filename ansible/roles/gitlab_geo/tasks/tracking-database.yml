@@ -19,28 +19,26 @@
   run_once: true
   set_fact:
     deploy_host: "{{ groups[geo_secondary_site_group_name] | random }}"
-  when:
-    - postgres_external
-    - geo_secondary_praefect_postgres_host == geo_tracking_postgres_host
+  when: geo_tracking_postgres_external
 
 - name: Configure Tracking database for externally managed databases
   block:
     - name: Tracking Database - Create Geo tracking user
       community.postgresql.postgresql_user:
-        login_host: "{{ geo_secondary_praefect_postgres_host }}"
-        login_port: "{{ praefect_postgres_port }}"
-        login_user: "{{ praefect_postgres_admin_username }}"
-        login_password: "{{ praefect_postgres_admin_password }}"
+        login_host: "{{ geo_tracking_postgres_host }}"
+        login_port: "{{ geo_tracking_postgres_port }}"
+        login_user: "{{ geo_tracking_postgres_admin_username }}"
+        login_password: "{{ geo_tracking_postgres_admin_password }}"
         db: "template1"
-        name: "{{ geo_tracking_postgres_user }}"
+        name: "{{ geo_tracking_postgres_user.split('@')[0] }}"
         password: "{{ geo_tracking_postgres_password }}"
         role_attr_flags: CREATEDB
         expires: infinity
 
     - name: Tracking Database - Create Geo tracking database
       community.postgresql.postgresql_db:
-        login_host: "{{ geo_secondary_praefect_postgres_host }}"
-        login_port: "{{ praefect_postgres_port }}"
+        login_host: "{{ geo_tracking_postgres_host }}"
+        login_port: "{{ geo_tracking_postgres_port }}"
         login_user: "{{ geo_tracking_postgres_user }}"
         login_password: "{{ geo_tracking_postgres_password }}"
         name: "{{ geo_tracking_postgres_database }}"
@@ -48,14 +46,15 @@
 
     - name: Tracking Database - Enable required Postgres extensions
       community.postgresql.postgresql_ext:
-        login_host: "{{ geo_secondary_praefect_postgres_host }}"
-        login_port: "{{ praefect_postgres_port }}"
-        login_user: "{{ praefect_postgres_admin_username }}"
-        login_password: "{{ praefect_postgres_admin_password }}"
+        login_host: "{{ geo_tracking_postgres_host }}"
+        login_port: "{{ geo_tracking_postgres_port }}"
+        login_user: "{{ geo_tracking_postgres_admin_username }}"
+        login_password: "{{ geo_tracking_postgres_admin_password }}"
         name: "{{ item }}"
         db: "{{ geo_tracking_postgres_database }}"
       loop: ['pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
   when:
-    - praefect_postgres_external_prep
+    - geo_tracking_postgres_external
+    - geo_tracking_postgres_external_prep
     - deploy_host is defined
     - inventory_hostname == deploy_host

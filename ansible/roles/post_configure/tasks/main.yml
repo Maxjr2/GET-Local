@@ -92,6 +92,10 @@
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"
+  tags:
+    - license
+    - reconfigure
+    - opensearch
 
 - name: Perform GitLab post configuration
   block:

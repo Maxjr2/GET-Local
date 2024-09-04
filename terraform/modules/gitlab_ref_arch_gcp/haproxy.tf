@@ -14,8 +14,8 @@ module "haproxy_external" {
   disk_kms_key = var.haproxy_external_disk_kms_key != null ? var.haproxy_external_disk_kms_key : var.default_disk_kms_key
   disks        = var.haproxy_external_disks
 
-  vpc               = local.vpc_name
-  subnet            = local.subnet_name
+  vpc               = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnet            = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
   external_ips      = var.haproxy_external_external_ips
@@ -53,8 +53,8 @@ module "haproxy_internal" {
   disk_kms_key = var.haproxy_internal_disk_kms_key != null ? var.haproxy_internal_disk_kms_key : var.default_disk_kms_key
   disks        = var.haproxy_internal_disks
 
-  vpc               = local.vpc_name
-  subnet            = local.subnet_name
+  vpc               = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+  subnet            = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
   zones             = var.zones
   setup_external_ip = var.setup_external_ips
 

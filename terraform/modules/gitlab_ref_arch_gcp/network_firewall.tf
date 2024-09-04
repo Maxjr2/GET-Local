@@ -7,7 +7,7 @@ locals {
 resource "google_compute_firewall" "gitlab_http_https" {
   count   = var.haproxy_external_node_count + var.monitor_node_count + length(var.gitlab_rails_external_ips) > 0 && (var.setup_external_ips || length(var.http_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-http-https"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow external load balancer or Rails node access for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
@@ -23,7 +23,7 @@ resource "google_compute_firewall" "gitlab_http_https" {
 resource "google_compute_firewall" "gitlab_ssh" {
   count   = local.gitlab_shell_ssh_port != null && (var.setup_external_ips || length(var.ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-gitlab-rails-ssh"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow access to GitLab SSH via external load balancer or Rails node for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
@@ -39,7 +39,7 @@ resource "google_compute_firewall" "gitlab_ssh" {
 resource "google_compute_firewall" "ssh" {
   count   = (var.setup_external_ips || length(var.external_ssh_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-ssh"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow SSH access for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
@@ -57,7 +57,7 @@ resource "google_compute_firewall" "ssh" {
 resource "google_compute_firewall" "icmp" {
   count   = (var.setup_external_ips || length(var.icmp_allowed_ingress_cidr_blocks) > 0) ? 1 : 0
   name    = "${var.prefix}-icmp"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow ICMP access for GitLab environment '${var.prefix}' on the ${local.vpc_name} network"
 
@@ -70,18 +70,10 @@ resource "google_compute_firewall" "icmp" {
 }
 
 # Created or Existing network rules
-data "google_compute_subnetwork" "selected" {
-  count = local.vpc_name != "default" ? 1 : 0
-
-  name = local.subnet_name
-
-  depends_on = [google_compute_subnetwork.gitlab_vpc_subnet[0]]
-}
-
 resource "google_compute_firewall" "internal" {
-  count   = local.vpc_name != "default" ? 1 : 0
+  count   = local.create_network || local.existing_network ? 1 : 0
   name    = "${var.prefix}-internal"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow internal traffic on the ${local.vpc_name} network"
 
@@ -98,13 +90,14 @@ resource "google_compute_firewall" "internal" {
   }
 
   priority      = 65534
-  source_ranges = [data.google_compute_subnetwork.selected[0].ip_cidr_range]
+  source_ranges = local.create_network ? [google_compute_subnetwork.gitlab_vpc_subnet[0].ip_cidr_range] : [data.google_compute_subnetwork.gitlab_subnet[0].ip_cidr_range]
 }
 
+# VPC Peering network rules
 resource "google_compute_firewall" "internal_peer" {
   count   = local.create_network && var.create_network_peer_subnet_cidr_block != null ? 1 : 0
   name    = "${var.prefix}-internal-peer"
-  network = local.vpc_name
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
 
   description = "Allow internal traffic on the ${local.vpc_name} network from peer network with cidr block ${var.create_network_peer_subnet_cidr_block}"
 
