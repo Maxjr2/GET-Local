@@ -14,6 +14,7 @@ system_packages_auto_security_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_AUTO_SE
 
 # Python packages should target minimum active Python version (3.8) but also must allow for lower targets for Python 3.6 (RHEL 8) and 3.7 (AL2).
 python_packages: [pexpect<=4.9.0, psycopg2<=3.2.1]
+python_packages_rhel: "{{ python_packages + ['requests<=2.32.3'] }}"
 python_packages_amazon:
   # Install requests and urllib3 1.x for Amazon Linux 2 - https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html#ssl-module-is-compiled-with-openssl-1-0-2-k-fips
   '2': "{{ python_packages + ['requests<=2.32.3', 'urllib3<2.0.0'] }}"

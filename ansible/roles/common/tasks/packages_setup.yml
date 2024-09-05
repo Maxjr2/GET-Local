@@ -79,15 +79,18 @@
   when:
     - not (ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_major_version'] == '2')
     - not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8')
+    - not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '9')
+
+- name: Install python packages (RHEL)
+  pip:
+    name: "{{ python_packages_rhel }}"
+    extra_args: "--upgrade-strategy only-if-needed"
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution'] != 'Amazon'
 
 - name: Install python packages (Amazon Linux 2)
   pip:
     name: "{{ python_packages_amazon[ansible_facts['distribution_major_version']] }}"
     extra_args: "--upgrade-strategy only-if-needed"
   when: (ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_major_version'] == '2')
-
-- name: Install python packages (RHEL 8)
-  pip:
-    name: "{{ python_packages }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-  when: (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8')
