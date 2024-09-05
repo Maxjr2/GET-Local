@@ -322,9 +322,9 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
 
 ## Firewall
 resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
+  count   = min(local.total_node_pool_count, 1)
   name    = "${var.prefix}-kubernetes-vms-internal"
   network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
-  count   = min(local.total_node_pool_count, 1)
 
   description = "Allow internal access between GitLab Kubernetes containers and VMs"
 
@@ -336,7 +336,8 @@ resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
     protocol = "tcp"
   }
 
-  source_ranges = [google_container_cluster.gitlab_cluster[count.index].cluster_ipv4_cidr]
+  source_ranges = [google_container_cluster.gitlab_cluster[0].cluster_ipv4_cidr]
+  target_tags   = [var.prefix]
 }
 
 output "kubernetes" {
