@@ -27,12 +27,12 @@ module "haproxy_external" {
   elastic_ip_allocation_ids = var.haproxy_external_elastic_ip_allocation_ids
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null),
-    try(aws_security_group.gitlab_external_git_ssh[0].id, null),
-    try(aws_security_group.gitlab_external_http_https[0].id, null)
-  ]
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
+    local.gitlab_git_ssh_access_security_group_create ? [aws_security_group.gitlab_git_ssh_access[0].id] : [],
+    local.gitlab_http_https_access_security_group_create ? [aws_security_group.gitlab_http_https_access[0].id] : []
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
@@ -68,10 +68,10 @@ module "haproxy_internal" {
   iam_permissions_boundary_arn = var.default_iam_permissions_boundary_arn
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null)
-  ]
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : []
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment

@@ -26,7 +26,7 @@ module "monitor" {
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null),
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
     var.monitor_security_group_ids
   ])
 

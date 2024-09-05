@@ -24,10 +24,10 @@ module "redis" {
   iam_permissions_boundary_arn = var.default_iam_permissions_boundary_arn
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null)
-  ]
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : []
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
@@ -67,10 +67,10 @@ module "redis_cache" {
   iam_permissions_boundary_arn = var.default_iam_permissions_boundary_arn
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null)
-  ]
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : []
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
@@ -108,10 +108,10 @@ module "redis_persistent" {
   iam_permissions_boundary_arn = var.default_iam_permissions_boundary_arn
 
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
-  security_group_ids = [
+  security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    try(aws_security_group.gitlab_external_ssh[0].id, null)
-  ]
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : []
+  ])
 
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment

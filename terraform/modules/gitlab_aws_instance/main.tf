@@ -20,7 +20,7 @@ resource "aws_instance" "gitlab" {
   instance_type          = var.instance_type
   ami                    = var.ami_id
   key_name               = var.ssh_key_name
-  vpc_security_group_ids = compact(var.security_group_ids)
+  vpc_security_group_ids = var.security_group_ids
   iam_instance_profile   = length(var.iam_instance_policy_arns) > 0 ? aws_iam_instance_profile.gitlab[0].name : null
 
   subnet_id = var.subnet_ids != null ? element(tolist(var.subnet_ids), count.index) : null

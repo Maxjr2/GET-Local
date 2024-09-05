@@ -594,7 +594,9 @@ output "kubernetes" {
     "kubernetes_addon_ebs_csi_driver_version" = try(aws_eks_addon.ebs_csi_driver[0].addon_version, "")
 
     # Exporting network configuration so that additional nodepools can be added with the same settings
-    "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
-    "cluster_security_group_id"     = try(aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id, "")
+    "kubernetes_cluster_security_group_ids"               = try(aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id, "")
+    "kubernetes_webservice_node_group_security_group_ids" = try(flatten(aws_launch_template.gitlab_webservice[0].vpc_security_group_ids), "")
+    "kubernetes_sidekiq_node_group_security_group_ids"    = try(flatten(aws_launch_template.gitlab_sidekiq[0].vpc_security_group_ids), "")
+    "kubernetes_supporting_node_group_security_group_ids" = try(flatten(aws_launch_template.gitlab_supporting[0].vpc_security_group_ids), "")
   }
 }
