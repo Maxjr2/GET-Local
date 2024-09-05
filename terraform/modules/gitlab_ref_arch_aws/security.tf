@@ -1,5 +1,9 @@
 locals {
   gitlab_shell_ssh_port = var.haproxy_external_node_count > 0 && var.gitlab_shell_ssh_port == null ? 2222 : (var.external_ssh_port != 2222 ? var.external_ssh_port : var.gitlab_shell_ssh_port)
+
+  gitlab_vm_ssh_access_security_group_create     = (var.subnet_priv_count == 0 && var.subnet_priv_ids == null) && var.ssh_public_key != null
+  gitlab_git_ssh_access_security_group_create    = local.gitlab_shell_ssh_port != null
+  gitlab_http_https_access_security_group_create = (var.haproxy_external_node_count + var.monitor_node_count + length(var.gitlab_rails_elastic_ip_allocation_ids)) > 0
 }
 
 resource "aws_key_pair" "ssh_key" {
@@ -15,76 +19,88 @@ data "aws_vpc" "selected" {
 
 # Internal
 resource "aws_security_group" "gitlab_internal_networking" {
-  # Allows for machine internal connections as well as outgoing internet access
-  # Avoid changes that cause replacement due to EKS Cluster issue
-  name   = "${var.prefix}-internal-networking"
-  vpc_id = data.aws_vpc.selected.id
+  name_prefix = "${var.prefix}-internal-networking"
+  vpc_id      = data.aws_vpc.selected.id
 
-  ingress {
-    description = "Open internal networking for VMs"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = true
+  description = "${var.prefix} - Internal Networking Security Group"
+
+  tags = {
+    Name = "${var.prefix}-internal-networking"
   }
 
-  dynamic "ingress" {
-    for_each = range(length(var.internal_allowed_ingress_security_group_ids) > 0 ? 1 : 0)
-
-    content {
-      description     = "Open internal networking from configured Security Groups"
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
-      security_groups = var.internal_allowed_ingress_security_group_ids
-    }
+  lifecycle {
+    create_before_destroy = true
   }
+}
 
-  dynamic "ingress" {
-    for_each = range(var.peer_vpc_cidr != null ? 1 : 0)
+resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking" {
+  security_group_id = aws_security_group.gitlab_internal_networking.id
 
-    content {
-      description = "Open internal peer networking for VMs"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = [var.peer_vpc_cidr]
-    }
-  }
+  description = "Open internal networking for VMs and Node Groups"
+  ip_protocol = "-1"
 
-  egress {
-    description = "Open internet access for VMs"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
   tags = {
     Name = "${var.prefix}-internal-networking"
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_security_groups" {
+  for_each = toset(var.internal_allowed_ingress_security_group_ids)
+
+  security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  description = "Open internal networking from configured Security Groups"
+  ip_protocol = "-1"
+
+  referenced_security_group_id = each.key
+
+  tags = {
+    Name = "${var.prefix}-internal-networking-security-groups-${each.key}"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_peer" {
+  count = var.peer_vpc_cidr != null ? 1 : 0
+
+  security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  description = "Open internal peer networking for VMs"
+  ip_protocol = "-1"
+
+  cidr_ipv4 = var.peer_vpc_cidr
+
+  tags = {
+    Name = "${var.prefix}-internal-networking-peer"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "gitlab_internal_networking_internet" {
+  security_group_id = aws_security_group.gitlab_internal_networking.id
+
+  description = "Open internet access for VMs"
+  ip_protocol = "-1"
+
+  cidr_ipv4 = "0.0.0.0/0"
+
+  tags = {
+    Name = "${var.prefix}-internal-networking-internet"
+  }
+}
+
 # External
-resource "aws_security_group" "gitlab_external_ssh" {
-  # Create only if no created or existing private subnets and if a SSH key has been passed
-  count = (var.subnet_priv_count == 0 && var.subnet_priv_ids == null) && var.ssh_public_key != null ? 1 : 0
+## VM SSH
+resource "aws_security_group" "gitlab_vm_ssh_access" {
+  count = local.gitlab_vm_ssh_access_security_group_create ? 1 : 0
 
-  name_prefix = "${var.prefix}-external-ssh-"
+  name_prefix = "${var.prefix}-vm-ssh-access-"
   vpc_id      = data.aws_vpc.selected.id
 
-  # kics: Terraform AWS - Security groups allow ingress from 0.0.0.0:0, Sensitive Port Is Exposed To Entire Network - False positive, source CIDR is configurable
-  # kics-scan ignore-block
-  ingress {
-    description = "Enable SSH access for VMs"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = coalescelist(var.external_ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
-  }
+  description = "${var.prefix} - VM SSH Access Security Group"
 
   tags = {
-    Name = "${var.prefix}-external-ssh"
+    Name = "${var.prefix}-vm-ssh-access"
   }
 
   lifecycle {
@@ -92,24 +108,34 @@ resource "aws_security_group" "gitlab_external_ssh" {
   }
 }
 
-resource "aws_security_group" "gitlab_external_git_ssh" {
-  count = local.gitlab_shell_ssh_port != null ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "gitlab_vm_ssh_access" {
+  for_each = local.gitlab_vm_ssh_access_security_group_create ? toset(coalescelist(var.external_ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
 
-  name_prefix = "${var.prefix}-external-git-ssh-"
-  vpc_id      = data.aws_vpc.selected.id
+  security_group_id = aws_security_group.gitlab_vm_ssh_access[0].id
 
-  # kics: Terraform AWS - Security groups allow ingress from 0.0.0.0:0 - False positive, source CIDR is configurable
-  # kics-scan ignore-block
-  ingress {
-    description = "External Git SSH access for ${var.prefix}"
-    from_port   = local.gitlab_shell_ssh_port
-    to_port     = local.gitlab_shell_ssh_port
-    protocol    = "tcp"
-    cidr_blocks = coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
-  }
+  description = "External SSH access for VMs from CIDR block ${each.key}"
+  from_port   = 22
+  to_port     = 22
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
 
   tags = {
-    Name = "${var.prefix}-external-git-ssh"
+    Name = "${var.prefix}-vm-ssh-${each.key}"
+  }
+}
+
+## Git SSH
+resource "aws_security_group" "gitlab_git_ssh_access" {
+  count = local.gitlab_git_ssh_access_security_group_create ? 1 : 0
+
+  name_prefix = "${var.prefix}-git-ssh-access-"
+  vpc_id      = data.aws_vpc.selected.id
+
+  description = "GitLab ${var.prefix} - Git SSH Access Security Group"
+
+  tags = {
+    Name = "${var.prefix}-git-ssh-access"
   }
 
   lifecycle {
@@ -117,37 +143,72 @@ resource "aws_security_group" "gitlab_external_git_ssh" {
   }
 }
 
-# kics: Terraform AWS - Security Group Rules Without Description - False positive due to issue https://github.com/Checkmarx/kics/issues/4691
-# kics: Terraform AWS - HTTP Port Open - Context dependent, only allowed on HAProxy External
-# kics-scan ignore-block
-resource "aws_security_group" "gitlab_external_http_https" {
-  count = (var.haproxy_external_node_count + var.monitor_node_count + length(var.gitlab_rails_elastic_ip_allocation_ids)) > 0 ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "gitlab_git_ssh_access" {
+  for_each = local.gitlab_git_ssh_access_security_group_create ? toset(coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
 
-  name_prefix = "${var.prefix}-external-http-https-"
-  vpc_id      = data.aws_vpc.selected.id
+  security_group_id = aws_security_group.gitlab_git_ssh_access[0].id
 
-  ingress {
-    description = "Enable HTTP access for select VMs"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
-  }
+  description = "External Git SSH access on port ${local.gitlab_shell_ssh_port} for ${var.prefix} from CIDR block ${each.key}"
+  from_port   = local.gitlab_shell_ssh_port
+  to_port     = local.gitlab_shell_ssh_port
+  ip_protocol = "tcp"
 
-  ingress {
-    description = "Enable HTTPS access for select VMs"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)
-  }
+  cidr_ipv4 = each.key
 
   tags = {
-    Name = "${var.prefix}-external-http-https"
+    Name = "${var.prefix}-git-ssh-${each.key}"
+  }
+}
+
+## HTTP / HTTPS
+resource "aws_security_group" "gitlab_http_https_access" {
+  count = local.gitlab_http_https_access_security_group_create ? 1 : 0
+
+  description = "${var.prefix} - HTTP / HTTPS Access Security Group"
+
+  name_prefix = "${var.prefix}-http-https-access"
+  vpc_id      = data.aws_vpc.selected.id
+
+  tags = {
+    Name = "${var.prefix}-http-https-access"
   }
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_http_access" {
+  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+
+  security_group_id = aws_security_group.gitlab_http_https_access[0].id
+
+  description = "Enable HTTP access for select VMs from CIDR block ${each.key}"
+  from_port   = 80
+  to_port     = 80
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-external-http-${each.key}"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "gitlab_https_access" {
+  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+
+  security_group_id = aws_security_group.gitlab_http_https_access[0].id
+
+  description = "Enable HTTPS access for select VMs from CIDR block ${each.key}"
+  from_port   = 443
+  to_port     = 443
+  ip_protocol = "tcp"
+
+  cidr_ipv4 = each.key
+
+  tags = {
+    Name = "${var.prefix}-external-https-${each.key}"
   }
 }
 
@@ -510,4 +571,18 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" 
   tags = {
     Name = "${var.prefix}-opensearch-service-cidr-${each.key}"
   }
+}
+
+# Moved
+moved {
+  from = aws_security_group.gitlab_external_ssh[0]
+  to   = aws_security_group.gitlab_vm_ssh_access[0]
+}
+moved {
+  from = aws_security_group.gitlab_external_git_ssh[0]
+  to   = aws_security_group.gitlab_git_ssh_access[0]
+}
+moved {
+  from = aws_security_group.gitlab_external_http_https[0]
+  to   = aws_security_group.gitlab_http_https_access[0]
 }

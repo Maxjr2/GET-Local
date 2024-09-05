@@ -24,3 +24,7 @@ output "data_disk_volume_ids" {
   description = "AWS Volume IDs for data disks provisioned for this instance."
   value       = [for k, v in aws_ebs_volume.gitlab : v.id]
 }
+
+output "security_group_ids" {
+  value = try(flatten(aws_instance.gitlab[0].vpc_security_group_ids), "")
+}
