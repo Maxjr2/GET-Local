@@ -44,6 +44,6 @@ When ready for review, the Author applies the ~"workflow::ready for review" labe
   - [ ] Documentation created/updated in the same MR.
   - [ ] If this MR adds an optional configuration - check that all permutations continue to work.
   - [ ] For Terraform changes: set up a previous version environment, then run a `terraform plan` with your new changes and ensure nothing will be destroyed. If anything will be destroyed and this can't be avoided please add a comment to the current MR.
-- [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Quality Enablement](https://about.gitlab.com/handbook/engineering/quality/sec-enablement-qe-team/) team if unsure.
+- [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Self-Managed Platform](https://handbook.gitlab.com/handbook/engineering/infrastructure/test-platform/self-managed-platform-team/) team if unsure.
 
 /label ~"section::platforms"
