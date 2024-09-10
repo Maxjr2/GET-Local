@@ -240,15 +240,21 @@ The variables that need to be set in the Inventory Variables [`vars.yml`](enviro
 
 Gitaly (for both Sharded or Cluster):
 
+- `gitaly_ssl_cert` - An alternative to `gitaly_ssl_cert_file` if the certificate is not stored in a local file, to pass the certificate contents directly to Ansible. Use `gitaly_ssl_cert`, or `gitaly_ssl_cert_file`, but not both. This approach can be used to retrieve the certificate via a lookup.
 - `gitaly_ssl_cert_file` - Path to the Gitaly Certificate file to upload. Default is `''`.
+- `gitaly_ssl_key` - An alternative to `gitaly_ssl_key_file` if the key is not stored in a local file, to pass the key contents directly to Ansible. Use `gitaly_ssl_key`, or `gitaly_ssl_key_file`, but not both. This approach can be used to retrieve the key via a lookup.
 - `gitaly_ssl_key_file` - Path to the Gitaly key file to upload. Default is `''`.
+- `gitaly_ssl_ca` - An alternative to `gitaly_ssl_ca_file` if the CA is not stored in a local file, to pass the CA contents directly to Ansible. Use `gitaly_ssl_ca`, or `gitaly_ssl_ca_file`, but not both. This approach can be used to retrieve the CA via a lookup.
 - `gitaly_ssl_ca_file` - Path to the Gitaly CA file to upload to relevant clients. Default is `''`.
 - `gitaly_ssl_port` - The port Gitaly will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `9999`.
 
 Praefect (for Cluster):
 
+- `praefect_ssl_cert` - An alternative to `praefect_ssl_cert_file` if the certificate is not stored in a local file, to pass the certificate contents directly to Ansible. Use `praefect_ssl_cert`, or `praefect_ssl_cert_file`, but not both. This approach can be used to retrieve the certificate via a lookup.
 - `praefect_ssl_cert_file` - Path to the Praefect Certificate file to upload. Default is `''`.
+- `praefect_ssl_key` - An alternative to `praefect_ssl_key_file` if the key is not stored in a local file, to pass the key contents directly to Ansible. Use `praefect_ssl_key`, or `praefect_ssl_key_file`, but not both. This approach can be used to retrieve the key via a lookup.
 - `praefect_ssl_key_file` - Path to the Praefect key file to upload. Default is `''`.
+- `praefect_ssl_ca` - An alternative to `praefect_ssl_ca_file` if the CA is not stored in a local file, to pass the CA contents directly to Ansible. Use `praefect_ssl_ca`, or `praefect_ssl_ca_file`, but not both. This approach can be used to retrieve the CA via a lookup.
 - `praefect_ssl_ca_file` - Path to the Praefect CA file to upload to relevant clients. Default is `''`.
 - `praefect_ssl_port` - The port Praefect will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `3035`.
 

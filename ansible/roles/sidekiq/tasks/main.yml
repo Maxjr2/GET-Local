@@ -47,24 +47,24 @@
   block:
     - name: Copy Praefect Internal SSL CA file if configured
       copy:
-        src: "{{ praefect_ssl_ca_file }}"
+        content: "{{ praefect_ssl_ca }}"
         dest: '/etc/gitlab/trusted-certs/praefect_ca.pem'
         mode: '0644'
       when:
         - "'praefect' in groups"
         - praefect_ssl
-        - praefect_ssl_ca_file != ''
+        - praefect_ssl_ca != ''
 
     - name: Copy Gitaly Internal SSL CA file if configured
       copy:
-        src: "{{ gitaly_ssl_ca_file }}"
+        content: "{{ gitaly_ssl_ca }}"
         dest: '/etc/gitlab/trusted-certs/gitaly_ca.pem'
         mode: '0644'
       when:
         - "'praefect' not in groups"
         - "'gitaly' in groups"
         - gitaly_ssl
-        - gitaly_ssl_ca_file != ''
+        - gitaly_ssl_ca != ''
   tags: reconfigure
 
 - name: Propagate Secrets if existing

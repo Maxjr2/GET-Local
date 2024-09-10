@@ -43,23 +43,23 @@
   block:
     - name: Copy over any Gitaly Internal SSL files
       copy:
-        src: "{{ item.src_path }}"
+        content: "{{ item.content }}"
         dest: "{{ item.dest_path }}"
         mode: '0644'
       loop:
-        - { src_path: "{{ gitaly_ssl_cert_file }}", dest_path: "/etc/gitlab/ssl/gitaly_cert.pem" }
-        - { src_path: "{{ gitaly_ssl_key_file }}", dest_path: "/etc/gitlab/ssl/gitaly_key.pem" }
-        - { src_path: "{{ gitaly_ssl_ca_file }}", dest_path: "/etc/gitlab/trusted-certs/gitaly_ca.pem" }
+        - { content: "{{ gitaly_ssl_cert }}", dest_path: "/etc/gitlab/ssl/gitaly_cert.pem" }
+        - { content: "{{ gitaly_ssl_key }}", dest_path: "/etc/gitlab/ssl/gitaly_key.pem" }
+        - { content: "{{ gitaly_ssl_ca }}", dest_path: "/etc/gitlab/trusted-certs/gitaly_ca.pem" }
       when: item.src_path != ''
 
     - name: Copy Praefect Internal SSL CA file if configured
       copy:
-        src: "{{ praefect_ssl_ca_file }}"
+        content: "{{ praefect_ssl_ca }}"
         dest: '/etc/gitlab/trusted-certs/praefect_ca.pem'
         mode: '0644'
       when:
         - praefect_ssl
-        - praefect_ssl_ca_file != ''
+        - praefect_ssl_ca != ''
   when: gitaly_ssl
   tags: reconfigure
 
