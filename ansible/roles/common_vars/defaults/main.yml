@@ -190,11 +190,14 @@ gitaly_primary_int_addr: "{{ (groups['gitaly_primary'] | sort | map('extract', h
 gitaly_secondary_int_addrs: "{{ (groups['gitaly_secondary'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'gitaly_secondary' in groups else [] }}"
 
 ## Gitaly SSL
+gitaly_ssl_cert: "{{ lookup('file', gitaly_ssl_cert_file) if gitaly_ssl_cert_file != '' else '' }}"
 gitaly_ssl_cert_file: ""
+gitaly_ssl_key: "{{ lookup('file', gitaly_ssl_key_file) if gitaly_ssl_key_file != '' else '' }}"
 gitaly_ssl_key_file: ""
+gitaly_ssl_ca: "{{ lookup('file', gitaly_ssl_ca_file) if gitaly_ssl_ca_file != '' else '' }}"
 gitaly_ssl_ca_file: ""
 gitaly_ssl_port: "9999"
-gitaly_ssl: "{{ gitaly_ssl_cert_file != '' and gitaly_ssl_key_file != '' }}"
+gitaly_ssl: "{{ gitaly_ssl_cert != '' and gitaly_ssl_key != '' }}"
 
 # Pages
 pages_enable: "{{ pages_external_url != '' and 'pages' in gitlab_object_storage_list }}"
@@ -215,11 +218,14 @@ praefect_int_addrs: "{{ (groups['praefect'] | sort | map('extract', hostvars, in
 praefect_external_token: ""
 
 ## Praefect SSL
+praefect_ssl_cert: "{{ lookup('file', praefect_ssl_cert_file) if praefect_ssl_cert_file != '' else '' }}"
 praefect_ssl_cert_file: ""
+praefect_ssl_key: "{{ lookup('file', praefect_ssl_key_file) if praefect_ssl_key_file != '' else '' }}"
 praefect_ssl_key_file: ""
+praefect_ssl_ca: "{{ lookup('file', praefect_ssl_ca_file) if praefect_ssl_ca_file != '' else '' }}"
 praefect_ssl_ca_file: ""
 praefect_ssl_port: "3305"
-praefect_ssl: "{{ praefect_ssl_cert_file != '' and praefect_ssl_key_file != '' }}"
+praefect_ssl: "{{ praefect_ssl_cert != '' and praefect_ssl_key != '' }}"
 
 ## Praefect Postgres
 praefect_postgres_int_addr: "{{ (groups['praefect_postgres'] | map('extract', hostvars, internal_addr_lookup) | join('')) if 'praefect_postgres_primary' in groups else '' }}"
