@@ -26,7 +26,6 @@ resource "google_sql_database_instance" "gitlab_praefect" {
       ipv4_enabled    = false
       private_network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
       ssl_mode        = local.cloud_sql_praefect_postgres_ssl_mode
-      require_ssl     = local.cloud_sql_praefect_postgres_ssl_mode == "TRUSTED_CLIENT_CERTIFICATE_REQUIRED" ? true : null
     }
 
     dynamic "database_flags" {
