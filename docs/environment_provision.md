@@ -784,6 +784,7 @@ terraform {
 
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
+  subscription_id = "<azure_subscription_id>"
   features {}
 }
 ```
@@ -797,6 +798,7 @@ provider "azurerm" {
   - `required_providers` - Config block for the required provider(s) Terraform needs to download and use.
     - `azurerm` - Config block for the Azure provider. Sets where to source the provider and what version to download and use.
 - `provider "azurerm"` - Config block for the [Azure provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs).
+  - `subscription_id` - Azure Subscription ID to be used by Terraform.
   - `features` - Used to [customize the behaviour](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#features) of certain Azure Provider resources.
 
 #### Configure Module settings (`environment.tf`)
