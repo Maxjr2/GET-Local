@@ -210,6 +210,10 @@
             dest: "{{ gitlab_deb_target_path }}"
             force: true
             headers: "{{ gitlab_deb_download_url_headers }}"
+          register: download_deb_package_result
+          until: download_deb_package_result is succeeded
+          retries: 3
+          delay: 30
           when:
             - omnibus_node
             - gitlab_deb_download_url != ''
@@ -242,6 +246,10 @@
             dest: "{{ gitlab_rpm_target_path }}"
             force: true
             headers: "{{ gitlab_rpm_download_url_headers }}"
+          register: download_rpm_package_result
+          until: download_rpm_package_result is succeeded
+          retries: 3
+          delay: 30
           when:
             - omnibus_node
             - gitlab_rpm_download_url != ''
