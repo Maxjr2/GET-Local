@@ -28,7 +28,7 @@ The Toolkit provides multiple curated [Terraform Modules](../terraform/modules) 
 
 ## 1. Install Terraform
 
-For the Toolkit Terraform `v1.5.0` or higher is required.
+For the Toolkit Terraform `v1.9.0` or higher is required.
 
 Terraform generally works best when all users for an environment are using the same major version due to its State. As such it's recommended that all users sync on the same version of Terraform when working against the same environment and any Terraform upgrades are done in unison.
 
