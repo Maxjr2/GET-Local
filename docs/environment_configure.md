@@ -376,7 +376,7 @@ General settings are config used across the playbooks to configure GitLab:
 - `prefix` - The configured prefix for the environment as set in Terraform.
 - `external_url` - External URL that will be the main address for the environment. This can be a DNS hostname you've configured to point to the IP you created on the `Create Static External IP` step ([GCP](environment_prep.md#6-create-static-external-ip-gcp), [AWS](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation), [Azure](environment_prep.md#5-create-static-external-ip-azure)) step or the IP itself in URL form, e.g. `http://1.2.3.4`.
 - `gitlab_license_file` - Local path to a valid GitLab License file. Toolkit will upload the license to the environment. Note that this is an optional setting.
-  - If you purchased a GitLab subscription, use `gitlab_subscription_activation_code` instead of `gitlab_license_file` variable. An [activation code](https://docs.gitlab.com/ee/user/admin_area/license.html#activate-gitlab-ee) can be obtained from the Customers Portal.
+  - If you purchased a GitLab subscription, use `gitlab_subscription_activation_code` instead of `gitlab_license_file` variable. An [activation code](https://docs.gitlab.com/ee/administration/license_file.html) can be obtained from the Customers Portal.
 - `gitlab_license_text` - An alternative to `gitlab_license_file` if the license is not stored in a local file, pass the license contents directly to Ansible. Either `gitlab_license_text`, or `gitlab_license_file`, or neither, should be set, but not both. This approach can be used to retrieve the license via a lookup. Note that this is an optional setting.
 
 Component settings are specific component for GitLab components, e.g. Postgres:
