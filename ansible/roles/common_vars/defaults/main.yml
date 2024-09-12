@@ -447,7 +447,7 @@ geo_tracking_postgres_password: "{{ postgres_password }}"
 geo_tracking_postgres_admin_username: "{{ geo_tracking_postgres_user if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_admin_username }}"
 geo_tracking_postgres_admin_password: "{{ geo_tracking_postgres_password if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_admin_password }}"
 geo_tracking_postgres_database: "gitlabhq_geo_production"
-geo_tracking_postgres_external: "{{ 'postgres' not in groups and 'praefect_postgres' not in groups and geo_tracking_postgres_host != '' }}"
+geo_tracking_postgres_external: "{{ 'postgres' not in groups and 'praefect_postgres' not in groups and geo_tracking_postgres_host != geo_secondary_site_postgres_int_ip }}"
 geo_tracking_postgres_external_prep: "{{ true if geo_tracking_postgres_host != praefect_postgres_host else praefect_postgres_external_prep }}"
 geo_tracking_postgres_trust_auth_cidr_blocks: ['0.0.0.0/0']
 geo_tracking_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
