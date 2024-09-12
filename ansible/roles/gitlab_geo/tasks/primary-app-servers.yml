@@ -10,6 +10,9 @@
 
     - name: Primary App Servers - Set geo primary node
       command: gitlab-ctl set-geo-primary-node
+      register: result
+      failed_when:
+        - result.rc == 1 or (result.rc == 0 and "GitLab Geo is not supported with this license" in result.stderr)
       when: ('gitlab_rails_primary' in group_names)
 
     - name: Primary App Servers - Update internal URL for primary site
