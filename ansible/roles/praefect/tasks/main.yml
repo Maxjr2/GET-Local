@@ -28,7 +28,7 @@
         - { content: "{{ praefect_ssl_cert }}", dest_path: "/etc/gitlab/ssl/praefect_cert.pem" }
         - { content: "{{ praefect_ssl_key }}", dest_path: "/etc/gitlab/ssl/praefect_key.pem" }
         - { content: "{{ praefect_ssl_ca }}", dest_path: "/etc/gitlab/trusted-certs/praefect_ca.pem" }
-      when: item.src_path != ''
+      when: item.content | default('') | length > 0
 
     - name: Copy Gitaly Internal SSL CA file if configured
       copy:
