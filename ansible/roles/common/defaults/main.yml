@@ -19,6 +19,41 @@ python_packages_amazon:
   # Install requests and urllib3 1.x for Amazon Linux 2 - https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html#ssl-module-is-compiled-with-openssl-1-0-2-k-fips
   '2': "{{ python_packages + ['requests<=2.32.3', 'urllib3<2.0.0'] }}"
 
+# GitLab Package
+## Repo
+gitlab_repo_package_version_syntax: "{{ '-' if ansible_facts['os_family'] == 'RedHat' else '=' }}"
+gitlab_repo_package: "{{ lookup('env','GITLAB_REPO_PACKAGE') | default(gitlab_edition + gitlab_repo_package_version_syntax + gitlab_version + '*' if gitlab_version != '' else gitlab_edition, true) }}"
+gitlab_repo_script_name: {Debian: 'script.deb.sh', RedHat: 'script.rpm.sh'}
+gitlab_repo_script_url: "{{ lookup('env','GITLAB_REPO_SCRIPT_URL') | default('https://packages.gitlab.com/install/repositories/gitlab/' + gitlab_edition + '/' + gitlab_repo_script_name[ansible_facts['os_family']], true) }}"
+gitlab_repo_script_path: "/tmp/gitlab_install_repository.sh"
+gitlab_repo_list_path: {Debian: "/etc/apt/sources.list.d/{{ 'gitlab_' + ('nightly-builds' if 'nightly' in gitlab_repo_script_url else gitlab_edition) }}.list", RedHat: "/etc/yum.repos.d/gitlab_{{ gitlab_edition }}.repo"}
+
+gitlab_repo_package_allow_downgrade: false
+
+## Deb
+gitlab_deb_host_path: "{{ lookup('env','GITLAB_HOST_DEB_PATH') }}"
+
+gitlab_deb_download_url: "{{ lookup('env','GITLAB_DEB_DOWNLOAD_URL') }}"
+gitlab_deb_download_url_headers: "{{ lookup('env','GITLAB_DEB_DOWNLOAD_URL_HEADERS') | default({}, true) }}"
+gitlab_deb_target_path: "{{ lookup('env','GITLAB_TARGET_DEB_PATH') | default('/tmp/gitlab_deb_package.deb', true) }}"
+
+gitlab_deb_allow_downgrade: "{{ true if gitlab_deb_force_install is defined and gitlab_deb_force_install else false }}"
+
+## RPM
+gitlab_rpm_host_path: "{{ lookup('env','GITLAB_HOST_RPM_PATH') }}"
+
+gitlab_rpm_download_url: "{{ lookup('env','GITLAB_RPM_DOWNLOAD_URL') }}"
+gitlab_rpm_download_url_headers: "{{ lookup('env','GITLAB_RPM_DOWNLOAD_URL_HEADERS') | default({}, true) }}"
+gitlab_rpm_target_path: "{{ lookup('env','GITLAB_TARGET_RPM_PATH') | default('/tmp/gitlab_rpm_package.rpm', true) }}"
+
+gitlab_rpm_allow_downgrade: false
+
+## Downgrade Prerequisites met flag
+### Downgrades require prerequisites to be in place beforehand - https://docs.gitlab.com/ee/update/package/downgrade.html
+### Failure to not have prerequisites will result in a broken environment and potential data loss.
+### Once prerequisitves are in place rerun with gitlab_downgrade_risk_accepted set to 'true' at your own risk
+gitlab_downgrade_prerequisites_met: false
+
 # Secrets
 gitlab_secrets_write: true
 gitlab_secrets_post_reconfigure: false

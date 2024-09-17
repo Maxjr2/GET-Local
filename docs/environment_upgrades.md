@@ -151,9 +151,21 @@ The upgrade process can take a couple of hours to complete, and the full runtime
 
 ### Environment Downgrades
 
-Downgrades are not supported directly by the Toolkit as it can be a delicate process, requiring the use of backups and is best done manually to ensure it's done correctly.
+[GitLab Downgrades](https://docs.gitlab.com/ee/update/package/downgrade.html) are an involved process and have several prerequires that need to be met beforehand and manual steps that need to be performed depending on your set up such as requiring a backup of the exact version to be restored.
 
-The Toolkit can however continue to be used against an environment after [a manual downgrade](https://docs.gitlab.com/ee/update/package/downgrade.html) has been performed. After downgrading the package on all nodes, you should [configure the GitLab version now used in Ansible](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_configure.md#repository) to ensure the Toolkit is aware and doesn't attempt to subsequently upgrade.
+:exclamation:&nbsp; **{- Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.-}**
+
+:information_source:&nbsp; It's generally recommended you contact the [GitLab Support](https://about.gitlab.com/support/) team when doing a downgrade for additional support and guidance. This is especially so if the process has failed in any way.
+
+For this reason the Toolkit cannot manage the full downgrade process. It is however possible to configure the Toolkit to perform the action of installing the older version package only as part of a downgrade at your own risk.
+
+To configure the Toolkit to install an older package version several flags are required to be set in your Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml):
+
+- `gitlab_repo_package_allow_downgrade` or `gitlab_deb_allow_downgrade` / `gitlab_rpm_allow_downgrade` - Set to `true` depending on your selected [Linux Package (Omnibus) install method](environment_configure.md#gitlab-omnibus-installation-options). Disable again after downgrade has been completed.
+- `gitlab_downgrade_prerequisites_met` - Set to `true` only and when you have all prerequires in place and know how to complete the remaining downgrade process steps manually. Disable again after downgrade has been completed.
+- `gitlab_version` - Set to the version you wish to downgrade to.
+
+:information_source:&nbsp; After the remaining downgrade steps have been completed manually it's strongly recommended to disable the above settings again (except for `gitlab_version`) to prevent any further unintentional downgrades.
 
 ## OS Upgrades
 

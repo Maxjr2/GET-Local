@@ -46,18 +46,6 @@
     - secrets
     - gitlab-secrets
 
-- name: Clear old Consul data if Nightly
-  block:
-    - name: Stop Consul
-      command: gitlab-ctl stop consul
-
-    - name: Clear old Consul data if Nightly
-      file:
-        path: /var/opt/gitlab/consul/data
-        state: absent
-  when: "'nightly' in gitlab_repo_script_url"
-  tags: reconfigure
-
 - name: Reconfigure Consul
   command: gitlab-ctl reconfigure
   throttle: 1

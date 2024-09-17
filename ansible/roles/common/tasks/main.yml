@@ -127,6 +127,22 @@
         - reconfigure
         - common_prep
 
+    - name: Downgrade prerequisites check
+      fail:
+        msg: |
+          WARNING - GitLab package setup has been configured to allow downgrades but acknowledgment is missing.
+
+          It's strongly recommended to read the documentation in full before proceeding - https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_upgrades.md#environment-downgrades
+
+          Downgrades require prerequisites to be in place beforehand and have manual steps to be performed after.
+          Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.
+
+          Once prerequisitves are in place and additional manual steps are understood in full, rerun with `gitlab_downgrade_risk_accepted` set to `true` at your own risk.
+      when:
+        - gitlab_repo_package_allow_downgrade or gitlab_deb_allow_downgrade or gitlab_rpm_allow_downgrade
+        - not gitlab_downgrade_prerequisites_met
+      tags: reconfigure
+
     - name: Unlock GitLab package installs
       command: "{{ 'yum versionlock delete' if ansible_facts['os_family'] == 'RedHat' else 'aptitude unhold' }} {{ gitlab_edition }}"
       register: result
@@ -176,6 +192,7 @@
         - name: Install GitLab repo package (deb)
           apt:
             name: "{{ gitlab_repo_package }}"
+            allow_downgrade: "{{ gitlab_repo_package_allow_downgrade }}"
             state: "{{ 'present' if gitlab_version != '' else 'latest' }}"
             lock_timeout: 360
             allow_change_held_packages: true
@@ -188,6 +205,7 @@
         - name: Install GitLab repo package (rpm)
           yum:
             name: "{{ gitlab_repo_package }}"
+            allow_downgrade: "{{ gitlab_repo_package_allow_downgrade }}"
             state: "{{ 'present' if gitlab_version != '' else 'latest' }}"
             lock_timeout: 360
           register: result
@@ -231,8 +249,8 @@
         - name: Install GitLab deb package
           apt:
             deb: "{{ gitlab_deb_target_path }}"
-            force: "{{ gitlab_deb_force_install }}"
             allow_change_held_packages: true
+            allow_downgrade: "{{ gitlab_deb_allow_downgrade }}"
           when:
             - omnibus_node
             - (gitlab_deb_host_path != '') or (gitlab_deb_download_url != '')
@@ -268,6 +286,7 @@
           yum:
             name: "{{ gitlab_rpm_target_path }}"
             disable_gpg_check: true
+            allow_downgrade: "{{ gitlab_rpm_allow_downgrade }}"
           when:
             - omnibus_node
             - (gitlab_rpm_host_path != '') or (gitlab_rpm_download_url != '')
