@@ -49,7 +49,7 @@ nginx['real_ip_trusted_addresses'] = [
 {% endfor %}
 ]
 
-# NGINX SSL Config - External Single Node (No Load Balancer) / Internal SSL
+# NGINX Port / SSL config
 {% if gitlab_rails_nginx_external_ssl_letsencrypt %}
 ## External NGINX SSL - Single Node (Let's Encrypt)
 letsencrypt['enable'] = true

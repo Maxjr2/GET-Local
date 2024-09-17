@@ -80,32 +80,6 @@ gitlab_edition: "gitlab-ee"
 
 gitlab_node_type: "{{ lookup('vars', cloud_provider_labels_name, default = {}).gitlab_node_type | default((group_names | reject('match', '.*_primary|.*_secondary') | first), true) | replace('-', '_') }}"
 
-## Set to env var, package with version wildcard or just latest
-## Select the nightly build by setting GITLAB_REPO_SCRIPT_URL to "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
-gitlab_repo_package_version_syntax: "{{ '-' if ansible_facts['os_family'] == 'RedHat' else '=' }}"
-gitlab_repo_package: "{{ lookup('env','GITLAB_REPO_PACKAGE') | default(gitlab_edition + gitlab_repo_package_version_syntax + gitlab_version + '*' if gitlab_version != '' else gitlab_edition, true) }}"
-gitlab_repo_script_name: {Debian: 'script.deb.sh', RedHat: 'script.rpm.sh'}
-gitlab_repo_script_url: "{{ lookup('env','GITLAB_REPO_SCRIPT_URL') | default('https://packages.gitlab.com/install/repositories/gitlab/' + gitlab_edition + '/' + gitlab_repo_script_name[ansible_facts['os_family']], true) }}"
-gitlab_repo_script_path: "/tmp/gitlab_install_repository.sh"
-gitlab_repo_list_path: {Debian: "/etc/apt/sources.list.d/{{ 'gitlab_' + ('nightly-builds' if 'nightly' in gitlab_repo_script_url else gitlab_edition) }}.list", RedHat: "/etc/yum.repos.d/gitlab_{{ gitlab_edition }}.repo"}
-
-gitlab_deb_force_install: false
-## Specify absolute path to the local deb package on host
-gitlab_deb_host_path: "{{ lookup('env','GITLAB_HOST_DEB_PATH') }}"
-## Specify deb package url
-gitlab_deb_download_url: "{{ lookup('env','GITLAB_DEB_DOWNLOAD_URL') }}"
-gitlab_deb_download_url_headers: "{{ lookup('env','GITLAB_DEB_DOWNLOAD_URL_HEADERS') | default({}, true) }}"
-gitlab_deb_target_path: "{{ lookup('env','GITLAB_TARGET_DEB_PATH') | default('/tmp/gitlab_deb_package.deb', true) }}"
-
-## Specify absolute path to the local rpm package on host
-gitlab_rpm_host_path: "{{ lookup('env','GITLAB_HOST_RPM_PATH') }}"
-## Specify rpm package url
-gitlab_rpm_download_url: "{{ lookup('env','GITLAB_RPM_DOWNLOAD_URL') }}"
-gitlab_rpm_download_url_headers: "{{ lookup('env','GITLAB_RPM_DOWNLOAD_URL_HEADERS') | default({}, true) }}"
-gitlab_rpm_target_path: "{{ lookup('env','GITLAB_TARGET_RPM_PATH') | default('/tmp/gitlab_rpm_package.rpm', true) }}"
-
-gitlab_admin_email: "admin@example.com"
-
 gitlab_shell_ssh_daemon: "openssh"  # openssh or gitlab-sshd
 gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment or (groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups and gitlab_shell_ssh_daemon == 'openssh') else '2222' }}"
 gitlab_shell_ssh_internal_port: "{{ '2222' if (gitlab_shell_ssh_daemon == 'gitlab-sshd' or cloud_native_hybrid_environment) else '22' }}"
