@@ -249,7 +249,11 @@ For GitLab, we suggest the following mount paths are suggested:
 - `/var/opt/gitlab` - Common path for GitLab to store stateful data (e.g. Git Repo data).
 - `/var/log/gitlab` - Common path for GitLab to store its logs.
 
-## Gitaly Setups: Cluster or Sharded
+## Gitaly
+
+There are several options for deploying and configuring Gitaly as detailed below.
+
+### Gitaly Deployment Types - Cluster or Sharded
 
 [Gitaly](https://docs.gitlab.com/ee/administration/gitaly/), which is our repo storage backend, can be run in two different ways:
 
@@ -259,6 +263,19 @@ For GitLab, we suggest the following mount paths are suggested:
 The Toolkit supports setting up both of these setups. This is controlled simply by not provisioning the Praefect nodes required in Cluster. If these nodes aren't present the Toolkit automatically assumes that the environment is using Gitaly Sharded and will configure in that way.
 
 :information_source:&nbsp; Attempting to switch an existing environment from using Gitaly Cluster to Sharded or vice versa is not supported in the Toolkit and may lead to data loss.
+
+### Gitaly Internal API Callback URL
+
+[Gitaly requires to make an API call to GitLab Shell](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#gitaly), which is deployed alongside Rails, when any Git Push is made to complete the action. This is known as the Internal API Callback.
+
+The Toolkit configures this for you automatically depending on the setup type as follows:
+
+- Linux Package (Omnibus) - By using the Internal Load Balancer. If using the Toolkit provided HAProxy option this is configured automatically.
+- Cloud Native Hybrid - By using the External URL to reach the Charts as required.
+
+In some advanced cases you may need to configure this URL directly, such is when using a custom Internal Load Balancer. This can be done via the following Ansible variable in [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
+
+- `gitaly_callback_internal_api_url` - Specifies the URL Gitaly uses for internal API callbacks to GitLab Shell. This should point to a reachable URL for the Gitaly nodes that resolves to either the GitLab Rails nodes (Linux package (Omnibus)) or Webservice deployment (Cloud Native Hybrid) where Shell is deployed.
 
 ## GitLab SSH
 
@@ -276,10 +293,9 @@ By default, `openssh` will be used, but you can switch over to `gitlab-sshd` via
 
 The Toolkit allows you to configure the External and Internal ports used for serving Git operations over SSH, where external is the port users will use and internal is the port that the selected SSH daemon runs on. These can be configured via the following Ansible variables in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
 
-- `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure all parts of the external connection - HAProxy (Linux installs) or Kubernetes Ingress. Optional, default is `2222` (Linux) / `22` (Cloud Native Hybrid).
-  - :information_source:&nbsp; On Linux installs with the Toolkit, the external SSH port can not be `22` to prevent clashes with the system SSH service. This is due to Ansible needing to connect over SSH in most cases.
-  - :information_source:&nbsp; On Linux installs using the default HAProxy External load balancer, if the default port of `2222` is intended to be changed the port will need to be adjusted on the HAProxy External node as well. This can be done by changing the `gitlab_shell_ssh_port` in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf) to the new value.
-    - Additionally, it should be noted in this setup that the external SSH port can not be `22` to prevent clashes with the system SSH service. This is due to Ansible needing to connect over SSH in most cases.
+- `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure all parts of the external connection - HAProxy (Linux installs) or Kubernetes Ingress. Optional, default is `2222` (Linux - HAProxy External) / `22` (Cloud Native Hybrid, Linux - Single Node).
+  - :information_source:&nbsp; On Linux installs using the optional Toolkit provided HAProxy External load balancer the default port is set to `2222` to avoid clashes with system SSH on the HAProxy node as this is what Ansible expects to use. If a different port is desired this can be done by changing the `gitlab_shell_ssh_port` in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf) to the new value.
+    - Note however that if the desired port is `22` in this setup the system SSH port on the HAProxy External node will need to be adjusted first manually and Ansible subsequently configured to use that new system SSH port.
 - `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for `gitlab-sshd` this will change whatever port the service runs on (Note for `gitlab-sshd` [it can not be run on a port number lower than `1024`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd)). Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
 
 ## Advanced Search

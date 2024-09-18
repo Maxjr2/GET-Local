@@ -97,7 +97,11 @@ The available variables in Ansible for this are as follows:
 
 - `external_url` - The external load balancer URL. This is expected to be the same as the main URL that the environment is to be accessed on.
 - `internal_lb_host` - The hostname of the Internal Load Balancer (not URL). Provided in Terraform outputs if provisioned earlier.
+
+You may also need to set the following variables depending on the setup:
+
 - `gitlab_rails_nginx_real_ip_trusted_cidr_blocks` - The array of Internal and External Load Balancer IPs. This allows GitLab to trust the `X-Forwarded-For` header from these IPs to [log the actual client IP](https://docs.gitlab.com/omnibus/settings/nginx.html#configuring-gitlab-trusted_proxies-and-the-nginx-real_ip-module).
+- `gitaly_callback_internal_api_url` - The URL Gitaly uses for internal API callbacks to GitLab Shell. For more information refer to [this section in the documentation](environment_advanced.md#gitaly-internal-api-callback-url).
 
 ## PostgreSQL
 
