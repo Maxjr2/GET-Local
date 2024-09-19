@@ -15,6 +15,7 @@ module "gitlab_nfs" {
   disk_delete_on_termination = var.gitlab_nfs_disk_delete_on_termination != null ? var.gitlab_nfs_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.gitlab_nfs_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.gitlab_nfs_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

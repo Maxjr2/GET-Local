@@ -15,6 +15,7 @@ module "redis" {
   disk_delete_on_termination = var.redis_disk_delete_on_termination != null ? var.redis_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.redis_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
@@ -58,6 +59,7 @@ module "redis_cache" {
   disk_delete_on_termination = var.redis_cache_disk_delete_on_termination != null ? var.redis_cache_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_cache_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.redis_cache_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
@@ -99,6 +101,7 @@ module "redis_persistent" {
   disk_delete_on_termination = var.redis_persistent_disk_delete_on_termination != null ? var.redis_persistent_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.redis_persistent_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.redis_persistent_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

@@ -14,6 +14,7 @@ module "haproxy_external" {
   disk_kms_key_arn           = var.haproxy_external_disk_kms_key_arn != null ? var.haproxy_external_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.haproxy_external_disk_delete_on_termination != null ? var.haproxy_external_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.haproxy_external_data_disks
+  user_data_base64           = var.haproxy_external_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
@@ -59,6 +60,7 @@ module "haproxy_internal" {
   disk_delete_on_termination = var.haproxy_internal_disk_delete_on_termination != null ? var.haproxy_internal_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.haproxy_internal_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.haproxy_internal_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

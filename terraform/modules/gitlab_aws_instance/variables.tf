@@ -110,3 +110,9 @@ variable "disk_delete_on_termination" {
   type    = bool
   default = null
 }
+
+variable "user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}

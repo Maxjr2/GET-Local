@@ -154,6 +154,11 @@ variable "consul_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "consul_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "gitaly_node_count" {
   type    = number
@@ -195,6 +200,11 @@ variable "gitaly_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "gitaly_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "gitlab_nfs_node_count" {
   type    = number
@@ -231,6 +241,11 @@ variable "gitlab_nfs_data_disks" {
 variable "gitlab_nfs_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "gitlab_nfs_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 variable "gitlab_rails_node_count" {
@@ -279,6 +294,11 @@ variable "gitlab_rails_elastic_ip_allocation_ids" {
   type        = list(string)
   default     = []
 }
+variable "gitlab_rails_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "haproxy_external_node_count" {
   type    = number
@@ -320,6 +340,11 @@ variable "haproxy_external_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "haproxy_external_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "haproxy_internal_node_count" {
   type    = number
@@ -356,6 +381,11 @@ variable "haproxy_internal_data_disks" {
 variable "haproxy_internal_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "haproxy_internal_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 variable "monitor_node_count" {
@@ -399,6 +429,11 @@ variable "monitor_security_group_ids" {
   type        = list(string)
   default     = []
 }
+variable "monitor_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 # Opensearch (self-managed)
 variable "opensearch_vm_node_count" {
@@ -437,6 +472,11 @@ variable "opensearch_vm_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "opensearch_vm_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "pgbouncer_node_count" {
   type    = number
@@ -473,6 +513,11 @@ variable "pgbouncer_data_disks" {
 variable "pgbouncer_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "pgbouncer_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 variable "postgres_node_count" {
@@ -511,6 +556,11 @@ variable "postgres_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "postgres_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "praefect_node_count" {
   type    = number
@@ -547,6 +597,11 @@ variable "praefect_data_disks" {
 variable "praefect_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "praefect_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 variable "praefect_postgres_node_count" {
@@ -585,6 +640,11 @@ variable "praefect_postgres_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "praefect_postgres_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "redis_node_count" {
   type    = number
@@ -621,6 +681,11 @@ variable "redis_data_disks" {
 variable "redis_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "redis_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 variable "redis_cache_node_count" {
@@ -659,6 +724,11 @@ variable "redis_cache_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "redis_cache_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "redis_persistent_node_count" {
   type    = number
@@ -696,6 +766,11 @@ variable "redis_persistent_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
+variable "redis_persistent_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
 
 variable "sidekiq_node_count" {
   type    = number
@@ -732,6 +807,11 @@ variable "sidekiq_data_disks" {
 variable "sidekiq_iam_instance_policy_arns" {
   type    = list(string)
   default = []
+}
+variable "sidekiq_user_data_base64" {
+  type        = string
+  default     = null
+  description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
 
 # EKS - Kubernetes \ Helm
