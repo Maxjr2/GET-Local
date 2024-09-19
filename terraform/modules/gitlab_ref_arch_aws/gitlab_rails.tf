@@ -15,6 +15,7 @@ module "gitlab_rails" {
   disk_delete_on_termination = var.gitlab_rails_disk_delete_on_termination != null ? var.gitlab_rails_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.gitlab_rails_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.gitlab_rails_user_data_base64
   elastic_ip_allocation_ids  = var.gitlab_rails_elastic_ip_allocation_ids
 
   iam_instance_policy_arns = flatten([

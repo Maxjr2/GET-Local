@@ -15,6 +15,7 @@ module "opensearch_vm" {
   disk_delete_on_termination = var.opensearch_vm_disk_delete_on_termination != null ? var.opensearch_vm_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.opensearch_vm_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.opensearch_vm_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

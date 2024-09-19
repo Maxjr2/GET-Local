@@ -15,6 +15,7 @@ module "monitor" {
   disk_delete_on_termination = var.monitor_disk_delete_on_termination != null ? var.monitor_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.monitor_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.monitor_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

@@ -15,6 +15,7 @@ module "praefect_postgres" {
   disk_delete_on_termination = var.praefect_postgres_disk_delete_on_termination != null ? var.praefect_postgres_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.praefect_postgres_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.praefect_postgres_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,

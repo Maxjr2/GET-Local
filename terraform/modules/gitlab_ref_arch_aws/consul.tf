@@ -15,6 +15,7 @@ module "consul" {
   disk_delete_on_termination = var.consul_disk_delete_on_termination != null ? var.consul_disk_delete_on_termination : var.default_disk_delete_on_termination
   data_disks                 = var.consul_data_disks
   subnet_ids                 = local.backend_subnet_ids
+  user_data_base64           = var.consul_user_data_base64
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
