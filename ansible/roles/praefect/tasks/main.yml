@@ -38,6 +38,8 @@
       when:
         - gitaly_ssl
         - gitaly_ssl_ca != ''
+  no_log: true
+  diff: false
   when: praefect_ssl
   tags: reconfigure
 

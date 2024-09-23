@@ -36,7 +36,7 @@ backend gitlab-rails
 
 {% for ip in gitlab_rails_int_addrs %}
 {% if gitlab_rails_nginx_ssl %}
-    server gitlab-rails{{loop.index}} {{ ip }}:443 check inter 3s fall 1 {{ 'ssl verify required ca-file /usr/local/etc/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem' if gitlab_rails_nginx_ssl_ca_file != '' else '' }}
+    server gitlab-rails{{loop.index}} {{ ip }}:443 check inter 3s fall 1 {{ 'ssl verify required ca-file /usr/local/etc/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem' if gitlab_rails_nginx_ssl_ca != '' else '' }}
 {% else %}
     server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
 {% endif %}
@@ -60,7 +60,7 @@ backend gitlab-registry
 
 {% for ip in gitlab_rails_int_addrs %}
 {% if gitlab_rails_nginx_ssl %}
-    server gitlab-rails{{loop.index}} {{ ip }}:443 check inter 3s fall 1 {{ 'ssl verify required ca-file /usr/local/etc/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem' if gitlab_rails_nginx_ssl_ca_file != '' else '' }}
+    server gitlab-rails{{loop.index}} {{ ip }}:443 check inter 3s fall 1 {{ 'ssl verify required ca-file /usr/local/etc/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem' if gitlab_rails_nginx_ssl_ca != '' else '' }}
 {% else %}
     server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
 {% endif %}

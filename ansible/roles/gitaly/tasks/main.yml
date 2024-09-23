@@ -60,6 +60,8 @@
       when:
         - praefect_ssl
         - praefect_ssl_ca != ''
+  no_log: true
+  diff: false
   when: gitaly_ssl
   tags: reconfigure
 

@@ -65,6 +65,8 @@
         - "'gitaly' in groups"
         - gitaly_ssl
         - gitaly_ssl_ca != ''
+  no_log: true
+  diff: false
   tags: reconfigure
 
 - name: Propagate Secrets if existing

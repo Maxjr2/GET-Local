@@ -39,13 +39,15 @@
   block:
     - name: Copy over any GitLab Rails NGINX SSL files
       copy:
-        src: "{{ item.src_path }}"
+        content: "{{ item.content }}"
         dest: "{{ item.dest_path }}"
         mode: '0600'
       loop:
-        - { src_path: "{{ gitlab_rails_nginx_ssl_cert_file }}", dest_path: "/etc/gitlab/ssl/gitlab_rails_nginx.pem" }
-        - { src_path: "{{ gitlab_rails_nginx_ssl_key_file }}", dest_path: "/etc/gitlab/ssl/gitlab_rails_nginx.pem.key" }
-      when: item.src_path != ''
+        - { content: "{{ gitlab_rails_nginx_ssl_cert }}", dest_path: "/etc/gitlab/ssl/gitlab_rails_nginx.pem" }
+        - { content: "{{ gitlab_rails_nginx_ssl_key }}", dest_path: "/etc/gitlab/ssl/gitlab_rails_nginx.pem.key" }
+      when: item.content != ''
+  no_log: true
+  diff: false
   when: gitlab_rails_nginx_ssl
 
 - name: Copy Praefect or Gitaly CA files if configured
@@ -70,3 +72,5 @@
         - "'gitaly' in groups"
         - gitaly_ssl
         - gitaly_ssl_ca != ''
+  no_log: true
+  diff: false

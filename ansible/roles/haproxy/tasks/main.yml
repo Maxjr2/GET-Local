@@ -65,13 +65,15 @@
 
 - name: Copy GitLab Rails NGINX SSL CA files if configured
   copy:
-    src: "{{ gitlab_rails_nginx_ssl_ca_file }}"
+    content: "{{ gitlab_rails_nginx_ssl_ca }}"
     dest: '/opt/haproxy/trusted-certs/gitlab_rails_nginx_ca.pem'
     owner: '99' # HAProxy Docker User ID
     mode: '0600'
+  no_log: true
+  diff: false
   when:
     - gitlab_rails_nginx_ssl
-    - gitlab_rails_nginx_ssl_ca_file != ''
+    - gitlab_rails_nginx_ssl_ca != ''
 
 - name: Start HAProxy External Docker
   docker_container:
