@@ -137,11 +137,11 @@ Once the settings have been added you will need to rerun `terraform apply` for t
 
 ## VPC Peering
 
-The Toolkit can configure VPC peering which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. This is required if the Geo sites are located on different VPC networks.
+The Toolkit can configure VPC peering which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. Depending on the Geo setup being used, this could be required if the Geo sites are located on different VPC networks. Peering will be required when using GitLab managed PostgreSQL or when the [internal URLs](https://docs.gitlab.com/ee/administration/geo/#internal-url) being used resolve to private IP addresses.
 
 When setting up VPC peering it is always required to have different subnet CIDR blocks on each network.
 
-:information_source:&nbsp; Peering is only available when using a single secondary site.
+:information_source:&nbsp; Peering is only available, within the toolkit, when using a single secondary site.
 
 ### VPC Peering (AWS)
 
