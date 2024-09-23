@@ -621,6 +621,7 @@ In addition to the above, the following optional settings are also available:
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `gp3`.
 - `additional_tags` - A dictionary of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VMs (including disks) or Kubernetes resources. Optional, default is `{}`.
+- `*_user_data_base64` - Custom [EC2 user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) to pass to the machine. Default is `null`.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
