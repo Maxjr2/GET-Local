@@ -208,8 +208,11 @@ Configuring Internal SSL for GitLab Rails NGINX is similar to other components i
 The variables that need to be set in the Inventory Variables [`vars.yml`](environment_configure.md#environment-config-varsyml) file that configures the Toolkit to use Internal SSL.
 
 - `gitlab_rails_nginx_ssl_cert_file` - Path to the GitLab Rails NGINX certificate file to upload. Default is `''`.
+- `gitlab_rails_nginx_ssl_cert` - An alternative to `gitlab_rails_nginx_ssl_cert_file` if the certificate is not stored in a local file, to pass the certificate contents directly to Ansible. Use `gitlab_rails_nginx_ssl_cert`, or `gitlab_rails_nginx_ssl_cert_file`, but not both. This approach can be used to retrieve the certificate via a lookup.
 - `gitlab_rails_nginx_ssl_key_file` - Path to the GitLab Rails NGINX key file to upload. Default is `''`.
+- `gitlab_rails_nginx_ssl_key` - An alternative to `gitlab_rails_nginx_ssl_key_file` if the key is not stored in a local file, to pass the key contents directly to Ansible. Use `gitlab_rails_nginx_ssl_key`, or `gitlab_rails_nginx_ssl_key_file`, but not both. This approach can be used to retrieve the key via a lookup.
 - `gitlab_rails_nginx_ssl_ca_file` - Path to the GitLab Rails NGINX CA file to upload to relevant clients. Default is `''`.
+- `gitlab_rails_nginx_ssl_ca` - An alternative to `gitlab_rails_nginx_ssl_ca_file` if the CA is not stored in a local file, to pass the CA contents directly to Ansible. Use `gitlab_rails_nginx_ssl_ca`, or `gitlab_rails_nginx_ssl_ca_file`, but not both. This approach can be used to retrieve the CA via a lookup.
 
 An example of how the config would look is as follows:
 

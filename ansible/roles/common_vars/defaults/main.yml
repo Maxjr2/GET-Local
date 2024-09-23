@@ -131,10 +131,13 @@ gitlab_rails_monitoring_cidr_blocks: ['0.0.0.0/0']
 gitlab_rails_nginx_real_ip_trusted_cidr_blocks: []
 
 ## GitLab Rails NGINX SSL
+gitlab_rails_nginx_ssl_cert: "{{ lookup('file', gitlab_rails_nginx_ssl_cert_file) if gitlab_rails_nginx_ssl_cert_file != '' else '' }}"
 gitlab_rails_nginx_ssl_cert_file: ""
+gitlab_rails_nginx_ssl_key: "{{ lookup('file', gitlab_rails_nginx_ssl_key_file) if gitlab_rails_nginx_ssl_key_file != '' else '' }}"
 gitlab_rails_nginx_ssl_key_file: ""
+gitlab_rails_nginx_ssl_ca: "{{ lookup('file', gitlab_rails_nginx_ssl_ca_file) if gitlab_rails_nginx_ssl_ca_file != '' else '' }}"
 gitlab_rails_nginx_ssl_ca_file: ""
-gitlab_rails_nginx_ssl: "{{ gitlab_rails_nginx_ssl_cert_file != '' and gitlab_rails_nginx_ssl_key_file != '' }}"
+gitlab_rails_nginx_ssl: "{{ gitlab_rails_nginx_ssl_cert != '' and gitlab_rails_nginx_ssl_key != '' }}"
 
 # GitLab Postgres / PGBouncer
 postgres_primary_int_addr: "{{ (groups['postgres_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'postgres_primary' in groups else '' }}"
