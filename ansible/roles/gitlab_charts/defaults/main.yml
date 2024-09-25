@@ -62,7 +62,7 @@ cluster_autoscaler_image_tag:
 
 ## Kube Prometheus Stack
 kube_prometheus_stack_charts_namespace: monitoring
-kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.73.2', true) }}"
+kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.76.1', true) }}"
 
 kube_prometheus_stack_charts_storage_size: 100Gi
 kube_prometheus_stack_charts_storage_class: ""
@@ -71,4 +71,4 @@ kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
 kube_prometheus_stack_charts_custom_scrape_config: []
 
 consul_charts_namespace: consul
-consul_charts_app_version: "{{ lookup('env','CONSUL_CHARTS_APP_VERSION') | default('1.16.6', true) }}"
+consul_charts_app_version: "{{ lookup('env','CONSUL_CHARTS_APP_VERSION') | default('1.18.2', true) }}"

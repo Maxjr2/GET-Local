@@ -52,9 +52,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends build-essent
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages $pkg_list
-RUN pip3 install --break-system-packages pipdeptree
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages pip-chill
 
-RUN printf "Ubuntu 24.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Ubuntu 24.04 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Debian 11
 FROM debian:11 as python_debian11
@@ -82,9 +82,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends build-essent
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages $pkg_list
-RUN pip3 install --break-system-packages pipdeptree
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages pip-chill
 
-RUN printf "Debian 12 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+RUN printf "Debian 12 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 8
 FROM rockylinux:8 as python_rl8
@@ -109,7 +109,7 @@ COPY --from=python_rl8 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel python3-libs gcc libpq-devel
 
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_list
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list && pip3 install --upgrade-strategy only-if-needed "requests<=2.32.3"
 RUN pip3 install pipdeptree
 
 RUN printf "RHEL 9 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
@@ -123,7 +123,7 @@ COPY --from=python_rl9 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel gcc postgresql-devel openssl
 
-RUN pip3 install --upgrade-strategy only-if-needed $pkg_list && pip3 install --upgrade-strategy only-if-needed "requests<=2.32.3,urllib3<2.0.0"
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list && pip3 install --upgrade-strategy only-if-needed $(echo "requests<=2.32.3 urllib3<2.0.0")
 RUN pip3 install pip-chill
 
 RUN printf "Amazon Linux 2 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
