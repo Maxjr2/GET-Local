@@ -154,7 +154,7 @@
         - ('no matches' not in result.stderr)
       when:
         - omnibus_node
-        - "'gitlab-ee' in ansible_facts.packages"
+        - gitlab_edition in ansible_facts.packages
 
     - name: Install GitLab package via repo if configured
       block:
