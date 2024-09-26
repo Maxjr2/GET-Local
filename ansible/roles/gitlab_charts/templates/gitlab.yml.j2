@@ -79,7 +79,7 @@ gitlab:
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
     serviceAccount:
       annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com" 
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com"
 {% endif %}
     metrics:
       enabled: true
@@ -104,7 +104,7 @@ gitlab:
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
     serviceAccount:
       annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com" 
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
@@ -252,6 +252,14 @@ global:
     enabled: false # Gitaly runs outside of cluster
     external:
     - name: default
+      hostname: "{{ gitaly_primary_int_addr }}"
+{% if gitaly_ssl %}
+      port: "{{ gitaly_ssl_port }}"
+      tlsEnabled: true
+{% else %}
+      port: 8075
+{% endif %}
+    - name: storage1
       hostname: "{{ gitaly_primary_int_addr }}"
 {% if gitaly_ssl %}
       port: "{{ gitaly_ssl_port }}"
@@ -495,7 +503,7 @@ registry:
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
   serviceAccount:
     annotations:
-      iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com" 
+      iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com"
 {% endif %}
   metrics:
     enabled: true
