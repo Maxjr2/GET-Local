@@ -1,6 +1,7 @@
 ---
 - import_playbook: playbook_prep.yml
   tags: always
+  when: geo_primary_site_group_name in group_names
 
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
