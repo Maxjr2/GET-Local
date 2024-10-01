@@ -315,7 +315,7 @@ gitlab_rails['db_load_balancing'] = { 'hosts' => {{ postgres_int_addrs }} }
 postgresql['enable'] = true
 postgresql['trust_auth_cidr_addresses'] = {{ postgres_trust_auth_cidr_blocks }}
 postgres_exporter['listen_address'] = '0.0.0.0:9187'
-{% if postgres_version is defined %}
+{% if postgres_version != '' %}
 postgresql['version'] = {{ postgres_version }}
 {% endif %}
 {% endif %}

@@ -29,7 +29,7 @@ pgbouncer['databases'] = {
 roles ['postgres_role']
 {% endif %}
 
-{% if postgres_version is defined %}
+{% if postgres_version != '' %}
 postgresql['version'] = {{ postgres_version }}
 {% endif %}
 
