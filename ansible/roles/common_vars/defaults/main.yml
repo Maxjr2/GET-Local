@@ -140,6 +140,8 @@ gitlab_rails_nginx_ssl_ca_file: ""
 gitlab_rails_nginx_ssl: "{{ gitlab_rails_nginx_ssl_cert != '' and gitlab_rails_nginx_ssl_key != '' }}"
 
 # GitLab Postgres / PGBouncer
+postgres_version: "{{ lookup('env','POSTGRES_VERSION') }}"
+
 postgres_primary_int_addr: "{{ (groups['postgres_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'postgres_primary' in groups else '' }}"
 postgres_int_addrs: "{{ (groups['postgres'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'postgres' in groups else [] }}"
 pgbouncer_int_addrs: "{{ (groups['pgbouncer'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'pgbouncer' in groups else [] }}"
