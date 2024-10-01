@@ -1,5 +1,5 @@
 ---
-# Remove no longer needed Python packages
+# Removes no longer needed Python packages as a once off
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   order: sorted
