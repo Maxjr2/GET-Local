@@ -1,4 +1,7 @@
 ---
+# Removes any NFS mounts added by GET versions lower than 3.0.0 as a once off
+# NFS is no longer required by GET from 3.0.0 and up
+# https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases/3.0.0#nfs-removal-cleanup
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   order: sorted

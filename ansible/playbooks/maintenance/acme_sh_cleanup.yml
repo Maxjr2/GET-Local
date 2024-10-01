@@ -1,3 +1,4 @@
+---
 # Removes any previously misconfigured acme.sh directories on HAProxy nodes
 # Wrong working environments were used previously due to bash profile differences
 - hosts: haproxy_external
