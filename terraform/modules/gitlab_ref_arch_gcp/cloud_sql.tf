@@ -24,6 +24,14 @@ resource "google_sql_database_instance" "gitlab" {
     disk_type = var.cloud_sql_postgres_disk_type
     disk_size = var.cloud_sql_postgres_disk_size
 
+    dynamic "data_cache_config" {
+      for_each = range(var.cloud_sql_postgres_data_cache_enabled ? 1 : 0)
+
+      content {
+        data_cache_enabled = var.cloud_sql_postgres_data_cache_enabled
+      }
+    }
+
     availability_type = var.cloud_sql_postgres_availability_type
 
     ip_configuration {
