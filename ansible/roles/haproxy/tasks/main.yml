@@ -110,6 +110,13 @@
     - reconfigure
     - restart
 
+- name: Prune any dangling Docker Images
+  docker_prune:
+    images: true
+    timeout: 180
+  when: haproxy_docker_prune
+  tags: reconfigure
+
 - name: Configure External SSL
   block:
     - name: Configure External SSL (Let's Encrypt) if configured

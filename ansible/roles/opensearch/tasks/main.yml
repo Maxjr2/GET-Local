@@ -69,3 +69,10 @@
   tags:
     - reconfigure
     - restart
+
+- name: Prune any dangling Docker Images
+  docker_prune:
+    images: true
+    timeout: 180
+  when: opensearch_docker_prune
+  tags: reconfigure

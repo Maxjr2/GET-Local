@@ -2,6 +2,7 @@
 
 haproxy_version: "{{ lookup('env','HAPROXY_VERSION') | default('3.0', true) }}"
 haproxy_docker_image: "{{ lookup('env','HAPROXY_DOCKER_IMAGE') | default('haproxy:' + haproxy_version + '-alpine', true) }}"
+haproxy_docker_prune: true
 
 # https://github.com/acmesh-official/acme.sh/wiki/Server
 # Only to be changed if required, such as for testing to avoid rate limits ('letsencrypt_test')
