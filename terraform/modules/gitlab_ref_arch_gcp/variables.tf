@@ -772,6 +772,11 @@ variable "cloud_sql_praefect_postgres_disk_size" {
   default = 100
 }
 
+variable "cloud_sql_postgres_data_cache_enabled" {
+  type    = bool
+  default = false
+}
+
 variable "cloud_sql_praefect_postgres_ssl_mode" {
   type        = string
   default     = null

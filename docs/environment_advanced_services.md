@@ -289,6 +289,7 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for Cloud SQL instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `ZONAL`.
 - `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.
 - `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
+- `cloud_sql_postgres_data_cache_enabled` - Toggle for [Data Cache](https://cloud.google.com/sql/docs/postgres/data-cache) feature in Cloud SQL. Feature is only available for the  Enterprise Plus edition (`cloud_sql_postgres_edition`). Optional, default is `false`.
 
 :information_source:&nbsp; If a separate Database Instance for Praefect or Geo Tracking is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` or `cloud_sql_geo_tracking_postgres_*` prefixes respectively.
 
