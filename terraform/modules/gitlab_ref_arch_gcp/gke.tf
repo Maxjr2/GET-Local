@@ -31,6 +31,8 @@ resource "google_container_cluster" "gitlab_cluster" {
   # Blank block enables this and picks at random
   ip_allocation_policy {}
 
+  datapath_provider = var.gke_datapath_provider
+
   release_channel {
     channel = var.cluster_release_channel != null ? var.cluster_release_channel : var.gke_release_channel
   }

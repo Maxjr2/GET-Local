@@ -527,6 +527,12 @@ variable "gke_deletion_protection" {
   type    = bool
   default = false
 }
+variable "gke_datapath_provider" {
+  description = "Sets Dataplane type for GKE Cluster. Set to 'ADVANCED_DATAPATH' to enable Dataplane v2."
+
+  type    = string
+  default = null
+}
 variable "gke_master_authorized_networks_config_cidr_blocks" {
   type    = list(string)
   default = []
