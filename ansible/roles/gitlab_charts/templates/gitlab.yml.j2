@@ -19,6 +19,15 @@ gitlab:
     workerProcesses: "{{ gitlab_charts_webservice_requests_cpu }}"
     ingress:
       proxyBodySize: 0  # Bigger file uploads, e.g. imports
+      useGeoClass: false
+{% if cloud_native_hybrid_geo_unified_url %}
+    extraIngress:
+      enabled: true
+      hostname: "{{ (geo_primary_internal_url if cloud_native_hybrid_geo_role == 'primary' else geo_secondary_internal_url) | regex_replace('^https?:\/\/') }}"
+      useGeoClass: {{ external_geo_ip != '' and (external_geo_ip != external_ip) }}
+      tls:
+        secretName: gitlab-webservice-ssl
+{% endif %}
     nodeSelector:
       workload: webservice
 {% if cloud_provider == 'aws' %}
@@ -282,6 +291,9 @@ global:
 {% if cloud_provider != 'aws' %}
     externalIP: "{{ external_ip }}"
 {% endif %}
+{% if cloud_native_hybrid_geo_unified_url %}
+    externalGeoIP: "{{ external_geo_ip }}"
+{% endif %}
     domain: "{{ external_host }}"
     https: {{ external_url_ssl | lower }}
     gitlab:
@@ -452,6 +464,9 @@ global:
         primaryApiUrl: "{{ geo_primary_registry_url }}"
 {% endif %}
 {% endif %}
+
+nginx-ingress-geo:
+  enabled: {{ cloud_native_hybrid_geo_unified_url }}
 
 nginx-ingress:
   controller:

@@ -303,6 +303,7 @@ cloud_native_hybrid_geo: false
 primary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_primary_site_group_name + '_gitlab_rails_primary' not in groups }}"
 secondary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_secondary_site_group_name + '_gitlab_rails_primary' not in groups }}"
 cloud_native_hybrid_geo_role: ""
+cloud_native_hybrid_geo_unified_url: false
 
 ################################################################################
 ## GitLab Component Custom Config / Tasks / Files
@@ -375,6 +376,8 @@ gitlab_license_text: "{{ lookup('file', gitlab_license_file) if gitlab_license_f
 ################################################################################
 
 maintenance_mode_message: "GitLab is undergoing maintenance"
+
+external_geo_ip: ""
 
 geo_primary_external_url: ""
 geo_primary_internal_url: "{{ geo_primary_external_url | default('') }}"
