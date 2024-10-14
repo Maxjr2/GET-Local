@@ -134,6 +134,7 @@ In addition to the above there are some optional settings that can configure the
 
 - `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
 - `gke_deletion_protection` - Configures [deletion protection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#deletion_protection) in Terraform. Default is `false`.
+- `gke_datapath_provider` - Configures Dataplane type for the GKE cluster. Set to `ADVANCED_DATAPATH` to enable [Dataplane v2](https://cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2) on new GKE clusters. If left unset the GKE default legacy dataplane will be used. Optional, default is `null`.
 
 #### GKE Cluster Availability Type (Regional, Zonal and Autoscaling)
 
