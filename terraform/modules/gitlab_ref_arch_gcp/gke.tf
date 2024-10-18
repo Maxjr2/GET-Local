@@ -19,6 +19,10 @@ resource "google_container_cluster" "gitlab_cluster" {
   node_config {
     # Temporary service account for initial node pool
     service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_supporting_service_account[0].email
+
+    shielded_instance_config {
+      enable_secure_boot = var.machine_secure_boot
+    }
   }
 
   deletion_protection = var.gke_deletion_protection
