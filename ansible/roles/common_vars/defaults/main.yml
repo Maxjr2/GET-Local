@@ -408,7 +408,7 @@ geo_sql_replication_password_md5: "{{ (geo_sql_replication_password + 'gitlab_re
 
 geo_external_primary: "{{ geo_primary_secrets_file != '' or geo_primary_secrets_json != '' or geo_primary_ssh_host_keys != '' or geo_primary_ssh_host_keys_folder != '' or geo_primary_registry_keys != '' or geo_primary_registry_key_file != '' or geo_primary_psql_crt_file != '' }}"
 
-geo_container_registry_notification_secret: "{{ container_registry_token if container_registry_token is defined else '' }} "
+geo_container_registry_notification_secret: "{{ container_registry_token if container_registry_token is defined else '' }}"
 
 # Custom Primary Secrets
 geo_primary_secrets_file: ""
