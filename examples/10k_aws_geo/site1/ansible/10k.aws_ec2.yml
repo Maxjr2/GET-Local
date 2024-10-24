@@ -19,5 +19,4 @@ hostnames:
   - tag:Name
 compose:
   # Return the public IP address of the box for connection
-  # 'public_ip_address' is the correct value here and should not be replaced
   ansible_host: public_ip_address

@@ -156,10 +156,6 @@ ansible
 
 With the above structure in place we can now look at the files to be configured. The rest of this guide will assume this structure is being used.
 
-### Config Examples
-
-[Full config examples are available for select Reference Architectures](../examples). The rest of this section will describe what the config does and how to use it.
-
 ### Configure Dynamic Inventory
 
 One of the first pieces of config you will need to configure is the Inventory. As mentioned we use Dynamic Inventories as it automates the collection of machines and labels.
@@ -240,9 +236,9 @@ hostnames:
   # List host by name instead of the default public ip
   - tag:Name
 compose:
-  # Set to 'public_ip_address' to make Ansible SSH into the public IP address of the hosts.
-  # Set to 'private_ip_address' to use the private (non-internet routable) IP addresses for the hosts.
-  # (note: this does not modify inventory_hostname, which is set via I(hostnames))
+  # Set to 'public_ip_address' to make Ansible SSH via the public IP address of the hosts.
+  # Set to 'private_ip_address' to make Ansible SSH via the private (non-internet routable) IP addresses of the hosts.
+  # Set to 'instance_id' if Ansible is configured to connect via AWS System Manager sessions (AWS SSM)
   ansible_host: public_ip_address
 ```
 
@@ -326,7 +322,6 @@ all:
     # GCP only settings
     gcp_project: "<gcp_project_id>"
 
-
     # AWS only settings
     aws_region: "<aws_region>"
 
@@ -367,7 +362,6 @@ Cloud settings are specific config relating to the cloud provider is running on.
 - `gcp_project` **_GCP only_** - ID of the GCP project. Note this must be the Project's unique ID and not just the name
 - `aws_region`  **_AWS only_** - AWS region the environment will run in.
 - `aws_s3_endpoint` **_AWS only_** - A specific service endpoint for S3 transactions. If not specified, AWS uses the default regional endpoint. See [AWS S3 endpoint documentation](https://docs.aws.amazon.com/general/latest/gr/rande.html) for more details.
-
 - `storage_account_name` **_Azure only_** - The name of the storage account previously created in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
 - `storage_access_key` **_Azure only_** - The access key of the storage account previously obtained in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
 
@@ -489,6 +483,48 @@ gitlab_rails_password: "{{ lookup('amazon.aws.aws_secret', 'gitlab_rails_passwor
 ```
 
 Note that region is required here but since you've already configured it earlier in your `vars.yml` file as `aws_region` this can be reused.
+
+### Alternative Ansible connection options
+
+The Toolkit has been designed and tested with the main Ansible connection option of SSH throughout. However, there are [other connection options](https://docs.ansible.com/ansible/latest/plugins/connection.html) available for Ansible directly or via community plugins.
+
+In this section we'll list connection options that have been known to work but please be aware that your milage may vary and any issues seen will need to be addressed to Ansible or the community responsible.
+
+#### AWS Systems Manager (AWS SSM)
+
+For AWS environments, one alternative to SSH is connecting via [AWS Systems Manager (AWS SSM)](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html) sessions.
+
+This setup is more complex than SSH and has several [additional requirements](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#id2), notably the requirement of a separate S3 bucket to handle file transfers, but it comes with the benefits of working with machines that have no public access and is tied to IAM credentials.
+
+If the requirements have been met Ansible can be configured as follows to use this connection type:
+
+1. Switch the `compose.ansible_host` setting of the [Dynamic Inventory config](#amazon-web-services-aws) from `public_ip_address` to `instance_id`
+
+    ```yaml
+    plugin: aws_ec2
+    [...]
+    compose:
+      ansible_host: instance_id
+    ```
+
+1. Change the Ansible config in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml) to use the connection type:
+
+    ```yaml
+    ansible_user: "ubuntu"
+    ansible_connection: aws_ssm
+    ansible_aws_ssm_region: <region>
+    ansible_aws_ssm_bucket_name: <aws_ssm_bucket>
+    ansible_aws_ssm_timeout: 360
+    ansible_python_interpreter: "/usr/bin/python3" # Valid path to Python on the target machines
+    ansible_shell_executable: /bin/bash # Valid path to a shell executable on the target machines
+    ansible_remote_tmp: "/tmp" # Valid path to a temp folder on the target machines
+    ```
+
+Once in place you can use the same commands but Ansible will now connect over AWS SSM accordingly.
+
+### Config Examples
+
+[Full config examples are available for select Reference Architectures](../examples). The rest of this section will describe what the config does and how to use it.
 
 ## 3. Run the GitLab Environment Toolkit's Docker container (optional)
 
