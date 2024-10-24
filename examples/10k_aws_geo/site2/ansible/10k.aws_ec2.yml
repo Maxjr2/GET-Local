@@ -18,6 +18,7 @@ hostnames:
   # List host by name instead of the default public ip
   - tag:Name
 compose:
-  # Return the public IP address of the box for connection
-  # 'public_ip_address' is the correct value here and should not be replaced
+  # Set to 'public_ip_address' to make Ansible SSH via the public IP address of the hosts.
+  # Set to 'private_ip_address' to make Ansible SSH via the private (non-internet routable) IP addresses of the hosts.
+  # Set to 'instance_id' if Ansible is configured to connect via AWS System Manager sessions (AWS SSM)
   ansible_host: public_ip_address
