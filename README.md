@@ -204,9 +204,15 @@ Due to complexities, permutations or areas best left to be configured directly w
 
 Some of the above areas are better tackled via [Custom Config](docs/environment_advanced.md#custom-config).
 
-### Contributions
+## Contributions
 
 This project accepts contributions to existing features. Refer to the [Contributing guide](CONTRIBUTING.md) for more information.
+
+## Testing
+
+If you wish to test the GitLab Environment Toolkit or use it for testing a scaled GitLab deployment it must be noted this can incur notable costs.
+
+Refer to the [Testing document](TESTING.md) for more information.
 
 ## Licensing
 
