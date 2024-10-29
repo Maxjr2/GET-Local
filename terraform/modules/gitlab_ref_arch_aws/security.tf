@@ -109,7 +109,7 @@ resource "aws_security_group" "gitlab_vm_ssh_access" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_vm_ssh_access" {
-  for_each = local.gitlab_vm_ssh_access_security_group_create ? toset(coalescelist(var.external_ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+  for_each = local.gitlab_vm_ssh_access_security_group_create ? toset(coalescelist(var.external_ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : toset([])
 
   security_group_id = aws_security_group.gitlab_vm_ssh_access[0].id
 
@@ -144,7 +144,7 @@ resource "aws_security_group" "gitlab_git_ssh_access" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_git_ssh_access" {
-  for_each = local.gitlab_git_ssh_access_security_group_create ? toset(coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+  for_each = local.gitlab_git_ssh_access_security_group_create ? toset(coalescelist(var.ssh_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : toset([])
 
   security_group_id = aws_security_group.gitlab_git_ssh_access[0].id
 
@@ -179,7 +179,7 @@ resource "aws_security_group" "gitlab_http_https_access" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_http_access" {
-  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : toset([])
 
   security_group_id = aws_security_group.gitlab_http_https_access[0].id
 
@@ -196,7 +196,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_http_access" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_https_access" {
-  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : []
+  for_each = local.gitlab_http_https_access_security_group_create ? toset(coalescelist(var.http_allowed_ingress_cidr_blocks, var.default_allowed_ingress_cidr_blocks)) : toset([])
 
   security_group_id = aws_security_group.gitlab_http_https_access[0].id
 
@@ -248,7 +248,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_internal_networking" 
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_cidr" {
-  for_each = local.rds_postgres_create ? toset(var.rds_postgres_allowed_ingress_cidr_blocks) : []
+  for_each = local.rds_postgres_create ? toset(var.rds_postgres_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_rds[0].id
 
@@ -298,7 +298,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_internal_net
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_cidr" {
-  for_each = local.rds_praefect_postgres_create ? toset(var.rds_praefect_postgres_allowed_ingress_cidr_blocks) : []
+  for_each = local.rds_praefect_postgres_create ? toset(var.rds_praefect_postgres_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_rds_praefect[0].id
 
@@ -348,7 +348,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_internal
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_cidr" {
-  for_each = local.rds_geo_tracking_postgres_create ? toset(var.rds_geo_tracking_postgres_allowed_ingress_cidr_blocks) : []
+  for_each = local.rds_geo_tracking_postgres_create ? toset(var.rds_geo_tracking_postgres_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_rds_geo_tracking[0].id
 
@@ -399,7 +399,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_interna
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cidr" {
-  for_each = var.elasticache_redis_node_count > 0 ? toset(var.elasticache_redis_allowed_ingress_cidr_blocks) : []
+  for_each = var.elasticache_redis_node_count > 0 ? toset(var.elasticache_redis_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_elasticache_redis[0].id
 
@@ -453,7 +453,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_i
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_cidr" {
-  for_each = var.elasticache_redis_cache_node_count > 0 ? toset(local.elasticache_redis_cache_allowed_ingress_cidr_blocks) : []
+  for_each = var.elasticache_redis_cache_node_count > 0 ? toset(local.elasticache_redis_cache_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_elasticache_redis_cache[0].id
 
@@ -507,7 +507,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persist
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persistent_cidr" {
-  for_each = var.elasticache_redis_persistent_node_count > 0 ? toset(local.elasticache_redis_persistent_allowed_ingress_cidr_blocks) : []
+  for_each = var.elasticache_redis_persistent_node_count > 0 ? toset(local.elasticache_redis_persistent_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_elasticache_redis_persistent[0].id
 
@@ -557,7 +557,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_intern
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" {
-  for_each = var.opensearch_service_node_count > 0 ? toset(var.opensearch_service_allowed_ingress_cidr_blocks) : []
+  for_each = var.opensearch_service_node_count > 0 ? toset(var.opensearch_service_allowed_ingress_cidr_blocks) : toset([])
 
   security_group_id = aws_security_group.gitlab_opensearch_service[0].id
 
