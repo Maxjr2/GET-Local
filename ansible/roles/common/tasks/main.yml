@@ -14,10 +14,6 @@
 
     - name: Gather other facts (common)
       block:
-        - name: Gather service facts (common)
-          service_facts:
-          when: ansible_facts.services is not defined
-
         - name: Gather package facts (common)
           package_facts:
           when: ansible_facts.packages is not defined
@@ -300,25 +296,6 @@
       until: result is success
       when: omnibus_node
       tags: packages
-
-    - name: Configure sshguard whitelist if present
-      block:
-        - name: Add internal cidr to sshguard whitelist
-          lineinfile:
-            path: /etc/sshguard/whitelist
-            regexp: "^{{ internal_cidr_16 }}$"
-            line: "{{ internal_cidr_16 }}"
-          register: sshguard_whitelist
-
-        - name: Restart sshguard
-          service:
-            name: sshguard
-            state: restarted
-          when: sshguard_whitelist.changed
-      when: "'sshguard' in ansible_facts.services"
-      tags:
-        - reconfigure
-        - common_prep
 
     - name: Upgrade Packages
       import_tasks: packages_upgrade.yml
