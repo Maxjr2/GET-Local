@@ -27,7 +27,7 @@
   block:
     - name: Download metrics-server manifest
       ansible.builtin.get_url:
-        url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        url: "{{ aws_eks_metrics_server_manifest_url }}"
         dest: /tmp/metrics-server.yaml
         mode: '0664'
 
@@ -41,6 +41,7 @@
         path: /tmp/metrics-server.yaml
         state: absent
   tags: metrics-server
+  when: aws_eks_metrics_server_setup
 
 - name: Configure Cluster Autoscaler (AWS EKS)
   block:

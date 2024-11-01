@@ -16,6 +16,10 @@ aws_partition: ""
 aws_account: ""
 aws_profile: ""
 
+aws_eks_metrics_server_setup: true
+aws_eks_metrics_server_version: ""
+aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics-server/releases/{{ 'latest/download' if aws_eks_metrics_server_version == '' else 'download/' + aws_eks_metrics_server_version }}/components.yaml"
+
 # Charts Settings
 ## Webservice
 gitlab_charts_webservice_requests_memory_gb: 5
