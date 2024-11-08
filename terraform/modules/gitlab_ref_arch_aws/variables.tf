@@ -1142,6 +1142,11 @@ variable "rds_postgres_enabled_cloudwatch_logs_exports" {
   type        = list(string)
   default     = []
 }
+variable "rds_postgres_monitoring_interval" {
+  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. Valid Values: 0, 1, 5, 10, 15, 30, 60."
+  type        = number
+  default     = 0
+}
 variable "rds_postgres_monitoring_role_arn" {
   description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
   type        = string
@@ -1272,6 +1277,11 @@ variable "rds_praefect_postgres_enabled_cloudwatch_logs_exports" {
   type        = list(string)
   default     = []
 }
+variable "rds_praefect_postgres_monitoring_interval" {
+  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. Valid Values: 0, 1, 5, 10, 15, 30, 60."
+  type        = number
+  default     = 0
+}
 variable "rds_praefect_postgres_monitoring_role_arn" {
   description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
   type        = string
@@ -1401,6 +1411,11 @@ variable "rds_geo_tracking_postgres_enabled_cloudwatch_logs_exports" {
   description = "Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and  `upgrade`"
   type        = list(string)
   default     = []
+}
+variable "rds_geo_tracking_postgres_monitoring_interval" {
+  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. Valid Values: 0, 1, 5, 10, 15, 30, 60."
+  type        = number
+  default     = 0
 }
 variable "rds_geo_tracking_postgres_monitoring_role_arn" {
   description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"

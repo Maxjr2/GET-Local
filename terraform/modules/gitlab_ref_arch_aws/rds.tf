@@ -97,6 +97,7 @@ resource "aws_db_instance" "gitlab" {
   copy_tags_to_snapshot = true
 
   enabled_cloudwatch_logs_exports = length(var.rds_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_interval             = var.rds_postgres_monitoring_interval
   monitoring_role_arn             = var.rds_postgres_monitoring_role_arn
 
   performance_insights_enabled          = var.rds_postgres_performance_insights_enabled
@@ -152,6 +153,7 @@ resource "aws_db_instance" "gitlab_read_replica" {
   copy_tags_to_snapshot = true
 
   enabled_cloudwatch_logs_exports = length(var.rds_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_interval             = var.rds_postgres_monitoring_interval
   monitoring_role_arn             = var.rds_postgres_monitoring_role_arn
 
   timeouts {
