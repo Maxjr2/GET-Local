@@ -776,6 +776,112 @@ all:
 
 </details>
 
+For Cloud Native Hybrid environments, the Ansible static inventory file only needs to include details for component VMs that it is expected to set up directly. For this setup this would be for any stateful backend components that are to be set up with the Linux package (Omnibus).
+
+For components that are to be deployed in Kubernetes, Ansible will handle this through the Cluster API in a similar approach to `kubectl`, as such [`kubeconfig` authentication](environment_advanced_hybrid.md#3-setting-up-authentication-for-the-provisioned-kubernetes-cluster) needs to be configured beforehand for Ansible to run correctly.
+
+As such, in this set up the following components would typically not be part of the Ansible inventory unless specified otherwise
+
+- GitLab Rails / Sidekiq
+- HAProxy External - Handled by Kubernetes
+- HAProxy Internal - Unless you sought to use this as the Internal Load Balancer for Linux package (Omnibus) backends in HA form (Postgres HA, Gitaly Cluster)
+
+<details><summary>10k Cloud Native Hybrid Static Inventory</summary>
+
+```yml
+all:
+  children:
+    consul:
+      hosts:
+        gitlab-consul-1:
+          ansible_host: <CONSUL-1-ADDRESS>
+        gitlab-consul-2:
+          ansible_host: <CONSUL-2-ADDRESS>
+        gitlab-consul-3:
+          ansible_host: <CONSUL-3-ADDRESS>
+    gitaly:
+      children:
+        gitaly_primary:
+          hosts:
+            gitlab-gitaly-1:
+              ansible_host: <GITALY-1-ADDRESS>
+        gitaly_secondary:
+          hosts:
+            gitlab-gitaly-2:
+              ansible_host: <GITALY-2-ADDRESS>
+            gitlab-gitaly-3:
+              ansible_host: <GITALY-3-ADDRESS>
+    haproxy_internal:
+      hosts:
+        gitlab-haproxy-internal-1:
+          ansible_host: <HAPROXY-INTERNAL-1-ADDRESS>
+    pgbouncer:
+      hosts:
+        gitlab-pgbouncer-1:
+          ansible_host: <PGBOUNCER-1-ADDRESS>
+        gitlab-pgbouncer-2:
+          ansible_host: <PGBOUNCER-2-ADDRESS>
+        gitlab-pgbouncer-3:
+          ansible_host: <PGBOUNCER-3-ADDRESS>
+    postgres:
+      children:
+        postgres_primary:
+          hosts:
+            gitlab-postgres-1:
+              ansible_host: <POSTGRES-1-ADDRESS>
+        postgres_secondary:
+          hosts:
+            gitlab-postgres-2:
+              ansible_host: <POSTGRES-2-ADDRESS>
+            gitlab-postgres-3:
+              ansible_host: <POSTGRES-3-ADDRESS>
+    praefect:
+      children:
+        praefect_primary:
+          hosts:
+            gitlab-praefect-1:
+              ansible_host: <PRAEFECT-1-ADDRESS>
+        praefect_secondary:
+          hosts:
+            gitlab-praefect-2:
+              ansible_host: <PRAEFECT-2-ADDRESS>
+            gitlab-praefect-3:
+              ansible_host: <PRAEFECT-3-ADDRESS>
+    praefect_postgres:
+      children:
+        praefect_postgres_primary:
+          hosts:
+            gitlab-praefect-postgres-1:
+              ansible_host: <PRAEFECT-POSTGRES-1-ADDRESS>
+    redis_cache:
+      children:
+        redis_cache_primary:
+          hosts:
+            gitlab-redis-cache-1:
+              ansible_host: <REDIS-CACHE-1-ADDRESS>
+        redis_cache_secondary:
+          hosts:
+            gitlab-redis-cache-2:
+              ansible_host: <REDIS-CACHE-2-ADDRESS>
+            gitlab-redis-cache-3:
+              ansible_host: <REDIS-CACHE-3-ADDRESS>
+    redis_persistent:
+      children:
+        redis_persistent_primary:
+          hosts:
+            gitlab-redis-persistent-1:
+              ansible_host: <REDIS-PERSISTENT-1-ADDRESS>
+        redis_persistent_secondary:
+          hosts:
+            gitlab-redis-persistent-2:
+              ansible_host: <REDIS-PERSISTENT-2-ADDRESS>
+            gitlab-redis-persistent-3:
+              ansible_host: <REDIS-PERSISTENT-3-ADDRESS>
+    ungrouped:
+```
+
+</details>
+
 ### Facts Cache (Optional)
 
 When running select playbooks, e.g. running a playbook only for `haproxy` - `ansible-playbook -i <inventory> playbooks/haproxy.yml`, some additional preparation is required when using a Static Inventory.
