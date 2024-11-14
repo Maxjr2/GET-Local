@@ -91,6 +91,7 @@ resource "aws_db_instance" "gitlab_praefect" {
   copy_tags_to_snapshot = true
 
   enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_interval             = var.rds_praefect_postgres_monitoring_interval
   monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
 
   timeouts {
@@ -143,6 +144,7 @@ resource "aws_db_instance" "gitlab_praefect_read_replica" {
   copy_tags_to_snapshot = true
 
   enabled_cloudwatch_logs_exports = length(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) > 0 ? toset(var.rds_praefect_postgres_enabled_cloudwatch_logs_exports) : null
+  monitoring_interval             = var.rds_praefect_postgres_monitoring_interval
   monitoring_role_arn             = var.rds_praefect_postgres_monitoring_role_arn
 
   timeouts {
