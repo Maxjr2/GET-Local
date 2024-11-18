@@ -100,12 +100,12 @@
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart deployment/{{ item }} -n {{ gitlab_charts_release_namespace }}"
+  command: "kubectl rollout restart deployment -n {{ gitlab_charts_release_namespace }} -l release=gitlab -l app={{ item }}"
   loop:
-    - gitlab-webservice-default
-    - gitlab-sidekiq-all-in-1-v2
-    - gitlab-gitlab-shell
-    - gitlab-toolbox
+    - webservice
+    - sidekiq
+    - gitlab-shell
+    - toolbox
 
 - name: Restart NGINX daemonset to pick up latest secrets
   become: false

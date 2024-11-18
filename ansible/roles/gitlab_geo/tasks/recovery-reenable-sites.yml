@@ -47,7 +47,9 @@
       delegate_to: localhost
       run_once: true
       kubernetes.core.k8s_scale:
-        name: gitlab-webservice-default
+        label_selectors:
+          - app = webservice
+          - release = gitlab
         kind: Deployment
         namespace: "{{ gitlab_charts_release_namespace }}"
         replicas: "{{ webservice_replicas }}"
@@ -58,7 +60,9 @@
       delegate_to: localhost
       run_once: true
       kubernetes.core.k8s_scale:
-        name: gitlab-sidekiq-all-in-1-v2
+        label_selectors:
+          - app = sidekiq
+          - release = gitlab
         kind: Deployment
         namespace: "{{ gitlab_charts_release_namespace }}"
         replicas: "{{ sidekiq_replicas }}"
