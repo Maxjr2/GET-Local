@@ -27,7 +27,7 @@
 
     - name: Check Toolbox Deployment & Pod is ready
       shell: |
-        kubectl wait --for=condition=available --timeout=360s deployment/gitlab-toolbox -n {{ gitlab_charts_release_namespace }}
+        kubectl wait --for=condition=available --timeout=360s deployment -n {{ gitlab_charts_release_namespace }} -l release=gitlab -l app=toolbox
         kubectl wait --for=condition=ready --timeout=360s pod -l app=toolbox,'!job-name' -n {{ gitlab_charts_release_namespace }}
 
     - name: Retrieve Toolbox pod details
