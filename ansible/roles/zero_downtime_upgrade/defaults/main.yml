@@ -1,0 +1,12 @@
+zdu_start_point: 'consul'
+zdu_update_order:
+  - consul
+  - postgres
+  - pgbouncer
+  - redis
+  - gitaly
+  - praefect
+  - gitlab_rails
+  - sidekiq
+  - geo
+  - post_migrations
