@@ -149,6 +149,13 @@ Running the zero downtime upgrade process with the Toolkit is done in the same w
 
 The upgrade process can take a couple of hours to complete, and the full runtime will depend on the number of nodes in the deployment.
 
+In advanced cases where the playbook fails for any reason but you're confident that you can start again from where it stopped, you can configure the process to start from a different point via the following variable:
+
+- `zdu_start_point` - The starting point for the Zero Downtime Upgrade process. Defaults to the first component, which is `consul`.
+  - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migration`
+
+:information_source:&nbsp; If the process has failed and you're in doubt as to why it's recommend to reach out to Support for further guidance.
+
 ### Environment Downgrades
 
 [GitLab Downgrades](https://docs.gitlab.com/ee/update/package/downgrade.html) are an involved process and have several prerequires that need to be met beforehand and manual steps that need to be performed depending on your set up such as requiring a backup of the exact version to be restored.
