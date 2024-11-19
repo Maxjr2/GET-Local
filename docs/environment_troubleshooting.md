@@ -77,13 +77,27 @@ Debugging these errors would be the same as if you were setting up Omnibus direc
 
 ### Ansible Install Failure: `No matching distribution found`
 
-Ansible `7.x` upwards requires Python `3.9` and higher. Attempting to install this version of Ansible via `pip` on a lower version of Python will fail with the following error:
+Ansible releases have a Python version requirement. As such, with new releases can come a requirement on a newer version of Python accordingly.
+
+If the version of Python installed on the control node is too old for the Ansible release, you will see the following error thrown by `pip`:
 
 ```sh
-ERROR: No matching distribution found for ansible==7.1.0
+ERROR: No matching distribution found for ansible==10.0.0
 ```
 
-Upgrade your Python version to `3.9` or higher and try installing again to fix.
+When this occurs you should upgrade your Python version accordingly. The minimum requirement version is noted in the documentation [here](environment_configure.md#1-install-ansible).
+
+### Ansible Install Failure: `Could not find a version that satisfies the requirement`
+
+[Ansible packages can be sometimes be removed by the project's maintainers from the Python Package Index (PyPI) for reasons such as storage](https://forum.ansible.com/t/saving-space-on-pypi/10878/13).
+
+When this happens the following error will be thrown by `pip` when trying to find that version:
+
+```sh
+Could not find a version that satisfies the requirement ansible==10.0.0
+```
+
+If you are seeing this error, the version will need to be adjusted to one that is available by checking the list on the [PyPI website](https://pypi.org/project/ansible/#history).
 
 ### Ansible unable to parse Inventory
 
