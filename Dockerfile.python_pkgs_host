@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye 
 
-ARG ansible_version=10.0.0
+ARG ansible_version=10.0.1
 
 COPY ansible/requirements/ansible-python-packages.txt ansible-python-packages.txt
 

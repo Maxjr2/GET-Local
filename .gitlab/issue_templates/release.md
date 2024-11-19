@@ -40,6 +40,7 @@ Release steps:
   - [ ] Select to create the tag on the release page but make sure to make it a new _lightweight_ tag with no specific notes.
   - [ ] Fill in release notes
     - Use previous releases for formatting. Big items → Smaller items → Upgrade notes / Breaking changes
+      - [ ] Note if any [Terraform or Ansible dependencies](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_upgrades.md#terraform-and-ansible-dependency-upgrades) have been updated since the last release in the Upgrade Notes section.
     - Cite authors when appropriate
     - [Use this link](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/commits/main?ref_type=heads) for reference of what's gone in compared to last release SHA.
     - Remember to also link in the Docker and Terraform registries (links will be the same as previous releases)
