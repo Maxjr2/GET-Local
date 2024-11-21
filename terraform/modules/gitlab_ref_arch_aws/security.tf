@@ -573,6 +573,12 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" 
   }
 }
 
+output "security" {
+  value = {
+    "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
+  }
+}
+
 # Moved
 moved {
   from = aws_security_group.gitlab_external_ssh[0]
