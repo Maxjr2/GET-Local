@@ -1,4 +1,8 @@
 # Avoid running unnecessary services on the Gitaly server
+# GitLab 17.6 added Gitaly role
+{% if gitlab_version == '' or gitlab_version is version('17.6', '>=') %}
+roles ['gitaly_role']
+{% else %}
 postgresql['enable'] = false
 redis['enable'] = false
 puma['enable'] = false
@@ -9,6 +13,7 @@ alertmanager['enable'] = false
 gitlab_exporter['enable'] = false
 nginx['enable'] = false
 gitlab_kas['enable'] = false
+{% endif %}
 
 # Prevent database connections during 'gitlab-ctl reconfigure'
 gitlab_rails['rake_cache_clear'] = false
