@@ -1,0 +1,105 @@
+---
+- name: Gather facts for Omnibus Postgres cluster
+  block:
+    - name: Get latest Postgres Leader
+      command: gitlab-ctl get-postgresql-primary
+      register: postgres_leader_int_address
+      delegate_to: "{{ groups['postgres'][0] }}"
+      delegate_facts: true
+      become: true
+
+    - name: Set Postgres Leader IP and Port
+      set_fact:
+        postgres_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
+        postgres_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
+  when:
+    - "'postgres' in groups and groups['postgres'] | length > 1"
+    - not postgres_external
+  tags:
+    - reconfigure
+    - charts
+    - charts_values
+
+- name: Configure database on externally managed Postgres
+  block:
+    - name: Deploy psql pod
+      kubernetes.core.k8s:
+        kind: Pod
+        name: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        state: present
+        definition:
+          spec:
+            containers:
+              - name: psql
+                image: "{{ psql_image }}"
+                command: ["/bin/sh"]
+                args: ["-c", "while true; do sleep 30; done"]
+                env:
+                  - name: PGUSER
+                    value: "{{ postgres_admin_username }}"
+                  - name: PGPASSWORD
+                    value: "{{ postgres_admin_password }}"
+                  - name: PGHOST
+                    value: "{{ postgres_host }}"
+                  - name: PGPORT
+                    value: "{{ postgres_port }}"
+                  - name: PGDATABASE
+                    value: "template1"
+                  - name: GL_PGUSER
+                    value: "{{ postgres_username.split('@')[0] }}"
+                  - name: GL_PGPASSWORD
+                    value: "{{ postgres_password }}"
+            nodeSelector:
+              workload: "support"
+      no_log: true
+      diff: true
+
+    - name: Check psql pod is ready
+      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql -n {{ gitlab_charts_release_namespace }}"
+
+    - name: Create Database User if missing
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          sh -c "psql -c \"CREATE USER $GL_PGUSER WITH PASSWORD '$GL_PGPASSWORD' CREATEDB;\""
+      register: database_user_create_result
+      failed_when:
+        - database_user_create_result.rc != 0
+        - ("already exists" not in database_user_create_result.stderr)
+
+    - name: Create Database if missing
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ postgres_database_name }};"'
+      register: database_create_result
+      failed_when:
+        - database_create_result.rc != 0
+        - ("already exists" not in database_create_result.stderr)
+
+    - name: Enable required Postgres extensions
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql;"
+  always:
+    - name: Remove psql pod
+      kubernetes.core.k8s:
+        kind: Pod
+        name: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        state: absent
+      no_log: true
+      diff: true
+  when:
+    - postgres_external
+    - postgres_external_prep
+    - cloud_native_hybrid_geo_role != 'secondary'
+  tags:
+    - reconfigure
+    - db_migrate
+    - postgres_external_prep

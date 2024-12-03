@@ -479,7 +479,7 @@ The required variables in Ansible for this are as follows:
 Depending on your Database instance setup some additional config may be required:
 
 - `postgres_migrations_host` / `postgres_migrations_port` - Required for running GitLab Migrations if the main connection is not direct (e.g. via a connection pooler like PgBouncer). This should be set to the direct connection details of your database.
-- `postgres_admin_username` / `postgres_admin_password` - Required if the admin username for the Database instance differs from the main one.
+- `postgres_admin_username` / `postgres_admin_password` - Required if the admin user for the Database instance differs from the main one.
   - **GCP only** - This must be set to `postgres` and the password set via Terraform when using a Toolkit provisioned GCP Cloud SQL instance (`cloud_sql_postgres_root_password`).
 - `postgres_external_prep` - Sets up data on external main database as required by GitLab. Disable this if Ansible is unable to connect to the database directly. Refer to the [Database Preparation](#database-preparation) section below for more info. Optional, default is `true`.
 
@@ -500,11 +500,23 @@ After Ansible is finished running your environment will now be ready.
 
 When using an external database several preparation steps are required for GitLab to use them, including the setup of users, databases and extensions.
 
-As a convenience, the Toolkit will attempt to do this for you automatically via Ansible's [`community.postgres`](https://docs.ansible.com/ansible/latest/collections/community/postgresql/) collection on one of the machines in the environment (as databases typically will only be available internally).
+As a convenience, the Toolkit will attempt to do this for you automatically via either via Ansible's [`community.postgres`](https://docs.ansible.com/ansible/latest/collections/community/postgresql/) collection on one of the Linux package (Omnibus) machines in the environment or via `psql` commands from the [`postgres` docker image](https://hub.docker.com/_/postgres) for Cloud Native Hybrid environments (as external databases typically will only be available within the network).
 
-In some cases this may not be compatible however with your selected database setup in relation to access. If you have options such as Mutual 2-way SSL authentication or any other restrictions on database access these convenience actions may fail with an error such as `unable to connect to database: FATAL: <reason>`.
+This has been designed to work as seamlessly as possible and it should do for most use cases but note the following caveats below in this section.
 
-Due to the complexity of this area and restrictions in Ansible it's not possible to cover every potential permutation. In these cases you need to disable Ansible from attempting this behaviour by setting the `postgres_external_prep` / `praefect_postgres_external_prep` variables to `false` and doing the preparation steps manually as detailed in the main documentation as follows:
+##### Database Preparation - Cloud Native Hybrid
+
+For Cloud Native Hybrid setups, Ansible will seek to do the database preparation by temporally deploying the latest [`postgres` docker image](https://hub.docker.com/_/postgres) into the cluster and running `psql` commands via that pod accordingly. This is to account for the recommended scenario that the database server in question will only be available internally on the network.
+
+This has been designed to work seamlessly thanks to `psql` being backwards compatible however if the image needs to be adjusted for any reason it can be done with the following variable in your Ansible [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`):
+
+- `psql_image` - A Docker image that has the PostgreSQL `psql` CLI installed. It's recommended to have the latest version of `psql` to ensure comparability with the database server version. Optional, default is `postgres:alpine`.
+
+##### Database Preparation - Manual
+
+In some cases it may not be possible or desirable for Ansible to complete the database preparation automatically. For example, Ansible may not be able to access the database server in question. If you have options such as Mutual 2-way SSL authentication or any other restrictions on database access these convenience actions may fail with an error such as `unable to connect to database: FATAL: <reason>`.
+
+Due to the complexity of this area and restrictions in Ansible it's not possible to cover every potential permutation. In these cases you need to disable Ansible from attempting this behaviour by setting the `postgres_external_prep` / `praefect_postgres_external_prep` / `geo_tracking_postgres_external_prep` variables to `false` and doing the preparation steps manually as detailed in the main documentation as follows:
 
 - [GitLab Database](https://docs.gitlab.com/ee/administration/postgresql/external.html)
 - [Praefect Database](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#manual-database-setup)
@@ -518,9 +530,16 @@ Due to the complexity of this area and restrictions in Ansible it's not possible
 When setting up Geo with AWS RDS or GCP Cloud SQL you must specify some extra settings to configure the instances being used. To configure these you can copy all the same variables listed above and replace `postgres_*` with `praefect_postgres_*` or `geo_tracking_postgres_*` respectively with the below considerations.
 
 - `geo_secondary_postgres_host` - Should always be specified and needs to point to the secondary site's database instance.
+- `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate database instance being used for Praefect.
 - `geo_tracking_postgres_host` - By default this will use the same database used for Praefect. If Gitaly Cluster is not being used then this must be set to a separate database instance than the main GitLab instance.
 - `geo_tracking_postgres_port` - By default the Geo tracking database uses port `5431`, if the Geo tracking database is sharing a database instance with Praefect this needs to be set to the same value as `praefect_postgres_port` (`5432` by default).
-- `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate database instance being used for Praefect.
+
+Depending on your Database instance setup some additional config may be required:
+
+- `geo_tracking_postgres_migrations_host` / `geo_tracking_postgres_migrations_port` - Required for running GitLab Migrations if the main connection is not direct (e.g. via a connection pooler like PgBouncer). This should be set to the direct connection details of your database.
+- `geo_tracking_postgres_admin_username` / `geo_tracking_postgres_admin_password` - Required if the admin user for the Database instance differs from the main one.
+  - **GCP only** - This must be set to `postgres` and the password set via Terraform when using a Toolkit provisioned GCP Cloud SQL instance (`cloud_sql_geo_tracking_postgres_root_password`).
+- `geo_tracking_postgres_external_prep` - Sets up data on external Geo Tracking database as required by GitLab. Disable this if Ansible is unable to connect to the database directly. Refer to the [Database Preparation](#database-preparation) section below for more info. Optional, default is `true`.
 
 ## Redis
 

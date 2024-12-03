@@ -1,14 +1,13 @@
 ---
+# Omnibus or Cloud Native Hybrid
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   any_errors_fatal: false
   ignore_unreachable: true
   ignore_errors: true
   no_log: true
-
   roles:
     - common_vars
-
   tasks:
     - name: Geo Failover - Disable primary site
       import_role:
@@ -19,10 +18,32 @@
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   ignore_unreachable: true
-
   roles:
     - common_vars
+  tasks:
+    - name: Geo Failover - Promote secondary site
+      import_role:
+        name: gitlab_geo
+        tasks_from: failover-promote-secondary
+      tags: promote-secondary
 
+# Cloud Native with no Omnibus backends
+- hosts: localhost
+  any_errors_fatal: false
+  ignore_errors: true
+  no_log: true
+  roles:
+    - common_vars
+  tasks:
+    - name: Geo Failover - Disable primary site
+      import_role:
+        name: gitlab_geo
+        tasks_from: failover-disable-primary
+      tags: disable-primary
+
+- hosts: localhost
+  roles:
+    - common_vars
   tasks:
     - name: Geo Failover - Promote secondary site
       import_role:

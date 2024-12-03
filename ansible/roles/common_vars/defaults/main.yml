@@ -293,7 +293,6 @@ cloud_native_hybrid_environment: false
 
 cloud_native_hybrid_monitoring_setup: false
 cloud_native_hybrid_cluster_autoscaler_setup: false
-kubeconfig_setup: false
 
 # Charts Settings
 gitlab_charts_release_namespace: default
@@ -304,6 +303,8 @@ primary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_primary_sit
 secondary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_secondary_site_group_name + '_gitlab_rails_primary' not in groups }}"
 cloud_native_hybrid_geo_role: ""
 cloud_native_hybrid_geo_unified_url: false
+
+psql_image: postgres:alpine # For external Postgres setup via Kubernetes. psql is backwards compatible
 
 ################################################################################
 ## GitLab Component Custom Config / Tasks / Files

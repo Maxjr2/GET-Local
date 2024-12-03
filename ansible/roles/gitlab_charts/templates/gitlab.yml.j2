@@ -1,8 +1,8 @@
 gitlab:
   webservice:
-    maxReplicas: "{{ gitlab_charts_webservice_max_replicas if gitlab_charts_webservice_max_replicas != '' else webservice_replicas }}"
-    minReplicas: "{{ gitlab_charts_webservice_min_replicas if gitlab_charts_webservice_min_replicas != '' else (webservice_replicas | int * gitlab_charts_webservice_min_replicas_scaler) | round | int }}"
-    maxUnavailable: "{{ gitlab_charts_webservice_max_unavailable if gitlab_charts_webservice_max_unavailable != '' else [(webservice_replicas | int * gitlab_charts_webservice_max_unavailable_scaler) | round | int, 1] | max }}"
+    maxReplicas: "{{ webservice_max_replicas }}"
+    minReplicas: "{{ webservice_min_replicas }}"
+    maxUnavailable: "{{ webservice_max_unavailable }}"
     hpa:
 {% if gitlab_version != '' and gitlab_version is version('15.2', '<') %}
       targetAverageValue: 1600m
@@ -59,9 +59,9 @@ gitlab:
       GEO_SECONDARY_PROXY: "0"
 {% endif %}
   sidekiq:
-    maxReplicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else sidekiq_replicas }}"
-    minReplicas: "{{ gitlab_charts_sidekiq_min_replicas if gitlab_charts_sidekiq_min_replicas != '' else (sidekiq_replicas | int * gitlab_charts_sidekiq_min_replicas_scaler) | round | int }}"
-    maxUnavailable: "{{ gitlab_charts_sidekiq_max_unavailable if gitlab_charts_sidekiq_max_unavailable != '' else [(sidekiq_replicas | int * gitlab_charts_sidekiq_max_unavailable_scaler) | round | int, 1] | max }}"
+    maxReplicas: "{{ sidekiq_max_replicas }}"
+    minReplicas: "{{ sidekiq_min_replicas }}"
+    maxUnavailable: "{{ sidekiq_max_unavailable }}"
 {% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
     concurrency: "20"
 {% endif %}
@@ -163,6 +163,47 @@ gitlab:
       enabled: true
       serviceMonitor:
         enabled: true
+{% if gitlab_charts_gitaly_setup %}
+# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+  gitaly:
+    nodeSelector:
+      workload: gitaly
+    resources:
+      limits:
+        memory: "{{ gitlab_charts_gitaly_limits_memory_gb }}G"
+      requests:
+        cpu: "{{ gitlab_charts_gitaly_requests_cpu }}"
+        memory: "{{ gitlab_charts_gitaly_requests_memory_gb }}G"
+    persistence:
+      storageClass: "{{ gitlab_charts_gitaly_storage_class }}"
+      size: "{{ gitlab_charts_gitaly_storage_size }}"
+    packObjectsCache:
+      enabled: true
+    cgroups: # https://docs.gitlab.com/ee/administration/gitaly/kubernetes.html#constrain-git-processes-resource-usage
+      enabled: true
+      memoryBytes: "{{ gitlab_charts_gitaly_cgroups_memory_bytes }}"
+      cpuShares: '1024' # 100%
+      repositories:
+        count: 1
+    antiAffinity: hard
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
+    gracefulRestartTimeout: 1
+{% if cloud_provider == 'aws' %}
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-gitaly-role"
+{% endif %}
+{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
+    serviceAccount:
+      annotations:
+        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-gitaly@{{ gcp_project }}.iam.gserviceaccount.com"
+{% endif %}
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+{% endif %}
 
 global:
   # Deploy pods to Supporting node pool by default unless otherwise configured
@@ -239,12 +280,13 @@ global:
     authToken:
       secret: gitlab-shell-token
       key: password
+
   gitaly:
-{% if 'praefect' in groups %}
     authToken:
-      secret: gitlab-praefect-external-token
+      secret: "{{ 'gitlab-praefect-external-token' if 'praefect' in groups else 'gitlab-gitaly-external-token' }}"
       key: password
-    enabled: false # Gitaly runs outside of cluster
+# Linux Package - Gitaly Cluster
+{% if 'gitaly' in groups and 'praefect' in groups %}
     external:
     - name: default
       hostname: "{{ internal_lb_host }}"
@@ -254,11 +296,8 @@ global:
 {% else %}
       port: 2305
 {% endif %}
+# Linux Package - Gitaly Sharded
 {% elif 'gitaly' in groups %}
-    authToken:
-      secret: gitlab-gitaly-external-token
-      key: password
-    enabled: false # Gitaly runs outside of cluster
     external:
     - name: default
       hostname: "{{ gitaly_primary_int_addr }}"
@@ -286,6 +325,17 @@ global:
       port: 8075
 {% endif %}
 {% endfor %}
+{% endif %}
+# Charts - Gitaly Sharded
+# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+{% if gitlab_charts_gitaly_setup %}
+    internal:
+      names:
+{% for gitaly_chart_storage_name in gitlab_charts_gitaly_storage_names %}
+        - "{{ gitaly_chart_storage_name }}"
+{% endfor %}
+{% else %}
+    enabled: false # Gitaly runs outside of cluster
 {% endif %}
   hosts:
 {% if cloud_provider != 'aws' %}

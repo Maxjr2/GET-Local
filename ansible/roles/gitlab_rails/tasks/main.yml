@@ -56,7 +56,7 @@
     - reconfigure
     - db_migrate
 
-- name: Non Omnibus database related tasks
+- name: Configure database on externally managed Postgres
   block:
     - name: Create Database User
       community.postgresql.postgresql_user:

@@ -51,7 +51,7 @@
   tags: reconfigure
   register: praefect_custom_config_file_path
 
-- name: Non Omnibus database related tasks
+- name: Configure database on externally managed Postgres
   block:
     - name: Create Praefect Database User
       community.postgresql.postgresql_user:

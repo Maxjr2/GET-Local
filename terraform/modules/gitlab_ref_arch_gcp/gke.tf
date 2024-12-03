@@ -1,5 +1,5 @@
 locals {
-  total_node_pool_count = var.webservice_node_pool_count + var.sidekiq_node_pool_count + var.supporting_node_pool_count + var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count
+  total_node_pool_count = var.webservice_node_pool_count + var.sidekiq_node_pool_count + var.supporting_node_pool_count + var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count + var.gitaly_node_pool_count
 
   node_pool_locations = var.gke_zones != null ? var.gke_zones : (var.kubernetes_zones != null ? var.kubernetes_zones : var.zones)
 }
@@ -100,15 +100,16 @@ resource "google_container_cluster" "gitlab_cluster" {
   }
 }
 
+# Webservice
 resource "google_container_node_pool" "gitlab_webservice_pool" {
   count = min(var.webservice_node_pool_count + var.webservice_node_pool_max_count, 1)
 
   # Max 14 chars, unique_id adds 26 chars, total max 40.
-  name_prefix    = "gl-webservice-"
-  cluster        = google_container_cluster.gitlab_cluster[0].name
-  node_locations = local.node_pool_locations
+  name_prefix = "gl-webservice-"
+  cluster     = google_container_cluster.gitlab_cluster[0].name
+  location    = var.gke_location # Cluster location
 
-  location = var.gke_location
+  node_locations = local.node_pool_locations
 
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
@@ -176,15 +177,17 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
   }
 }
 
+# Sidekiq
 resource "google_container_node_pool" "gitlab_sidekiq_pool" {
   count = min(var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count, 1)
 
   # Max 14 chars, unique_id adds 26 chars, total max 40.
-  name_prefix    = "gl-sidekiq-"
-  cluster        = google_container_cluster.gitlab_cluster[0].name
+  name_prefix = "gl-sidekiq-"
+  cluster     = google_container_cluster.gitlab_cluster[0].name
+  location    = var.gke_location # Cluster location
+
   node_locations = local.node_pool_locations
 
-  location = var.gke_location
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
   initial_node_count = var.sidekiq_node_pool_min_count > 0 ? var.sidekiq_node_pool_min_count : var.sidekiq_node_pool_count
@@ -251,15 +254,17 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
   }
 }
 
+# Supporting
 resource "google_container_node_pool" "gitlab_supporting_pool" {
   count = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
 
   # Max 14 chars, unique_id adds 26 chars, total max 40.
-  name_prefix    = "gl-supporting-"
-  cluster        = google_container_cluster.gitlab_cluster[0].name
+  name_prefix = "gl-supporting-"
+  cluster     = google_container_cluster.gitlab_cluster[0].name
+  location    = var.gke_location # Cluster location
+
   node_locations = local.node_pool_locations
 
-  location = var.gke_location
   # Node Count(s)
   # Total counts via Autoscaling ensure correct numbers cross zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
   initial_node_count = var.supporting_node_pool_min_count > 0 ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
@@ -326,6 +331,84 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   }
 }
 
+# Gitaly
+# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+resource "google_container_node_pool" "gitlab_gitaly_pool" {
+  count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
+
+  # Max 14 chars, unique_id adds 26 chars, total max 40.
+  name_prefix = "gl-gitaly-"
+  cluster     = google_container_cluster.gitlab_cluster[0].name
+  location    = var.gke_location # Cluster location
+
+  node_locations = local.node_pool_locations
+
+  # Node Count
+  # Autoscaling is not supported for Gitaly but ability to set is allowed for testing purposes and the feature always used to ensure correct node count across zones - https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#minimum_and_maximum_node_pool_size
+  initial_node_count = var.gitaly_node_pool_min_count > 0 ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
+  autoscaling {
+    total_max_node_count = var.gitaly_node_pool_max_count > 0 ? var.gitaly_node_pool_max_count : var.gitaly_node_pool_count
+    total_min_node_count = var.gitaly_node_pool_min_count > 0 ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  upgrade_settings {
+    max_surge       = 2
+    max_unavailable = 0
+  }
+
+  node_config {
+    machine_type = var.gitaly_node_pool_machine_type
+
+    disk_type         = coalesce(var.gitaly_node_pool_disk_type, var.default_disk_type)
+    disk_size_gb      = coalesce(var.gitaly_node_pool_disk_size, var.default_disk_size)
+    boot_disk_kms_key = var.gitaly_node_pool_disk_kms_key != null ? var.gitaly_node_pool_disk_kms_key : var.gke_default_disk_kms_key
+
+    service_account = var.gke_enable_workload_identity ? module.gitlab_gke_node_service_account[0].email : module.gitlab_gke_gitaly_service_account[0].email
+    oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"] # https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices
+
+    shielded_instance_config {
+      enable_secure_boot = var.machine_secure_boot
+    }
+
+    dynamic "workload_metadata_config" {
+      for_each = range(var.gke_enable_workload_identity || var.cluster_enable_workload_identity ? 1 : 0)
+
+      content {
+        mode = "GKE_METADATA"
+      }
+    }
+
+    # Added by GCP, if not added here TF will recreate each time
+    # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#metadata
+    metadata = {
+      disable-legacy-endpoints = true
+    }
+
+    labels = {
+      workload = "gitaly"
+    }
+
+    resource_labels = merge({
+      gitlab_node_prefix = var.prefix
+      gitlab_node_type   = "gitlab-gitaly-node-pool"
+    }, var.additional_labels)
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # Only set at creation, autoscaling takes over after
+      initial_node_count,
+      # Can only be set for new node pools so ignore any subsequent changes
+      node_config[0].boot_disk_kms_key
+    ]
+  }
+}
+
 ## Firewall
 resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
   count   = min(local.total_node_pool_count, 1)
@@ -355,6 +438,7 @@ output "kubernetes" {
     "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_webservice_service_account[0].email, "")
     "kubernetes_sidekiq_node_group_service_account_email"    = try(module.gitlab_gke_sidekiq_service_account[0].email, "")
     "kubernetes_supporting_node_group_service_account_email" = try(module.gitlab_gke_supporting_service_account[0].email, "")
+    "kubernetes_gitaly_node_group_service_account_email"     = try(module.gitlab_gke_supporting_service_account[0].email, "")
     "kubernetes_node_group_service_account_email"            = try(module.gitlab_gke_node_service_account[0].email, "")
     "kubernetes_toolbox_service_account_email"               = try(module.gitlab_gke_toolbox_service_account[0].email, "")
     "kubernetes_registry_service_account_email"              = try(module.gitlab_gke_registry_service_account[0].email, "")
@@ -363,5 +447,6 @@ output "kubernetes" {
     "kubernetes_webservice_node_group_version" = try(google_container_node_pool.gitlab_webservice_pool[0].version, "")
     "kubernetes_sidekiq_node_group_version"    = try(google_container_node_pool.gitlab_sidekiq_pool[0].version, "")
     "kubernetes_supporting_node_group_version" = try(google_container_node_pool.gitlab_supporting_pool[0].version, "")
+    "kubernetes_gitaly_node_group_version"     = try(google_container_node_pool.gitlab_gitaly_pool[0].version, "")
   }
 }

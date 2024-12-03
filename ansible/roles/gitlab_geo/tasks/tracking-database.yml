@@ -19,9 +19,12 @@
   run_once: true
   set_fact:
     deploy_host: "{{ groups[geo_secondary_site_group_name] | random }}"
-  when: geo_tracking_postgres_external
+  when:
+    - geo_tracking_postgres_external
+    - geo_tracking_postgres_external_prep
+    - not cloud_native_hybrid_geo
 
-- name: Configure Tracking database for externally managed databases
+- name: Configure Tracking database on externally managed Postgres (Omnibus)
   block:
     - name: Tracking Database - Create Geo tracking user
       community.postgresql.postgresql_user:
@@ -58,3 +61,99 @@
     - geo_tracking_postgres_external_prep
     - deploy_host is defined
     - inventory_hostname == deploy_host
+    - not cloud_native_hybrid_geo
+
+- name: Configure Tracking database on externally managed Postgres (Cloud Native)
+  block:
+    - name: Tracking Database - Configure kubeconfig credentials for Geo primary site
+      import_tasks: kubeconfig.yml
+      vars:
+        geo_site_prefix: "{{ geo_secondary_site_prefix }}"
+        geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
+        geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
+        geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+
+    - name: Tracking Database - Deploy psql pod
+      kubernetes.core.k8s:
+        kind: Pod
+        name: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        state: present
+        definition:
+          spec:
+            containers:
+              - name: psql
+                image: "{{ psql_image }}"
+                command: ["/bin/sh"]
+                args: ["-c", "while true; do sleep 30; done"]
+                env:
+                  - name: PGUSER
+                    value: "{{ geo_tracking_postgres_admin_username }}"
+                  - name: PGPASSWORD
+                    value: "{{ geo_tracking_postgres_admin_password }}"
+                  - name: PGHOST
+                    value: "{{ geo_tracking_postgres_host }}"
+                  - name: PGPORT
+                    value: "{{ geo_tracking_postgres_port }}"
+                  - name: PGDATABASE
+                    value: "template1"
+                  - name: GL_PGUSER
+                    value: "{{ geo_tracking_postgres_user.split('@')[0] }}"
+                  - name: GL_PGPASSWORD
+                    value: "{{ geo_tracking_postgres_password }}"
+            nodeSelector:
+              workload: "support"
+      no_log: true
+      diff: true
+
+    - name: Tracking Database - Check psql pod is ready
+      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql -n {{ gitlab_charts_release_namespace }}"
+
+    - name: Tracking Database - Create Database User if missing
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          sh -c "psql -c \"CREATE USER $GL_PGUSER WITH PASSWORD '$GL_PGPASSWORD' CREATEDB;\""
+      register: database_user_create_result
+      failed_when:
+        - database_user_create_result.rc != 0
+        - ("already exists" not in database_user_create_result.stderr)
+
+    - name: Tracking Database - Create Database if missing
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ geo_tracking_postgres_database }};"'
+      register: database_create_result
+      failed_when:
+        - database_create_result.rc != 0
+        - ("already exists" not in database_create_result.stderr)
+
+    - name: Tracking Database - Enable required Postgres extensions
+      kubernetes.core.k8s_exec:
+        pod: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        command: |
+          psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql;"
+  always:
+    - name: Tracking Database - Remove psql pod
+      kubernetes.core.k8s:
+        kind: Pod
+        name: "gitlab-psql"
+        namespace: "{{ gitlab_charts_release_namespace }}"
+        state: absent
+      no_log: true
+      diff: true
+  become: false
+  delegate_to: localhost
+  run_once: true
+  when:
+    - geo_tracking_postgres_external
+    - geo_tracking_postgres_external_prep
+    - cloud_native_hybrid_geo
+  tags:
+    - reconfigure
+    - db_migrate
+    - postgres_external_prep

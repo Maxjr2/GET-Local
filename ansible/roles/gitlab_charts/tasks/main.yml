@@ -54,100 +54,54 @@
     - charts
     - cloud_provider_prep
 
-- name: Gather facts for Omnibus Postgres cluster
-  block:
-    - name: Get latest Postgres Leader
-      command: gitlab-ctl get-postgresql-primary
-      register: postgres_leader_int_address
-      delegate_to: "{{ groups['postgres'][0] }}"
-      delegate_facts: true
-      become: true
-
-    - name: Set Postgres Leader IP and Port
-      set_fact:
-        postgres_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
-        postgres_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
-  when:
-    - "'postgres' in groups and groups['postgres'] | length > 1"
-    - not postgres_external
+- name: Run any database prep tasks
+  import_tasks: database_prep.yml
   tags:
     - reconfigure
     - charts
-    - charts_values
+    - secrets
+    - database_prep
 
-- name: Non Omnibus database related tasks
+- name: Calculate Webservice / Sidekiq pod replica counts as required
   block:
-    - name: Create Database User
-      community.postgresql.postgresql_user:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_admin_username }}"
-        login_password: "{{ postgres_admin_password }}"
-        db: "template1"
-        name: "{{ postgres_username.split('@')[0] }}"
-        password: "{{ postgres_password }}"
-        role_attr_flags: CREATEDB
-        expires: infinity
+    - name: Calculate Webservice / Sidekiq max replica counts based on Linux Package (Omnibus) Gitaly deployment size if not configured
+      block:
+        - name: Get Gitaly CPU count
+          set_fact:
+            gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
 
-    - name: Create Database
-      community.postgresql.postgresql_db:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_username }}"
-        login_password: "{{ postgres_password }}"
-        name: "{{ postgres_database_name }}"
-        encoding: UTF-8
+        - name: Set calculated Webservice / Sidekiq max replica counts
+          set_fact:
+            # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
+            calculated_webservice_max_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, 'true') }}"
+            calculated_sidekiq_max_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), 'true') }}"
+      when:
+        - "'gitaly' in groups"
+        - (gitlab_charts_webservice_max_replicas == '' or gitlab_charts_sidekiq_max_replicas == '')
 
-    - name: Enable required Postgres extensions
-      community.postgresql.postgresql_ext:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_admin_username }}"
-        login_password: "{{ postgres_admin_password }}"
-        name: "{{ item }}"
-        db: "{{ postgres_database_name }}"
-      loop: ['pg_trgm', 'btree_gist', 'plpgsql']
-  delegate_to: "{{ groups['gitaly'][0] }}"
-  delegate_facts: true
-  become: true
-  when:
-    - postgres_external
-    - postgres_external_prep
-    - cloud_native_hybrid_geo_role != 'secondary'
-  tags:
-    - reconfigure
-    - db_migrate
-    - postgres_external_prep
-  run_once: true
-
-- name: Calculate Pod Counts based on Environment size
-  block:
-    - name: Get Gitaly CPU count
-      set_fact:
-        gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
-
-    - name: Set Pod Counts
-      set_fact:
-        # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
-        webservice_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, 'true') }}"
-        sidekiq_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), 'true') }}"
-
-    - name: Show calculated numbers for charts
-      debug:
+    - name: Throw error if Webservice / Sidekiq max pod replica counts have not be configured and can't be calculated
+      fail:
         msg: |
-          gitaly_cpus: {{ gitaly_cpus }}
+          Webservice or Sidekiq max pod replica counts have not be configured and can't be calculated
+          Ensure 'gitlab_charts_webservice_max_replicas' and 'gitlab_charts_sidekiq_max_replicas' have been set and re-run
+      when:
+        - "'gitaly' not in groups"
+        - (gitlab_charts_webservice_max_replicas == '' or gitlab_charts_sidekiq_max_replicas == '')
 
-          webservice_requests_cpu: {{ gitlab_charts_webservice_requests_cpu }}
-          webservice_requests_memory_gb: {{ gitlab_charts_webservice_requests_memory_gb }}
-          webservice_limits_memory_gb: {{ gitlab_charts_webservice_limits_memory_gb }}
+    - name: Set Webservice / Sidekiq max replica counts if configured
+      set_fact:
+        webservice_max_replicas: "{{ gitlab_charts_webservice_max_replicas if gitlab_charts_webservice_max_replicas != '' else calculated_webservice_max_replicas }}"
+        sidekiq_max_replicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else calculated_sidekiq_max_replicas }}"
 
-          sidekiq_requests_cpu: {{ gitlab_charts_sidekiq_requests_cpu }}
-          sidekiq_requests_memory_gb: {{ gitlab_charts_sidekiq_requests_memory_gb }}
-          sidekiq_limits_memory_gb: {{ gitlab_charts_sidekiq_limits_memory_gb }}
+    - name: Set Webservice / Sidekiq min replica counts
+      set_fact:
+        webservice_min_replicas: "{{ gitlab_charts_webservice_min_replicas if gitlab_charts_webservice_min_replicas != '' else (webservice_max_replicas | int * gitlab_charts_webservice_min_replicas_scaler) | round | int }}"
+        sidekiq_min_replicas: "{{ gitlab_charts_sidekiq_min_replicas if gitlab_charts_sidekiq_min_replicas != '' else (sidekiq_max_replicas | int * gitlab_charts_sidekiq_min_replicas_scaler) | round | int }}"
 
-          webservice_replicas: {{ webservice_replicas }}
-          sidekiq_replicas: {{ sidekiq_replicas }}
-      when: gitlab_charts_show_values
+    - name: Set Webservice / Sidekiq max unavailable counts
+      set_fact:
+        webservice_max_unavailable: "{{ gitlab_charts_webservice_max_unavailable if gitlab_charts_webservice_max_unavailable != '' else [(webservice_max_replicas | int * gitlab_charts_webservice_max_unavailable_scaler) | round | int, 1] | max }}"
+        sidekiq_max_unavailable: "{{ gitlab_charts_sidekiq_max_unavailable if gitlab_charts_sidekiq_max_unavailable != '' else [(sidekiq_max_replicas | int * gitlab_charts_sidekiq_max_unavailable_scaler) | round | int, 1] | max }}"
   tags:
     - reconfigure
     - charts
