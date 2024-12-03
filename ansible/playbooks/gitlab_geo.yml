@@ -3,7 +3,14 @@
   tags: always
   when: geo_primary_site_group_name in group_names
 
+# Omnibus or Cloud Native Hybrid
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   roles:
-    - gitlab_geo
+    - { role: gitlab_geo, when: (group_names | length) > 0 }
+
+# Cloud Native with no Omnibus backends
+- hosts: localhost
+  gather_facts: false
+  roles:
+    - { role: gitlab_geo, when: (group_names | length) == 0 }

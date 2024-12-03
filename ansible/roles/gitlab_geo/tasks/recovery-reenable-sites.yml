@@ -13,28 +13,36 @@
 
 - name: Enable Primary Site for Cloud Native Hybrid environments
   block:
-    - name: Recovery Enable Sites - Gather Gitaly group facts
-      setup:
-        filter: ansible_processor_vcpus
-      register: result
-      retries: 3
-      delay: 2
-      until: result is success
-      delegate_to: "{{ node }}"
-      delegate_facts: true
-      with_items: "{{ groups['gitaly'] }}"
-      loop_control:
-        loop_var: node
+    - name: Recovery Enable Sites - Calculate Webservice / Sidekiq pod replica counts as required
+      block:
+        - name: Recovery Enable Sites - Calculate Webservice / Sidekiq max replica counts based on Linux Package (Omnibus) Gitaly deployment size if not configured
+          block:
+            - name: Get Gitaly CPU count
+              set_fact:
+                gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
 
-    - name: Recovery Enable Sites - Get Gitaly CPU count
-      set_fact:
-        gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
+            - name: Recovery Enable Sites - Set calculated Webservice / Sidekiq max replica counts
+              set_fact:
+                # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
+                calculated_webservice_max_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, 'true') }}"
+                calculated_sidekiq_max_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), 'true') }}"
+          when:
+            - "'gitaly' in groups"
+            - (gitlab_charts_webservice_max_replicas == '' or gitlab_charts_sidekiq_max_replicas == '')
 
-    - name: Recovery Enable Sites - Set Pod Counts
-      set_fact:
-        # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
-        webservice_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, 'true') }}"
-        sidekiq_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), 'true') }}"
+        - name: Recovery Enable Sites - Throw error if Webservice / Sidekiq max pod replica counts have not be configured and can't be calculated
+          fail:
+            msg: |
+              Webservice or Sidekiq max pod replica counts have not be configured and can't be calculated
+              Ensure 'gitlab_charts_webservice_max_replicas' and 'gitlab_charts_sidekiq_max_replicas' have been set and re-run
+          when:
+            - "'gitaly' not in groups"
+            - (gitlab_charts_webservice_max_replicas == '' or gitlab_charts_sidekiq_max_replicas == '')
+
+        - name: Recovery Enable Sites - Set Webservice / Sidekiq max replica counts if configured
+          set_fact:
+            webservice_max_replicas: "{{ gitlab_charts_webservice_max_replicas if gitlab_charts_webservice_max_replicas != '' else calculated_webservice_max_replicas }}"
+            sidekiq_max_replicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else calculated_sidekiq_max_replicas }}"
 
     - name: Recovery Enable Sites - Configure kubeconfig credentials for Geo primary site
       become: false
@@ -52,7 +60,7 @@
           - release = gitlab
         kind: Deployment
         namespace: "{{ gitlab_charts_release_namespace }}"
-        replicas: "{{ webservice_replicas }}"
+        replicas: "{{ webservice_max_replicas }}"
         wait_timeout: 300
 
     - name: Recovery Enable Sites - Enable Sidekiq pods
@@ -65,6 +73,6 @@
           - release = gitlab
         kind: Deployment
         namespace: "{{ gitlab_charts_release_namespace }}"
-        replicas: "{{ sidekiq_replicas }}"
+        replicas: "{{ sidekiq_max_replicas }}"
         wait_timeout: 300
   when: cloud_native_hybrid_geo

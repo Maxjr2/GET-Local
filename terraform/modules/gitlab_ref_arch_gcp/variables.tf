@@ -562,7 +562,8 @@ variable "gke_master_ipv4_cidr_block" {
   default = "10.87.0.0/28"
 }
 
-## Nodes
+## Node Pools
+### Webservice
 variable "webservice_node_pool_count" {
   type    = number
   default = 0
@@ -593,6 +594,7 @@ variable "webservice_node_pool_min_count" {
   default = 0
 }
 
+### Sidekiq
 variable "sidekiq_node_pool_count" {
   type    = number
   default = 0
@@ -623,6 +625,7 @@ variable "sidekiq_node_pool_min_count" {
   default = 0
 }
 
+### Supporting
 variable "supporting_node_pool_count" {
   type    = number
   default = 0
@@ -649,6 +652,38 @@ variable "supporting_node_pool_max_count" {
   default = 0
 }
 variable "supporting_node_pool_min_count" {
+  type    = number
+  default = 0
+}
+
+### Gitaly
+### EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+variable "gitaly_node_pool_count" {
+  type    = number
+  default = 0
+}
+variable "gitaly_node_pool_machine_type" {
+  type    = string
+  default = ""
+}
+variable "gitaly_node_pool_disk_type" {
+  type    = string
+  default = null
+}
+variable "gitaly_node_pool_disk_size" {
+  type    = string
+  default = null
+}
+variable "gitaly_node_pool_disk_kms_key" {
+  type    = string
+  default = null
+}
+## Cluster Autoscaling (Optional) - Strictly only for testing purposes with Gitaly as autoscaling is not supported.
+variable "gitaly_node_pool_max_count" {
+  type    = number
+  default = 0
+}
+variable "gitaly_node_pool_min_count" {
   type    = number
   default = 0
 }

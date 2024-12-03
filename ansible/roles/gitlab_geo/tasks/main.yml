@@ -13,6 +13,7 @@
   become: false
   run_once: true
   tags: always
+  when: ('postgres' in group_names)
 
 - name: Configure database for the primary site
   import_tasks: primary-database.yml
@@ -45,7 +46,9 @@
   tags:
     - secondary-database
     - secondary
-  when: geo_primary_psql_crt_file != ""
+  when:
+    - geo_primary_psql_crt_file != ""
+    - ('postgres' in group_names)
 
 - name: Configure the database for the secondary site
   import_tasks: secondary-database.yml
@@ -65,6 +68,7 @@
   become: false
   run_once: true
   tags: always
+  when: ('postgres' in group_names)
 
 - name: Configure the main read-only replica PostgreSQL database on the secondary site
   import_tasks: read-only-replica.yml
@@ -123,13 +127,6 @@
     - ('gitlab_rails' in group_names)
     - geo_secondary_site_group_name in group_names
 
-- name: Redeploy GitLab Charts for Cloud Native Hybrid environments
-  import_tasks: redeploy-secondary-charts.yml
-  tags:
-    - redeploy-secondary-charts
-    - secondary
-  when: secondary_cloud_native_hybrid_geo
-
 - name: Restart backend app servers on primary site
   command: gitlab-ctl restart
   tags:
@@ -138,3 +135,10 @@
   when:
     - ('sidekiq' in group_names)
     - (geo_primary_site_group_name in group_names)
+
+- name: Redeploy GitLab Charts for Cloud Native Hybrid environments
+  import_tasks: redeploy-secondary-charts.yml
+  tags:
+    - redeploy-secondary-charts
+    - secondary
+  when: secondary_cloud_native_hybrid_geo

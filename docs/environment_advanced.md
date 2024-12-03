@@ -26,7 +26,7 @@ On this page we'll detail all the supported advanced setups you can do with the 
 
 ## Custom Config
 
-The Toolkit allows for providing custom GitLab config that will be used when setting up components via Omnibus or Helm charts.
+The Toolkit allows for providing custom GitLab config that will be used when setting up components via the Linux package (Omnibus) or Helm charts.
 
 :exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Any custom config passed will always take precedence and may lead to various unintended consequences or broken environments if not used carefully.
 
@@ -40,11 +40,11 @@ Custom config should only be used in advanced scenarios where you are fully awar
 
 Custom configs are treated the same as our built-in config templates. As such you have access to the same variables for added flexibility.
 
-In this section we detail how to set up custom config for Omnibus and Helm charts components respectively.
+In this section we detail how to set up custom config for the Linux package (Omnibus) and Helm charts components respectively.
 
-### Omnibus
+### Linux package (Omnibus)
 
-Providing custom config for components deployed via Omnibus is done as follows:
+Providing custom config for components deployed via the Linux package (Omnibus) is done as follows:
 
 1. Create a [gitlab.rb](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template) template file in the correct format with the specific custom settings you wish to apply.
 1. By default, the Toolkit looks for [Jinja2 template files](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_configs` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_configs/<component>.rb.j2`. Save your file in this location with the same name.
@@ -54,7 +54,7 @@ Providing custom config for components deployed via Omnibus is done as follows:
 
 :information_source:&nbsp; From GitLab 16.0 onwards note that the config format for [Gitaly](https://docs.gitlab.com/ee/update/#gitaly-omnibus-gitlab-configuration-structure-change) and [Praefect](https://docs.gitlab.com/ee/update/#praefect-omnibus-gitlab-configuration-structure-change) respectively have changed to be under a new `['configuration']` key. When looking to add Custom Config for either of these components you can still do so normal, but you should follow the new structure. For example, to change the logging level for Gitaly you would set configure this as `gitaly['configuration']['logging']['level']`.
 
-With the above done the file will be picked up by the Toolkit and used when configuring Omnibus.
+With the above done the file will be picked up by the Toolkit and used when configuring the Linux package (Omnibus).
 
 ### Helm
 
@@ -74,7 +74,7 @@ The Toolkit allows for providing custom Ansible tasks that can be run at several
 The Toolkit has hooks to allow tasks to be run at the following points during the setup:
 
 - Common - Tasks to run on every VM **before** the component has deployed such as installing general monitoring tools.
-- Omnibus - Tasks to run on specific Omnibus VMs **after** the component has been set up via Omnibus such as installing any specific tools for the component.
+- Linux package (Omnibus) - Tasks to run on specific Linux package (Omnibus) VMs **after** the component has been set up via the Linux package (Omnibus) such as installing any specific tools for the component.
 - Helm - Tasks to run for the Kubernetes Cluster **after** the Charts have been deployed such as deploying additional components into the Cluster.
 - Post Configure - Tasks to run against the environment **after** setup from the Ansible runner.
 - Uninstall - Tasks to run as part of the uninstallation process such as uninstalling any additional tools.
@@ -89,7 +89,7 @@ Setting up common tasks is done in the same manner for each hook as follows:
 1. By default, the Toolkit looks for each hook's Custom Tasks file(s) in the [environment inventory's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_tasks` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_tasks/<custom_tasks_file>.yml`. This is controlled by the following settings for each:
     - `common_custom_tasks_file` - Full path for the Common tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/common.yml`.
     - `haproxy_custom_tasks_file` - Full path for the HAProxy tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/haproxy.yml`.
-    - `<component>_custom_tasks_file` - Full path for Omnibus custom tasks files. Where `<component>` should be replaced with the one intended (options below). Defaults to `<inventory_dir>/../files/gitlab_tasks/<component>.yml`.
+    - `<component>_custom_tasks_file` - Full path for Linux package (Omnibus) custom tasks files. Where `<component>` should be replaced with the one intended (options below). Defaults to `<inventory_dir>/../files/gitlab_tasks/<component>.yml`.
       - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
     - `gitlab_charts_custom_tasks_file` - Full path for the Helm custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/gitlab_charts.yml`.
     - `post_configure_custom_tasks_file` - Full path for the Post Configure custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/post_configure.yml`.
@@ -98,7 +98,7 @@ Setting up common tasks is done in the same manner for each hook as follows:
 Any task within the [Ansible library](https://docs.ansible.com/ansible/2.9/modules/list_of_all_modules.html) can be used for custom tasks, although it's worth noting the following general guidance when writing tasks:
 
 - Any Ansible tasks that aren't core, i.e. available within a standard Ansible install, will need their requirements installed manually before running.
-- If there's a requirement to only run Common tasks across all Omnibus VMs only you can do this by setting a `when` condition on the tasks to the Toolkit provided variable `omnibus_node`.
+- If there's a requirement to only run Common tasks across all Linux package (Omnibus) VMs only you can do this by setting a `when` condition on the tasks to the Toolkit provided variable `omnibus_node`.
 - Except for Common, tasks will run after component setup.
 
 ## Custom Files
@@ -134,13 +134,15 @@ gitaly_custom_files_paths: [
 
 With the above done the files will be copied by the Toolkit.
 
-## Custom GitLab Secrets
+## Custom GitLab Secrets - Linux package (Omnibus)
 
-[GitLab runs with several secrets internally](https://docs.gitlab.com/ee/development/application_secrets.html) that the Toolkit will propagate accordingly across nodes and / or Kubernetes clusters as required.
+[GitLab runs with several secrets internally](https://docs.gitlab.com/ee/development/application_secrets.html) that the Toolkit will propagate accordingly across nodes.
 
 As an additional feature, it's possible for you to pass in your own GitLab secrets, either some or all, that the Toolkit will merge with any existing secrets on the environment and subsequently propagate out.
 
 :exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
+
+:information_source:&nbsp; This feature is designed for Linux package (Omnibus) setups. As a convenience however on Cloud Native Hybrid environments some secrets, such as the GitLab Rails and GitLab Shell secrets, [are also propagated from Linux package (Omnibus) VMs to Kubernetes](environment_advanced_hybrid.md#kubernetes-secrets) to ensure synchronisation. The equivalent full Cloud Native version of this feature is [Custom Kubernetes Secrets (via Custom Tasks)](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
 
 Custom GitLab secrets can be given as a JSON string via the following variable in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 

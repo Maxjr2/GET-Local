@@ -98,7 +98,7 @@ We avoid custom code/implementations wherever possible as this will add addition
 
 ### Shared Responsibility
 
-The Toolkit follows the [Shared Responsibility Model](https://www.crowdstrike.com/cybersecurity-101/cloud-security/shared-responsibility-model/)).
+The Toolkit follows the [Shared Responsibility Model](https://www.crowdstrike.com/cybersecurity-101/cloud-security/shared-responsibility-model/).
 
 The principle is that Self Managed is primarily the responsibility of the user. GitLab does have responsibility to ensure that the Toolkit's scripts are following the best practices, where possible, specifically for the GitLab application. Outside that scope, such as with infrastructure, the responsibility is with the user to ensure that the environment meets all their requirements, and be aware of ongoing maintenance costs.
 
@@ -220,11 +220,11 @@ The following rules apply for Toolkit releases and support between them:
 - We aim to support Backwards Compatibility between minor releases. Although some small breaking changes may be added with adequate notice if the need is justified.
 - Backwards Compatibility is not guaranteed for in development code on the main branch.
 
-#### Support for New / Beta GitLab components
+#### Support for new GitLab components
 
-As a general rule we only aim to add support for new or beta GitLab components once the feature has reached a good level of development maturity.
+As a general rule we only aim to add support for new GitLab components once the feature has reached a good level of development maturity.
 
-Adding a component to GET is similar to adding one to the Reference Architectures and should happen quite far along in its development. The component requires a level of maturity as to answer the questions of how this is expected to run in production, which in turn drives the design in GET. We also require robust documentation on how to set up the component.
+Adding a component to GET is similar to adding one to the Reference Architectures and should happen once the feature is effectively development complete. The component requires a level of maturity as to answer the questions of how this is expected to run in production, which in turn drives the design in GET. We also require robust documentation on how to set up the component.
 
 Examples of maturity questions can be the following: 
 
@@ -236,6 +236,21 @@ Examples of maturity questions can be the following:
 - What is the [operational readiness](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Operational%20Readiness.md?ref_type=heads) status of the component?
 
 Each new component addition request will be reviewed using this guidance along with any additional context.
+
+##### Experimental support
+
+In some rare cases there may be features in GitLab that meet the [above criteria](#support-for-new-gitlab-components) and have no feature work outstanding but are still not recommended for production usage. On a case by case basis, at the sole discretion of the maintainers, we may choose to add experimental support in GET for GitLab components to support efforts for production readiness, such as to enable deploying it in test environments or for performance testing.
+
+Similar to [experimental features](https://docs.gitlab.com/ee/policy/experiment-beta-support.html#experiment) in GitLab, experimental support in GET has similar warnings:
+
+- Is not ready for production use.
+- Has no support available.
+- Could be removed at any time.
+- Might have a risk of data loss.
+- Will have no documentation.
+- Might not have a finalized user experience.
+
+However it must be noted that while the warnings are similar, experimental support in GET and [experimental features](https://docs.gitlab.com/ee/policy/experiment-beta-support.html#experiment) in GitLab are **not** interchangeable. For the avoidance of doubt, experimental GitLab features are not automatically eligible for experimental support in GET as most features do not meet the [above criteria](#support-for-new-gitlab-components).
 
 #### Prefer Custom Config for GitLab variables
 

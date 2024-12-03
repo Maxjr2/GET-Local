@@ -14,9 +14,6 @@ geo_secondary_site_sidekiq_secondary_int_ips: "{{ (groups[geo_secondary_site_gro
 
 tracking_db_md5_auth: "['{{ geo_secondary_site_rails_primary_int_ip }}/32'{% for ip in geo_secondary_site_rails_secondary_int_ips %}, '{{ ip }}/32'{% endfor %}, '{{ geo_secondary_site_sidekiq_primary_int_ip }}/32'{% for ip in geo_secondary_site_sidekiq_secondary_int_ips %}, '{{ ip }}/32'{% endfor %}]"
 
-gitlab_charts_repo_name: 'gitlab'
-gitlab_charts_repo_url: "https://charts.gitlab.io/"
-
 geo_primary_site_prefix: ""
 geo_primary_site_gcp_project: ""
 geo_primary_site_gcp_zone: ""
@@ -30,8 +27,6 @@ geo_secondary_site_aws_region: ""
 
 geo_run_patroni_workaround: true
 
-gitlab_charts_show_values: false
-
 geo_primary_postgres_host: "{{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }}"
 
 geo_secondary_site_count: "{{ geo_replication_slot_modifier if geo_replication_slot_modifier > 2 else geo_max_replication_slots }}"
@@ -39,7 +34,25 @@ geo_secondary_site_count: "{{ geo_replication_slot_modifier if geo_replication_s
 geo_primary_replication_slots: ["geo_secondary"]
 geo_primary_slot_name: "geo_secondary"
 
-# Depricated
+gitlab_charts_repo_name: 'gitlab'
+gitlab_charts_repo_url: "https://charts.gitlab.io/"
+gitlab_charts_show_values: false
+### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Linux Package (Omnibus) Gitaly CPU counts if available
+webservice_default_replica_counts:
+  '192': 77 # 1000 RPS / 50k User - 308 Puma workers (80*4)
+  '96': 35 # 500 RPS / 25k User - 140 Puma workers (35*4)
+  '48': 20 # 200 RPS / 10k User - 80 Puma workers (20*4)
+  '24': 9 # 100 RPS / 5k User - 36 Puma workers (9*4)
+  '12': 4 # 40 RPS / 3k User - 16 Puma workers (4*4)
+  '4': 3 # 20 RPS / 2k User - 12 Puma workers (3*4)
+sidekiq_default_replica_counts:
+  '192': 14
+  '96': 14
+  '48': 14
+  '24': 8
+  '12': 8
+  '4': 4
+
 # Deprecated - TODO Remove in 4.x
 geo_max_replication_slots: 1
 geo_replication_slot_modifier: 2

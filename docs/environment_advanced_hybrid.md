@@ -635,29 +635,53 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
 
-### Custom Kubernetes Secrets (via Custom Tasks)
+### Kubernetes Secrets
 
-The Toolkit supports adding additional Kubernetes Secrets for your deployment the Toolkit does provide a hook to do this via a tasks list.
+The GitLab Charts utilize Kubernetes Secrets throughout for config such as [GitLab secrets](https://docs.gitlab.com/charts/installation/secrets.html), passwords, certificates and more.
 
-Through this you can provide a custom Ansible tasks file that can run [`kubernetes.core.k8s`](https://github.com/ansible-collections/kubernetes.core/blob/main/docs/kubernetes.core.k8s_module.rst) tasks that in turn can contain standard secrets definitions. For example:
+The Toolkit in turn will [configure various secrets](../ansible/roles/gitlab_charts/tasks/secrets.yml) depending on the setup accordingly when deploying the Charts as part of a Cloud Native Hybrid environment, including:
+
+- Password secrets - From Ansible password variables.
+- Object Storage keys for authentication to GCP or AWS - Using IAM based mechanisms or Ansible variables.
+- SSL certificate secrets as configured - From Ansible variables.
+- Container Registry notification secrets as configured - From Ansible variables.
+
+It's recommended to let the Toolkit manage the above secrets for you by configuring via the Ansible variables as noted as it not only sets up the secrets but the equivalent Charts config accordingly to consume said secrets. For any other secrets these can be configured as desired separately or via [Custom Kubernetes Secrets (via Custom Tasks)](#custom-kubernetes-secrets-via-custom-tasks).
+
+Additionally, depending on the setup, the following secrets may be copied from Linux package (Omnibus) VM backends if present to ensure consistency:
+
+- [GitLab Rails](https://docs.gitlab.com/charts/installation/secrets.html#gitlab-rails-secret) (as `gitlab-rails-secrets`) and [GitLab Shell](https://docs.gitlab.com/charts/installation/secrets.html#gitlab-shell-secret) secrets (as `gitlab-shell-token`) - Propagated from Linux package (Omnibus) backends if available to ensure synchronisation as required.
+  - :information_source:&nbsp; This includes any custom values for these secrets passed in via [Custom GitLab Secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) to Linux package (Omnibus) backends when present.
+
+#### Custom Kubernetes Secrets (via Custom Tasks)
+
+It's possible for you to set your own custom Kubernetes secrets as desired via a tasks hook.
+
+:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
+
+This can be used to set any Kubernetes secret, including any of the ones [noted above](#kubernetes-secrets), although this is generally not recommended as noted. If you choose to configure secrets directly in this manner you would also be expected to manage any dependents such as ensuring GitLab secrets are correctly synchronised on any backends as required as well as Charts config to consume said secrets.
+
+Configuring secrets in this manner involves creating a list of Ansible tasks, such as [`kubernetes.core.k8s`](https://github.com/ansible-collections/kubernetes.core/blob/main/docs/kubernetes.core.k8s_module.rst), that it will run through accordingly. An example to configure a secret for GitLab Workhorse you could do so with the following task:
 
 ```yml
-- name: Configure AWS RDS Internal SSL CA secrets
+- name: Configure GitLab Workhorse secret
   kubernetes.core.k8s:
     state: present
     definition:
       kind: Secret
       type: Opaque
       metadata:
-        name: "rds-postgres-ca"
+        name: "gitlab-gitlab-workhorse-secret"
         namespace: "{{ gitlab_charts_release_namespace }}" # This should stay the same
       stringData:
-        rds_postgres_ca.pem: |
-          {{ lookup('file', <local_path_to_postgres_ca_file>) }}
+        shared_secret: |
+          <SECRET VALUE>
   diff: false
 ```
 
-Providing custom Kubernetes secrets for the Charts is done as follows:
+Note that the name for the GitLab Chart deployment, which it uses for default secret names, is `gitlab`,
+
+The overall process for providing custom Kubernetes secrets for the Charts is done as follows:
 
 1. Create a standard Ansible Tasks yaml file with the tasks you wish to run.
     - The file must be in a format that can be run in Ansible's [`include_tasks`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html) module.
@@ -665,7 +689,7 @@ Providing custom Kubernetes secrets for the Charts is done as follows:
 1. By default, the Toolkit looks for Custom Tasks files in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_tasks` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_tasks/gitlab_charts_secrets.yml`. Save your file in this location with the same name.
     - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via a variable for each different component e.g. `gitlab_charts_secrets_tasks_file`.
 
-With the above done, the file will be run before the Helm Charts deployment to add the new secrets.
+With the above done, the file will be run before the Helm Charts deployment to add the new secrets. Note that they will always take precedence over any secrets the Toolkit creates itself.
 
 ## Geo
 

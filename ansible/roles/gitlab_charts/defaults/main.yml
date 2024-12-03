@@ -1,10 +1,7 @@
 ---
-gitlab_charts_repo_name: 'gitlab'
-gitlab_charts_repo_url: "https://charts.gitlab.io/"
-
-gitlab_charts_show_values: false
-
 # Cloud Provider specific
+kubeconfig_setup: false
+
 gcp_backups_service_account_key_file: ""
 gcp_backups_service_account_key_json: "{{ (lookup('file', gcp_backups_service_account_key_file) | string) if gcp_backups_service_account_key_file != '' }}"
 gcp_zone: ""
@@ -21,6 +18,11 @@ aws_eks_metrics_server_version: ""
 aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics-server/releases/{{ 'latest/download' if aws_eks_metrics_server_version == '' else 'download/' + aws_eks_metrics_server_version }}/components.yaml"
 
 # Charts Settings
+gitlab_charts_repo_name: 'gitlab'
+gitlab_charts_repo_url: "https://charts.gitlab.io/"
+
+gitlab_charts_show_values: false
+
 ## Webservice
 gitlab_charts_webservice_requests_memory_gb: 5
 gitlab_charts_webservice_limits_memory_gb: 7
@@ -32,7 +34,7 @@ gitlab_charts_webservice_max_replicas: ""
 gitlab_charts_webservice_min_replicas: ""
 gitlab_charts_webservice_max_unavailable: ""
 
-### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
+### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Linux Package (Omnibus) Gitaly CPU counts if available
 webservice_default_replica_counts:
   '192': 77 # 1000 RPS / 50k User - 308 Puma workers (80*4)
   '96': 35 # 500 RPS / 25k User - 140 Puma workers (35*4)
@@ -51,7 +53,7 @@ gitlab_charts_sidekiq_max_replicas: ""
 gitlab_charts_sidekiq_min_replicas: ""
 gitlab_charts_sidekiq_max_unavailable: ""
 
-### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Gitaly CPU counts
+### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Linux Package (Omnibus) Gitaly CPU counts if available
 sidekiq_default_replica_counts:
   '192': 14
   '96': 14
@@ -59,6 +61,22 @@ sidekiq_default_replica_counts:
   '24': 8
   '12': 8
   '4': 4
+
+## Gitaly
+## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+gitlab_charts_gitaly_setup: false
+
+gitlab_charts_gitaly_requests_memory_gb: ''
+gitlab_charts_gitaly_limits_memory_gb: "{{ gitlab_charts_gitaly_requests_memory_gb }}"
+gitlab_charts_gitaly_requests_cpu: ''
+gitlab_charts_gitaly_storage_size: '50Gi'
+gitlab_charts_gitaly_storage_class: ''
+gitlab_charts_gitaly_storage_names: ['default']
+
+# Gitaly cgroups defaults
+## Memory - Gitaly cgroups are allocated the larger of: 90% of total memory, or total memory minus 6GB. This ensures at least 10% or 6GB (whichever is larger) is available for other processes not covered in cgroups. (gitaly, gitaly-logger, etc...)
+gitlab_charts_gitaly_cgroups_memory_scaler: 0.9
+gitlab_charts_gitaly_cgroups_memory_bytes: "{{ ((([gitlab_charts_gitaly_limits_memory_gb * gitlab_charts_gitaly_cgroups_memory_scaler, gitlab_charts_gitaly_limits_memory_gb - 6] | max) * 1000 * 1000 * 1000) | round | int) if gitlab_charts_gitaly_limits_memory_gb != '' else '' }}"
 
 ## Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
 cluster_autoscaler_image_tag:

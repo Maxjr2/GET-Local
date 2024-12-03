@@ -15,6 +15,7 @@ module "gitlab_gke_webservice_service_account" {
   # Set Workload Identity role if using
   service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-webservice]" : null
 }
+
 ### Sidekiq (Node or Workload Identity ADC)
 module "gitlab_gke_sidekiq_service_account" {
   count  = var.sidekiq_node_pool_count + var.sidekiq_node_pool_max_count > 0 ? 1 : 0
@@ -44,6 +45,23 @@ module "gitlab_gke_supporting_service_account" {
   service_account_profiles     = ["object_storage"]
   service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
+}
+
+### Gitaly (Node or Workload Identity ADC)
+### EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+module "gitlab_gke_gitaly_service_account" {
+  count  = var.gitaly_node_pool_count + var.gitaly_node_pool_max_count > 0 ? 1 : 0
+  source = "../gitlab_gcp_service_account"
+
+  # Ensure account ID is 30 characters or less by trimming and only using alnum characters
+  account_id   = "${var.service_account_prefix}-gke-gitaly"
+  display_name = "${var.prefix}-gke-gitaly"
+
+  service_account_user_members = var.service_account_user_members
+  custom_service_account_email = lookup(var.custom_service_account_emails, "gke-gitaly", null)
+
+  # Set Workload Identity role if using
+  service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-gitaly]" : null
 }
 
 ### Node (Workload Identity ADC)
