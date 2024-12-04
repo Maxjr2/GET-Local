@@ -1,6 +1,13 @@
 ---
-- name: Run NVMe to Block symlink script (AWS)
-  script: 'aws-data-disks/ebs-nvme-block-symlinks.sh'
+- name: Identify NVMe devices (AWS)
+  block:
+    - name: Install nvme-cli package (AWS)
+      package:
+        name: nvme-cli
+        state: present
+
+    - name: Run NVMe to Block symlink script (AWS)
+      script: 'aws-data-disks/ebs-nvme-block-symlinks.sh'
   when: cloud_provider == 'aws'
   tags: nvme
 

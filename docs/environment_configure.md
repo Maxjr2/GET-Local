@@ -70,9 +70,9 @@ Hopefully with this overview its clearer how Ansible in the Toolkit works. Below
 
 ## 1. Install Ansible
 
-The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `10.0` or higher (`ansible-core 2.17`).
+The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `11.0` or higher (`ansible-core 2.18`).
 
-:information_source:&nbsp; Ansible itself typically has requirements on what Python version is installed on the control node. Whatever version you chose will have a corresponding Python version requirement. **For Ansible `10.x` (`ansible-core 2.17`), [Python `3.10` or higher is required](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)**. Note that this Python requirement only applies to the box actually running Ansible and not for the target boxes - Typically the latest available version from the OS is sufficient for the latter.
+:information_source:&nbsp; Ansible itself typically has requirements on what Python version is installed on the control node. Whatever version you chose will have a corresponding Python version requirement. **For Ansible `11.x` (`ansible-core 2.18`), [Python `3.11` or higher is required](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)**. Note that this Python requirement only applies to the box actually running Ansible and not for the target boxes - Typically the latest available version from the OS is sufficient for the latter.
 
 :information_source:&nbsp; For RHEL 8 / Amazon Linux 2 targets an older version of Ansible is required due to Ansible support removal. See [this section for more information](environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
 

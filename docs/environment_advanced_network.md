@@ -374,12 +374,19 @@ Additionally, the Toolkit needs to be configured to run in offline mode to stop 
 
 The Toolkit installs several system packages, required for GitLab or itself, on each target OS via the official repos as follows:
 
-- Ubuntu / Debian _Main_ - `aptitude curl openssh-server ca-certificates tzdata python3-pip nfs-common postfix jq libpq-dev nvme-cli`
-- RHEL _Main, EPEL_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock libpq-devel`
-- Amazon Linux 2 _Main, EPEL, Postgres_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock postgresql-devel`
-- Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq nvme-cli gcc yum-plugin-versionlock libpq-devel`
+- Ubuntu / Debian _Main_ - `aptitude curl openssh-server ca-certificates tzdata python3-pip nfs-common postfix jq libpq-dev`
+- RHEL _Main, EPEL_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
+- Amazon Linux 2 _Main, EPEL, Postgres_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock postgresql-devel`
+- Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
 
 :information_source:&nbsp; For the most up-to-date list of packages it's recommend to check the `system_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
+
+Additionally the following packages may be installed depending on the functionality enabled:
+
+- `nvme-cli` - [Data Disks](environment_advanced.md#data-disks-gcp-aws) (AWS)
+- `socat` - [Let's Encrypt SSL setup on HAProxy External nodes](environment_advanced_ssl.md#lets-encrypt-generated-certificates).
+- `unattended-upgrades` (Ubuntu / Debian) / `dnf-automatic` (RHEL 9, Amazon Linux 2023) - [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades)
+- `nfs-kernel-server` (Ubuntu / Debian) / `nfs-utils` (RHEL 9, Amazon Linux 2023) - [NFS Server setup for Object Data](environment_advanced.md#nfs-for-object-data)
 
 When `offline_setup` is configured the Toolkit will not attempt to set up any repos or install the required packages. As such, you are required to ensure the packages are present before running Ansible. Note this also disables any setup of [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades).
 

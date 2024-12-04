@@ -38,7 +38,7 @@ The requirements for the Toolkit are as follows:
 Host machine:
 
 - Terraform `1.9.0` and upwards
-- Ansible `10.0` and upwards (Ansible core `2.17`, Python `3.10`+)
+- Ansible `11.0` and upwards (Ansible core `2.18`, Python `3.11`+)
 
 Target machine(s):
 
