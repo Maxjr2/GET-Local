@@ -288,7 +288,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 
 In addition to the above, the following optional settings are also available:
 
-- `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Supported OS versions are listed [in the README](../README.md#requirements). Defaults to `ubuntu-2004-lts`.
+- `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Supported OS versions are listed [in the README](../README.md#requirements). Defaults to `ubuntu-2404-lts-amd64`.
 - `machine_secure_boot` - Controls whether [Secure Boot](https://cloud.google.com/security/shielded-cloud/shielded-vm#secure-boot) is enabled on the VMs. Can only be enabled for OS Images that support the `Shielded VM` feature. Defaults to `false`.
 - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
 - `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
@@ -304,7 +304,7 @@ To add custom labels to the different resources created by Terraform you can fol
 
 ##### Configure Machine OS Image (GCP)
 
-By default, the Toolkit will configure machines using Ubuntu 20.04.
+By default, the Toolkit will configure machines using Ubuntu 24.04.
 
 However, this can be changed via the `machine_image` in the [module's environment config file](#configure-module-settings-environmenttf) to the [machine image name as given by GCP](https://cloud.google.com/compute/docs/images/os-details), e.g. `ubuntu-2204-lts` or `rhel-8`.
 
@@ -627,7 +627,7 @@ In addition to the above, the following optional settings are also available:
 
 ##### Configure Machine OS Image (AWS)
 
-By default, the Toolkit will configure machines using the latest Ubuntu 20.04 AMI.
+By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AMI.
 
 However, this can be changed via the `ami_id` setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the AWS docs on how to find the specific AMI ID you require](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html).
 
@@ -902,7 +902,7 @@ In addition to the above, the following optional settings are also available:
 
 ##### Configure Machine OS Image (Azure)
 
-By default, the Toolkit will configure machines using the latest Ubuntu 20.04 AMI.
+By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AMI.
 
 However, this can be changed via the `source_image_reference` dictionary setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the Azure docs on how to find the specific source image details you require](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage).
 
@@ -918,8 +918,8 @@ module "gitlab_ref_arch_azure" {
 
   source_image_reference = {
     "publisher" = "Canonical"
-    "offer"     = "0001-com-ubuntu-server-focal"
-    "sku"       = "20_04-lts"
+    "offer"     = "ubuntu-24_04-lts"
+    "sku"       = "server"
     "version"   = "latest"
   }
 
