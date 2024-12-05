@@ -16,7 +16,7 @@ variable "machine_type" {
 }
 variable "machine_image" {
   type    = string
-  default = "ubuntu-2004-lts"
+  default = "ubuntu-2404-lts-amd64"
 }
 
 variable "disk_size" {
