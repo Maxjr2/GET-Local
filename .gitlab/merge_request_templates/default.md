@@ -5,7 +5,7 @@ The Toolkit has a nuanced and layered design that [integrates with numerous tool
 
 Any contributions to the Toolkit _must_ follow our [Contributing](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/CONTRIBUTING.md) and [Technical Design](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md) guides. Changes should not go against [what the Toolkit isn't for](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md#what-is-it-not) as well as follow our [Focused Design](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md#focused-design) principals.
 
-We aim to review all MRs within 2 weeks although generally it's much quicker than this. If there's been no response please ping the @gl-quality/get-maintainers group.
+We aim to review all MRs within 2 weeks although generally it's much quicker than this. If there's been no response please ping the @gl-dx/get-maintainers group.
 -->
 
 ## What does this MR do?
@@ -31,7 +31,7 @@ We aim to review all MRs within 2 weeks although generally it's much quicker tha
 
 ## Author's checklist
 
-When ready for review, the Author applies the ~"workflow::ready for review" label and mention `@gl-quality/get-maintainers`:
+When ready for review, the Author applies the ~"workflow::ready for review" label and mention `@gl-dx/get-maintainers`:
 
 - Merge request:
   - [ ] Corresponding Issue raised and reviewed by the GET maintainers team.
