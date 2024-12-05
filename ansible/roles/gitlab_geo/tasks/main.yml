@@ -4,27 +4,6 @@
     - primary-app-servers
     - primary
 
-- name: Set up Postgres config temp folder on local
-  tempfile:
-    state: directory
-    prefix: "gitlab-environment-toolkit-"
-  register: geo_psql_temp_folder
-  delegate_to: localhost
-  become: false
-  run_once: true
-  tags: always
-  when: ('postgres' in group_names)
-
-- name: Configure database for the primary site
-  import_tasks: primary-database.yml
-  tags:
-    - primary-database
-    - primary
-  when:
-    - ('postgres' in group_names) or
-      ('gitlab_rails' in group_names and geo_primary_site_group_name + '_postgres_primary' not in groups and not postgres_external)
-    - (geo_primary_site_group_name in group_names)
-
 - name: Copy gitlab-secrets from primary site to secondary
   import_tasks: copy-secrets.yml
   when: gitlab_secrets_setup
@@ -34,41 +13,61 @@
     - copy-secrets
     - secondary
 
-- name: Copy custom psql certificate to local temp
-  fetch:
-    src: "{{ geo_primary_psql_crt_file }}"
-    dest: "{{ geo_psql_temp_folder.path }}/"
-    flat: true
-  no_log: true
-  delegate_to: localhost
-  become: false
-  run_once: true
-  tags:
-    - secondary-database
-    - secondary
-  when:
-    - geo_primary_psql_crt_file != ""
-    - ('postgres' in group_names)
+- name: Configure Postgres (Linux package)
+  block:
+    - name: Set up Postgres config temp folder on local
+      tempfile:
+        state: directory
+        prefix: "gitlab-environment-toolkit-"
+      register: geo_psql_temp_folder
+      delegate_to: localhost
+      become: false
+      run_once: true
+      tags: always
 
-- name: Configure the database for the secondary site
-  import_tasks: secondary-database.yml
-  tags:
-    - secondary-database
-    - secondary
-  when:
-    - ('postgres' in group_names) or
-      ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups and not postgres_external)
-    - (geo_secondary_site_group_name in group_names)
+    - name: Configure database for the primary site
+      import_tasks: primary-database.yml
+      tags:
+        - primary-database
+        - primary
+      when:
+        - ('postgres' in group_names) or
+          ('gitlab_rails' in group_names and geo_primary_site_group_name + '_postgres_primary' not in groups)
+        - (geo_primary_site_group_name in group_names)
 
-- name: Remove Postgres config temp folder
-  file:
-    path: "{{ geo_psql_temp_folder.path }}"
-    state: absent
-  delegate_to: localhost
-  become: false
-  run_once: true
-  tags: always
-  when: ('postgres' in group_names)
+    - name: Copy custom psql certificate to local temp
+      fetch:
+        src: "{{ geo_primary_psql_crt_file }}"
+        dest: "{{ geo_psql_temp_folder.path }}/"
+        flat: true
+      no_log: true
+      delegate_to: localhost
+      become: false
+      run_once: true
+      tags:
+        - secondary-database
+        - secondary
+      when: geo_primary_psql_crt_file != ""
+
+    - name: Configure the database for the secondary site
+      import_tasks: secondary-database.yml
+      tags:
+        - secondary-database
+        - secondary
+      when:
+        - ('postgres' in group_names) or
+          ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups)
+        - (geo_secondary_site_group_name in group_names)
+
+    - name: Remove Postgres config temp folder
+      file:
+        path: "{{ geo_psql_temp_folder.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      run_once: true
+      tags: always
+  when: not postgres_external
 
 - name: Configure the main read-only replica PostgreSQL database on the secondary site
   import_tasks: read-only-replica.yml
