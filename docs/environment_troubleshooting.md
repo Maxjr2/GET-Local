@@ -85,7 +85,7 @@ If the version of Python installed on the control node is too old for the Ansibl
 ERROR: No matching distribution found for ansible==10.0.0
 ```
 
-When this occurs you should upgrade your Python version accordingly. The minimum requirement version is noted in the documentation [here](environment_configure.md#1-install-ansible).
+When this occurs you should upgrade your Python version accordingly. The minimum required version is [noted in the documentation](environment_configure.md#1-install-ansible).
 
 ### Ansible Install Failure: `Could not find a version that satisfies the requirement`
 
