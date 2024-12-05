@@ -74,7 +74,7 @@ resource "aws_db_instance" "gitlab" {
 
   storage_type          = var.rds_postgres_storage_type
   iops                  = var.rds_postgres_storage_type == "io1" && var.rds_postgres_iops == null ? 1000 : var.rds_postgres_iops
-  allocated_storage     = var.rds_postgres_allocated_storage
+  allocated_storage     = local.rds_postgres_is_primary ? var.rds_postgres_allocated_storage : null
   max_allocated_storage = var.rds_postgres_max_allocated_storage
   storage_encrypted     = true
   kms_key_id            = coalesce(var.rds_postgres_kms_key_arn, var.default_kms_key_arn, try(data.aws_kms_key.aws_rds[0].arn, null))
@@ -88,9 +88,9 @@ resource "aws_db_instance" "gitlab" {
 
   iam_database_authentication_enabled = var.rds_postgres_iam_database_authentication_enabled
 
-  backup_window            = local.rds_postgres_is_primary ? var.rds_postgres_backup_window : null
-  backup_retention_period  = local.rds_postgres_is_primary ? var.rds_postgres_backup_retention_period : null
-  delete_automated_backups = local.rds_postgres_is_primary ? var.rds_postgres_delete_automated_backups : null
+  backup_window            = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_window : null
+  backup_retention_period  = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_retention_period : null
+  delete_automated_backups = local.rds_postgres_major_version >= 14 ? var.rds_postgres_delete_automated_backups : null
   maintenance_window       = var.rds_postgres_maintenance_window
 
   skip_final_snapshot   = true
@@ -147,7 +147,9 @@ resource "aws_db_instance" "gitlab_read_replica" {
 
   iam_database_authentication_enabled = aws_db_instance.gitlab[0].iam_database_authentication_enabled
 
-  backup_retention_period = 0
+  backup_window            = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_window : null
+  backup_retention_period  = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_retention_period : null
+  delete_automated_backups = local.rds_postgres_major_version >= 14 ? var.rds_postgres_delete_automated_backups : null
 
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true

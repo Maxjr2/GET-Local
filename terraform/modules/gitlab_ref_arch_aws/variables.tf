@@ -1090,7 +1090,7 @@ variable "rds_postgres_backup_window" {
 }
 variable "rds_postgres_delete_automated_backups" {
   type    = bool
-  default = true
+  default = null
 }
 variable "rds_postgres_maintenance_window" {
   type    = string
@@ -1225,7 +1225,7 @@ variable "rds_praefect_postgres_backup_window" {
 }
 variable "rds_praefect_postgres_delete_automated_backups" {
   type    = bool
-  default = true
+  default = null
 }
 variable "rds_praefect_postgres_maintenance_window" {
   type    = string
@@ -1360,7 +1360,7 @@ variable "rds_geo_tracking_postgres_backup_window" {
 }
 variable "rds_geo_tracking_postgres_delete_automated_backups" {
   type    = bool
-  default = true
+  default = null
 }
 variable "rds_geo_tracking_postgres_maintenance_window" {
   type    = string
