@@ -20,7 +20,8 @@ resource "google_storage_bucket" "gitlab_object_storage_buckets" {
     }
   }
 
-  labels = var.object_storage_labels
+  # TODO: var.object_storage_labels is deprecated and will be removed in 4.x
+  labels = merge(var.object_storage_labels, var.custom_labels, var.object_storage_custom_labels)
 }
 
 # IAM Storage Admin Role

@@ -79,11 +79,6 @@ variable "object_storage_force_destroy" {
   type        = bool
   default     = true
 }
-variable "object_storage_labels" {
-  description = "Labels to apply to object storage buckets"
-  type        = map(string)
-  default     = {}
-}
 variable "object_storage_versioning" {
   description = "Enable GCS bucket versioning"
   type        = bool
@@ -1118,9 +1113,131 @@ variable "gitlab_shell_ssh_port" {
 }
 
 ## Labels
-variable "additional_labels" {
-  type    = map(any)
+variable "custom_labels" {
+  type    = map(string)
   default = {}
+}
+variable "consul_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "gitaly_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "gitlab_rails_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_external_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_internal_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "monitor_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "object_storage_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "opensearch_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "pgbouncer_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "postgres_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_postgres_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_cache_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_persistent_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+
+variable "cloud_sql_postgres_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "cloud_sql_geo_tracking_postgres_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "cloud_sql_praefect_postgres_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "gke_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "gitaly_node_pool_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_node_pool_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "supporting_node_pool_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "webservice_node_pool_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "memorystore_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "memorystore_cache_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+variable "memorystore_persistent_custom_labels" {
+  type    = map(string)
+  default = {}
+}
+
+## TODO: additional_labels is deprecated and will be removed in 4.x
+variable "additional_labels" {
+  description = "Deprecated. Replaced by custom_labels."
+  type        = map(any)
+  default     = {}
+}
+## TODO: object_storage_labels is deprecated and will be removed in 4.x
+variable "object_storage_labels" {
+  description = "Deprecated. Replaced by object_storage_custom_labels"
+  type        = map(string)
+  default     = {}
 }
 
 # Additional

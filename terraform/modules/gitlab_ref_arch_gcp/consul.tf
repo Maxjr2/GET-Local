@@ -1,10 +1,11 @@
 module "consul" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "consul"
-  node_count        = var.consul_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "consul"
+  node_count = var.consul_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.consul_custom_labels)
 
   machine_type  = var.consul_machine_type
   machine_image = var.machine_image

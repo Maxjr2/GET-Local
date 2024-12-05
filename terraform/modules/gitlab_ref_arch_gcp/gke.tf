@@ -85,10 +85,11 @@ resource "google_container_cluster" "gitlab_cluster" {
     }
   }
 
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
   resource_labels = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
-  }, var.additional_labels)
+  }, var.additional_labels, var.custom_labels, var.gke_custom_labels)
 
   lifecycle {
     ignore_changes = [
@@ -161,10 +162,11 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       workload = "webservice"
     }
 
+    # TODO: var.additional_labels is deprecated and will be removed in 4.x
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-webservice-node-pool"
-    }, var.additional_labels)
+    }, var.additional_labels, var.custom_labels, var.webservice_node_pool_custom_labels)
   }
 
   lifecycle {
@@ -238,10 +240,11 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
       workload = "sidekiq"
     }
 
+    # TODO: var.additional_labels is deprecated and will be removed in 4.x
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-sidekiq-node-pool"
-    }, var.additional_labels)
+    }, var.additional_labels, var.custom_labels, var.sidekiq_node_pool_custom_labels)
   }
 
   lifecycle {
@@ -315,10 +318,11 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       workload = "support"
     }
 
+    # TODO: var.additional_labels is deprecated and will be removed in 4.x
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-supporting-node-pool"
-    }, var.additional_labels)
+    }, var.additional_labels, var.custom_labels, var.supporting_node_pool_custom_labels)
   }
 
   lifecycle {
@@ -393,10 +397,11 @@ resource "google_container_node_pool" "gitlab_gitaly_pool" {
       workload = "gitaly"
     }
 
+    # TODO: var.additional_labels is deprecated and will be removed in 4.x
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-gitaly-node-pool"
-    }, var.additional_labels)
+    }, var.additional_labels, var.custom_labels, var.gitaly_node_pool_custom_labels)
   }
 
   lifecycle {

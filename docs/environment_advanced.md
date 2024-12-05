@@ -991,3 +991,54 @@ To configure custom Path add the following variable in the Terraform [Environmen
 - `default_iam_identifier_path` - The IAM [Path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) to be applied to all IAM Policies and Roles the Toolkit creates. Defaults to `null` which in turn results in `/` default path in AWS.
 
 The Toolkit will then apply the path on the next `terraform apply` run.
+
+## Custom Tags/Labels
+
+:exclamation:&nbsp; This feature is currently only available for GCP, [support for AWS/Azure is in development](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/934).
+
+Resources on Cloud Providers such as instances, clusters, cloud services, data disks or buckets can be tagged (or labelled in the case of GCP) for automation or identification purposes. The Toolkit adds multiple tags accordingly for automation purposes.
+
+It's also possible to add additional tags as desired with Custom Tags. The following settings can be set to configure the tags for each component. Note that each setting expects a map of key value pairs as shown below:
+
+- `custom_labels`: These labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
+- `object_storage_custom_labels`: Will be applied to all object storage buckets.
+- `(instance type)_custom_labels`: Will be applied to the specific instance type and any associated data disks.
+- `(cloud service)_custom_labels`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
+
+```tf
+custom_labels                = { custom-label : "custom-value" }
+object_storage_custom_labels = { bucket-label : "bucket-value" }
+
+consul_custom_labels            = { consul-label1 : "consul-value1", consul-label2 : "consul-value2" }
+gitaly_custom_labels            = { gitaly-label1 : "gitaly-value1", gitaly-label2 : "gitaly-value2" }
+gitlab_rails_custom_labels      = { rails-label : "rails-value"}
+haproxy_external_custom_labels  = { haproxy-external-label : "haproxy-external-value" }
+haproxy_internal_custom_labels  = { haproxy-internal-label : "haproxy-internal-value" }
+monitor_custom_labels           = { monitor-label : "monitor-value" }
+opensearch_custom_labels        = { opensearch-label : "opensearch-value" }
+pgbouncer_custom_labels         = { pgbouncer-label : "pgbouncer-value" }
+postgres_custom_labels          = { postgres-label : "postgres-value" }
+praefect_custom_labels          = { praefect-label : "praefect-value" }
+praefect_postgres_custom_labels = { praefect-postgres-label : "praefect-postgres-value" }
+redis_cache_custom_labels       = { redis-cache-label : "redis-cache-value" }
+redis_custom_labels             = { redis-label : "redis-value" }
+redis_persistent_custom_labels  = { redis-persistent-label : "redis-persistent-value" }
+sidekiq_custom_labels           = { sidekiq-label : "sidekiq-value" }
+```
+
+### GCP Services
+
+```tf
+gke_custom_labels                  = { cluster-label : "cluster-value" }
+webservice_node_pool_custom_labels = { gke-webservice-label : "gke-webservice-value" }
+sidekiq_node_pool_custom_labels    = { gke-sidekiq-label : "gke-sidekiq-value" }
+supporting_node_pool_custom_labels = { gke-support-label : "gke-support-value" }
+
+cloud_sql_postgres_custom_labels              = { cloud-sql-label : "cloud-sql-value" }
+cloud_sql_geo_tracking_postgres_custom_labels = { cloud-sql-geo-label : "cloud-sql-geo-value" }
+cloud_sql_praefect_postgres_custom_labels     = { cloud-sql-praefect-label : "cloud-sql-praefect-value" }
+
+memorystore_custom_labels            = { memorystore--label : "memorystore-value" }
+memorystore_cache_custom_labels      = { memorystore-cache-label : "memorystore-cache-value" }
+memorystore_persistent_custom_labels = { memorystore-persistent-label : "memorystore-persistent-value" }
+```
