@@ -22,12 +22,13 @@ resource "google_compute_instance" "gitlab" {
     enable_secure_boot = var.machine_secure_boot
   }
 
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
   boot_disk {
     initialize_params {
       image  = var.machine_image
       size   = var.disk_size
       type   = var.disk_type
-      labels = var.additional_labels
+      labels = merge(var.additional_labels, var.custom_labels)
     }
     kms_key_self_link = var.disk_kms_key
   }
@@ -36,6 +37,7 @@ resource "google_compute_instance" "gitlab" {
     enable-oslogin = "TRUE"
   }
 
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
   labels = merge({
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
@@ -43,7 +45,7 @@ resource "google_compute_instance" "gitlab" {
     gitlab_geo_site       = var.geo_site
     gitlab_geo_deployment = var.geo_deployment
     gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
-  }, var.additional_labels)
+  }, var.additional_labels, var.custom_labels)
 
   network_interface {
     network    = var.vpc
@@ -120,6 +122,7 @@ module "google_service_account" {
 }
 
 ## Data Disks
+## TODO: var.additional_labels is deprecated and will be removed in 4.x
 resource "google_compute_disk" "gitlab" {
   for_each = { for d in local.node_data_disks : "${d.device_name}-${d.node_num}" => d }
 
@@ -128,7 +131,7 @@ resource "google_compute_disk" "gitlab" {
   size = each.value.size
   zone = each.value.zone
 
-  labels = var.additional_labels
+  labels = merge(var.additional_labels, var.custom_labels)
 
   dynamic "disk_encryption_key" {
     for_each = range(var.disk_kms_key != null ? 1 : 0)

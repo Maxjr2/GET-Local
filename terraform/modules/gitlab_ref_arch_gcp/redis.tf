@@ -1,10 +1,11 @@
 module "redis" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "redis"
-  node_count        = var.redis_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "redis"
+  node_count = var.redis_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_custom_labels)
 
   machine_type  = var.redis_machine_type
   machine_image = var.machine_image
@@ -41,10 +42,11 @@ output "redis" {
 module "redis_cache" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "redis-cache"
-  node_count        = var.redis_cache_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "redis-cache"
+  node_count = var.redis_cache_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_cache_custom_labels)
 
   machine_type  = var.redis_cache_machine_type
   machine_image = var.machine_image
@@ -79,10 +81,11 @@ output "redis_cache" {
 module "redis_persistent" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "redis-persistent"
-  node_count        = var.redis_persistent_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "redis-persistent"
+  node_count = var.redis_persistent_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_persistent_custom_labels)
 
   machine_type  = var.redis_persistent_machine_type
   machine_image = var.machine_image

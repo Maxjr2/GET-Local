@@ -111,11 +111,10 @@ variable "tags" {
   type    = list(string)
   default = []
 }
-variable "additional_labels" {
-  type    = map(any)
+variable "custom_labels" {
+  type    = map(string)
   default = {}
 }
-
 variable "allow_stopping_for_update" {
   type    = bool
   default = true
@@ -123,4 +122,11 @@ variable "allow_stopping_for_update" {
 variable "machine_secure_boot" {
   type    = bool
   default = false
+}
+
+## TODO: additional_labels is deprecated and will be removed in 4.x
+variable "additional_labels" {
+  description = "Deprecated. Replaced by custom_labels."
+  type        = map(any)
+  default     = {}
 }

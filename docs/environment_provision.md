@@ -293,12 +293,12 @@ In addition to the above, the following optional settings are also available:
 - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
 - `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_labels` - Labels to apply to object storage buckets.
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `pd-standard`.
 - `allow_stopping_for_update` - Controls whether Terraform can restart VMs when making changes if required. Should only be disabled for additional resilience. Defaults to `true`.
-- `additional_labels` - A dictionary of additional [labels](https://cloud.google.com/compute/docs/labeling-resources) to assign to VMs (including disks), Kubernetes and Cloud Services. Optional, default is `{}`.
+
+To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
@@ -416,7 +416,7 @@ While this is designed to be seemless there are several options available to adj
 
 Part of the GCP IAM design is to require a separate specific role for members who wish to _use_ Service Accounts, such as attaching them to VMs and for [SSH OS login](https://cloud.google.com/compute/docs/oslogin/set-up-oslogin#configure_users). This permission is called [`Service Account User`](https://cloud.google.com/iam/docs/service-account-permissions#user-role) and is separate from the permission used to create Service Accounts and manage their permissions (`Service Account Admin`).
 
-[GCP recommends that this role is not granted at the project level](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) for all Service Accounts. As such, the Toolkit will attach this role specifically for each created Service Account to the member account running Terraform by default. 
+[GCP recommends that this role is not granted at the project level](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) for all Service Accounts. As such, the Toolkit will attach this role specifically for each created Service Account to the member account running Terraform by default.
 
 For cases where there are multiple members expected to run Terraform you may see clashes as Terraform will switch to the running account each run and Ansible fails to log in due to the mismatch. In this scenario you can configure Terraform to instead set a custom static list of members in the [module's environment config file](#configure-module-settings-environmenttf) to include the member account(s) being used by Terraform and Ansible via the following variable:
 
@@ -1022,7 +1022,7 @@ docker run -it \
 
 ### Install Terraform in Docker container
 
-After starting the container you will need to install the specific version of Terraform required for your environment. 
+After starting the container you will need to install the specific version of Terraform required for your environment.
 
 Terraform is not installed by default due to licensing reasons. However, [`mise`](https://mise.jdx.dev/) and a compatible Terraform plugin are provided in the image already for convenience. Refer to the [Install Terraform using `mise` or `asdf`](#install-terraform-using-mise-or-asdf) section on how to use `mise` to install Terraform.
 

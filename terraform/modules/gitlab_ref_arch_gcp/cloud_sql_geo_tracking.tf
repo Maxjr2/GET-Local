@@ -67,7 +67,8 @@ resource "google_sql_database_instance" "gitlab_geo_tracking" {
       }
     }
 
-    user_labels = var.additional_labels
+    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    user_labels = merge(var.additional_labels, var.custom_labels, var.cloud_sql_geo_tracking_postgres_custom_labels)
   }
 
   deletion_protection = var.cloud_sql_geo_tracking_postgres_deletion_protection

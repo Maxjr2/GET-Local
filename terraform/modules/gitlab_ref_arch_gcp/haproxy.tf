@@ -1,10 +1,11 @@
 module "haproxy_external" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "haproxy-external"
-  node_count        = var.haproxy_external_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "haproxy-external"
+  node_count = var.haproxy_external_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.haproxy_external_custom_labels)
 
   machine_type  = var.haproxy_external_machine_type
   machine_image = var.machine_image
@@ -40,10 +41,11 @@ output "haproxy_external" {
 module "haproxy_internal" {
   source = "../gitlab_gcp_instance"
 
-  prefix            = var.prefix
-  node_type         = "haproxy-internal"
-  node_count        = var.haproxy_internal_node_count
-  additional_labels = var.additional_labels
+  prefix     = var.prefix
+  node_type  = "haproxy-internal"
+  node_count = var.haproxy_internal_node_count
+  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  custom_labels = merge(var.additional_labels, var.custom_labels, var.haproxy_internal_custom_labels)
 
   machine_type  = var.haproxy_internal_machine_type
   machine_image = var.machine_image
