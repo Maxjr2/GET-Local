@@ -966,6 +966,11 @@ variable "memorystore_redis_weekly_maintenance_window_start_time" {
   type    = any
   default = []
 }
+variable "memorystore_redis_update_timeout" {
+  type        = string
+  default     = "1h"
+  description = "How long to wait for the update to finish before timing out"
+}
 
 ### Separate - Cache
 variable "memorystore_redis_cache_node_count" {
@@ -996,6 +1001,11 @@ variable "memorystore_redis_cache_weekly_maintenance_window_start_time" {
   type    = any
   default = []
 }
+variable "memorystore_redis_cache_update_timeout" {
+  type        = string
+  default     = "1h"
+  description = "How long to wait for the update to finish before timing out"
+}
 
 ### Separate - Persistent
 variable "memorystore_redis_persistent_node_count" {
@@ -1025,6 +1035,11 @@ variable "memorystore_redis_persistent_weekly_maintenance_window_day" {
 variable "memorystore_redis_persistent_weekly_maintenance_window_start_time" {
   type    = any
   default = []
+}
+variable "memorystore_redis_persistent_update_timeout" {
+  type        = string
+  default     = "1h"
+  description = "How long to wait for the update to finish before timing out"
 }
 
 # Networking
