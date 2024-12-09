@@ -994,8 +994,6 @@ The Toolkit will then apply the path on the next `terraform apply` run.
 
 ## Custom Tags/Labels
 
-:exclamation:&nbsp; This feature is currently only available for GCP, [support for AWS/Azure is in development](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/934).
-
 Resources on Cloud Providers such as instances, clusters, cloud services, data disks or buckets can be tagged (or labelled in the case of GCP) for automation or identification purposes. The Toolkit adds multiple tags accordingly for automation purposes.
 
 It's also possible to add additional tags as desired with Custom Tags. The following settings can be set to configure the tags for each component. Note that each setting expects a map of key value pairs as shown below:
