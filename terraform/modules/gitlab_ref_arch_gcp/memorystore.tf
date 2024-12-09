@@ -49,6 +49,11 @@ resource "google_redis_instance" "gitlab_redis" {
       customer_managed_key
     ]
   }
+
+  timeouts {
+    update = var.memorystore_redis_update_timeout
+  }
+
 }
 
 output "memorystore_redis_connection" {
@@ -119,6 +124,9 @@ resource "google_redis_instance" "gitlab_redis_cache" {
       customer_managed_key
     ]
   }
+  timeouts {
+    update = var.memorystore_redis_cache_update_timeout
+  }
 }
 
 output "memorystore_redis_cache_connection" {
@@ -187,6 +195,9 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
       # Can only be set for new instances so ignore any subsequent changes
       customer_managed_key
     ]
+  }
+  timeouts {
+    update = var.memorystore_redis_persistent_update_timeout
   }
 }
 
