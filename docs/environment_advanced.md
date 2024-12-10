@@ -1008,7 +1008,7 @@ It's also possible to add additional tags as desired with Custom Tags. The follo
 custom_(tags/labels)                = { <key-name> : <value> }
 
 object_storage_custom_(tags/labels) = { <key-name> : <value> }
-object_storage_bucket_custom_tags = {
+object_storage_buckets_custom_(tags/labels) = {
   "artifacts"        = { <key-name> : <value> },
   "backups"          = { <key-name> : <value> },
   "dependency-proxy" = { <key-name> : <value> },

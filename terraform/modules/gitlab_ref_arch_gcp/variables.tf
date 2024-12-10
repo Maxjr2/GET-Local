@@ -1156,6 +1156,10 @@ variable "monitor_custom_labels" {
   type    = map(string)
   default = {}
 }
+variable "object_storage_buckets_custom_labels" {
+  type    = map(any)
+  default = {}
+}
 variable "object_storage_custom_labels" {
   type    = map(string)
   default = {}
