@@ -98,7 +98,8 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
     create = var.rds_geo_tracking_postgres_create_timeout
   }
 
-  tags = var.rds_geo_tracking_postgres_tags
+  ## TODO: var.rds_geo_tracking_postgres_tags is deprecated and will be removed in 4.x
+  tags = merge(var.rds_geo_tracking_postgres_tags, var.custom_tags, var.rds_geo_tracking_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
@@ -154,7 +155,8 @@ resource "aws_db_instance" "gitlab_geo_tracking_read_replica" {
     create = var.rds_geo_tracking_postgres_read_replica_create_timeout
   }
 
-  tags = var.rds_geo_tracking_postgres_tags
+  ## TODO: var.rds_geo_tracking_postgres_tags is deprecated and will be removed in 4.x
+  tags = merge(var.rds_geo_tracking_postgres_tags, var.custom_tags, var.rds_geo_tracking_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [

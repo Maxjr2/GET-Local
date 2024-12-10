@@ -101,11 +101,6 @@ variable "subnet_ids" {
   default = null
 }
 
-variable "additional_tags" {
-  type    = map(any)
-  default = {}
-}
-
 variable "disk_delete_on_termination" {
   type    = bool
   default = null
@@ -115,4 +110,16 @@ variable "user_data_base64" {
   type        = string
   default     = null
   description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
+}
+
+variable "custom_tags" {
+  type    = map(any)
+  default = {}
+}
+
+## TODO: additional_tags is deprecated and will be removed in 4.x
+variable "additional_tags" {
+  description = "Deprecated. Replaced by custom_tags."
+  type        = map(any)
+  default     = {}
 }

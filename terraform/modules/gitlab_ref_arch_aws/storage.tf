@@ -9,7 +9,8 @@ resource "aws_s3_bucket" "gitlab_object_storage_buckets" {
     ]
   }
 
-  tags = var.object_storage_tags
+  ## TODO: var.object_storage_tags is deprecated and will be removed in 4.x
+  tags = merge(var.object_storage_tags, var.custom_tags, var.object_storage_custom_tags, try(var.object_storage_buckets_custom_tags[each.value], null))
 }
 
 resource "aws_s3_bucket_versioning" "gitlab_object_storage_buckets" {

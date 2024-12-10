@@ -69,9 +69,10 @@ resource "aws_opensearch_domain" "gitlab" {
     enabled = true
   }
 
+  ## TODO: var.opensearch_service_tags is deprecated and will be removed in 4.x
   tags = merge({
     Domain = var.prefix
-  }, var.opensearch_service_tags)
+  }, var.opensearch_service_tags, var.custom_tags, var.opensearch_service_custom_tags)
 
   depends_on = [aws_iam_service_linked_role.gitlab_opensearch_role[0]]
 }

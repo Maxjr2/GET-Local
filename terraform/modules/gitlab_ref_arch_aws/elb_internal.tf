@@ -11,6 +11,8 @@ resource "aws_lb" "gitlab_internal_lb" {
   ]
 
   enable_cross_zone_load_balancing = true
+
+  tags = merge(var.custom_tags, var.elb_internal_custom_tags)
 }
 
 # GitLab Rails

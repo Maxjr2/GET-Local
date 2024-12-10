@@ -107,7 +107,8 @@ resource "aws_db_instance" "gitlab" {
     create = var.rds_postgres_create_timeout
   }
 
-  tags = var.rds_postgres_tags
+  ## TODO: var.rds_postgres_tags is deprecated and will be removed in 4.x
+  tags = merge(var.rds_postgres_tags, var.custom_tags, var.rds_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
@@ -162,7 +163,8 @@ resource "aws_db_instance" "gitlab_read_replica" {
     create = var.rds_postgres_read_replica_create_timeout
   }
 
-  tags = var.rds_postgres_tags
+  ## TODO: var.rds_postgres_tags is deprecated and will be removed in 4.x
+  tags = merge(var.rds_postgres_tags, var.custom_tags, var.rds_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
