@@ -620,8 +620,9 @@ In addition to the above, the following optional settings are also available:
 - `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `gp3`.
-- `additional_tags` - A dictionary of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VMs (including disks) or Kubernetes resources. Optional, default is `{}`.
 - `*_user_data_base64` - Custom [EC2 user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) to pass to the machine. Default is `null`.
+
+To add custom tags to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
 
 :information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 

@@ -74,10 +74,11 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     }
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags, var.eks_custom_tags)
 
   depends_on = [
     aws_iam_role_policy_attachment.gitlab_eks_role_cluster_policy,
@@ -161,19 +162,21 @@ resource "aws_launch_template" "gitlab_webservice" {
   tag_specifications {
     resource_type = "instance"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name               = "${var.prefix}-webservice-node-pool"
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-webservice-node-pool"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
   }
 
   tag_specifications {
     resource_type = "volume"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name = "${var.prefix}-webservice-pool-root"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
   }
 
   update_default_version = true
@@ -211,13 +214,14 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     workload = "webservice"
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-webservice-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
@@ -272,19 +276,21 @@ resource "aws_launch_template" "gitlab_sidekiq" {
   tag_specifications {
     resource_type = "instance"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name               = "${var.prefix}-sidekiq-node-pool"
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-sidekiq-node-pool"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
   }
 
   tag_specifications {
     resource_type = "volume"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name = "${var.prefix}-sidekiq-pool-root"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
   }
 
   update_default_version = true
@@ -322,13 +328,15 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     workload = "sidekiq"
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-sidekiq-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
+
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
     aws_iam_role_policy_attachment.gitlab_eks_node_role_node_policy,
@@ -382,19 +390,21 @@ resource "aws_launch_template" "gitlab_supporting" {
   tag_specifications {
     resource_type = "instance"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name               = "${var.prefix}-supporting-node-pool"
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-supporting-node-pool"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
   }
 
   tag_specifications {
     resource_type = "volume"
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name = "${var.prefix}-supporting-pool-root"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
   }
 
   update_default_version = true
@@ -432,13 +442,14 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     workload = "support"
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-supporting-node-pool"
 
     "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
     "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [

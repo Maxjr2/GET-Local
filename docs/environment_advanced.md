@@ -998,45 +998,82 @@ Resources on Cloud Providers such as instances, clusters, cloud services, data d
 
 It's also possible to add additional tags as desired with Custom Tags. The following settings can be set to configure the tags for each component. Note that each setting expects a map of key value pairs as shown below:
 
-- `custom_labels`: These labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
-- `object_storage_custom_labels`: Will be applied to all object storage buckets.
-- `(instance type)_custom_labels`: Will be applied to the specific instance type and any associated data disks.
-- `(cloud service)_custom_labels`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
+- `custom_(tags/labels)`: These tags/labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
+- `object_storage_custom_(tags/labels)`: Will be applied to all object storage buckets.
+- `object_storage_buckets_custom_(tags/labels)`: A map of different tags/labels to apply to specific buckets.
+- `(instance type)_custom_(tags/labels)`: Will be applied to the specific instance type and any associated data disks.
+- `(cloud service)_custom_(tags/labels)`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
 
 ```tf
-custom_labels                = { custom-label : "custom-value" }
-object_storage_custom_labels = { bucket-label : "bucket-value" }
+custom_(tags/labels)                = { <key-name> : <value> }
 
-consul_custom_labels            = { consul-label1 : "consul-value1", consul-label2 : "consul-value2" }
-gitaly_custom_labels            = { gitaly-label1 : "gitaly-value1", gitaly-label2 : "gitaly-value2" }
-gitlab_rails_custom_labels      = { rails-label : "rails-value"}
-haproxy_external_custom_labels  = { haproxy-external-label : "haproxy-external-value" }
-haproxy_internal_custom_labels  = { haproxy-internal-label : "haproxy-internal-value" }
-monitor_custom_labels           = { monitor-label : "monitor-value" }
-opensearch_custom_labels        = { opensearch-label : "opensearch-value" }
-pgbouncer_custom_labels         = { pgbouncer-label : "pgbouncer-value" }
-postgres_custom_labels          = { postgres-label : "postgres-value" }
-praefect_custom_labels          = { praefect-label : "praefect-value" }
-praefect_postgres_custom_labels = { praefect-postgres-label : "praefect-postgres-value" }
-redis_cache_custom_labels       = { redis-cache-label : "redis-cache-value" }
-redis_custom_labels             = { redis-label : "redis-value" }
-redis_persistent_custom_labels  = { redis-persistent-label : "redis-persistent-value" }
-sidekiq_custom_labels           = { sidekiq-label : "sidekiq-value" }
+object_storage_custom_(tags/labels) = { <key-name> : <value> }
+object_storage_bucket_custom_tags = {
+  "artifacts"        = { <key-name> : <value> },
+  "backups"          = { <key-name> : <value> },
+  "dependency-proxy" = { <key-name> : <value> },
+  "lfs"              = { <key-name> : <value> },
+  "mr-diffs"         = { <key-name> : <value> },
+  "packages"         = { <key-name> : <value> },
+  "terraform-state"  = { <key-name> : <value> },
+  "uploads"          = { <key-name> : <value> },
+  "registry"         = { <key-name> : <value> },
+  "ci-secure-files"  = { <key-name> : <value> },
+  "pages"            = { <key-name> : <value> },
+}
+
+consul_custom_(tags/labels)            = { <key-name> : <value> }
+gitaly_custom_(tags/labels)            = { <key-name> : <value> }
+gitlab_rails_custom_(tags/labels)      = { <key-name> : <value> }
+haproxy_external_custom_(tags/labels)  = { <key-name> : <value> }
+haproxy_internal_custom_(tags/labels)  = { <key-name> : <value> }
+monitor_custom_(tags/labels)           = { <key-name> : <value> }
+opensearch_custom_(tags/labels)        = { <key-name> : <value> }
+pgbouncer_custom_(tags/labels)         = { <key-name> : <value> }
+postgres_custom_(tags/labels)          = { <key-name> : <value> }
+praefect_custom_(tags/labels)          = { <key-name> : <value> }
+praefect_postgres_custom_(tags/labels) = { <key-name> : <value> }
+redis_cache_custom_(tags/labels)       = { <key-name> : <value> }
+redis_custom_(tags/labels)             = { <key-name> : <value> }
+redis_persistent_custom_(tags/labels)  = { <key-name> : <value> }
+sidekiq_custom_(tags/labels)           = { <key-name> : <value> }
 ```
 
 ### GCP Services
 
 ```tf
-gke_custom_labels                  = { cluster-label : "cluster-value" }
-webservice_node_pool_custom_labels = { gke-webservice-label : "gke-webservice-value" }
-sidekiq_node_pool_custom_labels    = { gke-sidekiq-label : "gke-sidekiq-value" }
-supporting_node_pool_custom_labels = { gke-support-label : "gke-support-value" }
+gke_custom_labels                  = { <key-name> : <value> }
+webservice_node_pool_custom_labels = { <key-name> : <value> }
+sidekiq_node_pool_custom_labels    = { <key-name> : <value> }
+supporting_node_pool_custom_labels = { <key-name> : <value> }
 
-cloud_sql_postgres_custom_labels              = { cloud-sql-label : "cloud-sql-value" }
-cloud_sql_geo_tracking_postgres_custom_labels = { cloud-sql-geo-label : "cloud-sql-geo-value" }
-cloud_sql_praefect_postgres_custom_labels     = { cloud-sql-praefect-label : "cloud-sql-praefect-value" }
+cloud_sql_postgres_custom_labels              = { <key-name> : <value> }
+cloud_sql_geo_tracking_postgres_custom_labels = { <key-name> : <value> }
+cloud_sql_praefect_postgres_custom_labels     = { <key-name> : <value> }
 
-memorystore_custom_labels            = { memorystore--label : "memorystore-value" }
-memorystore_cache_custom_labels      = { memorystore-cache-label : "memorystore-cache-value" }
-memorystore_persistent_custom_labels = { memorystore-persistent-label : "memorystore-persistent-value" }
+memorystore_custom_labels            = { <key-name> : <value> }
+memorystore_cache_custom_labels      = { <key-name> : <value> }
+memorystore_persistent_custom_labels = { <key-name> : <value> }
+```
+
+### AWS Services
+
+```tf
+eks_custom_tags                  = { <key-name> : <value> }
+webservice_node_pool_custom_tags = { <key-name> : <value> }
+sidekiq_node_pool_custom_tags    = { <key-name> : <value> }
+supporting_node_pool_custom_tags = { <key-name> : <value> }
+
+rds_postgres_custom_tags              = { <key-name> : <value> }
+rds_geo_tracking_postgres_custom_tags = { <key-name> : <value> }
+rds_praefect_postgres_custom_tags     = { <key-name> : <value> }
+
+elasticache_custom_tags            = { <key-name> : <value> }
+elasticache_cache_custom_tags      = { <key-name> : <value> }
+elasticache_persistent_custom_tags = { <key-name> : <value> }
+
+opensearch_custom_tags         = { <key-name> : <value> }
+opensearch_service_custom_tags = { <key-name> : <value> }
+
+elb_internal_custom_tags = { <key-name> : <value> }
 ```

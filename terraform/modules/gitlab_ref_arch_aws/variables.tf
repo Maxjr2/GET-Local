@@ -78,11 +78,6 @@ variable "object_storage_force_destroy" {
   type        = bool
   default     = true
 }
-variable "object_storage_tags" {
-  description = "Tags to apply to S3 buckets"
-  type        = map(any)
-  default     = {}
-}
 variable "object_storage_versioning" {
   description = "Enable S3 bucket versioning"
   type        = bool
@@ -1109,11 +1104,6 @@ variable "rds_postgres_params" {
   type        = map(any)
   default     = {}
 }
-variable "rds_postgres_tags" {
-  description = "Tags to apply to RDS Postgres"
-  type        = map(any)
-  default     = {}
-}
 variable "rds_postgres_create_timeout" {
   description = "How long to wait for the create to finish before timing out"
   type        = string
@@ -1244,11 +1234,7 @@ variable "rds_praefect_postgres_params" {
   type        = map(any)
   default     = {}
 }
-variable "rds_praefect_postgres_tags" {
-  description = "Tags to apply to RDS Praefect Postgres"
-  type        = map(any)
-  default     = {}
-}
+
 variable "rds_praefect_postgres_create_timeout" {
   description = "How long to wait for the create to finish before timing out"
   type        = string
@@ -1379,11 +1365,6 @@ variable "rds_geo_tracking_postgres_params" {
   type        = map(any)
   default     = {}
 }
-variable "rds_geo_tracking_postgres_tags" {
-  description = "Tags to apply to RDS Geo Tracking Postgres"
-  type        = map(any)
-  default     = {}
-}
 variable "rds_geo_tracking_postgres_create_timeout" {
   description = "How long to wait for the create to finish before timing out"
   type        = string
@@ -1497,11 +1478,6 @@ variable "elasticache_redis_default_subnet_count" {
   type    = number
   default = 2
 }
-variable "elasticache_redis_tags" {
-  description = "Tags to apply to ElastiCache Redis"
-  type        = map(any)
-  default     = {}
-}
 
 ### Separate - Cache
 variable "elasticache_redis_cache_node_count" {
@@ -1555,11 +1531,6 @@ variable "elasticache_redis_cache_snapshot_name" {
   type        = string
   default     = null
 }
-variable "elasticache_redis_cache_tags" {
-  description = "Tags to apply to ElastiCache Redis Cache"
-  type        = map(any)
-  default     = {}
-}
 
 ### Separate - Persistent
 variable "elasticache_redis_persistent_node_count" {
@@ -1612,11 +1583,6 @@ variable "elasticache_redis_persistent_snapshot_name" {
   description = "Name of a snapshot from which to restore data into the new node group. Changing this setting forces a new resource."
   type        = string
   default     = null
-}
-variable "elasticache_redis_persistent_tags" {
-  description = "Tags to apply to ElastiCache Redis Persistent"
-  type        = map(any)
-  default     = {}
 }
 
 ## OpenSearch (AWS Service)
@@ -1680,11 +1646,6 @@ variable "opensearch_service_kms_key_arn" {
 variable "opensearch_service_linked_role_create" {
   type    = bool
   default = false
-}
-variable "opensearch_service_tags" {
-  description = "Tags to apply to OpenSearch"
-  type        = map(any)
-  default     = {}
 }
 
 # Networking
@@ -1835,12 +1796,180 @@ variable "elb_internal_praefect_port" {
   default = 2305
 }
 
-variable "additional_tags" {
+
+# Tags
+variable "custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "consul_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "gitaly_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "gitlab_rails_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_external_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_internal_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "monitor_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "object_storage_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "object_storage_buckets_custom_tags" {
   type    = map(any)
+  default = {}
+}
+variable "opensearch_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "pgbouncer_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_cache_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_persistent_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "elb_internal_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "eks_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_node_pool_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "supporting_node_pool_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "webservice_node_pool_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "elasticache_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "elasticache_cache_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "elasticache_persistent_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "opensearch_service_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "rds_postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "rds_geo_tracking_postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "rds_praefect_postgres_custom_tags" {
+  type    = map(string)
   default = {}
 }
 
 # Deprecated - To be removed in 4.x
+variable "additional_tags" {
+  description = "Deprecated. Replaced by custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "elasticache_redis_tags" {
+  description = "Deprecated. Replaced by elasticache_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "elasticache_redis_cache_tags" {
+  description = "Deprecated. Replaced by elasticache_cache_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "elasticache_redis_persistent_tags" {
+  description = "Deprecated. Replaced by elasticache_persistent_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "object_storage_tags" {
+  description = "Deprecated. Replaced by object_storage_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "opensearch_service_tags" {
+  description = "Deprecated. Replaced by opensearch_service_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "rds_geo_tracking_postgres_tags" {
+  description = "Deprecated. Replaced by rds_geo_tracking_postgres_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "rds_postgres_tags" {
+  description = "Deprecated. Replaced by rds_postgres_custom_tags."
+  type        = map(any)
+  default     = {}
+}
+variable "rds_praefect_postgres_tags" {
+  description = "Deprecated. Replaced by rds_praefect_postgres_custom_tags."
+  type        = map(any)
+  default     = {}
+}
 variable "eks_ami_id" {
   description = "Deprecated. Replaced by eks_node_group_custom_ami_id"
   type        = string

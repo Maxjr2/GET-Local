@@ -36,9 +36,10 @@ resource "aws_instance" "gitlab" {
 
     delete_on_termination = var.disk_delete_on_termination
 
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
     tags = merge({
       Name = "${var.prefix}-${var.node_type}-${count.index + 1}-root"
-    }, var.additional_tags)
+    }, var.additional_tags, var.custom_tags)
   }
 
   # Enforce IMDSv2 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
@@ -49,6 +50,7 @@ resource "aws_instance" "gitlab" {
     instance_metadata_tags      = "enabled"
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     Name                  = local.instance_names[count.index]
     gitlab_node_prefix    = var.prefix
@@ -57,7 +59,7 @@ resource "aws_instance" "gitlab" {
     gitlab_geo_site       = var.geo_site
     gitlab_geo_deployment = var.geo_deployment
     gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags)
 
   lifecycle {
     ignore_changes = [
