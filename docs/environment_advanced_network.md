@@ -387,6 +387,7 @@ Additionally the following packages may be installed depending on the functional
 - `socat` - [Let's Encrypt SSL setup on HAProxy External nodes](environment_advanced_ssl.md#lets-encrypt-generated-certificates).
 - `unattended-upgrades` (Ubuntu / Debian) / `dnf-automatic` (RHEL 9, Amazon Linux 2023) - [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades)
 - `nfs-kernel-server` (Ubuntu / Debian) / `nfs-utils` (RHEL 9, Amazon Linux 2023) - [NFS Server setup for Object Data](environment_advanced.md#nfs-for-object-data)
+- `cron` (Debian 12) - [Let's Encrypt SSL for HAProxy External](environment_advanced_ssl.md#lets-encrypt-generated-certificates)
 
 When `offline_setup` is configured the Toolkit will not attempt to set up any repos or install the required packages. As such, you are required to ensure the packages are present before running Ansible. Note this also disables any setup of [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades).
 

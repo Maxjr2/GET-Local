@@ -36,6 +36,14 @@
     - ansible_facts['distribution'] == "Amazon"
     - ansible_facts['distribution_major_version'] != '2'
 
+- name: Install cron (Debian 12)
+  apt:
+    name: "cron"
+    update_cache: true
+  when:
+    - ansible_facts['distribution'] == "Debian"
+    - ansible_facts['distribution_major_version'] == '12'
+
 - name: Check if acme.sh is already installed
   stat:
     path: /opt/acme.sh/acme.sh
