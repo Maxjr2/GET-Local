@@ -5,7 +5,8 @@ module "redis" {
   node_type  = "redis"
   node_count = var.redis_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.redis_custom_metadata)
 
   machine_type  = var.redis_machine_type
   machine_image = var.machine_image
@@ -46,7 +47,8 @@ module "redis_cache" {
   node_type  = "redis-cache"
   node_count = var.redis_cache_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_cache_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_cache_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.redis_cache_custom_metadata)
 
   machine_type  = var.redis_cache_machine_type
   machine_image = var.machine_image
@@ -85,7 +87,8 @@ module "redis_persistent" {
   node_type  = "redis-persistent"
   node_count = var.redis_persistent_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.redis_persistent_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_persistent_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.redis_persistent_custom_metadata)
 
   machine_type  = var.redis_persistent_machine_type
   machine_image = var.machine_image

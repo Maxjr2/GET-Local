@@ -5,7 +5,8 @@ module "monitor" {
   node_type  = "monitor"
   node_count = var.monitor_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.monitor_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.monitor_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.monitor_custom_metadata)
 
   machine_type  = var.monitor_machine_type
   machine_image = var.machine_image

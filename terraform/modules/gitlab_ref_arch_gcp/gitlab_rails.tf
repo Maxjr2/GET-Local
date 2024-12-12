@@ -5,7 +5,8 @@ module "gitlab_rails" {
   node_type  = "gitlab-rails"
   node_count = var.gitlab_rails_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.gitlab_rails_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.gitlab_rails_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.gitlab_rails_custom_metadata)
 
   machine_type  = var.gitlab_rails_machine_type
   machine_image = var.machine_image

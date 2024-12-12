@@ -33,9 +33,9 @@ resource "google_compute_instance" "gitlab" {
     kms_key_self_link = var.disk_kms_key
   }
 
-  metadata = {
+  metadata = merge({
     enable-oslogin = "TRUE"
-  }
+  }, var.custom_metadata)
 
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
   labels = merge({

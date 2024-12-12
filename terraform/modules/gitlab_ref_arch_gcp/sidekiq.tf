@@ -5,7 +5,8 @@ module "sidekiq" {
   node_type  = "sidekiq"
   node_count = var.sidekiq_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.sidekiq_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.sidekiq_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.sidekiq_custom_metadata)
 
   machine_type  = var.sidekiq_machine_type
   machine_image = var.machine_image

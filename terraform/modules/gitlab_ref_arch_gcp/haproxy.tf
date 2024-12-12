@@ -5,7 +5,8 @@ module "haproxy_external" {
   node_type  = "haproxy-external"
   node_count = var.haproxy_external_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.haproxy_external_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.haproxy_external_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.haproxy_external_custom_metadata)
 
   machine_type  = var.haproxy_external_machine_type
   machine_image = var.machine_image
@@ -45,7 +46,8 @@ module "haproxy_internal" {
   node_type  = "haproxy-internal"
   node_count = var.haproxy_internal_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.haproxy_internal_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.haproxy_internal_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.haproxy_internal_custom_metadata)
 
   machine_type  = var.haproxy_internal_machine_type
   machine_image = var.machine_image
