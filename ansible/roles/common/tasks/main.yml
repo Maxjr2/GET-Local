@@ -133,7 +133,7 @@
           Downgrades require prerequisites to be in place beforehand and have manual steps to be performed after.
           Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.
 
-          Once prerequisitves are in place and additional manual steps are understood in full, rerun with `gitlab_downgrade_risk_accepted` set to `true` at your own risk.
+          Once prerequisitves are in place and additional manual steps are understood in full, rerun with `gitlab_downgrade_prerequisites_met` set to `true` at your own risk.
       when:
         - gitlab_repo_package_allow_downgrade or gitlab_deb_allow_downgrade or gitlab_rpm_allow_downgrade
         - not gitlab_downgrade_prerequisites_met

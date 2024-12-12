@@ -51,7 +51,7 @@ gitlab_rpm_allow_downgrade: false
 ## Downgrade Prerequisites met flag
 ### Downgrades require prerequisites to be in place beforehand - https://docs.gitlab.com/ee/update/package/downgrade.html
 ### Failure to not have prerequisites will result in a broken environment and potential data loss.
-### Once prerequisitves are in place rerun with gitlab_downgrade_risk_accepted set to 'true' at your own risk
+### Once prerequisitves are in place rerun with gitlab_downgrade_prerequisites_met set to 'true' at your own risk
 gitlab_downgrade_prerequisites_met: false
 
 # Secrets
