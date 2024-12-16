@@ -5,7 +5,8 @@ module "postgres" {
   node_type  = "postgres"
   node_count = var.postgres_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.postgres_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.postgres_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.postgres_custom_metadata)
 
   machine_type  = var.postgres_machine_type
   machine_image = var.machine_image

@@ -1259,6 +1259,72 @@ variable "object_storage_labels" {
   default     = {}
 }
 
+## Metadata
+variable "custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "consul_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "gitaly_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "gitlab_rails_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_external_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_internal_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "monitor_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "opensearch_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "pgbouncer_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "postgres_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_postgres_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_cache_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_persistent_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_custom_metadata" {
+  type    = map(string)
+  default = {}
+}
+
 # Additional
 variable "allow_stopping_for_update" {
   type    = bool

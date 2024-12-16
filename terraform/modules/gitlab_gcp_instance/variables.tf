@@ -123,6 +123,10 @@ variable "machine_secure_boot" {
   type    = bool
   default = false
 }
+variable "custom_metadata" {
+  type    = map(string)
+  default = {}
+}
 
 ## TODO: additional_labels is deprecated and will be removed in 4.x
 variable "additional_labels" {

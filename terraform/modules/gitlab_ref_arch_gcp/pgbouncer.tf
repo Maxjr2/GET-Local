@@ -5,7 +5,8 @@ module "pgbouncer" {
   node_type  = "pgbouncer"
   node_count = var.pgbouncer_node_count
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
-  custom_labels = merge(var.additional_labels, var.custom_labels, var.pgbouncer_custom_labels)
+  custom_labels   = merge(var.additional_labels, var.custom_labels, var.pgbouncer_custom_labels)
+  custom_metadata = merge(var.custom_metadata, var.pgbouncer_custom_metadata)
 
   machine_type  = var.pgbouncer_machine_type
   machine_image = var.machine_image
