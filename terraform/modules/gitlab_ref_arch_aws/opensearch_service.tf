@@ -53,6 +53,7 @@ resource "aws_opensearch_domain" "gitlab" {
     volume_type = var.opensearch_service_volume_type
     volume_size = var.opensearch_service_volume_size
     iops        = var.opensearch_service_volume_type == "io1" && var.opensearch_service_volume_iops == null ? 1000 : var.opensearch_service_volume_iops
+    throughput  = var.opensearch_service_volume_type == "gp3" ? var.opensearch_service_volume_throughput : null
   }
 
   domain_endpoint_options {
