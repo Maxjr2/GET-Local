@@ -1626,6 +1626,10 @@ variable "opensearch_service_volume_iops" {
   type    = number
   default = null
 }
+variable "opensearch_service_volume_throughput" {
+  type    = number
+  default = null
+}
 variable "opensearch_service_multi_az" {
   type    = bool
   default = true
