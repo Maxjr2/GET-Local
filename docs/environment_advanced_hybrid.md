@@ -218,7 +218,15 @@ There are two options available to pass the key to Ansible to be subsequently co
 
 Note that you can also create a separate Service Account and key if desired as long as it has the correct permissions as given above.
 
-#### GKE Storage Encryption
+#### GKE Persistent Volumes (StorageClass)
+
+[GKE configures several Storage Classes](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes) for any new cluster via its CSI driver along with setting a default class for workloads that request a Persistent Volume.
+
+However as a best practice it's recommended to use separate Storage Classes where possible to avoid clashing with any changes to the defaults, such as by the Cloud Provider or by the user. As such, for areas where this is applicable, the Toolkit either allows for users to pass in their own specific Storage Class or it will create it's own Storage Classes accordingly. This is applicable for the following features:
+
+- [`kube-prometheus-stack`](environment_advanced_monitoring.md)
+
+#### Encryption
 
 [GCP by default encrypts storage with service provided encryption keys](https://cloud.google.com/docs/security/encryption/default-encryption#googles_default_encryption) across all services.
 

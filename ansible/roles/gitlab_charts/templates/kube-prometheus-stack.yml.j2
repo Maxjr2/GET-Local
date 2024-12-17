@@ -9,7 +9,9 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-{% if kube_prometheus_stack_charts_storage_class != '' %}
+{% if kube_prometheus_stack_charts_existing_storage_class is defined and kube_prometheus_stack_charts_existing_storage_class != '' %}
+          storageClassName: "{{ kube_prometheus_stack_charts_existing_storage_class }}"
+{% elif kube_prometheus_stack_charts_storage_class != '' %}
           storageClassName: "{{ kube_prometheus_stack_charts_storage_class }}"
 {% endif %}
           resources:
