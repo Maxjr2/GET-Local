@@ -456,6 +456,19 @@ As Desired Size is likely to be adjusted outside of Terraform, either manually o
 
 As such, if this issue is occurring you would need to first [adjust the Desired Size manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to be equal to or greater than the target Minimum Size and then run Terraform again.
 
+#### `kube-prometheus-stack` not deploying its Prometheus pod due to no default StorageClass from EKS v1.30 and up
+
+From AWS EKS `1.30` a default StorageClass is no longer set for new deployments. As such, [from GET `3.5.0` for new setups it configures a dedicated StorageClass](environment_advanced_monitoring.md#persistent-volume-storageclass) for each workload type that requires ones.
+
+On older versions of GET running against AWS EKS `1.30` with the optional [`kube-prometheus-stack`](environment_advanced_monitoring.md#cloud-native-hybrid-kube-prometheus-stack) enabled, the Prometheus pod will fail to deploy due to its PVC failing as a result of this upstream change.
+
+There are several options available on how to mitigate this:
+
+- Set the `gp2` StorageClass to `default` if you're happy to continue using this class.
+- Undeploy the `kube-prometheus-stack` operator and either:
+  - Run again with GET `3.5.0`, which will create a new StorageClass to be used.
+  - Create a separate StorageClass and set this via the `kube_prometheus_stack_charts_storage_class`
+
 ## GitLab
 
 ### `422` Error on Login due to Redis misconfiguration

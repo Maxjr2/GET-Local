@@ -82,6 +82,23 @@
             kube_prometheus_stack_charts_app_version: "{{ (kube_prometheus_stack_charts_latest_app_version.stdout | from_json)[0].app_version }}"
       when: kube_prometheus_stack_charts_app_version == 'latest'
 
+    - name: Get all kube-prometheus-stack versions
+      command: helm search repo prometheus-community/kube-prometheus-stack -l -o json
+      register: kube_prometheus_stack_charts_versions
+
+    - name: Match kube-prometheus-stack charts version to app version
+      set_fact:
+        kube_prometheus_stack_charts_version: "{{ (kube_prometheus_stack_charts_versions.stdout | from_json | selectattr('name', 'equalto', 'prometheus-community/kube-prometheus-stack') | selectattr('app_version', 'equalto', kube_prometheus_stack_charts_app_version))[0].version | default('', true) }}"
+
+    - name: Fail if kube-prometheus-stack charts version can't be found
+      fail:
+        msg: "kube-prometheus-stack charts version for {{ kube_prometheus_stack_charts_app_version }} could not be found. Exiting..."
+      when: kube_prometheus_stack_charts_version == ''
+
+    - name: Show kube-prometheus-stack charts version
+      debug:
+        msg: "kube-prometheus-stack charts version for {{ kube_prometheus_stack_charts_app_version }} is {{ kube_prometheus_stack_charts_version }}"
+
     - name: Get existing kube-prometheus-stack deployment details
       kubernetes.core.helm_info:
         name: gitlab-kube-prometheus-stack
@@ -117,22 +134,63 @@
         - (kube_prometheus_stack_charts_existing_app_version | replace('v', '')) is version('0.59.1', '<')
         - kube_prometheus_stack_charts_app_version != kube_prometheus_stack_charts_existing_app_version
 
-    - name: Get all kube-prometheus-stack versions
-      command: helm search repo prometheus-community/kube-prometheus-stack -l -o json
-      register: kube_prometheus_stack_charts_versions
+    - name: Configure kube-prometheus-stack StorageClass for existing installs
+      # Ensure same StorageClass is used if already bound to avoid config clashes
+      # TODO: To be reviewed in 4.0.0 to be potentially removed as a breaking change
+      block:
+        - name: Get kube-prometheus-stack existing PVC information
+          k8s_info:
+            api_version: v1
+            kind: PersistentVolumeClaim
+            namespace: "{{ kube_prometheus_stack_charts_namespace }}"
+            name: "prometheus-gitlab-kube-prometheus-sta-prometheus-db-prometheus-gitlab-kube-prometheus-sta-prometheus-0"
+          register: kube_prometheus_stack_pvc_info
 
-    - name: Match kube-prometheus-stack charts version to app version
-      set_fact:
-        kube_prometheus_stack_charts_version: "{{ (kube_prometheus_stack_charts_versions.stdout | from_json | selectattr('name', 'equalto', 'prometheus-community/kube-prometheus-stack') | selectattr('app_version', 'equalto', kube_prometheus_stack_charts_app_version))[0].version | default('', true) }}"
+        - name: Set existing storage class
+          set_fact:
+            kube_prometheus_stack_charts_existing_storage_class: "{{ kube_prometheus_stack_pvc_info.resources[0].spec.storageClassName | default('') }}"
 
-    - name: Fail if kube-prometheus-stack charts version can't be found
-      fail:
-        msg: "kube-prometheus-stack charts version for {{ kube_prometheus_stack_charts_app_version }} could not be found. Exiting..."
-      when: kube_prometheus_stack_charts_version == ''
+        - name: Show existing storage class
+          debug:
+            msg: "Existing StorageClass for kube-prometheus-stack is {{ kube_prometheus_stack_charts_existing_storage_class }}"
+          when: gitlab_charts_show_values
+      when:
+        - cloud_provider != 'none'
+        - kube_prometheus_stack_charts_existing_app_version is defined
 
-    - name: Show kube-prometheus-stack charts version
-      debug:
-        msg: "kube-prometheus-stack charts version for {{ kube_prometheus_stack_charts_app_version }} is {{ kube_prometheus_stack_charts_version }}"
+    - name: Configure kube-prometheus-stack StorageClass for new installs if required (AWS EKS)
+      # Set up new StorageClass if this is a new install and none has been configured
+      # TODO: To be reviewed in 4.0.0 as the default for all installs as a breaking change
+      block:
+        - name: Configure kube-prometheus-stack StorageClass (AWS EKS)
+          kubernetes.core.k8s:
+            template: 'storage_classes/kube_prometheus_stack_gp3.aws.yml.j2'
+            state: present
+
+        - name: Set kube-prometheus-stack StorageClass (AWS EKS)
+          set_fact:
+            kube_prometheus_stack_charts_storage_class: "gitlab-kube-prometheus-stack-gp3"
+      when:
+        - cloud_provider == 'aws'
+        - kube_prometheus_stack_charts_existing_app_version is not defined
+        - kube_prometheus_stack_charts_storage_class == ''
+
+    - name: Configure default kube-prometheus-stack StorageClass for new installs if required (GCP GKE)
+      # Set up new StorageClass if this is a new install and none has been configured
+      # TODO: To be reviewed in 4.0.0 as the default for all installs as a breaking change
+      block:
+        - name: Configure default kube-prometheus-stack StorageClass (GCP GKE)
+          kubernetes.core.k8s:
+            template: 'storage_classes/kube_prometheus_stack_balanced.gcp.yml.j2'
+            state: present
+
+        - name: Set default kube-prometheus-stack StorageClass (GCP GKE)
+          set_fact:
+            kube_prometheus_stack_charts_storage_class: "gitlab-kube-prometheus-stack-balanced"
+      when:
+        - cloud_provider == 'gcp'
+        - kube_prometheus_stack_charts_existing_app_version is not defined
+        - kube_prometheus_stack_charts_storage_class == ''
 
     - name: Lookup kube-prometheus-stack chart values values
       set_fact:

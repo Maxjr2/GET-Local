@@ -48,6 +48,7 @@ Target machine(s):
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.
   - ARM based hardware is supported for Linux package (Omnibus) environments.
+- Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service.
 
 ## Documentation
 
