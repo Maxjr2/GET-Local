@@ -55,12 +55,12 @@ Merge Requests should follow our value of [Iteration](https://about.gitlab.com/h
 GitLab Environment Toolkit team uses the [Reviewers feature](https://docs.gitlab.com/ee/development/code_review.html#dogfooding-the-reviewers-feature) in the code review process. The process looks like this:
 
 1. Author opens a merge request in a project. Label ~"workflow::in dev" is applied by default.
-1. When ready for review, the Author applies the ~"workflow::ready for review" label and mentions `@gl-dx/get-maintainers`.
+1. When ready for review, the Author applies the ~"workflow::ready for review" label and mentions `@gitlab-org/software-delivery/get-maintainers`.
 1. When they are able to work on the merge request, a Maintainer adds themselves under the Reviewers section, and adds the ~"workflow::in review" label.
 1. The Maintainer works with the Author to get the merge request to a state where they approve it.
     - The Maintainer could apply ~"workflow::in dev" to the merge request if there are additional changes that need to be done by the Author. When the merge request is ready to be handed back for further review, Author should apply ~"workflow::ready for review" label and mention the Maintainer who previously reviewed the merge request.
 
-**NOTE**: If you are working on a merge request that requires a response quicker than the [First-response SLO](https://about.gitlab.com/handbook/engineering/workflow/code-review/#first-response-slo), please `@` mention the `gl-dx/get-maintainers` group in order to alert the team.
+**NOTE**: If you are working on a merge request that requires a response quicker than the [First-response SLO](https://about.gitlab.com/handbook/engineering/workflow/code-review/#first-response-slo), please `@` mention the `gitlab-org/software-delivery/get-maintainers` group in order to alert the team.
 
 ##### Merge Request Workflow labels
 
