@@ -141,11 +141,11 @@ That's all that's required for now. Later on in this guide we'll configure the T
 Create a standard [GCP storage bucket](https://cloud.google.com/storage/docs/creating-buckets) on the intended environment's project
 for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`
 
-As an example this bucket can be created via the `gsutil` cli as follows:
+As an example this bucket can be created via the [`gcloud storage`](https://cloud.google.com/storage/docs/creating-buckets#command-line) cli as follows:
 
 ```terminal
 # List of locations: https://cloud.google.com/storage/docs/locations
-gsutil mb -l BUCKET_LOCATION gs://<env_shortname>-get-terraform-state
+gcloud storage buckets create gs://<env_shortname>-get-terraform-state --location=BUCKET_LOCATION
 ```
 
 :information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
