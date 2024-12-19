@@ -435,7 +435,7 @@ global:
     cache:
       host: "{{ redis_cache_host }}"
       port: "{{ redis_cache_port }}"
-      "{{ 'password' if ((gitlab_version != '') and (gitlab_version is version('16.0', '<'))) else 'auth' }}":
+      password:
         secret: gitlab-redis-cache-password
         key: password
       scheme: "{{ 'rediss' if redis_cache_external_ssl else 'redis' }}"
@@ -474,7 +474,7 @@ global:
 #### Cache
     cache:
       host: gitlab-redis-cache
-      "{{ 'password' if ((gitlab_version != '') and (gitlab_version is version('16.0', '<'))) else 'auth' }}":
+      password:
         secret: gitlab-redis-cache-password
         key: password
       sentinels:
