@@ -52,6 +52,8 @@ sidekiq_default_replica_counts:
   '24': 8
   '12': 8
   '4': 4
+gitlab_charts_webservice_max_replicas: ""
+gitlab_charts_sidekiq_max_replicas: ""
 
 # Deprecated - TODO Remove in 4.x
 geo_max_replication_slots: 1
