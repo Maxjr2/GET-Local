@@ -999,8 +999,8 @@ Resources on Cloud Providers such as instances, clusters, cloud services, data d
 It's also possible to add additional tags as desired with Custom Tags. The following settings can be set to configure the tags for each component. Note that each setting expects a map of key value pairs as shown below:
 
 - `custom_(tags/labels)`: These tags/labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
-- `object_storage_custom_(tags/labels)`: Will be applied to all object storage buckets.
-- `object_storage_buckets_custom_(tags/labels)`: A map of different tags/labels to apply to specific buckets.
+- `object_storage_custom_(tags/labels)`: Will be applied to all object storage buckets. **AWS and GCP only**.
+- `object_storage_buckets_custom_(tags/labels)`: A map of different tags/labels to apply to specific buckets. **AWS and GCP only**.
 - `(instance type)_custom_(tags/labels)`: Will be applied to the specific instance type and any associated data disks.
 - `(cloud service)_custom_(tags/labels)`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
 

@@ -92,7 +92,14 @@ variable "geo_deployment" {
   default = null
 }
 
-variable "additional_tags" {
+variable "custom_tags" {
   type    = map(any)
   default = {}
+}
+
+# TODO: additional_tags is deprecated and will be removed in 4.x
+variable "additional_tags" {
+  description = "Deprecated. Replaced by custom_tags."
+  type        = map(any)
+  default     = {}
 }

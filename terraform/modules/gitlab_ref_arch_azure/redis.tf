@@ -1,10 +1,12 @@
 module "redis" {
   source = "../gitlab_azure_instance"
 
-  prefix          = var.prefix
-  node_type       = "redis"
-  node_count      = var.redis_node_count
-  additional_tags = var.additional_tags
+  prefix     = var.prefix
+  node_type  = "redis"
+  node_count = var.redis_node_count
+
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  custom_tags = merge(var.additional_tags, var.custom_tags, var.redis_custom_tags)
 
   size                   = var.redis_size
   source_image_reference = var.source_image_reference
@@ -36,10 +38,12 @@ output "redis" {
 module "redis_cache" {
   source = "../gitlab_azure_instance"
 
-  prefix          = var.prefix
-  node_type       = "redis-cache"
-  node_count      = var.redis_cache_node_count
-  additional_tags = var.additional_tags
+  prefix     = var.prefix
+  node_type  = "redis-cache"
+  node_count = var.redis_cache_node_count
+
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  custom_tags = merge(var.additional_tags, var.custom_tags, var.redis_cache_custom_tags)
 
   size                   = var.redis_cache_size
   source_image_reference = var.source_image_reference
@@ -69,10 +73,12 @@ output "redis_cache" {
 module "redis_persistent" {
   source = "../gitlab_azure_instance"
 
-  prefix          = var.prefix
-  node_type       = "redis-persistent"
-  node_count      = var.redis_persistent_node_count
-  additional_tags = var.additional_tags
+  prefix     = var.prefix
+  node_type  = "redis-persistent"
+  node_count = var.redis_persistent_node_count
+
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  custom_tags = merge(var.additional_tags, var.custom_tags, var.redis_persistent_custom_tags)
 
   size                   = var.redis_persistent_size
   source_image_reference = var.source_image_reference

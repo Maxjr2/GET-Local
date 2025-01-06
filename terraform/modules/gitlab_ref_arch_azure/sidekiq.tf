@@ -1,10 +1,12 @@
 module "sidekiq" {
   source = "../gitlab_azure_instance"
 
-  prefix          = var.prefix
-  node_type       = "sidekiq"
-  node_count      = var.sidekiq_node_count
-  additional_tags = var.additional_tags
+  prefix     = var.prefix
+  node_type  = "sidekiq"
+  node_count = var.sidekiq_node_count
+
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  custom_tags = merge(var.additional_tags, var.custom_tags, var.sidekiq_custom_tags)
 
   size                   = var.sidekiq_size
   source_image_reference = var.source_image_reference

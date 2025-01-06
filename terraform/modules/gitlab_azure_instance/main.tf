@@ -94,6 +94,7 @@ resource "azurerm_linux_virtual_machine" "gitlab" {
     version   = var.source_image_reference["version"]
   }
 
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
@@ -101,7 +102,7 @@ resource "azurerm_linux_virtual_machine" "gitlab" {
     gitlab_geo_site       = var.geo_site
     gitlab_geo_deployment = var.geo_deployment
     gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
-  }, var.additional_tags)
+  }, var.additional_tags, var.custom_tags)
 
   lifecycle {
     ignore_changes = [

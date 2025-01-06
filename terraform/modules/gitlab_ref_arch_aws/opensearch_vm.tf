@@ -5,7 +5,7 @@ module "opensearch_vm" {
   node_type  = "opensearch"
   node_count = var.opensearch_vm_node_count
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
   custom_tags = merge(var.additional_tags, var.custom_tags, var.opensearch_custom_tags)
 
   instance_type              = var.opensearch_vm_instance_type

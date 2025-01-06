@@ -5,7 +5,7 @@ module "haproxy_external" {
   node_type  = "haproxy-external"
   node_count = var.haproxy_external_node_count
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
   custom_tags = merge(var.additional_tags, var.custom_tags, var.haproxy_external_custom_tags)
 
   instance_type              = var.haproxy_external_instance_type
@@ -52,7 +52,7 @@ module "haproxy_internal" {
   node_type  = "haproxy-internal"
   node_count = var.haproxy_internal_node_count
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
   custom_tags = merge(var.additional_tags, var.custom_tags, var.haproxy_internal_custom_tags)
 
   instance_type              = var.haproxy_internal_instance_type
