@@ -5,7 +5,7 @@ module "monitor" {
   node_type  = "monitor"
   node_count = var.monitor_node_count
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # TODO: var.additional_tags is deprecated and will be removed in 4.x
   custom_tags = merge(var.additional_tags, var.custom_tags, var.monitor_custom_tags)
 
   instance_type              = var.monitor_instance_type

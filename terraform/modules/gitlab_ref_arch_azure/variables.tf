@@ -66,11 +66,6 @@ variable "object_storage_prefix" {
   default = null
 }
 
-variable "additional_tags" {
-  type    = map(any)
-  default = {}
-}
-
 # Machines
 variable "consul_node_count" {
   type    = number
@@ -405,8 +400,79 @@ variable "nat_gateway_idle_timeout_in_minutes" {
   default = 4
 }
 
-## Deprecated - To be removed in 4.0.0
 
+# Tags
+variable "custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "consul_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "gitaly_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "gitlab_rails_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_external_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "haproxy_internal_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "monitor_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "opensearch_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "pgbouncer_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_postgres_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "praefect_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_cache_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "redis_persistent_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "sidekiq_custom_tags" {
+  type    = map(string)
+  default = {}
+}
+
+## Deprecated - To be removed in 4.x
+variable "additional_tags" {
+  description = "Deprecated. Replaced by custom_tags."
+  type        = map(any)
+  default     = {}
+}
 variable "external_ssh_port" {
   description = "Deprecated. Replaced by gitlab_shell_ssh_port"
   type        = number
