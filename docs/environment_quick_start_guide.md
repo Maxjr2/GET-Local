@@ -87,7 +87,7 @@ With AWS this is straightforward as we can store the file on S3 object storage. 
 
 This can be named as desired, but note that **AWS requires the name to be globally unique across all users**. _Avoid_ using `<ENV_NAME>-terraform-state` as Toolkit will create a bucket with this naming format for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature.
 
-:information_source:&nbsp; **The Terraform state Bucket name wil be referred to as `<TERRAFORM_STATE_BUCKET_NAME>` later in this guide.**
+:information_source:&nbsp; **The Terraform state Bucket name will be referred to as `<TERRAFORM_STATE_BUCKET_NAME>` later in this guide.**
 
 ### 1d. Static External IP
 
