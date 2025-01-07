@@ -322,6 +322,23 @@ However, you can also specify the version as well as control upgrades if desired
 
 - `eks_version` - The Kubernetes version that the cluster should use if direct control is desired. Increase this value to perform an upgrade directly. Note that when set this also upgrades the Node Group VM's to use the latest AMI version for the cluster (see below for more info). Default is `null`.
 
+:information_source:&nbsp; It's recommended to regularly update your EKS version as the service will automatically upgrade clusters on versions that have reached the end of their support period, which in turn could create unintended clashes with the Terraform state. See [EKS Upgrade Policy](#eks-upgrade-policy) for more information.
+
+##### EKS Upgrade Policy
+
+By default, [AWS EKS Clusters will be upgraded automatically to the next version when the support period ends](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html).
+
+There are different support periods available as follows:
+
+- Standard - 14 month window.
+- Extended - 26 month window, with the last 12 months coming at an additional cost.
+
+The default on AWS EKS is Extended. The Toolkit allows for you to change this as desired however via the following setting in your Terraform [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+
+- `eks_upgrade_policy` - The [upgrade policy](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html) for the EKS Cluster. Can be `EXTENDED` (service default) or `STANDARD`. Default is `null`.
+
+:information_source:&nbsp; It's recommended in either case to manage upgrades yourself before this behaviour is triggered to avoid any unexpected clashes with the Terraform state.
+
 #### EKS Node Group AMI Type and Versions
 
 It's possible to configure what AMIs are to be used for the EKS Node Groups. There are numerous options available in this area that can interact in complex ways. The Toolkit aims to streamline this area and supports two options - Optimized AMI Type (Default) and Custom AMI ID. Refer to each section below for more information.

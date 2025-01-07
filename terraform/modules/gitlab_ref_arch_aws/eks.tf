@@ -74,6 +74,14 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     }
   }
 
+  dynamic "upgrade_policy" {
+    for_each = range(var.eks_upgrade_policy != null ? 1 : 0)
+
+    content {
+      support_type = var.eks_upgrade_policy
+    }
+  }
+
   ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     gitlab_node_prefix = var.prefix
