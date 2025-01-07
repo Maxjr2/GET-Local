@@ -4,11 +4,12 @@ data "aws_partition" "current" {}
 locals {
   aws_partition = data.aws_partition.current.partition
 
-  total_node_pool_count = var.webservice_node_pool_count + var.sidekiq_node_pool_count + var.supporting_node_pool_count + var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count
+  total_node_pool_count = var.webservice_node_pool_count + var.sidekiq_node_pool_count + var.supporting_node_pool_count + var.gitaly_node_pool_count + var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count + var.gitaly_node_pool_max_count
 
   webservice_node_pool_autoscaling = var.webservice_node_pool_max_count > 0
   sidekiq_node_pool_autoscaling    = var.sidekiq_node_pool_max_count > 0
   supporting_node_pool_autoscaling = var.supporting_node_pool_max_count > 0
+  gitaly_node_pool_autoscaling     = var.gitaly_node_pool_max_count > 0
 
   # Subnet selection
   eks_default_subnet_ids    = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.eks_default_subnet_count) : null
@@ -476,6 +477,121 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   }
 }
 
+## Gitaly
+## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+resource "aws_launch_template" "gitlab_gitaly" {
+  count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
+
+  name = "${var.prefix}-eks-gitaly-launch-template"
+
+  instance_type = var.gitaly_node_pool_instance_type
+  image_id      = local.eks_node_group_custom_ami_id
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size           = coalesce(var.gitaly_node_pool_disk_size, var.default_disk_size)
+      volume_type           = var.default_disk_type
+      encrypted             = true
+      kms_key_id            = var.gitaly_node_pool_disk_kms_key_arn != null ? var.gitaly_node_pool_disk_kms_key_arn : var.eks_default_disk_kms_key_arn
+      delete_on_termination = true
+    }
+  }
+
+  vpc_security_group_ids = [
+    aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id,
+    aws_security_group.gitlab_internal_networking.id,
+  ]
+
+  # Enforce IMDSv2 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template#metadata-options
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "enabled"
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    tags = merge({
+      Name               = "${var.prefix}-gitaly-node-pool"
+      gitlab_node_prefix = var.prefix
+      gitlab_node_type   = "gitlab-gitaly-node-pool"
+    }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+
+    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    tags = merge({
+      Name = "${var.prefix}-gitaly-pool-root"
+    }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+  }
+
+  update_default_version = true
+
+  user_data = local.eks_node_group_custom_ami_id != null ? base64encode(local.eks_custom_ami_userdata_templates[var.eks_node_group_custom_ami_userdata_type]) : null
+}
+
+resource "aws_eks_node_group" "gitlab_gitaly_pool" {
+  count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
+
+  node_group_name_prefix = "${format("%.28s", var.prefix)}-gitaly-" # Create a unique name to allow nodepool replacements
+  cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
+  subnet_ids             = local.eks_node_group_subnet_ids
+  node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
+
+  launch_template {
+    id      = aws_launch_template.gitlab_gitaly[0].id
+    version = aws_launch_template.gitlab_gitaly[0].latest_version
+  }
+  ami_type             = local.eks_node_group_ami_type
+  release_version      = local.eks_node_group_ami_release_version
+  force_update_version = var.eks_node_group_ami_force_update_version
+
+  scaling_config {
+    desired_size = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
+    min_size     = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
+    max_size     = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_max_count : var.gitaly_node_pool_count
+  }
+
+  update_config {
+    max_unavailable = max(var.gitaly_node_pool_max_unavailable, 1)
+  }
+
+  labels = {
+    workload = "gitaly"
+  }
+
+  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  tags = merge({
+    gitlab_node_prefix = var.prefix
+    gitlab_node_type   = "gitlab-gitaly-node-pool"
+
+    "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
+    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+  }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+
+  # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
+  depends_on = [
+    aws_iam_role_policy_attachment.gitlab_eks_node_role_node_policy,
+    aws_iam_role_policy_attachment.gitlab_eks_node_role_ec2_container_registry_read_only_policy,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.vpc_cni,
+    aws_nat_gateway.gitlab_vpc_sn_priv_ng,
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      scaling_config[0].desired_size,
+    ]
+  }
+}
+
 # Addons
 ## kube_proxy
 data "aws_eks_addon_version" "kube_proxy" {
@@ -520,7 +636,8 @@ resource "aws_eks_addon" "coredns" {
   depends_on = [
     aws_eks_node_group.gitlab_webservice_pool,
     aws_eks_node_group.gitlab_sidekiq_pool,
-    aws_eks_node_group.gitlab_supporting_pool
+    aws_eks_node_group.gitlab_supporting_pool,
+    aws_eks_node_group.gitlab_gitaly_pool
   ]
 }
 
@@ -577,6 +694,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
     aws_eks_node_group.gitlab_webservice_pool,
     aws_eks_node_group.gitlab_sidekiq_pool,
     aws_eks_node_group.gitlab_supporting_pool,
+    aws_eks_node_group.gitlab_gitaly_pool
   ]
 }
 
@@ -606,6 +724,7 @@ output "kubernetes" {
     "kubernetes_webservice_node_group_ami_release_version" = try(aws_eks_node_group.gitlab_webservice_pool[0].release_version, "")
     "kubernetes_sidekiq_node_group_ami_release_version"    = try(aws_eks_node_group.gitlab_sidekiq_pool[0].release_version, "")
     "kubernetes_supporting_node_group_ami_release_version" = try(aws_eks_node_group.gitlab_supporting_pool[0].release_version, "")
+    "kubernetes_gitaly_node_group_ami_release_version"     = try(aws_eks_node_group.gitlab_gitaly_pool[0].release_version, "")
 
     "kubernetes_addon_kube_proxy_version"     = try(aws_eks_addon.kube_proxy[0].addon_version, "")
     "kubernetes_addon_coredns_version"        = try(aws_eks_addon.coredns[0].addon_version, "")
@@ -617,6 +736,7 @@ output "kubernetes" {
     "kubernetes_webservice_node_group_security_group_ids" = try(flatten(aws_launch_template.gitlab_webservice[0].vpc_security_group_ids), "")
     "kubernetes_sidekiq_node_group_security_group_ids"    = try(flatten(aws_launch_template.gitlab_sidekiq[0].vpc_security_group_ids), "")
     "kubernetes_supporting_node_group_security_group_ids" = try(flatten(aws_launch_template.gitlab_supporting[0].vpc_security_group_ids), "")
+    "kubernetes_gitaly_node_group_security_group_ids"     = try(flatten(aws_launch_template.gitlab_gitaly[0].vpc_security_group_ids), "")
 
     # Deprecated - To be removed in 4.x
     "cluster_security_group_id"     = try(aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id, "")

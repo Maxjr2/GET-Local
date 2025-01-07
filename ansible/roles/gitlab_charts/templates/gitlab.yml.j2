@@ -189,11 +189,6 @@ gitlab:
     securityContext:
       fsGroupChangePolicy: OnRootMismatch
     gracefulRestartTimeout: 1
-{% if cloud_provider == 'aws' %}
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-gitaly-role"
-{% endif %}
     metrics:
       enabled: true
       serviceMonitor:

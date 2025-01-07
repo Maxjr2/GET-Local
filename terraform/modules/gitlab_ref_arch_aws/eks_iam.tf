@@ -238,7 +238,7 @@ resource "aws_iam_role_policy_attachment" "gitlab_eks_toolbox_role_s3_kms_policy
 ## Cluster Autoscaler (Optional)
 ### Follows recommendations - https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#employ-least-privileged-access-to-the-iam-role
 resource "aws_iam_role" "gitlab_eks_cluster_autoscaler_role" {
-  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count, 1)
+  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count + var.gitaly_node_pool_max_count, 1)
   name  = "${var.prefix}-eks-cluster-autoscaler-role"
 
   assume_role_policy = jsonencode({
@@ -263,7 +263,7 @@ resource "aws_iam_role" "gitlab_eks_cluster_autoscaler_role" {
 }
 
 resource "aws_iam_policy" "gitlab_eks_cluster_autoscaler_policy" {
-  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count, 1)
+  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count + var.gitaly_node_pool_max_count, 1)
 
   name = "${var.prefix}-eks-cluster-autoscaler"
   path = var.default_iam_identifier_path
@@ -304,7 +304,7 @@ resource "aws_iam_policy" "gitlab_eks_cluster_autoscaler_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "gitlab_eks_cluster_autoscaler_role_cluster_autoscaler_policy" {
-  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count, 1)
+  count = min(var.webservice_node_pool_max_count + var.sidekiq_node_pool_max_count + var.supporting_node_pool_max_count + var.gitaly_node_pool_max_count, 1)
 
   role       = aws_iam_role.gitlab_eks_cluster_autoscaler_role[0].name
   policy_arn = aws_iam_policy.gitlab_eks_cluster_autoscaler_policy[0].arn

@@ -83,3 +83,17 @@
             skip-nodes-with-local-storage: false
   when: cloud_native_hybrid_cluster_autoscaler_setup
   tags: cluster-autoscaler
+
+- name: Configure Gitaly StorageClass for new installs if required (AWS EKS)
+  block:
+    - name: Configure Gitaly StorageClass (AWS EKS)
+      kubernetes.core.k8s:
+        template: 'storage_classes/gitaly_gp3.aws.yml.j2'
+        state: present
+
+    - name: Set Gitaly StorageClass (AWS EKS)
+      set_fact:
+        gitlab_charts_gitaly_storage_class: "gitlab-gitaly-gp3"
+  when:
+    - gitlab_charts_gitaly_setup
+    - gitlab_charts_gitaly_storage_class == ''
