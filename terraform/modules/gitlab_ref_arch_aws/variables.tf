@@ -1011,6 +1011,39 @@ variable "supporting_node_pool_max_unavailable" {
   default = 0
 }
 
+## Gitaly
+## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+variable "gitaly_node_pool_count" {
+  type    = number
+  default = 0
+}
+variable "gitaly_node_pool_instance_type" {
+  type    = string
+  default = ""
+}
+variable "gitaly_node_pool_disk_size" {
+  type    = string
+  default = null
+}
+variable "gitaly_node_pool_disk_kms_key_arn" {
+  type    = string
+  default = null
+}
+## Cluster Autoscaling (Optional)
+variable "gitaly_node_pool_max_count" {
+  type    = number
+  default = 0
+}
+variable "gitaly_node_pool_min_count" {
+  type    = number
+  default = 0
+}
+## Cluster Updates (Optional)
+variable "gitaly_node_pool_max_unavailable" {
+  type    = number
+  default = 0
+}
+
 # PaaS Services
 ## PostgreSQL
 variable "rds_postgres_instance_type" {
@@ -1888,6 +1921,10 @@ variable "eks_custom_tags" {
   type    = map(string)
   default = {}
 }
+variable "webservice_node_pool_custom_tags" {
+  type    = map(string)
+  default = {}
+}
 variable "sidekiq_node_pool_custom_tags" {
   type    = map(string)
   default = {}
@@ -1896,7 +1933,8 @@ variable "supporting_node_pool_custom_tags" {
   type    = map(string)
   default = {}
 }
-variable "webservice_node_pool_custom_tags" {
+## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+variable "gitaly_node_pool_custom_tags" {
   type    = map(string)
   default = {}
 }
