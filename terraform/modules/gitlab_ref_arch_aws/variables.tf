@@ -845,6 +845,10 @@ variable "eks_default_disk_kms_key_arn" {
   type    = string
   default = null
 }
+variable "eks_upgrade_policy" {
+  type    = string
+  default = null
+}
 
 ## Node Group
 variable "eks_node_group_ami_type" {
