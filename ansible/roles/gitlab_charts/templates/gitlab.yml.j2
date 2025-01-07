@@ -194,11 +194,6 @@ gitlab:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-gitaly-role"
 {% endif %}
-{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
-    serviceAccount:
-      annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-gitaly@{{ gcp_project }}.iam.gserviceaccount.com"
-{% endif %}
     metrics:
       enabled: true
       serviceMonitor:

@@ -49,6 +49,10 @@
     - name: Run AWS EKS prep tasks
       import_tasks: cloud_provider_prep/aws_eks.yml
       when: cloud_provider == 'aws'
+
+    - name: Run GCP GKE prep tasks
+      import_tasks: cloud_provider_prep/gcp_gke.yml
+      when: cloud_provider == 'gcp'
   tags:
     - reconfigure
     - charts
