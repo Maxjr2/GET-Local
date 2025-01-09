@@ -48,8 +48,8 @@ geo_secondary_internal_url: "<Secondary URL>"
 geo_primary_registry_url: "registry.<Unified URL>"
 
 # Cloud Native environments only
-external_geo_ip: "<IP Address for geo_secondary_internal_url>"
 cloud_native_hybrid_geo_unified_url: true
+external_geo_ip: "<Site-specific internal IP>" # Use geo_primary_internal_url IP for primary, geo_secondary_internal_url IP for secondary
 ```
 
 ### SSL
