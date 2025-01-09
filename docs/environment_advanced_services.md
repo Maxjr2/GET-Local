@@ -231,6 +231,12 @@ With the following variable you can configure any [available parameter](https://
 
 - `rds_postgres_params` - A map of [Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) to configure in RDS. Any param set here will take precedence. Optional, default is `{}`.
 
+:information_source:&nbsp; [RDS Parameters can be applied in one of two ways](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#problematic-plan-changes) - Immediate or Pending Reboot. In the Terraform AWS provider this is configured under each parameter via the [`apply_method` variable](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#apply_method-1), with the default being `immediate`. However some parameters only support the other method, `pending-reboot`. For this specific case, `rds_postgres_params` also allows for nested map values to configure both the `value` and `apply_method`, for example:
+
+```tf
+rds_postgres_params = { shared_preload_libraries = { value = "pg_stat_statements,pgaudit", apply_method = "pending-reboot" }, deadlock_timeout = 4000 }
+```
+
 :information_source:&nbsp; Parameters for Praefect or Geo Tracking RDS databases can also be done with the same setting above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively.
 
 ##### AWS RDS - Read Replicas

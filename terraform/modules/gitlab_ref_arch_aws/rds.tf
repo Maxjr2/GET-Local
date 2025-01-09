@@ -39,8 +39,9 @@ resource "aws_db_parameter_group" "gitlab" {
   dynamic "parameter" {
     for_each = merge(local.rds_postgres_default_params, var.rds_postgres_params)
     content {
-      name  = parameter.key
-      value = parameter.value
+      name         = parameter.key
+      value        = try(parameter.value.value, parameter.value)
+      apply_method = try(parameter.value.apply_method, null)
     }
   }
 
