@@ -1138,7 +1138,7 @@ variable "rds_postgres_iam_database_authentication_enabled" {
 }
 variable "rds_postgres_params" {
   description = "Additional RDS parameter group settings"
-  type        = map(any)
+  type        = any
   default     = {}
 }
 variable "rds_postgres_create_timeout" {
