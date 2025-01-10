@@ -419,6 +419,14 @@ When `offline_setup` is configured, the Toolkit will not attempt to run these ro
 
 When `offline_setup` is configured the Toolkit will not attempt to do this. As such, you should configure the Toolkit to [install GitLab directly via a file](environment_configure.md#direct).
 
+### GitLab Helm Charts
+
+By default, the Toolkit will deploy the latest [GitLab Chart](https://gitlab.com/gitlab-org/charts/gitlab) via [the official repo](https://charts.gitlab.io/).
+
+When `offline_setup` is enabled, the Toolkit won't automatically fetch the GitLab Charts repository from a Helm Charts server. As such, you should first prepare your Ansible control node to have the repository available locally to Helm or install the GitLab Charts package directly. Once prepared, configure the Toolkit by setting the following setting depending on the approach:
+
+- `gitlab_charts_ref`: The [ref](https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#parameter-chart_ref) for a GitLab Charts repository locally available to Helm or the direct path / URL to a GitLab Charts package file in the `.tgz` format.
+
 ### Version Check and Service Ping
 
 While the Toolkit is not setting this up directly, GitLab defaults to enabling a callback Version Check and Service Ping. [Refer to the docs](https://docs.gitlab.com/ee/topics/offline/quick_start_guide.html#disable-version-check-and-service-ping) on how to disable this.

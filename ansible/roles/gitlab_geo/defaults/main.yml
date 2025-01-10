@@ -34,8 +34,12 @@ geo_secondary_site_count: "{{ geo_replication_slot_modifier if geo_replication_s
 geo_primary_replication_slots: ["geo_secondary"]
 geo_primary_slot_name: "geo_secondary"
 
+offline_setup: false
+
 gitlab_charts_repo_name: 'gitlab'
 gitlab_charts_repo_url: "https://charts.gitlab.io/"
+gitlab_charts_ref: "{{ gitlab_charts_repo_name }}/gitlab"
+gitlab_charts_direct_install: "{{ offline_setup or gitlab_charts_ref.startswith('/') or gitlab_charts_ref.endswith('.tgz') }}"
 gitlab_charts_show_values: false
 ### Default Replica / Pod counts as given by Reference Architectures, calculated by equivalent Linux Package (Omnibus) Gitaly CPU counts if available
 webservice_default_replica_counts:
