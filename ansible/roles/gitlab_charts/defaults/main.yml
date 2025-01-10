@@ -20,6 +20,8 @@ aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics
 # Charts Settings
 gitlab_charts_repo_name: 'gitlab'
 gitlab_charts_repo_url: "https://charts.gitlab.io/"
+gitlab_charts_ref: "{{ gitlab_charts_repo_name }}/gitlab"
+gitlab_charts_direct_install: "{{ offline_setup or gitlab_charts_ref.startswith('/') or gitlab_charts_ref.endswith('.tgz') }}"
 
 gitlab_charts_show_values: false
 

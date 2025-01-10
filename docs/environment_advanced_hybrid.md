@@ -534,9 +534,27 @@ First let's detail the general settings that apply to any Cloud Provider:
 - `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
   - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
-- `gitlab_charts_gpg_key_file_path` - This is a key to a generated and exported Gitlab public gpg key, instructions on how to create one are in [GitLab Helm chart provenance](https://docs.gitlab.com/charts/installation/chart-provenance.html).
 
-Next are specific Cloud Provider examples that will also detail any specific settings for each provider along with a section on various other additional settings that may be used.
+Next are sections covering various aspects for handling the charts from Install choices, Cloud Provider specifics as well as any other additional settings that can be considered.
+
+### Chart Install Options
+
+The Toolkit can install the Helm Charts via several different methods depending on your requirements or preferences as follows:
+
+- Helm Chart repository - Where the Charts are retrieved from a Helm Charts repository server, either via the official GitLab server (`charts.gitlab.io`) or a custom one.
+- Direct package - Where the Charts are installed directly via a package in the `.tgz` format.
+
+The following settings are available in the Toolkit to configure the preferred installation method:
+
+Helm Chart repository:
+
+- `gitlab_charts_repo_url` - The URL of the Helm Chart repository server. Optional, defaults to `https://charts.gitlab.io/`
+- `gitlab_charts_repo_name` - The name of the GitLab Chart repository for Helm to use. Optional, defaults to `gitlab`.
+- `gitlab_charts_gpg_key_file_path` - The key to a generated and exported Gitlab public gpg key to validate the Chart repository. Instructions on how to create one can be found in the [GitLab Helm chart provenance](https://docs.gitlab.com/charts/installation/chart-provenance.html) documentation.
+
+Direct package:
+
+- `gitlab_charts_ref` - The file path or URL to a GitLab Charts repository package file in the `.tgz` format, accessible to the Ansible control node. Optional, default is a generated value to be used for the default Helm Chart repository install method.
 
 ### Google Cloud Platform (GCP)
 
