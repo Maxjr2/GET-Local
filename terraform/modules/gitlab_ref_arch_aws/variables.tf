@@ -1146,6 +1146,11 @@ variable "rds_postgres_create_timeout" {
   type        = string
   default     = "2h"
 }
+variable "rds_postgres_lifecycle_support" {
+  description = "Support lifecycle for the database, Extended or Standard. Accepted values are `open-source-rds-extended-support` or `open-source-rds-extended-support-disabled`"
+  type        = string
+  default     = null
+}
 
 variable "rds_postgres_read_replica_count" {
   type    = number
@@ -1271,11 +1276,15 @@ variable "rds_praefect_postgres_params" {
   type        = map(any)
   default     = {}
 }
-
 variable "rds_praefect_postgres_create_timeout" {
   description = "How long to wait for the create to finish before timing out"
   type        = string
   default     = "2h"
+}
+variable "rds_praefect_postgres_lifecycle_support" {
+  description = "Support lifecycle for the database, Extended or Standard. Accepted values are `open-source-rds-extended-support` or `open-source-rds-extended-support-disabled`"
+  type        = string
+  default     = null
 }
 
 variable "rds_praefect_postgres_read_replica_count" {
@@ -1406,6 +1415,11 @@ variable "rds_geo_tracking_postgres_create_timeout" {
   description = "How long to wait for the create to finish before timing out"
   type        = string
   default     = "2h"
+}
+variable "rds_geo_tracking_postgres_lifecycle_support" {
+  description = "Support lifecycle for the database, Extended or Standard. Accepted values are `open-source-rds-extended-support` or `open-source-rds-extended-support-disabled`"
+  type        = string
+  default     = null
 }
 
 variable "rds_geo_tracking_postgres_read_replica_count" {
