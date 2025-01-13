@@ -50,8 +50,10 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
 
   identifier     = "${var.prefix}-rds-geo-tracking"
   instance_class = "db.${var.rds_geo_tracking_postgres_instance_type}"
-  engine         = "postgres"
-  engine_version = var.rds_geo_tracking_postgres_version
+
+  engine                   = "postgres"
+  engine_version           = var.rds_geo_tracking_postgres_version
+  engine_lifecycle_support = var.rds_geo_tracking_postgres_lifecycle_support
 
   db_name  = var.rds_geo_tracking_postgres_database_name
   username = var.rds_geo_tracking_postgres_username

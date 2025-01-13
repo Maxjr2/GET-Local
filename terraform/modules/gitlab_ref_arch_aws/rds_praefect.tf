@@ -50,8 +50,10 @@ resource "aws_db_instance" "gitlab_praefect" {
 
   identifier     = "${var.prefix}-rds-praefect"
   instance_class = "db.${var.rds_praefect_postgres_instance_type}"
-  engine         = "postgres"
-  engine_version = var.rds_praefect_postgres_version
+
+  engine                   = "postgres"
+  engine_version           = var.rds_praefect_postgres_version
+  engine_lifecycle_support = var.rds_praefect_postgres_lifecycle_support
 
   db_name  = var.rds_praefect_postgres_database_name
   username = var.rds_praefect_postgres_username

@@ -55,9 +55,11 @@ resource "aws_db_instance" "gitlab" {
 
   identifier     = "${var.prefix}-rds"
   instance_class = "db.${var.rds_postgres_instance_type}"
+
   # Required unless replicate_source_db is provided
-  engine         = local.rds_postgres_is_primary ? "postgres" : null
-  engine_version = local.rds_postgres_is_primary ? var.rds_postgres_version : null
+  engine                   = local.rds_postgres_is_primary ? "postgres" : null
+  engine_version           = local.rds_postgres_is_primary ? var.rds_postgres_version : null
+  engine_lifecycle_support = local.rds_postgres_is_primary ? var.rds_postgres_lifecycle_support : null
 
   db_name  = local.rds_postgres_is_primary ? var.rds_postgres_database_name : null
   username = local.rds_postgres_is_primary ? var.rds_postgres_username : null
