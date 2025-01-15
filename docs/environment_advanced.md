@@ -363,7 +363,13 @@ To configure Custom Servers with Ansible the setup process involves the followin
 
 Refer to each section below for how to do each:
 
-### Environment Config
+### Static Config
+
+First an [Ansible Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) is required instead of a [Dynamic Inventory](environment_configure.md#configure-dynamic-inventory).
+
+Using the same recommended structure the Static Inventory file should be saved in the inventory folder, e.g. `environments/<env_name>/inventory` alongside the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml). Several file formats are supported by Ansible but for consistency we'll use `yml` format.
+
+#### Environment Config
 
 Configuring the environment config `vars.yml` file is [much the same as it would be normally](environment_configure.md#environment-config-varsyml) with the following differences:
 
@@ -371,11 +377,7 @@ Configuring the environment config `vars.yml` file is [much the same as it would
 - Any Cloud Provider specific variables, such as `gcp_project` should be removed.
 - `prefix` can also be removed.
 
-### Static Config
-
-First an [Ansible Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) is required instead of a [Dynamic Inventory](environment_configure.md#configure-dynamic-inventory).
-
-Using the same recommended structure the Static Inventory file should be saved in the inventory folder, e.g. `environments/<env_name>/inventory` alongside the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml). Several file formats are supported by Ansible but for consistency we'll use `yml` format.
+#### Inventory Examples
 
 An example of a 10k environment's static inventory file that's Toolkit compatible is below but note the following:
 
