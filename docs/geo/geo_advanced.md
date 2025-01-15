@@ -189,7 +189,7 @@ During the setup of Geo some secrets are copied over from the primary site to th
 
 #### Gitaly Storage Paths
 
-The [repository storage paths](https://docs.gitlab.com/ee/administration/repository_storage_paths.html) of Gitaly, also known as `git_data_dirs`, is required to match between two Geo sites. As such this means that the environment you are looking to migrate from will need to match the default structure the Toolkit creates.
+The [repository storage paths](https://docs.gitlab.com/ee/administration/repository_storage_paths.html) of Gitaly are required to match between two Geo sites. As such this means that the environment you are looking to migrate from will need to match the default structure the Toolkit creates.
 
 :information_source:&nbsp; If you have not configured anything specific with repository storage paths or [weights](https://docs.gitlab.com/ee/administration/repository_storage_paths.html#configure-where-new-repositories-are-stored) then all of your repositories will be on the required `default` storage path and no further action will be required.
 

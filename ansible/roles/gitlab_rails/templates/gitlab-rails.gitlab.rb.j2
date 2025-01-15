@@ -335,24 +335,41 @@ gitlab_workhorse['env'] = {
 {% if 'praefect' in groups %}
 ## Gitaly Cluster - Separate Node(s)
 gitaly['enable'] = false
-git_data_dirs({
+
+{% set storage_config %}
+{
   "default" => {
     "gitaly_address" => "{{ 'tls' if praefect_ssl else 'tcp' }}://{{ internal_lb_host }}:{{ praefect_ssl_port if gitaly_ssl else '2305' }}",
     "gitaly_token" => '{{ praefect_external_token }}'
   }
-})
+}{% endset %}
+
+{% if gitlab_version == '' or gitlab_version is version('17.8', '>=') %}
+gitlab_rails['repositories_storages'] = {{ storage_config }}
+{% else %}
+git_data_dirs({{ storage_config }})
+{% endif %}
+
 {% elif 'gitaly' in groups %}
 ## Gitaly - Separate Node(s)
 gitaly['enable'] = false
 gitlab_rails['gitaly_token'] = '{{ gitaly_token }}'
 
-git_data_dirs({
+{% set storage_config %}
+{
   'default' => { 'gitaly_address' => "{{ 'tls' if gitaly_ssl else 'tcp' }}://{{ gitaly_primary_int_addr }}:{{ gitaly_ssl_port if gitaly_ssl else '8075' }}" },
   'storage1' => { 'gitaly_address' => "{{ 'tls' if gitaly_ssl else 'tcp' }}://{{ gitaly_primary_int_addr }}:{{ gitaly_ssl_port if gitaly_ssl else '8075' }}" },
 {% for gitaly_secondary_ip in gitaly_secondary_int_addrs %}
   "storage{{loop.index + 1}}" => { 'gitaly_address' => "{{ 'tls' if gitaly_ssl else 'tcp' }}://{{ gitaly_secondary_ip }}:{{ gitaly_ssl_port if gitaly_ssl else '8075' }}" },
 {% endfor %}
-})
+}{% endset %}
+
+{% if gitlab_version == '' or gitlab_version is version('17.8', '>=') %}
+gitlab_rails['repositories_storages'] = {{ storage_config }}
+{% else %}
+git_data_dirs({{ storage_config }})
+{% endif %}
+
 {% else %}
 ## Gitaly - Local
 gitaly['enable'] = true
