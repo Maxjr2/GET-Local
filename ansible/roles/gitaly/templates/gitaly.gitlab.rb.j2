@@ -114,8 +114,8 @@ git_data_dirs({
 {% endif %}
   "storage{{ gitaly_number }}" => { 'path' => "{{ gitaly_sharded_storage_path }}/storage{{ gitaly_number }}" },
 })
-{% endif %}
 
+{% endif %}
 {% endif %}
 
 custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{gitaly,common}.*.rb"))
