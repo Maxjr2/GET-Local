@@ -285,7 +285,7 @@ This error is usually caused by incomplete database migrations that happened dur
 
 ### Python install failure due to `module 'tarfile' has no attribute 'data_filter'` on RHEL 8
 
-The following error could occur on RHEL 8 based distros due to a [security update](https://rpmfind.net/linux/RPM/centos/8-stream/appstream/x86_64/Packages/python3-pip-9.0.3-23.el8.noarch.html) to the specific variant of Python that comes installed:
+The following error could occur on RHEL 8 based distros due to a security update to the specific variant of Python that comes installed:
 
 ```sh
     :stderr: WARNING: Running pip install with root privileges is generally not a good idea. Try `__main__.py install --user` instead.
@@ -296,7 +296,7 @@ The following error could occur on RHEL 8 based distros due to a [security updat
     AttributeError: module 'tarfile' has no attribute 'data_filter'
 ```
 
-This update introduced a new dependency on the [`python-libs` package](https://rpmfind.net/linux/RPM/centos/8-stream/baseos/x86_64/Packages/python3-libs-3.6.8-56.el8.x86_64.html) but was notably not linked correctly in the package manager config so subsequently didn't update as expected.
+This update introduced a new dependency on the `python-libs` package but was notably not linked correctly in the package manager config so subsequently didn't update as expected.
 
 This issue looks to have subsequently been fixed but if you see the above error this can be addressed by running the following package command on the box and then running GET Ansible again:
 
