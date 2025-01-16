@@ -91,6 +91,18 @@
     - reconfigure
     - restart
 
+- name: Create custom Gitaly Cluster directory if configured
+  file:
+    path: "{{ gitaly_cluster_storage_path }}/repositories"
+    state: directory
+    mode: '2770'
+    owner: git
+    group: git
+  when:
+    - gitaly_cluster_storage_path != "/var/opt/gitlab/git-data"
+    - "'praefect' in groups"
+  tags: reconfigure
+
 - name: Create Default Gitaly Sharded directory
   file:
     path: "{{ gitaly_sharded_storage_path }}/default/repositories"
