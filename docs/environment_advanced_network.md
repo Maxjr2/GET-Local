@@ -356,6 +356,19 @@ The Toolkit by default uses IPs for internal connections. However, this can be s
 
 :information_source:&nbsp; On the main Cloud Providers internal hostnames are available by default (For more info - [GCP](https://cloud.google.com/compute/docs/internal-dns), [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-naming.html), [Azure](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances#reverse-dns-considerations)). Terraform output shows the hostnames for each VM. For On Prem installs hostnames and DNS will need to be configured separately.
 
+## Health Checks
+
+The Toolkit will perform some health checks as part of it's set up to ensure it can in turn run actions that require a running environment. It does this by polling the [Readiness endpoint](https://docs.gitlab.com/ee/administration/monitoring/health_check.html#readiness) of the environment.
+
+The URLs it polls to perform these health checks can be changed as required in scenarios such as when the Toolkit may not be able to reach the environment URL directly. However it's generally only recommended to change these settings if strictly required as if the changed URL does not return a valid health check of the instance it will lead to build failures and instability.
+
+The Health Check settings that are available in Ansible and can be changed via the [`vars.yml`](environment_configure.md#environment-config-varsyml) file are as follows:
+
+- `health_check_url` - The main Health Check URL for the GitLab instance. Defaults to `<external_url>/-/readiness`.
+- `geo_primary_health_check_url` - (Geo only) The main Health Check URL for the primary GitLab instance. Defaults to `<geo_primary_external_url>/-/readiness`.
+- `geo_primary_health_check_url` - (Geo only) The main Health Check URL for the secondary GitLab instance. Defaults to `<geo_secondary_external_url>/-/readiness`.
+- `gitlab_rails_local_health_check_url` - (Zero Downtime Upgrade only) The Health Check URL for the local Rails instance on each node. It's not recommended to change this setting unless absolutely necessary. Defaults to `http[s]://localhost/-/readiness`. 
+
 ## Offline Setup Guidance
 
 The Toolkit supports setting up an [offline environment without internet access](https://docs.gitlab.com/ee/topics/offline/quick_start_guide.html). However, this does require some additional manual setup to function properly as there are several areas that the Toolkit expects internet access by default and alternatives need to be put in place accordingly.

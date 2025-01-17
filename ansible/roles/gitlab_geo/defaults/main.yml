@@ -12,6 +12,9 @@ geo_secondary_site_rails_secondary_int_ips: "{{ (groups[geo_secondary_site_group
 geo_secondary_site_sidekiq_primary_int_ip: "{{ (groups[geo_secondary_site_group_name + '_sidekiq_primary'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
 geo_secondary_site_sidekiq_secondary_int_ips: "{{ (groups[geo_secondary_site_group_name + '_sidekiq_secondary'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | list if geo_secondary_site_group_name + '_sidekiq_secondary' in groups else '') }}"
 
+geo_primary_health_check_url: "{{ geo_primary_external_url }}/-/readiness"
+geo_secondary_health_check_url: "{{ geo_secondary_external_url }}/-/readiness"
+
 tracking_db_md5_auth: "['{{ geo_secondary_site_rails_primary_int_ip }}/32'{% for ip in geo_secondary_site_rails_secondary_int_ips %}, '{{ ip }}/32'{% endfor %}, '{{ geo_secondary_site_sidekiq_primary_int_ip }}/32'{% for ip in geo_secondary_site_sidekiq_secondary_int_ips %}, '{{ ip }}/32'{% endfor %}]"
 
 geo_primary_site_prefix: ""

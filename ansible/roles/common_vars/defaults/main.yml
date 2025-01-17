@@ -114,9 +114,6 @@ container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gc
 container_registry_external_url: "https://registry.{{ external_host }}"
 container_registry_external_host: "{{ container_registry_external_url | regex_replace('^https?:\/\/') }}"
 
-# Zero Downtime Upgrade Rails readiness check settings
-gitlab_rails_readiness_url: "{{ 'https' if gitlab_rails_nginx_ssl else 'http' }}://localhost/-/readiness"
-
 ################################################################################
 ## GitLab Component Settings (Omnibus)
 ################################################################################

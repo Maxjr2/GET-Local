@@ -13,7 +13,7 @@
 
 - name: Wait for GitLab Rails to be ready
   uri:
-    url: "{{ gitlab_rails_readiness_url }}"
+    url: "{{ gitlab_rails_local_health_check_url }}"
     timeout: 60
     validate_certs: false # User provided internal SSL
   register: result

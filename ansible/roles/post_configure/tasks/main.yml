@@ -5,7 +5,7 @@
 
 - name: Wait for GitLab to be available
   uri:
-    url: '{{ external_url_sanitised }}/-/readiness'
+    url: "{{ health_check_url }}"
     validate_certs: false
     timeout: 60
   register: result
