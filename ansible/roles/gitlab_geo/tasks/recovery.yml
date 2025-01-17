@@ -75,7 +75,7 @@
   block:
     - name: Recovery - Wait for GitLab to be available
       uri:
-        url: '{{ geo_primary_external_url }}/-/readiness'
+        url: '{{ geo_primary_health_check_url }}'
         validate_certs: false
         timeout: 60
       register: result

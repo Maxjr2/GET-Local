@@ -122,7 +122,7 @@
   block:
     - name: Failover Promote Secondary - Wait for GitLab to be available
       uri:
-        url: "{{ geo_secondary_external_url }}/-/readiness"
+        url: "{{ geo_secondary_health_check_url }}"
         validate_certs: false
         timeout: 60
       register: result
