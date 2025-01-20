@@ -1,0 +1,213 @@
+# Requires issues https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1734, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1089, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1568
+- name: Fail if using unsupported GitLab version for Operator in GET
+  fail:
+    msg: "GET requires 17.6 and up for Operator setup. {{ gitlab_version }} is not compatible. Exiting..."
+  when: gitlab_version != '' and gitlab_version is version('17.6', '<')
+
+- name: Install Cert-manager
+  block:
+    - name: Download cert-manager manifest
+      ansible.builtin.get_url:
+        url: "{{ gitlab_operator_cert_manager_manifest_url }}"
+        dest: /tmp/cert-manager.yaml
+        mode: "0664"
+
+    - name: Apply cert-manager manifest to the cluster
+      kubernetes.core.k8s:
+        state: present
+        src: /tmp/cert-manager.yaml
+
+    - name: Wait for cert-manager deployment to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: cert-manager
+        label_selectors:
+          - app.kubernetes.io/instance=cert-manager
+      register: cert_manager_deployment
+      until:
+        - cert_manager_deployment.resources is defined
+        - cert_manager_deployment.resources | length > 0
+        - cert_manager_deployment.resources[0].status is defined
+        - cert_manager_deployment.resources[0].status.availableReplicas is defined
+        - cert_manager_deployment.resources[0].status.availableReplicas == cert_manager_deployment.resources[0].status.replicas
+      retries: 30
+      delay: 10
+
+    - name: Clean up cert-manager manifest
+      file:
+        path: /tmp/cert-manager.yaml
+        state: absent
+  tags:
+    - cert-manager
+    - reconfigure
+    - prerequisite
+
+- name: Fetch latest Operator and Chart version if configured
+  block:
+    - name: Get latest gitlab-operator details
+      command: helm search repo "{{ gitlab_charts_repo_name }}/gitlab-operator" -o json
+      register: gitlab_operator_version
+
+    - name: Set latest Operator version
+      set_fact:
+        gitlab_operator_version: "{{ (gitlab_operator_version.stdout | from_json)[0].version }}"
+
+    - name: Show latest Chart version
+      debug:
+        var: gitlab_operator_version
+
+    - name: Fetch latest Chart version
+      uri:
+        url: "https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/raw/{{ gitlab_operator_version }}/CHART_VERSIONS"
+        return_content: true
+      register: chart_versions_response
+
+    - name: Extract latest Chart version
+      set_fact:
+        gitlab_charts_version: "{{ chart_versions_response.content.split('\n') | select('match', '^\\d+\\.\\d+\\.\\d+$') | first }}"
+
+    - name: Show latest Chart version
+      debug:
+        var: gitlab_charts_version
+  when: gitlab_version == ''
+  tags:
+    - reconfigure
+
+- name: Fetch compatible GitLab Operator version for GitLab Charts
+  block:
+    - name: Get all GitLab Operator chart versions
+      command: helm search repo "{{ gitlab_charts_repo_name }}/gitlab-operator" -l -o json
+      register: operator_charts_versions
+
+    - name: Extract version numbers
+      set_fact:
+        operator_versions: "{{ operator_charts_versions.stdout | from_json | json_query('[*].version') }}"
+
+    - name: Check Operator to GitLab Chart compatibility for each version
+      include_tasks: operator_prep/check_compatibility.yml
+      loop: "{{ operator_versions }}"
+      when: compatible_gitlab_operator_version is not defined
+
+    - name: Show GitLab Operator Version
+      debug:
+        msg: "Compatible GitLab Operator version for chart {{ gitlab_charts_version }} is {{ compatible_gitlab_operator_version }}"
+
+    - name: Set GitLab Operator and Chart versions
+      set_fact:
+        gitlab_operator_version: "{{ compatible_gitlab_operator_version }}"
+  rescue:
+    - name: Handle errors
+      debug:
+        msg: "An error occurred while trying to find a compatible GitLab Operator version. Ensure that specified GitLab version has mapping to GitLab Operator release."
+  when: gitlab_version != '' and gitlab_charts_version != ''
+  tags:
+    - reconfigure
+
+- name: Fail if GitLab Operator version can't be found
+  fail:
+    msg: "Operator version for {{ gitlab_version }} could not be found. Exiting..."
+  when: gitlab_operator_version == ''
+
+# https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1315#note_1796142040
+- name: Create Service Accounts for sub-charts
+  block:
+    - name: Create Service Accounts for Workload Identity
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: "{{ item.name }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            annotations:
+              iam.gke.io/gcp-service-account: "{{ item.gcp_sa }}"
+      loop:
+        - name: "gitlab-sidekiq"
+          gcp_sa: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com"
+        - name: "gitlab-toolbox"
+          gcp_sa: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
+        - name: "gitlab-webservice"
+          gcp_sa: "{{ gcp_service_account_prefix }}-gke-webservice@{{ gcp_project }}.iam.gserviceaccount.com"
+        - name: "gitlab-registry"
+          gcp_sa: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com"
+      when: gcp_gke_workload_identity_setup
+
+    - name: Create Service Accounts for IRSA
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: "{{ item.name }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            annotations:
+              eks.amazonaws.com/role-arn: "{{ item.aws_sa }}"
+      loop:
+        - name: "gitlab-sidekiq"
+          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
+        - name: "gitlab-toolbox"
+          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
+        - name: "gitlab-webservice"
+          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
+        - name: "gitlab-registry"
+          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
+      when: cloud_provider == 'aws'
+
+- name: Check if custom GitLab Operator values are provided
+  stat:
+    path: "{{ gitlab_operator_custom_config_file }}"
+  register: custom_operator_config_file
+  tags:
+    - reconfigure
+    - kube-prometheus-stack
+
+- name: Install GitLab Operator
+  kubernetes.core.helm:
+    name: gitlab-operator
+    chart_ref: "{{ gitlab_charts_repo_name }}/gitlab-operator"
+    chart_version: "{{ gitlab_operator_version | default('') }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    values_files: "{{ [gitlab_operator_custom_config_file] if custom_operator_config_file.stat.exists else omit }}"
+  tags:
+    - reconfigure
+
+- name: Deploy a GitLab instance via a GitLab custom resource (CR)
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps.gitlab.com/v1beta1
+      kind: GitLab
+      metadata:
+        name: gitlab
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+      spec:
+        chart:
+          version: "{{ gitlab_charts_version }}"
+          values: "{{ gitlab_charts_values }}"
+  tags:
+    - reconfigure
+
+# To allow for the resource to be Ready before proceeding to Post Configure steps
+- name: Wait for GitLab resource to be Ready after install
+  block:
+    - name: Wait for GitLab resource to be Ready
+      kubernetes.core.k8s_info:
+        api_version: apps.gitlab.com/v1beta1
+        kind: GitLab
+        name: gitlab
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+      register: gitlab_resource
+      until:
+        - gitlab_resource.resources is defined
+        - gitlab_resource.resources | length > 0
+        - gitlab_resource.resources[0].status is defined
+        - gitlab_resource.resources[0].status.phase == 'Running'
+      retries: 25
+      delay: 30
+  rescue:
+    - name: Fail with custom message
+      fail:
+        msg: "GitLab resource did not become Ready within the expected time. Current status: {{ gitlab_resource.resources[0].status.phase | default('Unknown') }}"
+  tags:
+    - reconfigure

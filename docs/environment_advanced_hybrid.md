@@ -18,7 +18,7 @@
   - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
-The Toolkit by default will deploy the latest version of the selected [Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/). However, it can also support deploying our alternative [Cloud Native Hybrid Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) where select stateless components are deployed in Kubernetes via our [Helm charts](https://docs.gitlab.com/charts/) instead of static compute VMs. To achieve this the Toolkit can provision the Kubernetes cluster via Terraform and then configure the Helm Chart via Ansible.
+The Toolkit by default will deploy the latest version of the selected [Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/). However, it can also support deploying our alternative [Cloud Native Hybrid Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) where select stateless components are deployed in Kubernetes via our [Helm charts](https://docs.gitlab.com/charts/) or [Operator](https://docs.gitlab.com/operator/) instead of static compute VMs. To achieve this the Toolkit can provision the Kubernetes cluster via Terraform and then configure the Cloud Native deployment via Ansible.
 
 While the Toolkit can deploy such an architecture it should be noted that this is an advanced setup as running services in Kubernetes is well known to be complex. **This setup is only recommended** if
 you have strong working knowledge and experience in Kubernetes. For most users a standard Reference Architecture on static compute VMs typically will suffice, Hybrid architectures should only be used if the specific benefits of Kubernetes are desired.
@@ -29,9 +29,9 @@ On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architec
 
 ## Overview
 
-As detailed in the docs, a Cloud Native Hybrid Reference Architecture is an alternative approach where select stateless components are deployed in Kubernetes via Helm Charts. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
+As detailed in the docs, a Cloud Native Hybrid Reference Architecture is an alternative approach where select stateless components are deployed in Kubernetes via Helm Charts or Operator. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
 
-To achieve this with the Toolkit it can provision the Kubernetes cluster via Terraform and then configure the Helm Chart via Ansible.
+To achieve this with the Toolkit it can provision the Kubernetes cluster via Terraform and then configure the Cloud Native deployment via Ansible.
 
 ## 1. Install Kubernetes Tools
 
@@ -52,10 +52,10 @@ Provisioning the required Kubernetes cluster with a cloud provider only requires
 
 By design, the `environment.tf` file is similar to the one used in a [standard environment](environment_provision.md#configure-module-settings-environmenttf) with the following differences:
 
-- `gitlab_rails_x` entries are replaced with `webservice_node_pool_x`. In the charts we run Puma and Workhorse in Webservice pods.
+- `gitlab_rails_x` entries are replaced with `webservice_node_pool_x`. In the cloud native we run Puma and Workhorse in Webservice pods.
 - `sidekiq_x` entries are replaced with `sidekiq_node_pool_x`
-- `supporting_node_pool_x` entries are added for several additional supporting services needed when running components in Helm Charts, e.g. Registry.
-- `haproxy_external_x` entries are removed as the Chart deployment handles external load balancing.
+- `supporting_node_pool_x` entries are added for several additional supporting services needed when running components in Kubernetes, e.g. Registry.
+- `haproxy_external_x` entries are removed as the Cloud Native deployment handles external load balancing.
 
 Each node pool setting configures the following. To avoid repetition we'll describe each setting once:
 
@@ -183,7 +183,7 @@ For more information refer to the [GCP documentation](https://cloud.google.com/k
 
 #### GKE Workload Identity
 
-:information_source:&nbsp; GKE Workload Identity is only supported from GitLab `17.0`.
+:information_source:&nbsp; GKE Workload Identity is only supported with Charts installations from GitLab `17.0`.
 
 [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) can optionally be configured with the Toolkit. This is to allow deployments to authenticate directly via their own [Service Accounts](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts) to GCP services instead of using node accounts as a further security best practice.
 
@@ -195,15 +195,15 @@ Enabling Workload Identity will instruct the Toolkit to not only enable that opt
 
 ##### GitLab Chart Namespace
 
-In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable in Ansible.
+In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_cloud_native_release_namespace` variable in Ansible.
 
-However, if using GKE Workload Identity, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `gke_gitlab_charts_namespace` variable.
+However, if using GKE Workload Identity, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `gke_gitlab_cloud_native_namespace` variable.
 
-As such, if you do choose to change the namespace for GitLab components you should change both the `gke_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
+As such, if you do choose to change the namespace for GitLab components you should change both the `gke_gitlab_cloud_native_namespace` and `gitlab_cloud_native_release_namespace` variables to match in both Terraform and Ansible respectively.
 
 #### GKE Toolbox Backups - Service Account Key (<`17.0`)
 
-With a Cloud Native Hybrid environment, [GitLab backups are taken via the Charts Toolbox pod](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
+With a Cloud Native Hybrid environment, [GitLab backups are taken via the Toolbox chart](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
 
 :information_source:&nbsp; For GitLab version `17.0` and higher, [Application Default Credentials](https://docs.gitlab.com/charts/advanced/external-object-storage/#backups) are used by default and no further configuration will be required.
 
@@ -211,10 +211,10 @@ For GitLab versions lower than `17.0`, an additional step is required to configu
 
 The Service Account requires the `roles/storage.objectAdmin` role to be given for each of the Object Storage Buckets to be used. The Toolkit creates a role for this purpose already with the suffix `-gke-supporting` so creating the account is not required. However, as Service Account keys are sensitive credential files the Toolkit doesn't generate the key specifically. As such, one manual step that is required in this scenario is to [generate a key](https://cloud.google.com/iam/docs/keys-create-delete) for this account and pass it accordingly to Ansible.
 
-There are two options available to pass the key to Ansible to be subsequently configured, either by passing the json string directly or the location of the keyfile on the disk of the Ansible host. For both approaches this is configured in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) as follows:
+There are two options available to pass the key to Ansible to be subsequently configured, either by passing the JSON string directly or the location of the keyfile on the disk of the Ansible host. For both approaches this is configured in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) as follows:
 
-`gcp_backups_service_account_key_json` - Full JSON contents of a GCP Service Account key to be used by the Charts Toolbox pod for performing Backups. The Service Account must have the `roles/storage.objectAdmin` role attached for each Object Storage bucket GitLab uses. If not set, backups will be disabled on the environment. Should not be used in conjunction with `gcp_backups_service_account_key_file`. Optional, default is `''`.
-`gcp_backups_service_account_key_file` - Full file path to a GCP Service Account key file on the host running Ansible to be used by the Charts Toolbox pod for performing Backups. The Service Account must have the `roles/storage.objectAdmin` role attached for each Object Storage bucket GitLab uses. If not set, backups will be disabled on the environment. Should not be used in conjunction with `gcp_backups_service_account_key_json`. Optional, default is `''`.
+- `gcp_backups_service_account_key_json` - Full JSON contents of a GCP Service Account key to be used by the Charts Toolbox pod for performing Backups. The Service Account must have the `roles/storage.objectAdmin` role attached for each Object Storage bucket GitLab uses. If not set, backups will be disabled on the environment. Should not be used in conjunction with `gcp_backups_service_account_key_file`. Optional, default is `''`.
+- `gcp_backups_service_account_key_file` - Full file path to a GCP Service Account key file on the host running Ansible to be used by the Charts Toolbox pod for performing Backups. The Service Account must have the `roles/storage.objectAdmin` role attached for each Object Storage bucket GitLab uses. If not set, backups will be disabled on the environment. Should not be used in conjunction with `gcp_backups_service_account_key_json`. Optional, default is `''`.
 
 Note that you can also create a separate Service Account and key if desired as long as it has the correct permissions as given above.
 
@@ -358,7 +358,7 @@ This can be configured further in Terraform via the following settings in your [
 
 ##### Custom AMI ID
 
-As an alternative it's also possible to set a specific custom AMI ID to be used for the Node Groups if desired. 
+As an alternative it's also possible to set a specific custom AMI ID to be used for the Node Groups if desired.
 
 :information_source:&nbsp; Creating such an image is outside the scope of this documentation, refer to the [official AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html) for more information.
 
@@ -406,11 +406,11 @@ While this should work out of the box for most setups there are a few scenarios 
 
 ##### GitLab Chart Namespace
 
-In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_charts_release_namespace` variable in Ansible.
+In Kubernetes, namespaces allow for separating deployments within a cluster. This Toolkit typically manages this for you via Ansible for GitLab components by using the `default` namespace, but this is also configurable via the `gitlab_cloud_native_release_namespace` variable in Ansible.
 
-However, since the Toolkit uses IRSA, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `eks_gitlab_charts_namespace` variable.
+However, since the Toolkit uses IRSA, Terraform also needs to be aware of the namespace for GitLab to set up the accounts to match correctly via the `eks_gitlab_cloud_native_namespace` variable.
 
-As such, if you do choose to change the namespace for GitLab components you should change both the `eks_gitlab_charts_namespace` and `gitlab_charts_release_namespace` variables to match in both Terraform and Ansible respectively.
+As such, if you do choose to change the namespace for GitLab components you should change both the `eks_gitlab_cloud_native_namespace` and `gitlab_cloud_native_release_namespace` variables to match in both Terraform and Ansible respectively.
 
 ##### AWS IAM ARN Account and Partition
 
@@ -521,7 +521,7 @@ The easiest way to do this is via the selected cloud providers tooling after the
 
 As a convenience, the Toolkit can automatically run these commands for you in its configuration stage when the variable `kubeconfig_setup` is set to `true`, but it expects that you have configured authentication beforehand. This will be detailed more in the next section.
 
-## 4. Configuring the Helm Charts deployment with Ansible
+## 4. Configuring the Cloud Native deployment with Ansible
 
 Like Provisioning with Terraform, configuring the Helm deployment for the Kubernetes cluster only requires a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) - Namely a few extra settings required for Helm.
 
@@ -534,6 +534,8 @@ First let's detail the general settings that apply to any Cloud Provider:
 - `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
   - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
+- `gitlab_operator` - Flag to use GitLab Operator for deployment instead of Charts. Only for new installations with GitLab version 17.6 and up. The Toolkit doesn't handle migration to Operator. Optional, default is `false`.
+  - :exclamation:&nbsp; This feature is available in Toolkit under [Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) status. The GitLab Operator has [known limitations](https://docs.gitlab.com/operator/#known-issues) and is only suitable for specific scenarios in production use. Make sure to confirm that your use case is applicable before enabling.
 
 Next are sections covering various aspects for handling the charts from Install choices, Cloud Provider specifics as well as any other additional settings that can be considered.
 
@@ -658,7 +660,7 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 :information_source:&nbsp; Adjusting the scalability and resource management values should only be done in advanced scenarios and may impact the performance of the environment.
 
 - `gitlab_version` - Sets the GitLab version to be installed. The Toolkit finds and selects the equivalent Helm Chart version if configured. This should be set to the full semantic version, e.g. `14.0.0`. If left unset the Toolkit will look to install the latest version. Optional, default is `''`.
-- `gitlab_charts_release_namespace`: Kubernetes namespace the Helm chart will be deployed to. This should only be changed when the namespace is known to be different from the typical default of `default`. Set to `default` by default.
+- `gitlab_cloud_native_release_namespace`: Kubernetes namespace the Helm chart will be deployed to. This should only be changed when the namespace is known to be different from the typical default of `default`. Set to `default` by default.
 - `gitlab_charts_webservice_requests_memory_gb`: Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `5` by default.
 - `gitlab_charts_webservice_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `7` by default.
 - `gitlab_charts_webservice_requests_cpu`: CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Webservice pods in GB. Changing this will affect pod sizing count as well as number of Puma workers and should only be done so for specific reasons. Set to `4` by default.
@@ -715,7 +717,7 @@ Configuring secrets in this manner involves creating a list of Ansible tasks, su
       type: Opaque
       metadata:
         name: "gitlab-gitlab-workhorse-secret"
-        namespace: "{{ gitlab_charts_release_namespace }}" # This should stay the same
+        namespace: "{{ gitlab_cloud_native_release_namespace }}" # This should stay the same
       stringData:
         shared_secret: |
           <SECRET VALUE>
@@ -732,7 +734,7 @@ The overall process for providing custom Kubernetes secrets for the Charts is do
 1. By default, the Toolkit looks for Custom Tasks files in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_tasks` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_tasks/gitlab_charts_secrets.yml`. Save your file in this location with the same name.
     - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via a variable for each different component e.g. `gitlab_charts_secrets_tasks_file`.
 
-With the above done, the file will be run before the Helm Charts deployment to add the new secrets. Note that they will always take precedence over any secrets the Toolkit creates itself.
+With the above done, the file will be run before the Cloud Native deployment to add the new secrets. Note that they will always take precedence over any secrets the Toolkit creates itself.
 
 ## Geo
 

@@ -10,7 +10,7 @@
     - name: Disable Write to "authorized_keys" file setting via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: "gitlab-rails runner 'ApplicationSetting.last.update(authorized_keys_enabled: false)'"
       register: result
       retries: 3
@@ -33,7 +33,7 @@
     - name: Enable 'gitlab_environment_toolkit_instance' setting via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: "gitlab-rails runner 'ApplicationSetting.last.update(gitlab_environment_toolkit_instance: true)'"
       register: result
       retries: 3

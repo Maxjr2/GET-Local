@@ -26,7 +26,7 @@
       kubernetes.core.k8s:
         kind: Pod
         name: "gitlab-psql"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         state: present
         definition:
           spec:
@@ -56,12 +56,12 @@
       diff: true
 
     - name: Check psql pod is ready
-      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql -n {{ gitlab_charts_release_namespace }}"
+      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql -n {{ gitlab_cloud_native_release_namespace }}"
 
     - name: Create Database User if missing
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           sh -c "psql -c \"CREATE USER $GL_PGUSER WITH PASSWORD '$GL_PGPASSWORD' CREATEDB;\""
       register: database_user_create_result
@@ -72,7 +72,7 @@
     - name: Create Database if missing
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ postgres_database_name }};"'
       register: database_create_result
@@ -83,7 +83,7 @@
     - name: Enable required Postgres extensions
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql;"
   always:
@@ -91,7 +91,7 @@
       kubernetes.core.k8s:
         kind: Pod
         name: "gitlab-psql"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         state: absent
       no_log: true
       diff: true

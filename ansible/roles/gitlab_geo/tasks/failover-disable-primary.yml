@@ -44,7 +44,7 @@
           - app = webservice
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         replicas: 0
 
     - name: Failover Disable Primary - Disable Sidekiq pods
@@ -56,6 +56,6 @@
           - app = sidekiq
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         replicas: 0
   when: cloud_native_hybrid_geo

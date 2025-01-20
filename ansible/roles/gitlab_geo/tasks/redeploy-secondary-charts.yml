@@ -15,7 +15,7 @@
   run_once: true
   kubernetes.core.helm_info:
     name: gitlab
-    release_namespace: "{{ gitlab_charts_release_namespace }}"
+    release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
   register: gitlab_info
 
 - name: Redeploy Secondary Charts - Set gitlab_values
@@ -91,7 +91,7 @@
     name: gitlab
     chart_ref: "{{ gitlab_charts_ref }}"
     chart_version: "{{ gitlab_charts_version | default(None) }}"
-    release_namespace: "{{ gitlab_charts_release_namespace }}"
+    release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
     values: "{{ gitlab_values }}"
   register: helm_install_result
   failed_when:
@@ -102,7 +102,7 @@
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart deployment -n {{ gitlab_charts_release_namespace }} -l release=gitlab -l app={{ item }}"
+  command: "kubectl rollout restart deployment -n {{ gitlab_cloud_native_release_namespace }} -l release=gitlab -l app={{ item }}"
   loop:
     - webservice
     - sidekiq
@@ -113,11 +113,11 @@
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ gitlab_charts_release_namespace }}"
+  command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ gitlab_cloud_native_release_namespace }}"
 
 - name: Restart GitLab Registry deployment if present to pick up latest secrets
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart deployment/gitlab-registry -n {{ gitlab_charts_release_namespace }}"
+  command: "kubectl rollout restart deployment/gitlab-registry -n {{ gitlab_cloud_native_release_namespace }}"
   when: container_registry_enable

@@ -35,7 +35,7 @@
     - name: Check for existing license or configure new subscription / license via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "
             if License.current&.plan != nil

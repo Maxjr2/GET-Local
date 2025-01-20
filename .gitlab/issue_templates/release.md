@@ -21,6 +21,7 @@ Release steps:
   - [ ] Node Exporter version deployed by `geerlingguy.node_exporter` - Set `node_exporter_version` to the [latest version](https://github.com/prometheus/node_exporter/releases) in `group_vars/all.yml`.
   - [ ] [Kube Prometheus Stack Operator](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) - Set to the latest app version in [chart defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/gitlab_charts/defaults/main.yml) (`kube_prometheus_stack_charts_app_version`).
   - [ ] [Consul Operator](https://artifacthub.io/packages/helm/hashicorp/consul) - Set app version to match [Linux package default](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/config/software/consul.rb?ref_type=heads#L21) if newer in [chart defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/gitlab_charts/defaults/main.yml) (`consul_charts_app_version`).
+  - [ ] [cert-manager](https://cert-manager.io/docs/installation/) - Set to latest `1.x` version in [chart defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/gitlab_charts/defaults/main.yml) for GitLab Operator installs (`gitlab_operator_cert_manager_version`).
 - [ ] Complete the following Terraform smoke tests to ensure there's no unexpected data loss from VMs being rebuilt by upgrading from last release. (Optional - Only required for Major or Minor releases)
   - [ ] GCP Omnibus Upgrade
   - [ ] GCP Cloud Native Hybrid Upgrade
