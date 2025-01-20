@@ -8,6 +8,11 @@
     - kube-prometheus-stack
     - kubeconfig
 
+- name: Create GitLab Cloud Native namespace
+  kubernetes.core.k8s:
+    kind: Namespace
+    name: "{{ gitlab_cloud_native_release_namespace }}"
+
 - name: Setup Monitoring Namespaces if configured
   kubernetes.core.k8s:
     name: "{{ item }}"
@@ -112,7 +117,7 @@
     - charts_values
     - kube-prometheus-stack
 
-- name: Add GitLab Charts repo
+- name: Add GitLab Helm repo
   kubernetes.core.helm_repository:
     name: "{{ gitlab_charts_repo_name }}"
     repo_url: "{{ gitlab_charts_repo_url }}"
@@ -121,7 +126,7 @@
     - reconfigure
     - charts
 
-- name: Update GitLab Charts repo
+- name: Update GitLab Helm repo
   command: "helm repo update {{ gitlab_charts_repo_name }}"
   when: not gitlab_charts_direct_install
   tags:
@@ -194,36 +199,19 @@
     - charts_values
     - kube-prometheus-stack
 
-- name: Verify GitLab Charts
-  kubernetes.core.helm_pull:
-    chart_ref: "{{ gitlab_charts_ref }}"
-    chart_version: "{{ gitlab_charts_version | default(None) }}"
-    destination: /tmp
-    verify_chart: true
-    verify_chart_keyring: "{{ gitlab_charts_gpg_key_file_path }}"
-  register: helm_verify_result
-  failed_when:
-    - (helm_verify_result.msg is defined and 'sha256 sum does not match' in helm_verify_result.msg)  or
-      ('FAILED' in helm_verify_result.stderr)
-  when: gitlab_charts_gpg_key_file_path is defined
+- name: Install GitLab Charts
+  import_tasks: 'gitlab_charts.yml'
+  when: not gitlab_operator
   tags:
     - reconfigure
     - charts
 
-- name: Install GitLab Charts
-  kubernetes.core.helm:
-    name: gitlab
-    chart_ref: "{{ gitlab_charts_ref }}"
-    chart_version: "{{ gitlab_charts_version | default(None) }}"
-    release_namespace: "{{ gitlab_charts_release_namespace }}"
-    values: "{{ gitlab_charts_values }}"
-  register: helm_install_result
-  failed_when:
-    - (helm_install_result.msg is defined and 'Failure when executing Helm command' in helm_install_result.msg) or
-      ('FAILED' in helm_install_result.stderr)
+- name: Install GitLab Operator
+  import_tasks: 'gitlab_operator.yml'
+  when: gitlab_operator
   tags:
     - reconfigure
-    - charts
+    - operator
 
 - name: Setup Monitoring Charts if configured
   import_tasks: "monitoring.yml"

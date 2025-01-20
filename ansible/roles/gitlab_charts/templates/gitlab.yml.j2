@@ -34,11 +34,17 @@ gitlab:
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
+{% if gitlab_operator %}
+      name: "gitlab-webservice"
+{% endif %}
 {% endif %}
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
     serviceAccount:
       annotations:
         iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-webservice@{{ gcp_project }}.iam.gserviceaccount.com"
+{% if gitlab_operator %}
+      name: "gitlab-webservice"
+{% endif %}
 {% endif %}
     metrics:
       enabled: true
@@ -84,11 +90,17 @@ gitlab:
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
+{% if gitlab_operator %}
+      name: "gitlab-sidekiq"
+{% endif %}
 {% endif %}
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
     serviceAccount:
       annotations:
         iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com"
+{% if gitlab_operator %}
+      name: "gitlab-sidekiq"
+{% endif %}
 {% endif %}
     metrics:
       enabled: true
@@ -109,11 +121,17 @@ gitlab:
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
+{% if gitlab_operator %}
+      name: "gitlab-toolbox"
+{% endif %}
 {% endif %}
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
     serviceAccount:
       annotations:
         iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
+{% if gitlab_operator %}
+      name: "gitlab-toolbox"
+{% endif %}
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
@@ -554,11 +572,17 @@ registry:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
+{% if gitlab_operator %}
+    name: "gitlab-registry"
+{% endif %}
 {% endif %}
 {% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
   serviceAccount:
     annotations:
       iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com"
+{% if gitlab_operator %}
+    name: "gitlab-registry"
+{% endif %}
 {% endif %}
   metrics:
     enabled: true

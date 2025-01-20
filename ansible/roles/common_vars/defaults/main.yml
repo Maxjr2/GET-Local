@@ -291,8 +291,15 @@ cloud_native_hybrid_environment: false
 cloud_native_hybrid_monitoring_setup: false
 cloud_native_hybrid_cluster_autoscaler_setup: false
 
+# CNG
+gitlab_cloud_native_release_namespace: "{{ gitlab_charts_release_namespace }}"
+
 # Charts Settings
 gitlab_charts_release_namespace: default
+
+# Operator Settings
+## BETA - Deploying Cloud Native Hybrid using Operator is a Beta feature. The GitLab Operator has known limitations and is only suitable for specific scenarios in production use.
+gitlab_operator: false
 
 # Geo
 cloud_native_hybrid_geo: false
@@ -323,6 +330,7 @@ sidekiq_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/sideki
 monitor_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/monitor.rb.j2"
 gitlab_charts_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/gitlab_charts.yml.j2"
 kube_prometheus_stack_charts_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/kube_prometheus_stack_charts.yml.j2"
+gitlab_operator_custom_config_file: "{{ inventory_path }}/../files/gitlab_configs/gitlab_operator.yml.j2"
 
 ## Custom Tasks
 consul_custom_tasks_file: "{{ inventory_path }}/../files/gitlab_tasks/consul.yml"

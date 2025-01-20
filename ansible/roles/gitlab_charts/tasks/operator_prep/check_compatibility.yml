@@ -1,0 +1,19 @@
+- name: Fetch CHART_VERSIONS for each operator version
+  uri:
+    url: "https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/raw/{{ item }}/CHART_VERSIONS"
+    return_content: true
+  register: chart_versions_response
+  failed_when: false # old Operator versions don't have this file
+  when: compatible_gitlab_operator_version is not defined
+
+- name: Extract supported Chart versions for each operator version
+  set_fact:
+    chart_versions_response_body: "{{ chart_versions_response.content.split('\n') | select('match', '^\\d+\\.\\d+\\.\\d+$')}}"
+  when: compatible_gitlab_operator_version is not defined
+
+- name: Check if desired chart version is in CHART_VERSIONS
+  set_fact:
+    compatible_gitlab_operator_version: "{{ item }}"
+  when:
+    - compatible_gitlab_operator_version is not defined
+    - gitlab_charts_version in chart_versions_response_body

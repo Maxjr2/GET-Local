@@ -237,6 +237,8 @@
         name: gitlab
         chart_ref: gitlab/gitlab
         chart_version: "{{ gitlab_charts_version | default(None) }}"
-        release_namespace: "{{ gitlab_charts_release_namespace }}"
+        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
         values: "{{ gitlab_charts_values }}"
-  when: kube_prometheus_stack_charts_existing_app_version is not defined
+      when: not gitlab_operator
+  when:
+    - kube_prometheus_stack_charts_existing_app_version is not defined

@@ -27,8 +27,8 @@
 
     - name: Check Toolbox Deployment & Pod is ready
       shell: |
-        kubectl wait --for=condition=available --timeout=360s deployment -n {{ gitlab_charts_release_namespace }} -l release=gitlab -l app=toolbox
-        kubectl wait --for=condition=ready --timeout=360s pod -l app=toolbox,'!job-name' -n {{ gitlab_charts_release_namespace }}
+        kubectl wait --for=condition=available --timeout=360s deployment -n {{ gitlab_cloud_native_release_namespace }} -l release=gitlab -l app=toolbox
+        kubectl wait --for=condition=ready --timeout=360s pod -l app=toolbox,'!job-name' -n {{ gitlab_cloud_native_release_namespace }}
 
     - name: Retrieve Toolbox pod details
       kubernetes.core.k8s_info:
@@ -73,7 +73,7 @@
     - name: Get and save Environment Settings and License plan via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "
             env_settings = ApplicationSetting.last.attributes.select {|k,v| !k.include?('encrypted') }
@@ -88,7 +88,7 @@
 
     - name: Save Environment Settings
       set_fact:
-        gitlab_environment_settings: '{{ env_settings_response_pod.stdout | from_json }}'
+        gitlab_environment_settings: "{{ env_settings_response_pod.stdout | from_json }}"
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"

@@ -59,7 +59,7 @@
           - app = webservice
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         replicas: "{{ webservice_max_replicas }}"
         wait_timeout: 300
 
@@ -72,7 +72,7 @@
           - app = sidekiq
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         replicas: "{{ sidekiq_max_replicas }}"
         wait_timeout: 300
   when: cloud_native_hybrid_geo

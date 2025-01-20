@@ -17,6 +17,10 @@ aws_eks_metrics_server_setup: true
 aws_eks_metrics_server_version: ""
 aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics-server/releases/{{ 'latest/download' if aws_eks_metrics_server_version == '' else 'download/' + aws_eks_metrics_server_version }}/components.yaml"
 
+# Operator settings
+gitlab_operator_cert_manager_version: "{{ lookup('env','CERT_MANAGER_VERSION') | default('v1.16.2', true) }}" # https://cert-manager.io/docs/installation/
+gitlab_operator_cert_manager_manifest_url: "https://github.com/cert-manager/cert-manager/releases/download/{{ gitlab_operator_cert_manager_version }}/cert-manager.yaml"
+
 # Charts Settings
 gitlab_charts_repo_name: 'gitlab'
 gitlab_charts_repo_url: "https://charts.gitlab.io/"

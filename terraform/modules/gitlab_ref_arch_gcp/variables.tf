@@ -510,7 +510,7 @@ variable "gke_release_channel" {
   type    = string
   default = "STABLE"
 }
-variable "gke_gitlab_charts_namespace" {
+variable "gke_gitlab_cloud_native_namespace" {
   type    = string
   default = "default"
 }
@@ -1375,4 +1375,10 @@ variable "subnet_cidr" {
   type        = string
   default     = null
   description = "Deprecated. Replaced by create_network_subnet_cidr_block"
+}
+
+variable "gke_gitlab_charts_namespace" {
+  type        = string
+  default     = "default"
+  description = "Deprecated. Replaced by gke_gitlab_cloud_native_namespace"
 }

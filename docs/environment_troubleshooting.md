@@ -24,7 +24,7 @@ On this page you'll find troubleshooting guidance for various areas when using t
 
 ## Troubleshooting
 
-The Toolkit has been designed to deploy GitLab following the same steps as Omnibus or the Helm Charts.
+The Toolkit has been designed to deploy GitLab following the same steps as Omnibus or the Helm Charts / Operator.
 
 When working with the Toolkit, you might encounter some of the following issues.
 

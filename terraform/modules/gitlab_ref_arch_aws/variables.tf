@@ -900,7 +900,7 @@ variable "eks_ebs_csi_driver_version" {
 }
 
 ## Namespaces
-variable "eks_gitlab_charts_namespace" {
+variable "eks_gitlab_cloud_native_namespace" {
   type    = string
   default = "default"
 }
@@ -2044,4 +2044,10 @@ variable "default_kms_key_arn" {
   description = "Deprecated. Replaced by default_disk_kms_key_arn, object_storage_kms_key_arn, eks_default_disk_kms_key_arn, rds_postgres_kms_key_arn, elasticache_redis_kms_key_arn and opensearch_service_kms_key_arn"
   type        = string
   default     = null
+}
+
+variable "eks_gitlab_charts_namespace" {
+  description = "Deprecated. Replaced by eks_gitlab_cloud_native_namespace"
+  type        = string
+  default     = "default"
 }

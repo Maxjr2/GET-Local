@@ -32,7 +32,7 @@
     - common_vars
 
   tasks:
-    - name: Uninstall GitLab Charts
+    - name: Uninstall GitLab Cloud Native
       include_role:
         name: gitlab_charts
         tasks_from: uninstall

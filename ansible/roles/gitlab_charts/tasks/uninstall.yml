@@ -5,6 +5,27 @@
 - name: Uninstall GitLab Charts
   kubernetes.core.helm:
     release_name: gitlab
-    release_namespace: "{{ gitlab_charts_release_namespace }}"
+    release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
     state: absent
     wait: true
+  when: not gitlab_operator
+
+- name: Uninstall GitLab Operator
+  block:
+    - name: Uninstall an instance of GitLab
+      k8s:
+        state: absent
+        definition:
+          apiVersion: apps.gitlab.com/v1beta1
+          kind: GitLab
+          metadata:
+            name: gitlab
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+
+    - name: Uninstall GitLab Operator
+      kubernetes.core.helm:
+        release_name: gitlab-operator
+        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        state: absent
+        wait: true
+  when: gitlab_operator

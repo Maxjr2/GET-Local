@@ -58,14 +58,25 @@ With the above done the file will be picked up by the Toolkit and used when conf
 
 ### Helm
 
-Providing custom config for components deployed via Helm charts in Cloud Native Hybrid environments is done as follows:
+Providing custom config for components deployed via Helm charts or Operator in Cloud Native Hybrid environments is done as follows:
 
 1. Create a [GitLab Charts](https://docs.gitlab.com/charts/) yaml template file in the correct format with the specific custom settings you wish to apply
 1. By default, the Toolkit looks for a [Jinja2 template file](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) named `gitlab_charts.yml.j2` in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_configs` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_configs/gitlab_charts.yml.j2`. Save your file in this location with the same name.
     - Files should be saved in Ansible template format - `.j2`.
     - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via the `gitlab_charts_custom_config_file` inventory variable.
 
-With the above done the file will be picked up by the Toolkit and used when configuring the Helm charts.
+With the above done the file will be picked up by the Toolkit and used when configuring the Helm charts or GitLab custom resource with Operator.
+
+### Operator
+
+Providing custom config for the GitLab Operator in Cloud Native Hybrid environments is done as follows:
+
+1. Create a [GitLab Operator chart](https://docs.gitlab.com/operator/installation.html?tab=Helm+Chart) yaml template file in the correct format with the specific custom settings you wish to apply
+1. By default, the Toolkit looks for a [Jinja2 template file](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) named `gitlab_operator.yml.j2` in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_configs` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_configs/gitlab_operator.yml.j2`. Save your file in this location with the same name.
+    - Files should be saved in Ansible template format - `.j2`.
+    - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via the `gitlab_operator_custom_config_file` inventory variable.
+
+With the above done the file will be picked up by the Toolkit and used when installing the GitLab Operator.
 
 ## Custom Tasks
 

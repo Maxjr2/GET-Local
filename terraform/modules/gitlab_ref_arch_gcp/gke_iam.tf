@@ -1,3 +1,6 @@
+locals {
+  gke_gitlab_cloud_native_namespace = var.gke_gitlab_charts_namespace != null ? var.gke_gitlab_charts_namespace : var.gke_gitlab_cloud_native_namespace
+}
 ## Service Account
 ### Webservice (Node or Workload Identity ADC)
 module "gitlab_gke_webservice_service_account" {
@@ -13,7 +16,7 @@ module "gitlab_gke_webservice_service_account" {
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-webservice", null)
 
   # Set Workload Identity role if using
-  service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-webservice]" : null
+  service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${local.gke_gitlab_cloud_native_namespace}/gitlab-webservice]" : null
 }
 
 ### Sidekiq (Node or Workload Identity ADC)
@@ -30,7 +33,7 @@ module "gitlab_gke_sidekiq_service_account" {
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-sidekiq", null)
 
   # Set Workload Identity role if using
-  service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-sidekiq]" : null
+  service_account_workload_identity_member = var.gke_enable_workload_identity ? "serviceAccount:${var.project}.svc.id.goog[${local.gke_gitlab_cloud_native_namespace}/gitlab-sidekiq]" : null
 }
 
 ### Supporting (Node ADC)
@@ -87,7 +90,7 @@ module "gitlab_gke_toolbox_service_account" {
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-toolbox", null)
 
   # Set Workload Identity role
-  service_account_workload_identity_member = "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-toolbox]"
+  service_account_workload_identity_member = "serviceAccount:${var.project}.svc.id.goog[${local.gke_gitlab_cloud_native_namespace}/gitlab-toolbox]"
 }
 ### Registry (Workload Identity ADC)
 module "gitlab_gke_registry_service_account" {
@@ -103,7 +106,7 @@ module "gitlab_gke_registry_service_account" {
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-registry", null)
 
   # Set Workload Identity role
-  service_account_workload_identity_member = "serviceAccount:${var.project}.svc.id.goog[${var.gke_gitlab_charts_namespace}/gitlab-registry]"
+  service_account_workload_identity_member = "serviceAccount:${var.project}.svc.id.goog[${local.gke_gitlab_cloud_native_namespace}/gitlab-registry]"
 }
 
 ## Refactors

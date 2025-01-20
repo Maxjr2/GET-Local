@@ -1,3 +1,7 @@
+locals {
+  eks_gitlab_cloud_native_namespace = var.eks_gitlab_charts_namespace != null ? var.eks_gitlab_charts_namespace : var.eks_gitlab_cloud_native_namespace
+}
+
 # EKS IAM Roles
 ## Cluster Role
 resource "aws_iam_role" "gitlab_eks_role" {
@@ -83,7 +87,7 @@ resource "aws_iam_role" "gitlab_eks_webservice_role" {
         Condition = {
           "StringEquals" = {
             "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:aud" = "sts.amazonaws.com",
-            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${var.eks_gitlab_charts_namespace}:gitlab-webservice"
+            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${local.eks_gitlab_cloud_native_namespace}:gitlab-webservice"
           }
         }
       },
@@ -121,7 +125,7 @@ resource "aws_iam_role" "gitlab_eks_sidekiq_role" {
         Condition = {
           "StringEquals" = {
             "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:aud" = "sts.amazonaws.com",
-            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${var.eks_gitlab_charts_namespace}:gitlab-sidekiq"
+            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${local.eks_gitlab_cloud_native_namespace}:gitlab-sidekiq"
           }
         }
       },
@@ -159,7 +163,7 @@ resource "aws_iam_role" "gitlab_eks_registry_role" {
         Condition = {
           "StringEquals" = {
             "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:aud" = "sts.amazonaws.com",
-            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${var.eks_gitlab_charts_namespace}:gitlab-registry"
+            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${local.eks_gitlab_cloud_native_namespace}:gitlab-registry"
           }
         }
       },
@@ -198,7 +202,7 @@ resource "aws_iam_role" "gitlab_eks_toolbox_role" {
         Condition = {
           "StringEquals" = {
             "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:aud" = "sts.amazonaws.com",
-            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${var.eks_gitlab_charts_namespace}:gitlab-toolbox"
+            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${local.eks_gitlab_cloud_native_namespace}:gitlab-toolbox"
           }
         }
       },

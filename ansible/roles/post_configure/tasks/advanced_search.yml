@@ -20,7 +20,7 @@
         - name: Delete old Advanced Search index for GitLab via GitLab Toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_charts_release_namespace }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
             command: "{{ item }}"
           loop:
             - gitlab-rake gitlab:elastic:delete_index
@@ -52,7 +52,7 @@
         - name: Unconfigure Advanced Search settings via GitLab Toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_charts_release_namespace }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
             command: |
               gitlab-rails runner "
                 ApplicationSetting.last.update(elasticsearch_url: '')
@@ -88,7 +88,7 @@
     - name: Enable GitLab Advanced Search indexing setting via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "
             ApplicationSetting.last.update(elasticsearch_url: \"{{ advanced_search_hosts | join(',') }}\")
@@ -123,7 +123,7 @@
         - name: Index all GitLab data via GitLab Toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_charts_release_namespace }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
             command: gitlab-rake gitlab:elastic:index
           when:
             - toolbox_pod is defined
@@ -145,7 +145,7 @@
         - name: Wait until indexing is complete via GitLab Toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_charts_release_namespace }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
             command: gitlab-rake gitlab:elastic:index_projects_status
           register: index_status_result
           retries: 20
@@ -170,7 +170,7 @@
     - name: Enable Advanced Search via GitLab Toolbox pod
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_charts_release_namespace }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: "gitlab-rails runner 'ApplicationSetting.last.update(elasticsearch_search: true)'"
       when:
         - toolbox_pod is defined
