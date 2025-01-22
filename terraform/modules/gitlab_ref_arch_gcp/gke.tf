@@ -176,6 +176,8 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       # Can only be set for new node pools so ignore any subsequent changes
       node_config[0].boot_disk_kms_key
     ]
+
+    replace_triggered_by = [google_container_cluster.gitlab_cluster[0].id]
   }
 }
 
@@ -254,6 +256,8 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
       # Can only be set for new node pools so ignore any subsequent changes
       node_config[0].boot_disk_kms_key
     ]
+
+    replace_triggered_by = [google_container_cluster.gitlab_cluster[0].id]
   }
 }
 
@@ -332,6 +336,8 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       # Can only be set for new node pools so ignore any subsequent changes
       node_config[0].boot_disk_kms_key
     ]
+
+    replace_triggered_by = [google_container_cluster.gitlab_cluster[0].id]
   }
 }
 
@@ -438,6 +444,7 @@ output "kubernetes" {
   value = {
     "kubernetes_cluster_name"    = try(google_container_cluster.gitlab_cluster[0].name, "")
     "kubernetes_cluster_version" = try(google_container_cluster.gitlab_cluster[0].master_version, "")
+    "kubernetes_cluster_id"      = try(google_container_cluster.gitlab_cluster[0].id, "")
 
     # Service Accounts
     "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_webservice_service_account[0].email, "")
