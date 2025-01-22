@@ -237,20 +237,37 @@ Examples of maturity questions can be the following:
 
 Each new component addition request will be reviewed using this guidance along with any additional context.
 
-##### Experimental support
+##### Beta or Experimental support
 
-In some rare cases there may be features in GitLab that meet the [above criteria](#support-for-new-gitlab-components) and have no feature work outstanding but are still not recommended for production usage. On a case by case basis, at the sole discretion of the maintainers, we may choose to add experimental support in GET for GitLab components to support efforts for production readiness, such as to enable deploying it in test environments or for performance testing.
+In some cases features may be added to the Toolkit under a Beta or Experimental status, at the sole discretion of the maintainers. The reasons for this can vary but ultimately this is to reflect that the feature in the Toolkit is not recommended yet for production usage but has been added specifically for development or testing purposes.
 
-Similar to [experimental features](https://docs.gitlab.com/ee/policy/experiment-beta-support.html#experiment) in GitLab, experimental support in GET has similar warnings:
+It should be noted that the statuses stated here are specific to the Toolkit and features in GitLab with the same [status](https://docs.gitlab.com/ee/policy/development_stages_support.html) don't automatically qualify for Toolkit addition accordingly.
 
-- Is not ready for production use.
+Refer to the below for what each status means for a Toolkit feature and how they are marked:
+
+**Beta**
+
+Beta features will be called out clearly in code and / or documentation and are subject to the following:
+
+- Not recommended for production use.
+- May or may not have documentation present.
+- Are supported on a commercially-reasonable effort basis, but with the expectation that issues require extra time and assistance from development to troubleshoot.
+- Might be unstable.
+- Have configuration and dependencies that are unlikely to change.
+- Have features and functions that are unlikely to change. However, breaking changes can occur outside of major releases or with less notice than for generally available features.
+- Have a low risk of data loss.
+- Have a user experience that is complete or near completion.
+
+**Experimental**
+
+Experimental features will be called out clearly in code and are subject to the following:
+
+- Are not ready for production use.
 - Has no support available.
 - Could be removed at any time.
 - Might have a risk of data loss.
 - Will have no documentation.
 - Might not have a finalized user experience.
-
-However it must be noted that while the warnings are similar, experimental support in GET and [experimental features](https://docs.gitlab.com/ee/policy/experiment-beta-support.html#experiment) in GitLab are **not** interchangeable. For the avoidance of doubt, experimental GitLab features are not automatically eligible for experimental support in GET as most features do not meet the [above criteria](#support-for-new-gitlab-components).
 
 #### Prefer Custom Config for GitLab variables
 
