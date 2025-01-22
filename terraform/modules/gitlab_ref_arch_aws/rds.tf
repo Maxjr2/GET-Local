@@ -96,6 +96,8 @@ resource "aws_db_instance" "gitlab" {
   delete_automated_backups = local.rds_postgres_major_version >= 14 ? var.rds_postgres_delete_automated_backups : null
   maintenance_window       = var.rds_postgres_maintenance_window
 
+  deletion_protection = var.rds_postgres_deletion_protection
+
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
 
@@ -154,6 +156,8 @@ resource "aws_db_instance" "gitlab_read_replica" {
   backup_window            = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_window : null
   backup_retention_period  = local.rds_postgres_major_version >= 14 ? var.rds_postgres_backup_retention_period : null
   delete_automated_backups = local.rds_postgres_major_version >= 14 ? var.rds_postgres_delete_automated_backups : null
+
+  deletion_protection = var.rds_postgres_read_replica_deletion_protection
 
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
