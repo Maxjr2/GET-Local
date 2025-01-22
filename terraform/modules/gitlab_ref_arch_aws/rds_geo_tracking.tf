@@ -89,6 +89,8 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
   delete_automated_backups = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_delete_automated_backups : null
   maintenance_window       = var.rds_geo_tracking_postgres_maintenance_window
 
+  deletion_protection = var.rds_geo_tracking_postgres_deletion_protection
+
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
 

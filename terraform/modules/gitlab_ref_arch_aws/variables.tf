@@ -1184,6 +1184,15 @@ variable "rds_postgres_monitoring_role_arn" {
   type        = string
   default     = null
 }
+variable "rds_postgres_deletion_protection" {
+  type    = bool
+  default = false
+}
+
+variable "rds_postgres_read_replica_deletion_protection" {
+  type    = bool
+  default = false
+}
 
 ## Praefect PostgreSQL
 variable "rds_praefect_postgres_instance_type" {
@@ -1319,6 +1328,10 @@ variable "rds_praefect_postgres_monitoring_role_arn" {
   type        = string
   default     = null
 }
+variable "rds_praefect_postgres_deletion_protection" {
+  type    = bool
+  default = false
+}
 
 ## Geo Tracking PostgreSQL
 variable "rds_geo_tracking_postgres_instance_type" {
@@ -1453,6 +1466,10 @@ variable "rds_geo_tracking_postgres_monitoring_role_arn" {
   description = "An assumable IAM Role used to publish RDS logs to Cloudwatch"
   type        = string
   default     = null
+}
+variable "rds_geo_tracking_postgres_deletion_protection" {
+  type    = bool
+  default = false
 }
 
 ## RDS Performance Insights

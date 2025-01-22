@@ -89,6 +89,8 @@ resource "aws_db_instance" "gitlab_praefect" {
   delete_automated_backups = local.rds_praefect_postgres_major_version >= 14 ? var.rds_praefect_postgres_delete_automated_backups : null
   maintenance_window       = var.rds_praefect_postgres_maintenance_window
 
+  deletion_protection = var.rds_praefect_postgres_deletion_protection
+
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
 
