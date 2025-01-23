@@ -13,4 +13,4 @@ zdu_update_order:
 
 # Rails Local Health Check URL
 ## TODO - Deprecate previous gitlab_rails_readiness_url setting in 4.x
-gitlab_rails_local_health_check_url: "{{ gitlab_rails_readiness_url if gitlab_rails_readiness_url is defined else (('https' if gitlab_rails_nginx_ssl else 'http') + '//localhost/-/readiness') }}"
+gitlab_rails_local_health_check_url: "{{ gitlab_rails_readiness_url if gitlab_rails_readiness_url is defined else (('https' if gitlab_rails_nginx_ssl else 'http') + '://localhost/-/readiness') }}"
