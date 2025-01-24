@@ -24,6 +24,8 @@ resource "google_sql_database_instance" "gitlab" {
     disk_type = var.cloud_sql_postgres_disk_type
     disk_size = var.cloud_sql_postgres_disk_size
 
+    deletion_protection_enabled = var.cloud_sql_postgres_deletion_protection_enabled
+
     dynamic "data_cache_config" {
       for_each = range(var.cloud_sql_postgres_data_cache_enabled ? 1 : 0)
 
@@ -113,7 +115,8 @@ resource "google_sql_database_instance" "gitlab_read_replica" {
     tier    = google_sql_database_instance.gitlab[0].settings[0].tier
     edition = google_sql_database_instance.gitlab[0].settings[0].edition
 
-    availability_type = var.cloud_sql_postgres_read_replica_availability_type
+    availability_type           = var.cloud_sql_postgres_read_replica_availability_type
+    deletion_protection_enabled = var.cloud_sql_postgres_read_replica_deletion_protection_enabled
 
     ip_configuration {
       ipv4_enabled    = false

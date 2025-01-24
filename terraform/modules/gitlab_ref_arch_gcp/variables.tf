@@ -727,8 +727,15 @@ variable "cloud_sql_postgres_encryption_key_name" {
 }
 
 variable "cloud_sql_postgres_deletion_protection" {
-  type    = bool
-  default = false
+  description = "Whether Terraform will be prevented from destroying the instance."
+  type        = bool
+  default     = false
+}
+
+variable "cloud_sql_postgres_deletion_protection_enabled" {
+  description = "Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform)."
+  type        = bool
+  default     = false
 }
 
 variable "cloud_sql_postgres_master_instance_name" {
@@ -777,8 +784,14 @@ variable "cloud_sql_postgres_read_replica_availability_type" {
   default = null
 }
 variable "cloud_sql_postgres_read_replica_deletion_protection" {
-  type    = bool
-  default = false
+  description = "Whether Terraform will be prevented from destroying the instance."
+  type        = bool
+  default     = false
+}
+variable "cloud_sql_postgres_read_replica_deletion_protection_enabled" {
+  description = "Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform)."
+  type        = bool
+  default     = false
 }
 
 ## Praefect PostgreSQL (Cloud SQL)
@@ -820,8 +833,14 @@ variable "cloud_sql_praefect_postgres_ssl_mode" {
 }
 
 variable "cloud_sql_praefect_postgres_deletion_protection" {
-  type    = bool
-  default = false
+  description = "Whether Terraform will be prevented from destroying the instance."
+  type        = bool
+  default     = false
+}
+variable "cloud_sql_praefect_postgres_deletion_protection_enabled" {
+  description = "Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform)."
+  type        = bool
+  default     = false
 }
 variable "cloud_sql_praefect_postgres_availability_type" {
   type    = string
@@ -895,8 +914,14 @@ variable "cloud_sql_geo_tracking_postgres_ssl_mode" {
 }
 
 variable "cloud_sql_geo_tracking_postgres_deletion_protection" {
-  type    = bool
-  default = false
+  description = "Whether Terraform will be prevented from destroying the instance."
+  type        = bool
+  default     = false
+}
+variable "cloud_sql_geo_tracking_postgres_deletion_protection_enabled" {
+  description = "Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform)."
+  type        = bool
+  default     = false
 }
 variable "cloud_sql_geo_tracking_postgres_availability_type" {
   type    = string
