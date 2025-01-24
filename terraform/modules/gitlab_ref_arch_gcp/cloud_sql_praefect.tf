@@ -20,7 +20,8 @@ resource "google_sql_database_instance" "gitlab_praefect" {
     disk_type = var.cloud_sql_praefect_postgres_disk_type
     disk_size = var.cloud_sql_praefect_postgres_disk_size
 
-    availability_type = var.cloud_sql_praefect_postgres_availability_type
+    availability_type           = var.cloud_sql_praefect_postgres_availability_type
+    deletion_protection_enabled = var.cloud_sql_praefect_postgres_deletion_protection_enabled
 
     ip_configuration {
       ipv4_enabled    = false

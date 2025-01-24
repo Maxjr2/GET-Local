@@ -295,7 +295,8 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` (GCP default) or `PD-HDD`. Optional, default is `null`.
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
 - `cloud_sql_postgres_availability_type` - Specifies the [availability type](https://cloud.google.com/sql/docs/postgres/high-availability) for Cloud SQL instance (HA). Options are `ZONAL` (non-HA) or `REGIONAL` (HA) - GCP will default to `ZONAL` if not configured. Optional, default is `ZONAL`.
-- `cloud_sql_postgres_deletion_protection` - If deletion protection should be enabled for the instance. Optional, default is `false`.
+- `cloud_sql_postgres_deletion_protection` - If Terraform will be prevented from destroying the instance. Optional, default is `false`.
+- `cloud_sql_postgres_deletion_protection_enabled` - Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform). Optional, default is `false`.
 - `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
 - `cloud_sql_postgres_data_cache_enabled` - Toggle for [Data Cache](https://cloud.google.com/sql/docs/postgres/data-cache) feature in Cloud SQL. Feature is only available for the  Enterprise Plus edition (`cloud_sql_postgres_edition`). Optional, default is `false`.
 
