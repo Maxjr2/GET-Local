@@ -54,9 +54,6 @@ locals {
   gitlab_s3_backups_policy_create  = length(var.object_storage_buckets) > 0 && contains(var.object_storage_buckets, "backups")
   gitlab_s3_registry_policy_create = length(var.object_storage_buckets) > 0 && contains(var.object_storage_buckets, "registry")
   gitlab_s3_kms_policy_create      = length(var.object_storage_buckets) > 0 && (var.object_storage_kms_key_arn != null || var.default_kms_key_arn != null)
-  # Special permission required for Geo to process HEAD requests
-  # https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
-  gitlab_s3_list_bucket_permission = var.geo_site != null ? ["s3:ListBucket"] : []
 }
 
 ## S3 access policy for all buckets except registry and backups (covered by separate policies)
@@ -69,17 +66,22 @@ resource "aws_iam_policy" "gitlab_s3_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = setunion(
-          [
-            "s3:PutObject",
-            "s3:GetObject",
-            "s3:DeleteObject",
-          ],
-          local.gitlab_s3_list_bucket_permission,
-        )
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+        ]
         Effect   = "Allow"
-        Resource = concat([for k, v in aws_s3_bucket.gitlab_object_storage_buckets : v.arn if !contains(["registry", "backups"], k)], [for k, v in aws_s3_bucket.gitlab_object_storage_buckets : "${v.arn}/*" if !contains(["registry", "backups"], k)])
-      }
+        Resource = [for k, v in aws_s3_bucket.gitlab_object_storage_buckets : "${v.arn}/*" if !contains(["registry", "backups"], k)]
+      },
+      # Backup Utility and Geo Replication
+      {
+        Action = [
+          "s3:ListBucket",
+        ]
+        Effect   = "Allow"
+        Resource = [for k, v in aws_s3_bucket.gitlab_object_storage_buckets : v.arn if !contains(["registry", "backups"], k)]
+      },
     ]
   })
 }
@@ -100,7 +102,7 @@ resource "aws_iam_policy" "gitlab_s3_backups_policy" {
           "s3:DeleteObject",
         ]
         Effect   = "Allow"
-        Resource = [aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn, "${aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn}/*"]
+        Resource = ["${aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn}/*"]
       }
     ]
   })
