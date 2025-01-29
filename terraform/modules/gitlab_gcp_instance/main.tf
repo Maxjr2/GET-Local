@@ -86,8 +86,6 @@ locals {
 
   external_ips = length(var.external_ips) == 0 ? google_compute_address.gitlab[*].address : var.external_ips
 
-  setup_service_account_member_default = length(var.service_account_user_members) == 0 && var.custom_service_account_email == null
-
   node_data_disks = flatten([
     for i in range(var.node_count) :
     [
@@ -102,22 +100,19 @@ locals {
   ])
 }
 
-## Service Account
-### Default Terraform GCP user information to be passed for Service Account Members if none are given
-### Needed to grant permissions for Teraform user to in turn use that Service Account, i.e. Attach it to a VM or to allow SSH OS Login
-data "google_client_openid_userinfo" "current_userinfo" {
-  count = local.setup_service_account_member_default ? 1 : 0
-}
-
 module "google_service_account" {
   source = "../gitlab_gcp_service_account"
   count  = min(var.node_count, 1)
 
+  # Create
   account_id   = "${var.service_account_prefix}-${var.node_type}"
   display_name = local.name_prefix
 
-  service_account_profiles     = var.service_account_profiles
-  service_account_user_members = local.setup_service_account_member_default ? ["${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}"] : var.service_account_user_members
+  service_account_profiles                  = var.service_account_profiles
+  setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
+  service_account_user_members              = var.service_account_user_members
+
+  # Custom
   custom_service_account_email = var.custom_service_account_email
 }
 

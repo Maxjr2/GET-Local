@@ -6,7 +6,7 @@ variable "custom_service_account_email" {
 }
 
 variable "account_id" {
-  description = "Account ID of Service Account to be created if configured"
+  description = "Account ID of Service Account to be created if configured. Must be 30 characters or lower to meet GCP limits."
   type        = string
   nullable    = false
 }
@@ -36,10 +36,16 @@ variable "service_account_profiles" {
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members
 variable "service_account_user_members" {
-  description = "List of optional identity members that will be assigned the Service Account User role on each created Service Account, which is required to attach the service accounts to resources. List must contain the identity running Terraform if given. If not given account running Terraform will be given sole access."
+  description = "List of optional identity members that will be assigned the Service Account User role on each created Service Account, which is required to attach the service accounts to resources. List must contain the identity running Terraform if given."
 
   type    = list(string)
   default = []
+}
+variable "setup_default_service_account_user_member" {
+  description = "Sets whether the identity running Terraform is configured with the default Service Account Member User permission on each created Service Account. If not enabled, service_account_user_members must be configured with identity running Terraform else builds will fail."
+
+  type    = bool
+  default = false
 }
 
 variable "service_account_workload_identity_member" {
