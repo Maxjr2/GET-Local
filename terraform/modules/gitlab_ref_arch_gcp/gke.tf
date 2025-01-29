@@ -447,13 +447,18 @@ output "kubernetes" {
     "kubernetes_cluster_id"      = try(google_container_cluster.gitlab_cluster[0].id, "")
 
     # Service Accounts
-    "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_webservice_service_account[0].email, "")
-    "kubernetes_sidekiq_node_group_service_account_email"    = try(module.gitlab_gke_sidekiq_service_account[0].email, "")
-    "kubernetes_supporting_node_group_service_account_email" = try(module.gitlab_gke_supporting_service_account[0].email, "")
-    "kubernetes_gitaly_node_group_service_account_email"     = try(module.gitlab_gke_supporting_service_account[0].email, "")
-    "kubernetes_node_group_service_account_email"            = try(module.gitlab_gke_node_service_account[0].email, "")
-    "kubernetes_toolbox_service_account_email"               = try(module.gitlab_gke_toolbox_service_account[0].email, "")
-    "kubernetes_registry_service_account_email"              = try(module.gitlab_gke_registry_service_account[0].email, "")
+    # Service Accounts - Node
+    "kubernetes_webservice_node_group_service_account_email" = try(module.gitlab_gke_node_service_account[0].email, module.gitlab_gke_webservice_service_account[0].email, "")
+    "kubernetes_sidekiq_node_group_service_account_email"    = try(module.gitlab_gke_node_service_account[0].email, module.gitlab_gke_sidekiq_service_account[0].email, "")
+    "kubernetes_supporting_node_group_service_account_email" = try(module.gitlab_gke_node_service_account[0].email, module.gitlab_gke_supporting_service_account[0].email, "")
+    "kubernetes_gitaly_node_group_service_account_email"     = try(module.gitlab_gke_node_service_account[0].email, module.gitlab_gke_gitaly_service_account[0].email, "")
+
+    # Service Accounts - Workload Identity
+    "kubernetes_node_group_service_account_email" = try(module.gitlab_gke_node_service_account[0].email, "")
+    "kubernetes_webservice_service_account_email" = try(var.gke_enable_workload_identity ? module.gitlab_gke_webservice_service_account[0].email : "", "")
+    "kubernetes_sidekiq_service_account_email"    = try(var.gke_enable_workload_identity ? module.gitlab_gke_sidekiq_service_account[0].email : "", "")
+    "kubernetes_toolbox_service_account_email"    = try(module.gitlab_gke_toolbox_service_account[0].email, "")
+    "kubernetes_registry_service_account_email"   = try(module.gitlab_gke_registry_service_account[0].email, "")
 
     # Node Group / Addon Versions
     "kubernetes_webservice_node_group_version" = try(google_container_node_pool.gitlab_webservice_pool[0].version, "")
