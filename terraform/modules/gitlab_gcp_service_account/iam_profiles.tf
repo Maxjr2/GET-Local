@@ -1,10 +1,21 @@
 # IAM Profiles - https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam
 
-# Service Account usage - serviceAccountUser
-## Needed to grant permissions for users to in turn use that Service Account, i.e. Attach it to a VM or to allow SSH OS Login
-## Role is strictly only given to the member accounts passed via service_account_user_members if given to avoid impersonation attacks (https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants)
+# Service Account User Member - serviceAccountUser
+## Grants permissions for users to in turn use that Service Account, i.e. Attach it to a VM or to allow SSH OS Login
+## Role is strictly only given to the member accounts to either the identity running Terraform or a custom list passed by user to avoid impersonation attacks (https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants)
+locals {
+  setup_default_service_account_user_member = local.create_service_account && var.setup_default_service_account_user_member && length(var.service_account_user_members) == 0
+  default_service_account_user_member_email = local.setup_default_service_account_user_member ? "${strcontains(data.google_client_openid_userinfo.current_userinfo[0].email, "gserviceaccount") ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.current_userinfo[0].email}" : null
+
+  service_account_user_members = local.setup_default_service_account_user_member ? [local.default_service_account_user_member_email] : var.service_account_user_members
+}
+
+data "google_client_openid_userinfo" "current_userinfo" {
+  count = local.setup_default_service_account_user_member ? 1 : 0
+}
+
 resource "google_service_account_iam_member" "gitlab_user_members" {
-  for_each = local.create_service_account ? toset(var.service_account_user_members) : toset([])
+  for_each = local.create_service_account ? toset(local.service_account_user_members) : toset([])
 
   service_account_id = google_service_account.gitlab[0].name
   role               = "roles/iam.serviceAccountUser"
