@@ -84,6 +84,7 @@ gitlab_shell_ssh_daemon: "openssh"  # openssh or gitlab-sshd
 gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment or (groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups and gitlab_shell_ssh_daemon == 'openssh') else '2222' }}"
 gitlab_shell_ssh_internal_port: "{{ '2222' if (gitlab_shell_ssh_daemon == 'gitlab-sshd' or cloud_native_hybrid_environment) else '22' }}"
 gitlab_shell_ssh_key_path: "{{ '/var/opt/gitlab/gitlab-sshd' if gitlab_shell_ssh_daemon == 'gitlab-sshd' else '/etc/ssh/' }}"
+gitlab_shell_ssh_sync_keys: true
 
 gitlab_secrets_setup: true
 

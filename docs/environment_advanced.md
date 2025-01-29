@@ -311,6 +311,19 @@ The Toolkit allows you to configure the External and Internal ports used for ser
     - Note however that if the desired port is `22` in this setup the system SSH port on the HAProxy External node will need to be adjusted first manually and Ansible subsequently configured to use that new system SSH port.
 - `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for `gitlab-sshd` this will change whatever port the service runs on (Note for `gitlab-sshd` [it can not be run on a port number lower than `1024`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd)). Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
 
+## Gitlab Rails SSH Host Keys handling
+
+By default the Toolkit will copy the SSH host keys from the first Rails node you configured and add or replace the files of the same name on each secondary Rails node. This ensures host mismatch errors aren’t thrown for your users when they hit the load balanced Rails nodes.
+
+The locations and keys it copies from and to are depending on the SSH Daemon being used:
+
+- `openssh` - `/etc/ssh/ssh_host_*`
+- `gitlab-sshd` - `/var/opt/gitlab/gitlab-sshd/ssh_host_*`
+
+In select circumstances it may be preferable to disable this behaviour. However please note doing do will require manual action to ensure that the keys match across all Rails nodes accordingly to avoid mismatch areas. If this is desired, the behaviour can be disabled via the following Ansible variable in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
+
+- `gitlab_shell_ssh_sync_keys` - Syncs SSH keys between all Rails nodes. This should only be disabled in select circumstances and doing so will require manual syncing of all keys to prevent mismatch errors. Optional, default is `true`.
+
 ## Advanced Search
 
 The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes optionally provisioning and configuring [OpenSearch](https://opensearch.org/) nodes as a convenience to be a cluster as well as configuring GitLab to use it.

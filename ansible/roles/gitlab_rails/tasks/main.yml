@@ -215,7 +215,9 @@
       delegate_to: localhost
       become: false
       run_once: true
-  when: "groups['gitlab_rails'] | length > 1"
+  when:
+    - groups['gitlab_rails'] | length > 1
+    - gitlab_shell_ssh_sync_keys
   tags:
     - reconfigure
     - secrets
