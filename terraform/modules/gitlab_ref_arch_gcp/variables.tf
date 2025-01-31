@@ -1258,15 +1258,15 @@ variable "webservice_node_pool_custom_labels" {
   type    = map(string)
   default = {}
 }
-variable "memorystore_custom_labels" {
+variable "memorystore_redis_custom_labels" {
   type    = map(string)
   default = {}
 }
-variable "memorystore_cache_custom_labels" {
+variable "memorystore_redis_cache_custom_labels" {
   type    = map(string)
   default = {}
 }
-variable "memorystore_persistent_custom_labels" {
+variable "memorystore_redis_persistent_custom_labels" {
   type    = map(string)
   default = {}
 }
