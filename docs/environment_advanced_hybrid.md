@@ -536,6 +536,7 @@ First let's detail the general settings that apply to any Cloud Provider:
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
 - `gitlab_operator` - Flag to use GitLab Operator for deployment instead of Charts. Only for new installations with GitLab version 17.6 and up. The Toolkit doesn't handle migration to Operator. Optional, default is `false`.
   - :exclamation:&nbsp; This feature is available in Toolkit under [Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) status. The GitLab Operator has [known limitations](https://docs.gitlab.com/operator/#known-issues) and is only suitable for specific scenarios in production use. Make sure to confirm that your use case is applicable before enabling.
+  - :information_source:&nbsp; Geo support for Operator Cloud Native Hybrid setup with the Toolkit is currently not available. Progress on this feature is being tracked in [this issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/1016).
 
 Next are sections covering various aspects for handling the charts from Install choices, Cloud Provider specifics as well as any other additional settings that can be considered.
 
