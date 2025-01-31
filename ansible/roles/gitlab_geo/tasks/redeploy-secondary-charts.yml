@@ -35,6 +35,14 @@
     gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'role': 'secondary' }}}, recursive=True ) }}"
   when: geo_recovery is defined and geo_recovery
 
+- name: Redeploy Secondary Charts - Set Geo Tracking Postgres host during recovery
+  become: false
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'psql':{'host': geo_tracking_postgres_host }}}}, recursive=True ) }}"
+  when: geo_recovery is defined and geo_recovery
+
 - name: Redeploy Secondary Charts - Update Registry primary API Url
   become: false
   delegate_to: localhost
