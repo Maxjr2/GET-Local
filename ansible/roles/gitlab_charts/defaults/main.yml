@@ -90,7 +90,7 @@ cluster_autoscaler_image_tag:
 
 ## Kube Prometheus Stack
 kube_prometheus_stack_charts_namespace: monitoring
-kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.76.1', true) }}"
+kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.79.2', true) }}"
 
 kube_prometheus_stack_charts_storage_size: 100Gi
 kube_prometheus_stack_charts_storage_class: ""
