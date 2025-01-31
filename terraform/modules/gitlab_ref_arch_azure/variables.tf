@@ -430,7 +430,7 @@ variable "monitor_custom_tags" {
   type    = map(string)
   default = {}
 }
-variable "opensearch_custom_tags" {
+variable "opensearch_vm_custom_tags" {
   type    = map(string)
   default = {}
 }

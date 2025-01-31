@@ -1074,12 +1074,12 @@ sidekiq_node_pool_custom_labels    = { <key-name> : <value> }
 supporting_node_pool_custom_labels = { <key-name> : <value> }
 
 cloud_sql_postgres_custom_labels              = { <key-name> : <value> }
-cloud_sql_geo_tracking_postgres_custom_labels = { <key-name> : <value> }
 cloud_sql_praefect_postgres_custom_labels     = { <key-name> : <value> }
+cloud_sql_geo_tracking_postgres_custom_labels = { <key-name> : <value> }
 
-memorystore_custom_labels            = { <key-name> : <value> }
-memorystore_cache_custom_labels      = { <key-name> : <value> }
-memorystore_persistent_custom_labels = { <key-name> : <value> }
+memorystore_redis_custom_labels            = { <key-name> : <value> }
+memorystore_redis_cache_custom_labels      = { <key-name> : <value> }
+memorystore_redis_persistent_custom_labels = { <key-name> : <value> }
 ```
 
 ### AWS Services
@@ -1091,14 +1091,14 @@ sidekiq_node_pool_custom_tags    = { <key-name> : <value> }
 supporting_node_pool_custom_tags = { <key-name> : <value> }
 
 rds_postgres_custom_tags              = { <key-name> : <value> }
-rds_geo_tracking_postgres_custom_tags = { <key-name> : <value> }
 rds_praefect_postgres_custom_tags     = { <key-name> : <value> }
+rds_geo_tracking_postgres_custom_tags = { <key-name> : <value> }
 
-elasticache_custom_tags            = { <key-name> : <value> }
-elasticache_cache_custom_tags      = { <key-name> : <value> }
-elasticache_persistent_custom_tags = { <key-name> : <value> }
+elasticache_redis_custom_tags            = { <key-name> : <value> }
+elasticache_redis_cache_custom_tags      = { <key-name> : <value> }
+elasticache_redis_persistent_custom_tags = { <key-name> : <value> }
 
-opensearch_custom_tags         = { <key-name> : <value> }
+opensearch_vm_custom_tags      = { <key-name> : <value> }
 opensearch_service_custom_tags = { <key-name> : <value> }
 
 elb_internal_custom_tags = { <key-name> : <value> }

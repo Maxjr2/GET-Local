@@ -74,7 +74,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   ]
 
   ## TODO: var.elasticache_redis_tags is deprecated and will be removed in 4.x
-  tags = merge(var.elasticache_redis_tags, var.custom_tags, var.elasticache_custom_tags)
+  tags = merge(var.elasticache_redis_tags, var.custom_tags, var.elasticache_redis_custom_tags)
 
   lifecycle {
     ignore_changes = [
@@ -168,7 +168,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   ]
 
   ## TODO: var.elasticache_redis_cache_tags is deprecated and will be removed in 4.x
-  tags = merge(var.elasticache_redis_cache_tags, var.custom_tags, var.elasticache_cache_custom_tags)
+  tags = merge(var.elasticache_redis_cache_tags, var.custom_tags, var.elasticache_redis_cache_custom_tags)
 
   lifecycle {
     ignore_changes = [
@@ -257,7 +257,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   ]
 
   ## TODO: var.elasticache_redis_persistent_tags is deprecated and will be removed in 4.x
-  tags = merge(var.elasticache_redis_persistent_tags, var.custom_tags, var.elasticache_persistent_custom_tags)
+  tags = merge(var.elasticache_redis_persistent_tags, var.custom_tags, var.elasticache_redis_persistent_custom_tags)
 
   lifecycle {
     ignore_changes = [

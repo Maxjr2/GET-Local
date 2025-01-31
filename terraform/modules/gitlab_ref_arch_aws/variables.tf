@@ -1906,7 +1906,7 @@ variable "object_storage_buckets_custom_tags" {
   type    = map(any)
   default = {}
 }
-variable "opensearch_custom_tags" {
+variable "opensearch_vm_custom_tags" {
   type    = map(string)
   default = {}
 }
@@ -1970,15 +1970,15 @@ variable "gitaly_node_pool_custom_tags" {
   default = {}
 }
 
-variable "elasticache_custom_tags" {
+variable "elasticache_redis_custom_tags" {
   type    = map(string)
   default = {}
 }
-variable "elasticache_cache_custom_tags" {
+variable "elasticache_redis_cache_custom_tags" {
   type    = map(string)
   default = {}
 }
-variable "elasticache_persistent_custom_tags" {
+variable "elasticache_redis_persistent_custom_tags" {
   type    = map(string)
   default = {}
 }
@@ -2008,17 +2008,17 @@ variable "additional_tags" {
   default     = {}
 }
 variable "elasticache_redis_tags" {
-  description = "Deprecated. Replaced by elasticache_custom_tags."
+  description = "Deprecated. Replaced by elasticache_redis_custom_tags."
   type        = map(any)
   default     = {}
 }
 variable "elasticache_redis_cache_tags" {
-  description = "Deprecated. Replaced by elasticache_cache_custom_tags."
+  description = "Deprecated. Replaced by elasticache_redis_cache_custom_tags."
   type        = map(any)
   default     = {}
 }
 variable "elasticache_redis_persistent_tags" {
-  description = "Deprecated. Replaced by elasticache_persistent_custom_tags."
+  description = "Deprecated. Replaced by elasticache_redis_persistent_custom_tags."
   type        = map(any)
   default     = {}
 }
