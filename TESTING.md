@@ -263,4 +263,4 @@ module "gitlab_ref_arch_azure" {
 
 ## Further guidance or questions
 
-To reiterate GET should only be used for testing when required to avoid incurring costs but if you require any additional guidance or have any questions please [reach out to the Self Managed Platform team](https://handbook.gitlab.com/handbook/engineering/infrastructure/test-platform/self-managed-excellence/#how-to-engage-with-us).
+To reiterate GET should only be used for testing when required to avoid incurring costs but if you require any additional guidance or have any questions please [reach out to the Framework team](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/framework/#working-with-us).
