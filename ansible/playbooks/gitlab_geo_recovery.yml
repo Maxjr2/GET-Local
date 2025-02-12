@@ -9,6 +9,7 @@
       import_role:
         name: gitlab_geo
         tasks_from: recovery
+      when: groups | select('match', 'gitaly|rails.*') | length > 0
 
 # Cloud Native with no Omnibus backends
 - hosts: localhost
@@ -19,3 +20,4 @@
       import_role:
         name: gitlab_geo
         tasks_from: recovery
+      when: groups | select('match', 'gitaly|rails.*') | length == 0

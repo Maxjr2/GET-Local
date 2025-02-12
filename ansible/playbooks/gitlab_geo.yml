@@ -7,10 +7,10 @@
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
   roles:
-    - { role: gitlab_geo, when: (group_names | length) > 0 }
+    - { role: gitlab_geo, when: "groups | select('match', 'gitaly|rails.*') | length > 0" }
 
 # Cloud Native with no Omnibus backends
 - hosts: localhost
   gather_facts: false
   roles:
-    - { role: gitlab_geo, when: (group_names | length) == 0 }
+    - { role: gitlab_geo, when: "groups | select('match', 'gitaly|rails.*') | length == 0" }
