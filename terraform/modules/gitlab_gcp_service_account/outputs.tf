@@ -20,8 +20,9 @@ output "member" {
 
 output "details" {
   value = {
-    name   = local.create_service_account ? google_service_account.gitlab[0].name : data.google_service_account.gitlab[0].name
-    email  = local.create_service_account ? google_service_account.gitlab[0].email : data.google_service_account.gitlab[0].email
-    member = local.create_service_account ? google_service_account.gitlab[0].member : data.google_service_account.gitlab[0].member
+    unique_id = local.create_service_account ? google_service_account.gitlab[0].unique_id : data.google_service_account.gitlab[0].unique_id
+    name      = local.create_service_account ? google_service_account.gitlab[0].name : data.google_service_account.gitlab[0].name
+    email     = local.create_service_account ? google_service_account.gitlab[0].email : data.google_service_account.gitlab[0].email
+    member    = local.create_service_account ? google_service_account.gitlab[0].member : data.google_service_account.gitlab[0].member
   }
 }
