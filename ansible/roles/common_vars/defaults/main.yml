@@ -282,6 +282,8 @@ advanced_search_hosts: "{{ opensearch_urls }}"
 advanced_search_external: "{{ 'opensearch' not in groups and advanced_search_hosts != [] }}"
 advanced_search_clean_install: "{{ lookup('env','ADVANCED_SEARCH_CLEAN_INSTALL') | default('false', true) }}"
 advanced_search_enable: true
+advanced_search_username: ''
+advanced_search_password: ''
 
 ################################################################################
 ## GitLab Cloud Native Hybrid Settings (Helm)
