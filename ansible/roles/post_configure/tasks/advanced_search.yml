@@ -43,6 +43,10 @@
               ApplicationSetting.last.update(elasticsearch_url: '')
               ApplicationSetting.last.update(elasticsearch_indexing: false)
               ApplicationSetting.last.update(elasticsearch_search: false)
+              if '{{ advanced_search_username }}' != '' && '{{ advanced_search_password }}' != ''
+                ApplicationSetting.last.update(elasticsearch_username: '')
+                ApplicationSetting.last.update(elasticsearch_password: '')
+              end
             "
           delegate_to: "{{ groups['gitlab_rails'][0] }}"
           delegate_facts: true
@@ -58,6 +62,10 @@
                 ApplicationSetting.last.update(elasticsearch_url: '')
                 ApplicationSetting.last.update(elasticsearch_indexing: false)
                 ApplicationSetting.last.update(elasticsearch_search: false)
+                if '{{ advanced_search_username }}' != '' && '{{ advanced_search_password }}' != ''
+                  ApplicationSetting.last.update(elasticsearch_username: '')
+                  ApplicationSetting.last.update(elasticsearch_password: '')
+                end
               "
           when:
             - toolbox_pod is defined
@@ -75,10 +83,15 @@
         gitlab-rails runner "
           ApplicationSetting.last.update(elasticsearch_url: \"{{ advanced_search_hosts | join(',') }}\")
           ApplicationSetting.last.update(elasticsearch_indexing: true)
+          if '{{ advanced_search_username }}' != '' && '{{ advanced_search_password }}' != ''
+            ApplicationSetting.last.update(elasticsearch_username: \"{{ advanced_search_username }}\")
+            ApplicationSetting.last.update(elasticsearch_password: \"{{ advanced_search_password }}\")
+          end
         "
       delegate_to: "{{ groups['gitlab_rails'][0] }}"
       delegate_facts: true
       become: true
+      no_log: true
       register: advanced_search_status_result
       retries: 5
       delay: 5
@@ -93,6 +106,10 @@
           gitlab-rails runner "
             ApplicationSetting.last.update(elasticsearch_url: \"{{ advanced_search_hosts | join(',') }}\")
             ApplicationSetting.last.update(elasticsearch_indexing: true)
+            if '{{ advanced_search_username }}' != '' && '{{ advanced_search_password }}' != ''
+              ApplicationSetting.last.update(elasticsearch_username: \"{{ advanced_search_username }}\")
+              ApplicationSetting.last.update(elasticsearch_password: \"{{ advanced_search_password }}\")
+            end
           "
       register: advanced_search_status_result
       retries: 5
