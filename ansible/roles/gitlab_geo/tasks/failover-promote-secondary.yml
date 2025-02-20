@@ -47,23 +47,49 @@
       run_once: true
       command: "helm repo update {{ gitlab_charts_repo_name }}"
 
-    - name: Failover Promote Secondary - Get GitLab Charts values
-      become: false
-      delegate_to: localhost
-      run_once: true
-      kubernetes.core.helm_info:
-        name: gitlab
-        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
-      register: gitlab_info
+    - name: Failover Promote Secondary - GitLab Chart values preparation
+      block:
+        - name: Failover Promote Secondary - Get GitLab Charts values
+          become: false
+          delegate_to: localhost
+          run_once: true
+          kubernetes.core.helm_info:
+            name: gitlab
+            release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+          register: gitlab_info
 
-    - name: Failover Promote Secondary - Set gitlab_values
-      become: false
-      delegate_to: localhost
-      run_once: true
-      set_fact:
-        gitlab_values: "{{ item.value }}"
-      loop: "{{ lookup('dict', gitlab_info.status) }}"
-      when: "'values' in item.key"
+        - name: Failover Promote Secondary - Set gitlab_values
+          become: false
+          delegate_to: localhost
+          run_once: true
+          set_fact:
+            gitlab_values: "{{ item.value }}"
+          loop: "{{ lookup('dict', gitlab_info.status) }}"
+          when: "'values' in item.key"
+      when: not gitlab_operator
+
+    - name: Failover Promote Secondary - GitLab Operator values preparation
+      block:
+        - name: Failover Promote Secondary - Get GitLab CR installation values
+          become: false
+          delegate_to: localhost
+          run_once: true
+          kubernetes.core.k8s_info:
+            kind: GitLab
+            name: gitlab
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            api_version: apps.gitlab.com/v1beta1
+          register: gitlab_cr_info
+
+        - name: Failover Promote Secondary - Set gitlab_values
+          become: false
+          delegate_to: localhost
+          run_once: true
+          set_fact:
+            # The 'values' key conflicts with the dict.values() method, so we need to extract it explicitly
+            gitlab_values: "{{ gitlab_cr_info.resources[0].spec.chart | dict2items | selectattr('key', 'eq', 'values') | map(attribute='value') | first }}"
+            gitlab_charts_version: "{{ gitlab_cr_info.resources[0].spec.chart.version }}"
+      when: gitlab_operator
 
     - name: Failover Promote Secondary - Update Geo Role from secondary to primary
       become: false
@@ -95,6 +121,7 @@
             gitlab_charts_version: "{{ (gitlab_charts_versions.stdout | from_json | selectattr('name', 'equalto', gitlab_charts_ref) | selectattr('app_version', 'match', '^v?' + gitlab_version + '$'))[0].version }}"
       when:
         - gitlab_charts_version is not defined
+        - not gitlab_operator
         - gitlab_version != ""
         - not gitlab_charts_direct_install
 
@@ -109,6 +136,58 @@
         update_repo_cache: true
         release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
         values: "{{ gitlab_values }}"
+      when: not gitlab_operator
+
+    - name: Failover Promote Secondary - Redeploy GitLab CR
+      block:
+        - name: Redeploy Secondary Operator - Update GitLab Operator repo
+          become: false
+          delegate_to: localhost
+          run_once: true
+          command: "helm repo update gitlab-operator"
+
+        - name: Failover Promote Secondary - Deploy a GitLab instance via a GitLab custom resource (CR)
+          become: false
+          delegate_to: localhost
+          run_once: true
+          k8s:
+            state: present
+            definition:
+              apiVersion: apps.gitlab.com/v1beta1
+              kind: GitLab
+              metadata:
+                name: gitlab
+                namespace: "{{ gitlab_cloud_native_release_namespace }}"
+              spec:
+                chart:
+                  version: "{{ gitlab_charts_version }}"
+                  values: "{{ gitlab_values }}"
+
+        # To allow for the resource to be Ready before proceeding
+        - name: Failover Promote Secondary - Wait for GitLab resource to be Ready after install
+          become: false
+          delegate_to: localhost
+          run_once: true
+          block:
+            - name: Wait for GitLab resource to be Ready
+              kubernetes.core.k8s_info:
+                api_version: apps.gitlab.com/v1beta1
+                kind: GitLab
+                name: gitlab
+                namespace: "{{ gitlab_cloud_native_release_namespace }}"
+              register: gitlab_resource
+              until:
+                - gitlab_resource.resources is defined
+                - gitlab_resource.resources | length > 0
+                - gitlab_resource.resources[0].status is defined
+                - gitlab_resource.resources[0].status.phase == 'Running'
+              retries: 25
+              delay: 30
+          rescue:
+            - name: Fail with custom message
+              fail:
+                msg: "GitLab resource did not become Ready within the expected time. Current status: {{ gitlab_resource.resources[0].status.phase | default('Unknown') }}"
+      when: gitlab_operator
   when: cloud_native_hybrid_geo
 
 - name: Removing the former secondary’s tracking database

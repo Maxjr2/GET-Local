@@ -135,7 +135,7 @@
     - ('sidekiq' in group_names)
     - (geo_primary_site_group_name in group_names)
 
-- name: Redeploy GitLab Charts for Cloud Native Hybrid environments
+- name: Redeploy GitLab Cloud Native deployment for Cloud Native Hybrid environments
   import_tasks: redeploy-secondary-charts.yml
   tags:
     - redeploy-secondary-charts
