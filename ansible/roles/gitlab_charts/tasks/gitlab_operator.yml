@@ -154,13 +154,25 @@
           aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
       when: cloud_provider == 'aws'
 
+- name: Lookup GitLab Operator values
+  set_fact:
+    gitlab_operator_values: "{{ lookup('template', 'templates/operator.yml.j2') | from_yaml | default({}, true) }}"
+  tags:
+    - reconfigure
+
 - name: Check if custom GitLab Operator values are provided
   stat:
     path: "{{ gitlab_operator_custom_config_file }}"
   register: custom_operator_config_file
   tags:
     - reconfigure
-    - kube-prometheus-stack
+
+- name: Merge in custom GitLab Operator values if provided
+  set_fact:
+    gitlab_operator_values: "{{ gitlab_operator_values | combine(lookup('template', custom_operator_config_file) | from_yaml, recursive=True) }}"
+  when: custom_config_file.stat.exists
+  tags:
+    - reconfigure
 
 - name: Install GitLab Operator
   kubernetes.core.helm:
@@ -168,7 +180,7 @@
     chart_ref: "{{ gitlab_charts_repo_name }}/gitlab-operator"
     chart_version: "{{ gitlab_operator_version | default('') }}"
     namespace: "{{ gitlab_cloud_native_release_namespace }}"
-    values_files: "{{ [gitlab_operator_custom_config_file] if custom_operator_config_file.stat.exists else omit }}"
+    values: "{{ gitlab_operator_values if gitlab_operator_values else omit }}"
   tags:
     - reconfigure
 
@@ -209,5 +221,7 @@
     - name: Fail with custom message
       fail:
         msg: "GitLab resource did not become Ready within the expected time. Current status: {{ gitlab_resource.resources[0].status.phase | default('Unknown') }}"
+  # Ignore deployment status for Secondary - it requires tracking database which is configured at Geo playbook
+  when: cloud_native_hybrid_geo_role != 'secondary'
   tags:
     - reconfigure
