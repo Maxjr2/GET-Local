@@ -63,9 +63,9 @@ azure-mgmt-web==6.1.0
 azure-nspkg==2.0.0
 azure-storage-blob==12.13.0
 bcrypt==4.2.1
-boto3==1.36.19
-botocore==1.36.19
-cachetools==5.5.1
+boto3==1.36.25
+botocore==1.36.25
+cachetools==5.5.2
 certifi==2025.1.31
 cffi==1.17.1
 charset-normalizer==3.4.1
@@ -88,7 +88,7 @@ isodate==0.7.2
 Jinja2==3.1.5
 jmespath==1.0.1
 knack==0.11.0
-kubernetes==31.0.0
+kubernetes==32.0.1
 MarkupSafe==3.0.2
 microsoft-kiota-abstractions==1.9.2
 microsoft-kiota-authentication-azure==1.9.2
@@ -110,9 +110,9 @@ opentelemetry-sdk==1.30.0
 opentelemetry-semantic-conventions==0.51b0
 packaging==24.2
 paramiko==3.5.1
-pkginfo==1.12.0
+pkginfo==1.12.1.2
 portalocker==2.10.1
-propcache==0.2.1
+propcache==0.3.0
 psutil==5.9.8
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
