@@ -14,7 +14,7 @@
         name: gitlab_geo
         tasks_from: failover-disable-primary
       tags: disable-primary
-      when: groups | select('match', 'gitaly|rails.*') | length > 0
+      when: groups | select('match', 'gitaly|gitlab_rails') | length > 0
 
 - hosts: all:!gitlab_*_node_pool:!ungrouped
   become: true
@@ -27,7 +27,7 @@
         name: gitlab_geo
         tasks_from: failover-promote-secondary
       tags: promote-secondary
-      when: groups | select('match', 'gitaly|rails.*') | length > 0
+      when: groups | select('match', 'gitaly|gitlab_rails') | length > 0
 
 # Cloud Native with no Omnibus backends
 - hosts: localhost
@@ -42,7 +42,7 @@
         name: gitlab_geo
         tasks_from: failover-disable-primary
       tags: disable-primary
-      when: groups | select('match', 'gitaly|rails.*') | length == 0
+      when: groups | select('match', 'gitaly|gitlab_rails') | length == 0
 
 - hosts: localhost
   roles:
@@ -53,4 +53,4 @@
         name: gitlab_geo
         tasks_from: failover-promote-secondary
       tags: promote-secondary
-      when: groups | select('match', 'gitaly|rails.*') | length == 0
+      when: groups | select('match', 'gitaly|gitlab_rails') | length == 0
