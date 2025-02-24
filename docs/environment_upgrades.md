@@ -44,7 +44,7 @@ The following upgrade paths are supported for the Toolkit.
 
 ### Review Toolkit release notes
 
-When updating the Toolkit, check the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any called out breaking changes or other release guidance changes to ensure no issues occur on upgrade.
+When updating the Toolkit, check the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any specific callouts such as any changes made in a backwards compatible manner.
 
 ### Terraform and Ansible Dependency Upgrades
 

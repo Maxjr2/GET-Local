@@ -215,9 +215,10 @@ For the latest information, the [requirements section of the README](README.md#r
 The following rules apply for Toolkit releases and support between them:
 
 - The Toolkit follows [Semantic Versions](https://semver.org/) where we release Major, Minor and Patch versions via [project releases](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases).
-- Releases are not tied directly to GitLab versions, we currently support GitLab versions from `15.0` onwards.
-- Breaking changes such as minimum supported GitLab version may be changed in Major releases with adequate notice and an upgrade path given to users.
-- We aim to support Backwards Compatibility between minor releases. Although some small breaking changes may be added with adequate notice if the need is justified.
+- Each Release will have a corresponding [Milestone](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/milestones) that contains the details of what Issues and Merge Requests are in said release.
+- Each Release will be done via the [Releases](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) page with full release notes in place, including sections such as Upgrade Notes that contain specific guidance to be aware of such as any changes made in a backwards compatible manner.
+- While it may not be related to a specific Toolkit release we will endeavour to call out any impacts of upstream changes such as a GitLab or OS version entering End of Life.
+- Releases are not tied directly to GitLab versions to allow for flexibility to make changes specifically on the Toolkit side.
 - Backwards Compatibility is not guaranteed for in development code on the main branch.
 
 #### Support for new GitLab components

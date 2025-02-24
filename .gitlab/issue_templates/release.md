@@ -31,9 +31,12 @@ Release steps:
 - [ ] If creating a Backport:
   - [ ] [Create](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/branches/new) `support/<GET_major_minor_x>` branch from GET tag. For example, for patch release `2.8.5` - create `support/2.8.x`.
     - Note that the branch must conform to this naming scheme for it to be a protected branch.
+  - [ ] Create Merge Request to update GET version strings in repo
   - [ ] Create Merge Request targeting `support/<GET_major_minor_x>` with the following changes:
     - Cherry-picked commits that should be backported
-    - Updated GET version strings in repo
+    - Cherry-picked commit for updated GET version
+- [ ] Milestone created - A Milestone should typically already exist for the release with all Issues and Merge Requests attached. In some cases, such as a patch release, a Milestone may still need to be created.
+  - If this is for a patch release, update Issues and Merge Requests that were cherry-picked to point to the new Milestone. 
 - [ ] Release notes created - Should follow similar style as previous releases. [Use this link](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/commits/main?ref_type=heads) to go through and collect all notes from last release SHA.
   - Use previous releases for formatting. Big items → Smaller items → Upgrade notes / Breaking changes
   - Cite authors when appropriate
