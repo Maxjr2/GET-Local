@@ -46,6 +46,8 @@ When using Terraform, one important caveat is preparing its [State](https://www.
 
 [Terraform has numerous possible backends](https://developer.hashicorp.com/terraform/language/state/remote-state-data) where the state can be stored. As a general guidance we recommend a remote backend that can be shared between applicable users such as the targeted Cloud Provider's Object Storage or [GitLab's own managed Terraform State backend](https://docs.gitlab.com/ee/user/infrastructure/iac/terraform_state.html). Whatever backend is chosen the configuration is set in the same location - the environment's `main.tf` file.
 
+:information_source:&nbsp; You should ensure that the Terraform state is stored in a unique location, regardless of whatever backend is being used. For Cloud Provider Object Storage this would typically mean using separate buckets or using the specific Cloud Provider's Terraform backend options to store the state in a unique folder, such as the [`prefix` option for GCP GCS](https://developer.hashicorp.com/terraform/language/backend/gcs) or [`key` option for AWS](https://developer.hashicorp.com/terraform/language/backend/s3). Refer to the relevant Terraform backend documentation for more information.
+
 :information_source:&nbsp; These docs assume the target Cloud Provider's Object Storage is being used.
 
 ### Static External IP

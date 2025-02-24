@@ -22,6 +22,10 @@
 
 ## Terraform
 
+The main steps, up to the provisioning step, for [GitLab Environment Toolkit - Building environments](../environment_provision.md) should be followed when creating a new Terraform project. The following modifications to the standard Terraform provisioning apply.
+
+### Directory structure
+
 When creating a new Terraform site for Geo it is recommended to create a new subfolder for your Geo deployment with sub-folders below that for each Geo sites config. Although not required, this does help to keep all the config for a single Geo deployment in one location. Each separate environment will always need their own folder here for Terraform to manage their State correctly.
 
 ```bash
@@ -32,11 +36,15 @@ my-geo-deployment
     ...
 ```
 
-Next it is recommended to copy an existing reference architecture for each site. You could copy the 10k reference architecture to use as your primary site and the 3k for your secondary, or use 5k for both your primary and secondary sites, the Geo process will work for any combination with the same steps.
+In each site directory the site's specific `environment.tf`, `main.tf` and `variables.tf` files are stored.
 
-The main steps, up to the provisioning step, for [GitLab Environment Toolkit - Building environments](../environment_provision.md) should be followed when creating a new Terraform project.
+### Site environment sizes
 
-Once you have copied the desired architecture sizes we will need to modify them to allow for Geo. The first step is to adjust the `ref_arch` module source variable, within the `environment.tf` file, to point to the right location. If you've followed the folder structure above, you will need to add an additional `../` to the path as we are now using sub-folders. For example:
+The size of each Geo site environment does not do not need to be the same. It's not uncommon to have the secondary sites be a smaller size for example.
+
+The Geo process will work for any combination with the same steps. You can find examples of various environment sizes following the reference architectures under [/examples](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/tree/main/examples).
+ 
+Once you have selected the desired sizes we will need to modify them to allow for Geo. The first step is to adjust the `ref_arch` module source variable, within the `environment.tf` file, to point to the right location. If you've followed the folder structure above, you will need to add an additional `../` to the path as we are now using sub-folders. For example:
 
 ```tf
 module "gitlab_ref_arch_*" {
@@ -44,6 +52,9 @@ module "gitlab_ref_arch_*" {
 
   [...]
 ```
+
+
+### Geo variables configuration
 
 Next you need to add some new labels to every site within you deployment. These labels are used to identify each site as belonging to your Geo deployment:
 
@@ -62,7 +73,9 @@ module "gitlab_ref_arch_*" {
   [...]
 ```
 
-Once the configuration has been updated, you may need to add some additional configuration settings depending on your setup. If you are using cloud provided [object storage replication](./geo_provision.md#object-storage-replication) or [VPC Peering](./geo_provision.md#vpc-peering) then you should read the corresponding sections below. Once all settings are in place we can run the `terraform apply` command against the primary site followed by any secondary sites.
+Once the configuration has been updated, you may need to add some additional configuration settings depending on your setup. If you are using cloud provided [object storage replication](./geo_provision.md#object-storage-replication) or [VPC Peering](./geo_provision.md#vpc-peering) then you should read the corresponding sections below. 
+
+Once all settings are in place we can run the `terraform apply` command against the primary site followed by any secondary sites.
 
 ## Object Storage Replication
 
