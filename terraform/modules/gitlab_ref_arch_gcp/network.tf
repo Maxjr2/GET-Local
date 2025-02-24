@@ -33,14 +33,14 @@ resource "google_compute_subnetwork" "gitlab_vpc_subnet" {
 
   name                     = "${var.prefix}-subnet"
   ip_cidr_range            = var.subnet_cidr != null ? var.subnet_cidr : var.create_network_subnet_cidr_block
-  network                  = google_compute_network.gitlab_vpc[0].name
+  network                  = google_compute_network.gitlab_vpc[0].self_link
   private_ip_google_access = true
 }
 resource "google_compute_network_peering" "gitlab_vpc_peer" {
   count = local.create_network && var.create_network_peer != null ? 1 : 0
 
   name                                = "${var.prefix}-peer"
-  network                             = data.google_compute_network.gitlab_network[0].self_link
+  network                             = google_compute_network.gitlab_vpc[0].self_link
   peer_network                        = var.create_network_peer
   import_subnet_routes_with_public_ip = true
 }
@@ -94,11 +94,12 @@ resource "google_service_networking_connection" "gitlab_private_service_access" 
 
 output "network" {
   value = {
-    "vpc_name"             = local.vpc_name
-    "vpc_id"               = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network[0].id
-    "vpc_self_link"        = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
-    "vpc_subnet_name"      = local.subnet_name
-    "vpc_subnet_id"        = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].id : data.google_compute_subnetwork.gitlab_subnet[0].id
-    "vpc_subnet_self_link" = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
+    "vpc_name"              = local.vpc_name
+    "vpc_id"                = local.create_network ? google_compute_network.gitlab_vpc[0].id : data.google_compute_network.gitlab_network[0].id
+    "vpc_self_link"         = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+    "vpc_subnet_name"       = local.subnet_name
+    "vpc_subnet_id"         = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].id : data.google_compute_subnetwork.gitlab_subnet[0].id
+    "vpc_subnet_self_link"  = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].self_link : data.google_compute_subnetwork.gitlab_subnet[0].self_link
+    "vpc_subnet_cidr_block" = local.create_network ? google_compute_subnetwork.gitlab_vpc_subnet[0].ip_cidr_range : data.google_compute_subnetwork.gitlab_subnet[0].ip_cidr_range
   }
 }

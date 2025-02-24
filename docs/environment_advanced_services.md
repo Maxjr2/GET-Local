@@ -283,8 +283,6 @@ The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://c
 
 :information_source:&nbsp; Ensure that [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/sqladmin.googleapis.com) APIs are enabled on the target GCP project. The account that Terraform is running with also requires the `Cloud SQL Admin` and `Compute Network Admin` IAM roles.
 
-:information_source:&nbsp; Note that Geo setups are not directly supported at this time. While the Toolkit can set up two separate Cloud SQL instances, additional manual setup for [VPC Network Peering](https://cloud.google.com/vpc/docs/vpc-peering) and [Logical Replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication) will be required.
-
 The variables for this service start with the prefix `cloud_sql_*` and should replace any previous `postgres_*`, `pgbouncer_*` and `praefect_postgres_*` settings. The available variables are as follows:
 
 - `cloud_sql_postgres_machine_tier`- The [GCP Cloud SQL Machine Tier](https://cloud.google.com/sql/docs/postgres/create-instance#machine-types) for the service to use without the `db-` prefix. Note that for this service the standard GCP machine sizes don't apply, instead utilizing custom sizes in most cases. For example, to deploy an instance that matches a `n1-standard-4` machine type this can be configured as `custom-4-15360`. **Required**.
