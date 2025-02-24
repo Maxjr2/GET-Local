@@ -13,8 +13,9 @@ We aim to review all MRs within 2 weeks although generally it's much quicker tha
 <!-- Briefly describe what this MR is about. -->
 
 
-<!-- Set the appropriate milestone -->
-/milestone %
+<!-- Set the GET milestone this MR will be part of - https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/milestones -->
+<!-- If you are unsure set to the next minor release and ask a maintainer to check -->
+/milestone %GET
 
 <!-- Set Work Type and Subtype Classification label(s) for the MR - https://about.gitlab.com/handbook/engineering/metrics/#work-type-classification -->
 <!-- Note: Only one subtype should be selected -->
@@ -44,6 +45,6 @@ When ready for review, the Author applies the ~"workflow::ready for review" labe
   - [ ] Documentation created/updated in the same MR.
   - [ ] If this MR adds an optional configuration - check that all permutations continue to work.
   - [ ] For Terraform changes: set up a previous version environment, then run a `terraform plan` with your new changes and ensure nothing will be destroyed. If anything will be destroyed and this can't be avoided please add a comment to the current MR.
-- [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Self-Managed Platform](https://handbook.gitlab.com/handbook/engineering/infrastructure/test-platform/self-managed-platform-team/) team if unsure.
+- [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Framework](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/framework/) team if unsure.
 
 /label ~"section::platforms"
