@@ -205,43 +205,60 @@ To set up VPC peering:
 
 ### VPC Peering (GCP)
 
-To setup VPC peering with GCP a VPC peering connection must be setup in both networks to allow traffic to flow in both directions.
+The Toolkit can set up peering for networks it creates in GCP. This can be used for certain Geo setups to allow traffic to flow in both directions.
 
-To set up VPC peering:
+:information_source:&nbsp; [GCP Cloud SQL does not support setting up replicas directly in a different VPC network or a different project](../environment_advanced_services.md#gcp-cloud-sql---geo). VPC Peering in turn is not applicable to that service as a result.
 
-1. First run terraform for both sites to create the initial networks, each network needs to exist before peering can be setup. At this point no extra settings need to be added to either sites Terraform settings. However, it is recommended to create new networks for each site with config similar to below:
+Setting up peering for created networks is done as follows:
 
-```tf
-create_network                        = true
-create_network_subnet_cidr_block      = "<CIDR block>"
-```
+1. Provision the two environments via Terraform as normal with created networks. For one site the create network's subnetwork CIDR block will need to be changed to ensure there's no clashes across the environments. An example of configuring the network for each site would be:
 
-1. Once the command has completed you will need to get some information from the output for each site.
+   ```tf
+   # Site 1
+   create_network = true
+   
+   # Site 2
+   create_network                        = true
+   create_network_subnet_cidr_block      = "<site-2-subnet-cidr-block>" # Set to a valid CIDR block that's different from Site 1
+   ```
 
-```tf
-# Site 1
-"network" = {
-  "vpc_name" = "site-1-vpc"
-  "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<GCP Project ID>/global/networks/site-1-vpc"
-  "vpc_subnet_name" = "site-1-subnet"
-}
+1. Once the environments have been provisioned, you will need to get some information from the output for each site.
 
-# Site 2
-"network" = {
-  "vpc_name" = "site-2-vpc"
-  "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<GCP Project ID>/global/networks/site-2-vpc"
-  "vpc_subnet_name" = "example-2-subnet"
-}
-```
+   ```tf
+   # Site 1
+   "network" = {
+     "vpc_name" = "<site-1-vpc-name>"
+     "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-1-vpc-name>"
+     "vpc_subnet_name" = "<site-1-subnet-name>"
+     "vpc_subnet_cidr_block" = "<site-1-subnet-cidr-block>"
+   }
 
-2. With the information gathered in the previous step, update both Terraform inventories with the below settings to configure peering. Each site will need to point to the other sites VPC. After running a `terraform apply` the new settings will add a new peering connection for each network, as well as a firewall rule to allow traffic from the peering network.
+   # Site 2
+   "network" = {
+     "vpc_name" = "<site-2-vpc-name>"
+     "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-2-vpc-name>"
+     "vpc_subnet_name" = "<site-2-subnet-name>"
+     "vpc_subnet_cidr_block" = "<site-2-subnet-cidr-block>"
+   }
+   ```
 
-```tf
-# Site 1
-create_network_peer_subnet_cidr_block = <Site 2 CIDR>
-create_network_peer                   = "projects/<GCP Project ID>/global/networks/site-2-vpc"
+1. With the information gathered in the previous step, the following settings need to be configured on each site to configure peering:
 
-# Site 2
-create_network_peer_subnet_cidr_block = <Site 1 CIDR>
-create_network_peer                   = "projects/<GCP Project ID>/global/networks/site-1-vpc"
-```
+   - `create_network_peer` - The Self Link of the target VPC to peer to.
+   - `create_network_peer_subnet_cidr_block` - The subnet block of the target VPC to peer to. This only needs to be configured if the target VPC has had it's subnet CIDR block changed via the `create_network_subnet_cidr_block` setting.
+
+   An example of how this is configured is as follows:
+   
+   ```tf
+   # Site 1
+   create_network                        = true
+   create_network_peer                   = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-2-vpc-name>"
+   create_network_peer_subnet_cidr_block = "<site-2-subnet-cidr-block>"
+   
+   # Site 2
+   create_network                        = true
+   create_network_subnet_cidr_block      = "<site-2-subnet-cidr-block>"
+   create_network_peer                   = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-1-vpc-name>"
+   ```
+
+   Once set run `terraform apply` on each site to configure the peering and the required firewall rules. After this has completed peering will now be active.
