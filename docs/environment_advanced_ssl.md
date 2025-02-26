@@ -259,7 +259,7 @@ Praefect (for Cluster):
 - `praefect_ssl_key_file` - Path to the Praefect key file to upload. Default is `''`.
 - `praefect_ssl_ca` - An alternative to `praefect_ssl_ca_file` if the CA is not stored in a local file, to pass the CA contents directly to Ansible. Use `praefect_ssl_ca`, or `praefect_ssl_ca_file`, but not both. This approach can be used to retrieve the CA via a lookup.
 - `praefect_ssl_ca_file` - Path to the Praefect CA file to upload to relevant clients. Default is `''`.
-- `praefect_ssl_port` - The port Praefect will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `3035`.
+- `praefect_ssl_port` - The port Praefect will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `3305`.
 
 In addition to the above there are some other settings you may need to set depending on your setup as follows:
 
@@ -267,7 +267,7 @@ In addition to the above there are some other settings you may need to set depen
 
 If the environment is on AWS and [using ELB (NLB) for its internal load balancer](environment_advanced_services.md#internal-nlb) one additional piece of configuration is required when switching to use Internal SSL for Gitaly Cluster to set the correct port for load balancing as this is managed by Terraform.
 
-In this scenario you must set the `elb_internal_praefect_port` variable to the same port being used by Praefect for SSL connections in the Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf). This would be `3035` in most cases and would look as follows:
+In this scenario you must set the `elb_internal_praefect_port` variable to the same port being used by Praefect for SSL connections in the Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf). This would be `3305` in most cases and would look as follows:
 
 ```tf
 module "gitlab_ref_arch_aws" {
@@ -276,7 +276,7 @@ module "gitlab_ref_arch_aws" {
   [...]
 
   elb_internal_create = true
-  elb_internal_praefect_port = 3035
+  elb_internal_praefect_port = 3305
 }
 ```
 
