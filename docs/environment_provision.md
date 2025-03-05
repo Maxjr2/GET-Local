@@ -412,7 +412,7 @@ As per recommended [best practices](https://cloud.google.com/compute/docs/access
 
 While this is designed to be seemless there are several options available to adjust how Terraform will create or set up these accounts. These are detailed in this section.
 
-###### Service Account User Members (GCP)
+###### Service Account User members (GCP)
 
 Part of the GCP IAM design is to require a separate specific role for members who wish to _use_ Service Accounts, such as attaching them to VMs and for [SSH OS login](https://cloud.google.com/compute/docs/oslogin/set-up-oslogin#configure_users). This permission is called [`Service Account User`](https://cloud.google.com/iam/docs/service-account-permissions#user-role) and is separate from the permission used to create Service Accounts and manage their permissions (`Service Account Admin`).
 
