@@ -174,6 +174,22 @@ of the variables used in the playbooks:
 ansible-inventory -i environments/10k/inventory --graph --host mytest-gitaly-1
 ```
 
+### GCP SSH OS Login fails due to permission denied error
+
+For SSH OS Login to work on GCP [a specific role is required](environment_provision.md#service-account-user-members-gcp), `Service Account User`, on the Service Account running the VM in question. This role should be in turn set to the User or Service Account that is intending to SSH into the VM via OS Login.
+
+As per GCP's guidance this role is recommended to be set on each Service Account that the VM runs with. The Toolkit's Terraform module will set this by default for the role that Terraform is run with.
+
+However a clash can occur when Terraform is run with a different role to the one used by Ansible for OS login. When this occurs you may see the following error from Ansible:
+
+```sh
+fatal: [sidekiq-1]: UNREACHABLE! => changed=false
+  msg: 'Failed to connect to the host via ssh: <sa_********>@<ip_address>: Permission denied (publickey).'
+  unreachable: true
+```
+
+To correct this you can set what GCP accounts specifically are granted this role for the VM Service Accounts it creates. Refer to [this section in the documentation](environment_provision.md#service-account-user-members-gcp) for further information.
+
 ### OS Package repository issues
 
 A subtle issue that can occur is when the OS repository script the [Toolkit is configured to use](environment_configure.md#repository) for setting up the repo is not correct for the target OS. When this occurs you may see a message such as `Package gitlab-ee cannot be found`.

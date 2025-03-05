@@ -133,6 +133,8 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
    gcloud config set account <account-email-address>
    ```
 
+:information_source:&nbsp; To enable this Service Account to use OS Login it in turn needs to be given the `Service Account User` role on each node's Service Account, that the Toolkit creates. In Terraform this is done automatically for the role it's run with. If you are not using the Service Account to run Terraform additional configuration will be required, refer to this [documentation section for more information](environment_provision.md#service-account-user-members-gcp).
+
 SSH access should now be enabled on the Service Account and this will be used by Ansible to SSH login to each VM.
 More info on OS Login and how it's configured can be found [in Google's documentation](https://cloud.google.com/compute/docs/oslogin/).
 
