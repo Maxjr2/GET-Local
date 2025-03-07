@@ -12,7 +12,7 @@ module "gitlab_gke_webservice_service_account" {
   account_id   = "${var.service_account_prefix}-gke-webservice"
   display_name = "${var.prefix}-gke-webservice"
 
-  service_account_profiles                  = ["object_storage"]
+  service_account_profiles                  = var.gke_enable_workload_identity ? ["object_storage"] : ["gke_node", "object_storage"]
   setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
   service_account_user_members              = var.service_account_user_members
 
@@ -32,7 +32,7 @@ module "gitlab_gke_sidekiq_service_account" {
   account_id   = "${var.service_account_prefix}-gke-sidekiq"
   display_name = "${var.prefix}-gke-sidekiq"
 
-  service_account_profiles                  = ["object_storage"]
+  service_account_profiles                  = var.gke_enable_workload_identity ? ["object_storage"] : ["gke_node", "object_storage"]
   setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
   service_account_user_members              = var.service_account_user_members
 
@@ -52,7 +52,7 @@ module "gitlab_gke_supporting_service_account" {
   account_id   = "${var.service_account_prefix}-gke-supporting"
   display_name = "${var.prefix}-gke-supporting"
 
-  service_account_profiles                  = ["object_storage"]
+  service_account_profiles                  = ["gke_node", "object_storage"]
   setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
   service_account_user_members              = var.service_account_user_members
 
@@ -70,6 +70,7 @@ module "gitlab_gke_gitaly_service_account" {
   account_id   = "${var.service_account_prefix}-gke-gitaly"
   display_name = "${var.prefix}-gke-gitaly"
 
+  service_account_profiles                  = ["gke_node"]
   setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
   service_account_user_members              = var.service_account_user_members
 
@@ -86,6 +87,7 @@ module "gitlab_gke_node_service_account" {
   account_id   = "${var.service_account_prefix}-gke-node"
   display_name = "${var.prefix}-gke-node"
 
+  service_account_profiles                  = ["gke_node"]
   setup_default_service_account_user_member = length(var.service_account_user_members) == 0 ? true : false
   service_account_user_members              = var.service_account_user_members
 

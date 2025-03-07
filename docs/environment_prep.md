@@ -84,7 +84,9 @@ With the above set create the Service Account as follows:
    - `Kubernetes Engine Admin`
    - `Storage Admin` (Note - Not `Compute Storage Admin`)
    - `Service Account Admin`
-1. Assign the following additional IAM roles if you're planning on deploying the respective optional service:
+1. Assign the following additional IAM roles if you're planning on deploying with the respective GCP service:
+   - [Google Kubernetes Engine (GKE)](environment_advanced_hybrid.md#google-cloud-platform-gcp) - For Cloud Native environments.
+     - `Project IAM Admin`
    - [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)
      - `Cloud SQL Admin`
      - `Compute Network Admin`

@@ -41,3 +41,14 @@ resource "google_service_account_iam_member" "workload_identity_member" {
   role               = "roles/iam.workloadIdentityUser"
   member             = var.service_account_workload_identity_member
 }
+
+# GKE Workload Identity - defaultNodeServiceAccount
+## Required by GKE - https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
+## Project is lowest possible level to be set, following recommendation
+resource "google_project_iam_member" "gke_default_node_service_account" {
+  count = local.create_service_account && contains(var.service_account_profiles, "gke_node") ? 1 : 0
+
+  project = google_service_account.gitlab[0].project
+  role    = "roles/container.defaultNodeServiceAccount"
+  member  = google_service_account.gitlab[0].member
+}
