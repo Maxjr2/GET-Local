@@ -26,11 +26,11 @@ variable "service_account_profiles" {
     condition = alltrue([
       for profile in var.service_account_profiles :
       contains([
-        "object_storage"
-        # Additional required access types will added here over time
+        "object_storage",
+        "gke_node"
       ], profile)
     ])
-    error_message = "Service account profile must be one of 'object_storage'."
+    error_message = "Service account profile must be one of 'object_storage' or 'gke_node'."
   }
 }
 
