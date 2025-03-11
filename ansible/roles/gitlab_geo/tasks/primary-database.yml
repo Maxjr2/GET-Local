@@ -37,6 +37,9 @@
 
 - name: Primary Database - Restart Postgres
   command: gitlab-ctl restart
+  register: result
+  retries: 3
+  until: result is success
 
 - name: Primary Database - Fetch psql certificate
   fetch:
