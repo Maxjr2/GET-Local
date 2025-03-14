@@ -219,6 +219,7 @@ resource "aws_security_group" "gitlab_rds" {
   count = local.rds_postgres_create ? 1 : 0
 
   name_prefix = "${var.prefix}-rds-"
+  description = "RDS Security Group for internal access to RDS"
   vpc_id      = data.aws_vpc.selected.id
 
   tags = {
