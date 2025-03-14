@@ -10,7 +10,7 @@ Unless specified otherwise, all additions or changes to the Toolkit should align
 
 The GitLab Environment Toolkit (`GET`) is a collection of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying GitLab at scale as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). It uses the official [Linux package (Omnibus)](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/) packages.
 
-Created and maintained by the GitLab Quality Engineering Enablement team, the Toolkit supports provisioning and configuring machines and other related infrastructure respectively:
+The Toolkit supports provisioning and configuring machines and other related infrastructure respectively:
 
 - Support for deploying all Reference Architectures sizes dynamically from 1k to 50k.
 - Support for deploying Cloud Native Hybrid variants of the Reference Architectures (AWS & GCP only at this time).

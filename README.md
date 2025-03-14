@@ -2,9 +2,9 @@
 
 ![alt text](https://gitlab.com/uploads/-/system/project/avatar/14292404/tanuki-blueprint.png "GitLab Environment Toolkit")
 
-The GitLab Environment Toolkit (`GET`) is a set of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying scaled self-managed GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures).
+The GitLab Environment Toolkit (`GET`) is a set of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures).
 
-Created and maintained by the GitLab Quality Engineering Enablement team, the Toolkit supports the following features:
+The Toolkit supports the following features:
 
 - Support for deploying all [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures) sizes dynamically from [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) to [50k](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html).
 - Support for deploying Cloud Native Hybrid variants of the Reference Architectures (AWS & GCP only at this time).
@@ -23,7 +23,7 @@ Created and maintained by the GitLab Quality Engineering Enablement team, the To
 
 ## Before You Start
 
-The Toolkit can help you with the deployment and maintenance of a self-managed GitLab environment. But please note it does not remove any of the underlying challenges that comes with running large production applications and that ultimately self-managed environments are the responsibility of the user. As such, users are recommended to have a good working knowledge of Terraform, Ansible, GitLab administration and Infrastructure management as well be aware of what running such an environment entails. For users who aren't in this position, our [Professional Services](https://about.gitlab.com/services/#implementation-services) team offers implementation services, but for those who want a more managed solution long term, it's recommended to instead explore our other offerings such as [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/).
+The Toolkit can help you with the deployment and maintenance of a scaled GitLab environment. But please note it does not remove any of the underlying challenges that comes with running large production applications and that ultimately environments are the responsibility of the user. As such, users are recommended to have a good working knowledge of Terraform, Ansible, GitLab administration and Infrastructure management as well be aware of what running such an environment entails. For users who aren't in this position, our [Professional Services](https://about.gitlab.com/services/#implementation-services) team offers implementation services, but for those who want a more managed solution long term, it's recommended to instead explore our other offerings such as [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/).
 
 The Toolkit is designed to be flexible, and to follow best practices for GitLab. However, the scripts are opinionated, presented as-is, and may not be compatible with your specific environment build needs. There may be cases where you will need to extend or customize the Toolkit for your unique needs.
 
