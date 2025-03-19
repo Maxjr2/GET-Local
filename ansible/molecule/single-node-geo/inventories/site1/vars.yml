@@ -1,0 +1,16 @@
+all:
+  vars:
+    external_url: "http://docker"
+    cloud_provider: none
+
+    geo_primary_external_url: "https://docker"
+    geo_primary_internal_url: "https://docker"
+    geo_primary_site_group_name: "site1"
+    geo_primary_site_name: "Site 1"
+
+    gitlab_repo_script_url: "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
+
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.yml"
+
+    hosts_filter: "{{ lookup('env', 'HOSTS_FILTER') }}"

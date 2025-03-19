@@ -1,0 +1,12 @@
+- name: Verify
+  hosts: localhost
+  tasks:
+    - name: Wait for GitLab to be available
+      uri:
+        url: "{{ external_url }}/-/readiness"
+        validate_certs: false
+        timeout: 60
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 10
