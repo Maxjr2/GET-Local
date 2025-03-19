@@ -6,6 +6,7 @@
 secrets.auto.tfvars
 .terraform/
 .terraform.lock.hcl
+.ansible
 logs/
 ansible/playbooks/test*.yml
 error-search.yml

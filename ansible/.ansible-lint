@@ -3,6 +3,11 @@ exclude_paths:
   - playbooks/error-search.yml
   - playbooks/test*.yml
   - environments/
+  - molecule/*/inventories/
+  - molecule/*/inventory/
+  - molecule/*/molecule.yml
+  - molecule/gitlab_configs
+  - molecule/gitlab_tasks
 skip_list:
   - experimental
   - risky-file-permissions  # Lines should be no longer than 160 char

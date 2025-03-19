@@ -1,0 +1,15 @@
+---
+- name: Run Setup Tasks
+  ansible.builtin.shell: |
+    # Set install type to docker
+    echo 'gitlab-docker' > /opt/gitlab/embedded/service/gitlab-rails/INSTALLATION_TYPE
+
+    # Start service manager
+    GITLAB_OMNIBUS_CONFIG= /opt/gitlab/embedded/bin/runsvdir-start &
+
+- name: Install Requests
+  pip:
+    name: "requests"
+    extra_args: "--upgrade-strategy only-if-needed"
+    break_system_packages: true
+  when: not omnibus_node

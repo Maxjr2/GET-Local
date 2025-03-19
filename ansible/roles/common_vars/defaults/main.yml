@@ -86,6 +86,7 @@ gitlab_shell_ssh_internal_port: "{{ '2222' if (gitlab_shell_ssh_daemon == 'gitla
 gitlab_shell_ssh_key_path: "{{ '/var/opt/gitlab/gitlab-sshd' if gitlab_shell_ssh_daemon == 'gitlab-sshd' else '/etc/ssh/' }}"
 gitlab_shell_ssh_sync_keys: true
 
+gitlab_root_password: "{{ lookup('env','GITLAB_ROOT_PASSWORD') }}"
 gitlab_secrets_setup: true
 
 # Object Storage Settings

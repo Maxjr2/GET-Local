@@ -1,0 +1,12 @@
+# Docker options
+## Prevent Postgres from trying to allocate 25% of total memory
+postgresql['shared_buffers'] = '256MB'
+
+# Disable Prometheus node_exporter inside Docker.
+node_exporter['enable'] = false
+
+# Explicitly disable init detection since we are running on a container
+package['detect_init'] = false
+
+# Explicitly disable attempt to update kernel parameters
+package['modify_kernel_parameters'] = false
