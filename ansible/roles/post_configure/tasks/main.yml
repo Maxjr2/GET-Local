@@ -63,6 +63,9 @@
       delegate_facts: true
       become: true
       register: env_settings_response_rails
+      retries: 2
+      delay: 5
+      until: env_settings_response_rails is success
       when: "'gitlab_rails' in groups"
 
     - name: Save Environment Settings
@@ -82,6 +85,9 @@
             print env_settings.to_json
           "
       register: env_settings_response_pod
+      retries: 2
+      delay: 5
+      until: env_settings_response_pod is success
       when:
         - toolbox_pod is defined
         - "'gitlab_rails' not in groups"
