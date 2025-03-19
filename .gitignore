@@ -24,3 +24,5 @@ config/*
 get-python-env
 /.bundle
 .idea
+.ansible
+ansible/.ansible
