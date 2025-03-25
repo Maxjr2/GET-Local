@@ -99,6 +99,8 @@
       file:
         path: /etc/gitlab/skip-unmigrated-data-check
         state: touch
+        access_time: preserve
+        modification_time: preserve
       when: omnibus_node
       tags:
         - reconfigure
