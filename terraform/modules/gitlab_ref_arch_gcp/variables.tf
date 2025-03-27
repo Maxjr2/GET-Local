@@ -540,6 +540,10 @@ variable "gke_default_disk_kms_key" {
   type    = string
   default = null
 }
+variable "gke_binary_authorization_evaluation_mode" {
+  type    = string
+  default = null
+}
 
 ### Private Cluster
 variable "gke_enable_private_nodes" {
