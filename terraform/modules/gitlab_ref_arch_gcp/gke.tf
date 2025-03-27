@@ -85,6 +85,14 @@ resource "google_container_cluster" "gitlab_cluster" {
     }
   }
 
+  dynamic "binary_authorization" {
+    for_each = range(var.gke_binary_authorization_evaluation_mode != null ? 1 : 0)
+
+    content {
+      evaluation_mode = var.gke_binary_authorization_evaluation_mode
+    }
+  }
+
   # TODO: var.additional_labels is deprecated and will be removed in 4.x
   resource_labels = merge({
     gitlab_node_prefix = var.prefix
