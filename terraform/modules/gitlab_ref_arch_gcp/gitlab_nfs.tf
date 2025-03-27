@@ -26,6 +26,8 @@ module "gitlab_nfs" {
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
+  tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot
 }

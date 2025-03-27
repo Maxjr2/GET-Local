@@ -29,7 +29,13 @@ module "haproxy_external" {
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
-  tags = ["${var.prefix}-web", "${var.prefix}-ssh", "${var.prefix}-haproxy", "${var.prefix}-monitor"]
+  tags = flatten([
+    "${var.prefix}-web",
+    "${var.prefix}-ssh",
+    "${var.prefix}-haproxy",
+    "${var.prefix}-monitor",
+    var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+  ])
 
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot
@@ -69,7 +75,10 @@ module "haproxy_internal" {
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
-  tags = ["${var.prefix}-haproxy"]
+  tags = flatten([
+    "${var.prefix}-haproxy",
+    var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+  ])
 
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot

@@ -81,7 +81,7 @@ resource "google_compute_firewall" "gitlab_icmp_access" {
   target_tags   = [var.prefix]
 }
 
-# Created or Existing network rules
+# Internal Firewall rules
 resource "google_compute_firewall" "internal" {
   count   = local.create_network || local.existing_network ? 1 : 0
   name    = "${var.prefix}-internal"
@@ -103,6 +103,25 @@ resource "google_compute_firewall" "internal" {
 
   priority      = 65534
   source_ranges = local.create_network ? [google_compute_subnetwork.gitlab_vpc_subnet[0].ip_cidr_range] : [data.google_compute_subnetwork.gitlab_subnet[0].ip_cidr_range]
+  target_tags   = [var.prefix]
+}
+
+resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
+  count   = min(local.total_node_pool_count, local.gitlab_vm_node_count, 1)
+  name    = "${var.prefix}-kubernetes-vms-internal"
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+
+  description = "Allow internal access between GitLab Kubernetes containers and VMs"
+
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+  }
+
+  source_ranges = [google_container_cluster.gitlab_cluster[0].cluster_ipv4_cidr]
   target_tags   = [var.prefix]
 }
 
@@ -129,6 +148,23 @@ resource "google_compute_firewall" "internal_peer" {
   priority      = 65534
   source_ranges = [var.create_network_peer_subnet_cidr_block]
   target_tags   = [var.prefix]
+}
+
+# IAP access firewall rule
+resource "google_compute_firewall" "gitlab_iap_ssh_access" {
+  count   = var.setup_iap_ssh_access ? 1 : 0
+  name    = "${var.prefix}-iap-ssh-access"
+  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
+
+  description = "Allow IAP tunnel SSH access ${local.vpc_name} network"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"] # IAP's IP range
+  target_tags   = ["${var.prefix}-iap"]
 }
 
 # Moved

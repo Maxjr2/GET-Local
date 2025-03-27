@@ -32,7 +32,10 @@ module "gitlab_rails" {
 
   label_secondaries = true
 
-  tags = length(var.gitlab_rails_external_ips) > 0 && var.haproxy_external_node_count == 0 ? ["${var.prefix}-web", "${var.prefix}-ssh"] : []
+  tags = flatten([
+    length(var.gitlab_rails_external_ips) > 0 && var.haproxy_external_node_count == 0 ? ["${var.prefix}-web", "${var.prefix}-ssh"] : [],
+    var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+  ])
 
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot

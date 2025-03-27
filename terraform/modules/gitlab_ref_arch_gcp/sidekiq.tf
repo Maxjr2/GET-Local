@@ -31,6 +31,8 @@ module "sidekiq" {
 
   label_secondaries = true
 
+  tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+
   allow_stopping_for_update = var.allow_stopping_for_update
   machine_secure_boot       = var.machine_secure_boot
 }

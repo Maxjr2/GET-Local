@@ -25,6 +25,8 @@ module "consul" {
   service_account_user_members = var.service_account_user_members
   custom_service_account_email = lookup(var.custom_service_account_emails, "consul", null)
 
+  tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
+
   geo_site       = var.geo_site
   geo_deployment = var.geo_deployment
 
