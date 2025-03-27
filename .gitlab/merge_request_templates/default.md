@@ -17,7 +17,7 @@ We aim to review all MRs within 2 weeks although generally it's much quicker tha
 <!-- If you are unsure set to the next minor release and ask a maintainer to check -->
 /milestone %GET
 
-<!-- Set Work Type and Subtype Classification label(s) for the MR - https://about.gitlab.com/handbook/engineering/metrics/#work-type-classification -->
+<!-- Set Work Type and Subtype Classification label(s) for the MR - https://handbook.gitlab.com/handbook/product/groups/product-analysis/engineering/metrics/#work-type-classification -->
 <!-- Note: Only one subtype should be selected -->
 /label ~type::
 /label ~bug:: ~feature:: ~maintenance::
