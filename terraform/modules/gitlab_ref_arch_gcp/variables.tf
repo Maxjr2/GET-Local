@@ -1152,6 +1152,13 @@ variable "gitlab_shell_ssh_port" {
   default = null
 }
 
+variable "setup_iap_ssh_access" {
+  description = "Setup Cloud IAP SSH firewall access rule for nodes."
+
+  type    = bool
+  default = false
+}
+
 ## Labels
 variable "custom_labels" {
   type    = map(string)

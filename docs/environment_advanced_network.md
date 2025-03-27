@@ -135,6 +135,17 @@ In this setup however some tweaks will need to be made to Ansible:
 - The `external_url` setting should be set to the URL that the instance will be reachable internally
 - When using the Dynamic Inventory it will need to be adjusted to return internal IPs. This can be done by changing the `compose.ansible_host` setting to `private_ip_address`
 
+### Cloud IAP SSH access (GCP)
+
+The Toolkit allows for enabling [GCP Cloud Identity-Aware Proxy (IAP)](https://cloud.google.com/iap/docs/using-tcp-forwarding) access to nodes, both Linux package and GKE VMs, as desired.
+
+Specifically it can create the required Firewall rules for IAP tunnels to connect via the following setting in your Terraform `environment.tf` file:
+
+- `setup_iap_ssh_access` - Configures firewall rule(s) to allow GCP IAP tunnel access to Linux package and GKE nodes.
+
+> [!note]
+> Additional user permissions may be required to connect to nodes via IAP. Refer to the [GCP documentation](https://cloud.google.com/iap/docs/using-tcp-forwarding#grant-permission) for more information.
+
 ## Configure network setup (AWS)
 
 By default, the toolkit sets up the infrastructure on the default network stack as provided by AWS. However, it can also support other advanced setups such as creating a new network or using an existing one.

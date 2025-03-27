@@ -167,6 +167,8 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-webservice-node-pool"
     }, var.additional_labels, var.custom_labels, var.webservice_node_pool_custom_labels)
+
+    tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
   }
 
   lifecycle {
@@ -247,6 +249,8 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-sidekiq-node-pool"
     }, var.additional_labels, var.custom_labels, var.sidekiq_node_pool_custom_labels)
+
+    tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
   }
 
   lifecycle {
@@ -327,6 +331,8 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-supporting-node-pool"
     }, var.additional_labels, var.custom_labels, var.supporting_node_pool_custom_labels)
+
+    tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
   }
 
   lifecycle {
@@ -408,6 +414,8 @@ resource "google_container_node_pool" "gitlab_gitaly_pool" {
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-gitaly-node-pool"
     }, var.additional_labels, var.custom_labels, var.gitaly_node_pool_custom_labels)
+
+    tags = var.setup_iap_ssh_access ? ["${var.prefix}-iap"] : []
   }
 
   lifecycle {
@@ -418,26 +426,6 @@ resource "google_container_node_pool" "gitlab_gitaly_pool" {
       node_config[0].boot_disk_kms_key
     ]
   }
-}
-
-## Firewall
-resource "google_compute_firewall" "gitlab_kubernetes_vms_internal" {
-  count   = min(local.total_node_pool_count, 1)
-  name    = "${var.prefix}-kubernetes-vms-internal"
-  network = local.create_network ? google_compute_network.gitlab_vpc[0].self_link : data.google_compute_network.gitlab_network[0].self_link
-
-  description = "Allow internal access between GitLab Kubernetes containers and VMs"
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "tcp"
-  }
-
-  source_ranges = [google_container_cluster.gitlab_cluster[0].cluster_ipv4_cidr]
-  target_tags   = [var.prefix]
 }
 
 output "kubernetes" {
