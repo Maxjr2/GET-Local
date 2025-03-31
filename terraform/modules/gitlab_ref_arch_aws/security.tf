@@ -577,6 +577,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" 
 output "security" {
   value = {
     "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
+    "gitlab_rds_id"                 = try(aws_security_group.gitlab_rds[0].id, "")
   }
 }
 
