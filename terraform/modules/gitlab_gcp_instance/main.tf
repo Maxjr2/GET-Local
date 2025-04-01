@@ -90,11 +90,14 @@ locals {
     for i in range(var.node_count) :
     [
       for data_disk in var.disks : {
-        device_name = try(data_disk.name, data_disk.device_name)
-        size        = lookup(data_disk, "size", var.disk_size)
-        type        = lookup(data_disk, "type", var.disk_type)
+        device_name = data_disk.device_name
+        size        = coalesce(data_disk.size, var.disk_size)
+        type        = coalesce(data_disk.type, var.disk_type)
         node_num    = i
         zone        = var.zones == null ? null : element(var.zones, i)
+
+        snapshot         = try(data_disk.source_snapshots["${local.name_prefix}-${data_disk.device_name}-${i}"], null)
+        snapshot_kms_key = try(data_disk.source_snapshot_kms_key, null)
       }
     ]
   ])
@@ -136,9 +139,20 @@ resource "google_compute_disk" "gitlab" {
     }
   }
 
+  snapshot = each.value.snapshot
+  dynamic "source_snapshot_encryption_key" {
+    for_each = range(each.value.snapshot != null && each.value.snapshot_kms_key != null ? 1 : 0)
+
+    content {
+      kms_key_self_link = each.value.snapshot_kms_key
+    }
+  }
+
   lifecycle {
     ignore_changes = [
-      disk_encryption_key[0].kms_key_self_link
+      disk_encryption_key[0].kms_key_self_link,
+      snapshot,
+      source_snapshot_encryption_key[0].kms_key_self_link
     ]
   }
 }

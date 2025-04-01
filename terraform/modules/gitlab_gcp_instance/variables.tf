@@ -78,7 +78,9 @@ variable "geo_deployment" {
 }
 
 variable "disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
