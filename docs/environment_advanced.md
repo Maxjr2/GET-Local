@@ -188,15 +188,19 @@ The config is given per node type and is passed an array of hashes (each hash re
 
 ```tf
 gitaly_disks = [
-  { device_name = "data", size = 500, type = "pd-ssd" },
+  { device_name = "data", size = 500, type = "pd-ssd", source_snapshots = { "gitlab-gitaly-data-0": "<snapshot_0_id>", "gitlab-gitaly-data-1": "<snapshot_1_id>" }, source_snapshot_kms_key = "<key_id>" },
   { device_name = "logs", size = 50 }
 ]
 ```
 
-- `*_disks` - The main setting for each node group.
+- `*_disks` - The data disk configuration that will be used for every node in the group.
   - `device_name` - The name _and_ block device identifier for each disk attached. Must be unique per machine. **Required**.
   - `size` - The size of the disk in GB. **Optional**, default is `100`.
   - `type` - The [type](https://cloud.google.com/compute/docs/disks) of the disk. **Optional**, default is `pd-standard`.
+  - `source_snapshots` - A map that defines which snapshot should be used for the initial creation of each node's specific data disk, designated by the target disk name. **Optional**, default is `null`.
+    - Target disk names follow the format: `<prefix>-<node_type>-<data_disk_device_name>-<node_number>`. For example, with a `prefix` of `gitlab`, target disk names for a three-node Gitaly group would be `gitlab-gitaly-data-0`, `gitlab-gitaly-data-1`, and `gitlab-gitaly-data-2` (node numbers start at 0).
+    - Snapshot IDs can be passed in various formats, [refer to the Terraform GCP documentation for more information](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk#snapshot).
+  - `source_snapshot_kms_key` - KMS Key ID if snapshots have been encrypted by a Customer Managed Encryption Key (CMEK). **Optional**, default is `null`.
 
 **AWS**
 

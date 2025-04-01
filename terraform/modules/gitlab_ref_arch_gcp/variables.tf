@@ -111,7 +111,9 @@ variable "consul_disk_kms_key" {
   default = null
 }
 variable "consul_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -136,7 +138,9 @@ variable "gitaly_disk_kms_key" {
   default = null
 }
 variable "gitaly_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -161,7 +165,9 @@ variable "gitlab_nfs_disk_kms_key" {
   default = null
 }
 variable "gitlab_nfs_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -186,7 +192,9 @@ variable "gitlab_rails_disk_kms_key" {
   default = null
 }
 variable "gitlab_rails_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 variable "gitlab_rails_external_ips" {
@@ -220,7 +228,9 @@ variable "haproxy_external_external_ips" {
   default = []
 }
 variable "haproxy_external_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -245,7 +255,9 @@ variable "haproxy_internal_disk_kms_key" {
   default = null
 }
 variable "haproxy_internal_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -270,7 +282,9 @@ variable "monitor_disk_kms_key" {
   default = null
 }
 variable "monitor_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -295,7 +309,9 @@ variable "opensearch_vm_disk_kms_key" {
   default = null
 }
 variable "opensearch_vm_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -320,7 +336,9 @@ variable "pgbouncer_disk_kms_key" {
   default = null
 }
 variable "pgbouncer_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -345,7 +363,9 @@ variable "postgres_disk_kms_key" {
   default = null
 }
 variable "postgres_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -370,7 +390,9 @@ variable "praefect_disk_kms_key" {
   default = null
 }
 variable "praefect_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -395,7 +417,9 @@ variable "praefect_postgres_disk_kms_key" {
   default = null
 }
 variable "praefect_postgres_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -420,7 +444,9 @@ variable "redis_disk_kms_key" {
   default = null
 }
 variable "redis_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -445,7 +471,9 @@ variable "redis_cache_disk_kms_key" {
   default = null
 }
 variable "redis_cache_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -470,7 +498,9 @@ variable "redis_persistent_disk_kms_key" {
   default = null
 }
 variable "redis_persistent_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
@@ -495,7 +525,9 @@ variable "sidekiq_disk_kms_key" {
   default = null
 }
 variable "sidekiq_disks" {
-  type    = list(any)
+  type = list(
+    object({ device_name = string, size = optional(number), type = optional(string), source_snapshots = optional(map(string)), source_snapshot_kms_key = optional(string) })
+  )
   default = []
 }
 
