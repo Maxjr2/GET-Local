@@ -84,6 +84,7 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
 
   iam_database_authentication_enabled = var.rds_geo_tracking_postgres_iam_database_authentication_enabled
 
+  # Checks for cascading read replicas on RDS, which are only supported on 14.0 and higher
   backup_window            = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_backup_window : null
   backup_retention_period  = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_backup_retention_period : null
   delete_automated_backups = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_delete_automated_backups : null
@@ -144,6 +145,7 @@ resource "aws_db_instance" "gitlab_geo_tracking_read_replica" {
 
   iam_database_authentication_enabled = aws_db_instance.gitlab_geo_tracking[0].iam_database_authentication_enabled
 
+  # Checks for cascading read replicas on RDS, which are only supported on 14.0 and higher
   backup_window            = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_backup_window : null
   backup_retention_period  = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_backup_retention_period : null
   delete_automated_backups = local.rds_geo_tracking_postgres_major_version >= 14 ? var.rds_geo_tracking_postgres_delete_automated_backups : null
