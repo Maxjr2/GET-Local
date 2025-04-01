@@ -142,7 +142,9 @@ variable "consul_disk_kms_key_arn" {
   default = null
 }
 variable "consul_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "consul_iam_instance_policy_arns" {
@@ -188,7 +190,9 @@ variable "gitaly_disk_kms_key_arn" {
   default = null
 }
 variable "gitaly_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "gitaly_iam_instance_policy_arns" {
@@ -230,7 +234,9 @@ variable "gitlab_nfs_disk_kms_key_arn" {
   default = null
 }
 variable "gitlab_nfs_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "gitlab_nfs_iam_instance_policy_arns" {
@@ -272,7 +278,9 @@ variable "gitlab_rails_disk_kms_key_arn" {
   default = null
 }
 variable "gitlab_rails_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "gitlab_rails_iam_instance_policy_arns" {
@@ -324,7 +332,9 @@ variable "haproxy_external_disk_kms_key_arn" {
   default = null
 }
 variable "haproxy_external_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "haproxy_external_elastic_ip_allocation_ids" {
@@ -370,7 +380,9 @@ variable "haproxy_internal_disk_kms_key_arn" {
   default = null
 }
 variable "haproxy_internal_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "haproxy_internal_iam_instance_policy_arns" {
@@ -412,7 +424,9 @@ variable "monitor_disk_kms_key_arn" {
   default = null
 }
 variable "monitor_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "monitor_iam_instance_policy_arns" {
@@ -460,7 +474,9 @@ variable "opensearch_vm_disk_kms_key_arn" {
   default = null
 }
 variable "opensearch_vm_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "opensearch_vm_iam_instance_policy_arns" {
@@ -502,7 +518,9 @@ variable "pgbouncer_disk_kms_key_arn" {
   default = null
 }
 variable "pgbouncer_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "pgbouncer_iam_instance_policy_arns" {
@@ -544,7 +562,9 @@ variable "postgres_disk_kms_key_arn" {
   default = null
 }
 variable "postgres_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "postgres_iam_instance_policy_arns" {
@@ -586,7 +606,9 @@ variable "praefect_disk_kms_key_arn" {
   default = null
 }
 variable "praefect_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "praefect_iam_instance_policy_arns" {
@@ -628,7 +650,9 @@ variable "praefect_postgres_disk_kms_key_arn" {
   default = null
 }
 variable "praefect_postgres_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "praefect_postgres_iam_instance_policy_arns" {
@@ -670,7 +694,9 @@ variable "redis_disk_kms_key_arn" {
   default = null
 }
 variable "redis_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "redis_iam_instance_policy_arns" {
@@ -712,7 +738,9 @@ variable "redis_cache_disk_kms_key_arn" {
   default = null
 }
 variable "redis_cache_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "redis_cache_iam_instance_policy_arns" {
@@ -754,7 +782,9 @@ variable "redis_persistent_disk_kms_key_arn" {
   default = null
 }
 variable "redis_persistent_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "redis_persistent_iam_instance_policy_arns" {
@@ -796,7 +826,9 @@ variable "sidekiq_disk_kms_key_arn" {
   default = null
 }
 variable "sidekiq_data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 variable "sidekiq_iam_instance_policy_arns" {

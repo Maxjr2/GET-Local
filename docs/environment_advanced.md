@@ -221,18 +221,21 @@ gitaly_disks = [
 
 ```tf
 gitaly_data_disks = [
-  { name = "data", device_name = "/dev/sdf", size = 500, iops = 8000, snapshots = { start_time = "01:00", interval = "24", retain_count = "14" } },
-  { name = "logs", device_name = "/dev/sdg" }
+  { name = "data", device_name = "/dev/sdf", size = 500, iops = 8000, source_snapshots = { "gitlab-gitaly-1-data": "<snapshot_1_id>", "gitlab-gitaly-2-data": "<snapshot_2_id>" } },
+  { name = "logs", device_name = "/dev/sdg", snapshots = { start_time = "01:00", interval = "24", retain_count = "14" } }
 ]
 ```
 
-- `*_data_disks` - The main setting for each node group.
+- `*_data_disks` - The data disk configuration that will be used for every node in the group.
   - `name` - The name for each disk attached. Must be unique per machine. **Required**.
-  - `device_name` = The block device name for each disk attached. For AWS, due to limitations, this must be in the format `/dev/sd[f-p]` and unique for each disk (more info [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html)). Additionally, each block device name must be available on all machines in the target group (e.g. `gitaly-1` or `gitaly-2`). **Required**.
+  - `device_name` = The block device name for each disk attached. For AWS, due to its design, this must be in the format `/dev/sd[f-p]` and unique for each disk (more info [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html)). Additionally, each block device name must be available on all machines in the target group (e.g. `gitaly-1` or `gitaly-2`). **Required**.
   - `size` - The size of the disk in GB. **Optional**, default is `100`.
   - `type` - The [type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html) of the disk. **Optional**, default is `gp3`.
   - `iops` - The amount of IOPS to provision for the disk. Only valid for types of `io1`, `io2` or `gp3`. **Optional**, default is `null`.
-  - `skip_destroy` - Set this to true if you do not wish to detach the volume from the instance to which it is attached at destroy time, and instead just remove the attachment from Terraform state. This is useful when destroying an instance which has volumes created by some other means attached. **Optional**, defaults to false
+  - `skip_destroy` - Set this to `true` if you do not wish to detach the volume from the instance to which it is attached at destroy time, and instead just remove the attachment from Terraform state. This is useful when destroying an instance which has volumes created by some other means attached. **Optional**, defaults to `false`.
+  - `source_snapshots` - A map that defines which snapshot should be used for the initial creation of each node's specific data disk. Specified in the format `<target_data_disk_name>: <snapshot_id>`. **Optional**, default is `null`.
+    - Target disk names follow the format: `<prefix>-<node_type>-<node_number>-<data_disk_name>`. For example, with a `prefix` of `gitlab`, target disk names for a three-node Gitaly group would be `gitlab-gitaly-1-data`, `gitlab-gitaly-2-data`, and `gitlab-gitaly-3-data`.
+    - Snapshot IDs should be passed in the expected AWS format of `snap-<ID>`. Refer to the [AWS documentation](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-describing-snapshots.html) on how to retrieve the IDs.
   - `snapshots` - Configuration to schedule backup snapshots of the disk via AWS Data Lifecycle Manager. **Optional**
     - `start_time` - The time to start the schedule from.
     - `interval` - The interval in hours between snapshots e.g. `24`. Possible values are `1`, `2`, `3`, `4`, `6`, `8`, `12` or `24`.

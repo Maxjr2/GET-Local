@@ -8,17 +8,15 @@ locals {
     [
       for data_disk in var.data_disks : {
         name                           = data_disk.name
-        num                            = index(var.data_disks, data_disk)
-        type                           = lookup(data_disk, "type", var.disk_type)
-        size                           = lookup(data_disk, "size", var.disk_size)
-        iops                           = lookup(data_disk, "iops", null)
         device_name                    = data_disk.device_name
+        type                           = coalesce(data_disk.type, var.disk_type)
+        size                           = coalesce(data_disk.size, var.disk_size)
+        iops                           = try(data_disk.iops, null)
         availability_zone              = aws_instance.gitlab[i].availability_zone
         instance_id                    = aws_instance.gitlab[i].id
         instance_name                  = local.instance_names[i]
-        instance_num                   = i
-        instance_disk_num              = index(var.data_disks, data_disk)
-        skip_destroy                   = lookup(data_disk, "skip_destroy", null)
+        snapshot_id                    = try(data_disk.source_snapshots["${local.instance_names[i]}-${data_disk.name}"], null)
+        skip_destroy                   = try(data_disk.skip_destroy, null)
         stop_instance_before_detaching = true
       }
       if data_disk.name != null
@@ -37,6 +35,8 @@ resource "aws_ebs_volume" "gitlab" {
   encrypted  = true
   kms_key_id = var.disk_kms_key_arn
 
+  snapshot_id = each.value.snapshot_id
+
   ## TODO: additional_tags is deprecated and will be removed in 4.x
   tags = merge({
     Name                       = each.key
@@ -47,7 +47,8 @@ resource "aws_ebs_volume" "gitlab" {
     ignore_changes = [
       availability_zone,
       encrypted,
-      kms_key_id
+      kms_key_id,
+      snapshot_id
     ]
   }
 }
@@ -69,7 +70,7 @@ locals {
       name      = data_disk.name
       snapshots = data_disk.snapshots
     }
-    if contains(keys(data_disk), "snapshots")
+    if data_disk.snapshots != null
   ]
 }
 
