@@ -65,7 +65,8 @@ This approach ensures we maintain comprehensive cloud verification while optimiz
 
 The Toolkit has been designed to have reasonable defaults for production deployments. If it is deemed necessary to use the Toolkit for testing these defaults can be adjusted to reduce the cost accordingly depending on the context. Refer to each section below for more options:
 
-:information_source:&nbsp; Adjusting options as given in this guide must only be done for testing purposes. These adjustments should not be done for production environments unless it's understood to not be impactful.
+> [!note]
+> Adjusting options as given in this guide must only be done for testing purposes. These adjustments should not be done for production environments unless it's understood to not be impactful.
 
 #### General
 

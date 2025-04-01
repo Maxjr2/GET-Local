@@ -128,7 +128,8 @@ output "gitlab_ref_arch_gcp" {
 }
 ```
 
-:information_source:&nbsp; With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional, Zonal and Autoscaling)](#gke-cluster-availability-type-regional-zonal-and-autoscaling) for more information.
+> [!note]
+> With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional, Zonal and Autoscaling)](#gke-cluster-availability-type-regional-zonal-and-autoscaling) for more information.
 
 In addition to the above there are some optional settings that can configure the GKE setup as follows:
 
@@ -164,9 +165,11 @@ Private clusters can be configured in Terraform  as follows in your [`environmen
 - `gke_enable_private_endpoint` - Flag to configure if **only** a Private endpoint is enabled for the Private cluster. If `false` then both a Public and Private endpoint are enabled. Optional, default is `false`.
 - `gke_master_ipv4_cidr_block` - The CIDR block to be used by the Private Cluster for its internal network. The block must be a `/28` subnet and must not overlap with any other ranges in use within the cluster's network. Optional, default is `10.87.0.0/28`.
 
-:information_source:&nbsp; Note that it's not possible to convert an existing GKE cluster to be Private and attempting to enable this will trigger a full recreation of the GKE Cluster.
+> [!note]
+> It's not possible to convert an existing GKE cluster to be Private. Attempting to do this will trigger a full recreation of the GKE Cluster.
 
-:information_source:&nbsp; Note that when the `gke_enable_private_endpoint` is enabled the `master_authorized_networks_config` setting is also enabled as required by GCP to block all addresses except Cluster IPs. Though additional private address access can be configured. See [GKE Authorized Network config](#gke-authorized-network-config) for more information.
+> [!note]
+> When `gke_enable_private_endpoint` is enabled, GCP requires the `master_authorized_networks_config` setting to be enabled to block external access to the cluster's control plane. By default, only cluster node IPs will be allowed, though you can configure additional private network access. See [GKE Authorized Network config](#gke-authorized-network-config) for more information.
 
 #### GKE Authorized Network config
 
@@ -183,7 +186,8 @@ For more information refer to the [GCP documentation](https://cloud.google.com/k
 
 #### GKE Workload Identity
 
-:information_source:&nbsp; GKE Workload Identity is only supported with Charts installations from GitLab `17.0`.
+> [!note]
+> GKE Workload Identity is only supported with Charts installations from GitLab `17.0`.
 
 [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) can optionally be configured with the Toolkit. This is to allow deployments to authenticate directly via their own [Service Accounts](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts) to GCP services instead of using node accounts as a further security best practice.
 
@@ -191,7 +195,8 @@ Enabling Workload Identity will instruct the Toolkit to not only enable that opt
 
 - `gke_enable_workload_identity` - Enable [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) in the GKE cluster to deployments to authenticate directly via their own service accounts. Optional, default is `false`.
 
-:information_source:&nbsp; [Subsequent configuration via Ansible](#google-cloud-platform-gcp-1) will be required to configure Workload Identity fully. Namely, the `gcp_gke_workload_identity_setup` variable will need to be set as well as the `gcp_service_account_prefix` setting if [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) has been changed.
+> [!important]
+> To complete the Workload Identity setup, additional Ansible configuration is required. Refer to the [section](#google-cloud-platform-gcp-1) for more information.
 
 ##### GitLab Chart Namespace
 
@@ -205,7 +210,8 @@ As such, if you do choose to change the namespace for GitLab components you shou
 
 With a Cloud Native Hybrid environment, [GitLab backups are taken via the Toolbox chart](https://docs.gitlab.com/charts/backup-restore/) that in turn will save backups to a selected Object Storage Bucket.
 
-:information_source:&nbsp; For GitLab version `17.0` and higher, [Application Default Credentials](https://docs.gitlab.com/charts/advanced/external-object-storage/#backups) are used by default and no further configuration will be required.
+> [!note]
+> For GitLab version `17.0` and higher, [Application Default Credentials](https://docs.gitlab.com/charts/advanced/external-object-storage/#backups) are used by default and no further configuration will be required.
 
 For GitLab versions lower than `17.0`, an additional step is required to configure this correctly as the Charts require [the key of a Service Account](https://cloud.google.com/iam/docs/keys-create-delete) with the correct permissions to be given for the Toolbox to use at this time.
 
@@ -226,7 +232,8 @@ Note that you can also create a separate Service Account and key if desired as l
 
 The Toolkit allows for you to configure GKE Node Pool disk encryption with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) instead of the service defaults.
 
-:information_source:&nbsp; Refer to the main [Customer managed encryption keys (CMEK) (GCP)](environment_provision.md#customer-managed-encryption-keys-cmek-gcp) section for more information on key requirements and setup.
+> [!note]
+> Refer to the main [Customer managed encryption keys (CMEK) (GCP)](environment_provision.md#customer-managed-encryption-keys-cmek-gcp) section for more information on key requirements and setup.
 
 This can be configured in Terraform via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf) with the following variables:
 
@@ -241,7 +248,8 @@ As an additional security layer for Kubernetes secrets, which are already encryp
 This feature requires a [Cloud KMS key to be created separately](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating-key). Once created, the feature can be enabled via the following variable in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
 - `gke_database_encryption_key_name` - The resource name for an existing [Cloud KMS key](https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating-key) to be used to envelope encrypt Kubernetes secrets. The name must be the full resource name and should be created in the correct region for a Zonal cluster as well as have the required permissions as detailed in the documentation. Optional, default is `null`.
-  - :information_source:&nbsp; Note that the name must be given in its [full resource ID format](https://cloud.google.com/kms/docs/resource-hierarchy) (`projects/<project-id>/locations/<location>/keyRings/<keyring>/cryptoKeys/<key>`)
+  > [!note]
+  > The name must be given in its [full resource ID format](https://cloud.google.com/kms/docs/resource-hierarchy) (`projects/<project-id>/locations/<location>/keyRings/<keyring>/cryptoKeys/<key>`)
 
 ### Amazon Web Services (AWS)
 
@@ -314,7 +322,8 @@ However, you can also specify the version as well as control upgrades if desired
 
 - `eks_version` - The Kubernetes version that the cluster should use if direct control is desired. Increase this value to perform an upgrade directly. Note that when set this also upgrades the Node Group VM's to use the latest AMI version for the cluster (see below for more info). Default is `null`.
 
-:information_source:&nbsp; It's recommended to regularly update your EKS version as the service will automatically upgrade clusters on versions that have reached the end of their support period, which in turn could create unintended clashes with the Terraform state. See [EKS Upgrade Policy](#eks-upgrade-policy) for more information.
+> [!tip]
+> It's recommended to regularly update your EKS version as the service will automatically upgrade clusters on versions that have reached the end of their support period, which in turn could create unintended clashes with the Terraform state. See [EKS Upgrade Policy](#eks-upgrade-policy) for more information.
 
 ##### EKS Upgrade Policy
 
@@ -329,7 +338,8 @@ The default on AWS EKS is Extended. The Toolkit allows for you to change this as
 
 - `eks_upgrade_policy` - The [upgrade policy](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html) for the EKS Cluster. Can be `EXTENDED` (service default) or `STANDARD`. Default is `null`.
 
-:information_source:&nbsp; It's recommended in either case to manage upgrades yourself before this behaviour is triggered to avoid any unexpected clashes with the Terraform state.
+> [!tip]
+> It's recommended in either case to manage upgrades yourself before this behaviour is triggered to avoid any unexpected clashes with the Terraform state.
 
 #### EKS Node Group AMI Type and Versions
 
@@ -339,12 +349,11 @@ It's possible to configure what AMIs are to be used for the EKS Node Groups. The
 
 AWS provides numerous [optimized Amazon Linux AMIs](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html). These are divided by Amazon Linux version, CPU architecture and EKS version. The Toolkit supports Amazon Linux AMIs as well as optional automatic upgrades where a new AMI version is released for the selected type.
 
-:information_source:&nbsp; This is the default option in the Toolkit. It will automatically select the Amazon Linux AMI type that is the default for the EKS version, either Amazon Linux 2 or 2023.
-
 This can be configured further in Terraform via the following settings in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
 - `eks_node_group_ami_type` - Optimized AMI type to use based on machine spec. Can be one of `AL2_x86_64`, `AL2_ARM_64`, `AL2023_x86_64_STANDARD` or `AL2023_ARM_64_STANDARD`. Will default to AWS x86 default for EKS version. Ignored if `eks_node_group_custom_ami_id` is set. Default is `AL2_x86_64` for EKS versions lower than `1.30` and `AL2023_x86_64_STANDARD` for versions equal to or higher.
-  - :information_source:&nbsp; Note that if deploying on ARM machine types this setting will always need to be configured to the corresponding type.
+  > [!tip]
+  > If deploying on ARM machine types this setting will always need to be configured to the corresponding type.
 - `eks_node_group_ami_release_version` - The [AMI release version](https://docs.aws.amazon.com/eks/latest/userguide/eks-linux-ami-versions.html) to use for the selected AMI type EKS. Can either be set to a specific version or just `latest` to enable automatic upgrades on subsequent Terraform runs. Defaults to `null`.
 - `eks_node_group_ami_force_update_version` - If `eks_node_group_ami_release_version` is set to `latest` this additional variable can be set to `true` to force versions updates that ignores any pod draining blocks due to pod distribution budgets. Defaults to `null`.
 
@@ -352,7 +361,8 @@ This can be configured further in Terraform via the following settings in your [
 
 As an alternative it's also possible to set a specific custom AMI ID to be used for the Node Groups if desired.
 
-:information_source:&nbsp; Creating such an image is outside the scope of this documentation, refer to the [official AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html) for more information.
+> [!note]
+> Creating such an image is outside the scope of this documentation, refer to the [official AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html) for more information.
 
 When deploying EKS Node Groups with a custom AMI ID a [`user data` script](https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data) is required to be run on the nodes for them to join the cluster correctly. The Toolkit supports the `bootstrap` and `nodeadm` user data types and will configure this automatically for you as directed.
 
@@ -387,8 +397,8 @@ Granting access to additional principals in the past required manually editing t
 Access Entries allow for IAM principals to be configured natively via AWS EKS APIs and other interfaces, including Terraform. As such, the Toolkit enables this method by default and allows configuring standard access for specific IAM principals via the following variable in your Terraform [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
 - `eks_access_config_iam_arns` - A list of IAM principal ARNs to grant standard access to the created EKS cluster. Optional, default is `null`.
-
-:information_source:&nbsp; For more advanced entries this can be configured separately, including the configuration of any [Access Entry Policy Associations](https://docs.aws.amazon.com/eks/latest/userguide/access-policies.html). Also note that the `aws-auth` ConfigMap option is also enabled on Toolkit created EKS clusters for backwards compatibility.
+  > [!note]
+  > For more advanced entries this can be configured separately, including the configuration of any [Access Entry Policy Associations](https://docs.aws.amazon.com/eks/latest/userguide/access-policies.html). Also note that the `aws-auth` ConfigMap option is also enabled on Toolkit created EKS clusters for backwards compatibility.
 
 #### EKS IAM roles for service accounts (IRSA)
 
@@ -439,14 +449,16 @@ The Toolkit will configure this endpoint to be both Public and Private by defaul
 In some cases you may prefer to restrict who can connect to the Public endpoint or disable it entirely. This is configurable in the Toolkit via Terraform with the following settings in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
 - `eks_endpoint_public_access` - Controls if the Public endpoint is enabled. Defaults to `true`.
-  - :information_source:&nbsp; If this is disabled Ansible needs to be run within the same VPC as the Kubernetes cluster to ensure access.
+  > [!important]
+  > If this is disabled Ansible needs to be run within the same VPC as the Kubernetes cluster to ensure access.
 - `eks_endpoint_public_access_cidr_blocks` - A list of CIDR blocks that are allowed access to the Public endpoint. Defaults to `['0.0.0.0/0']`.
 
 #### EKS Control-Plane Logging
 
 Amazon EKS control plane logging provides audit and diagnostic logs directly from the Amazon EKS control plane to CloudWatch Logs. You can select the exact log types you need by configuring the `eks_enabled_cluster_log_types` variable as an array of string values. Possible values are described in [Amazon EKS control plane logging documentation](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html). Logs are sent as log streams to AWS CloudWatch.
 
-:information_source:&nbsp; Note that there are additional costs to enable this feature. Refer to the above docs for more info.
+> [!note]
+> There are additional costs to enable this feature. Refer to the above docs for more info.
 
 #### EKS Storage Encryption
 
@@ -457,7 +469,8 @@ The Toolkit will enable encryption by default for EKS Storage by enabling via se
 
 The Toolkit allows for you to configure EKS Node Group disk encryption with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) instead of the service defaults.
 
-:information_source:&nbsp; Refer to the main [Customer managed encryption keys (CMEK) (AWS)](environment_provision.md#customer-managed-encryption-keys-cmek-aws) section for more information on key requirements and setup. Also note that any key used for EKS Node Group VM disks [requires additional policy to be set](https://docs.aws.amazon.com/autoscaling/ec2/userguide/key-policy-requirements-EBS-encryption.html) to allow the `AWSServiceRoleForAutoScaling` service-linked role access.
+> [!note]
+> Refer to the main [Customer managed encryption keys (CMEK) (AWS)](environment_provision.md#customer-managed-encryption-keys-cmek-aws) section for more information on key requirements and setup. Also note that any key used for EKS Node Group VM disks [requires additional policy to be set](https://docs.aws.amazon.com/autoscaling/ec2/userguide/key-policy-requirements-EBS-encryption.html) to allow the `AWSServiceRoleForAutoScaling` service-linked role access.
 
 This can be configured in Terraform via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf) with the following variables:
 
@@ -471,7 +484,8 @@ As an additional security layer for Kubernetes secrets, which are already encryp
 
 Note however there are several limitations to this feature, such as manually having to encrypt any existing secrets, and it's recommended you review the [documentation](https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html#enable-kms) in full.
 
-:exclamation:&nbsp; Enabling this feature is irreversible. Any changes to the key or attempting to disable the feature will require a full rebuild of the cluster.
+> [!warning]
+> Enabling this feature is irreversible. Any changes to the key or attempting to disable the feature will require a full rebuild of the cluster.
 
 Enabling the feature is controlled via the following variables:
 
@@ -524,10 +538,12 @@ First let's detail the general settings that apply to any Cloud Provider:
 - `cloud_native_hybrid_environment` - Tells Ansible it's configuring a Cloud Native Hybrid Reference Architecture environment. **Required.**
 - `kubeconfig_setup` - When true, will attempt to automatically configure the `.kubeconfig` file entry for the provisioned Kubernetes cluster. **Recommended unless kubeconfig is to be setup separately.**
 - `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
-  - :information_source:&nbsp; - On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
+  > [!note]
+  > On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
   - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
 - `gitlab_operator` - Flag to use GitLab Operator for deployment instead of Charts. Only for new installations with GitLab version 17.6 and up. The Toolkit doesn't handle migration to Operator. Optional, default is `false`.
-  - :exclamation:&nbsp; This feature is available in Toolkit under [Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) status. The GitLab Operator has [known limitations](https://docs.gitlab.com/operator/#known-issues) and is only suitable for specific scenarios in production use. Make sure to confirm that your use case is applicable before enabling.
+  > [!note] Beta feature
+  > This feature is available in Toolkit under [Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) status. The GitLab Operator has [known limitations](https://docs.gitlab.com/operator/#known-issues) and is only suitable for specific scenarios in production use. Make sure to confirm that your use case is applicable before enabling.
 
 Next are sections covering various aspects for handling the charts from Install choices, Cloud Provider specifics as well as any other additional settings that can be considered.
 
@@ -649,7 +665,8 @@ all:
 
 The Toolkit provides several other settings that can customize a Cloud Native Hybrid setup further as follows:
 
-:information_source:&nbsp; Adjusting the scalability and resource management values should only be done in advanced scenarios and may impact the performance of the environment.
+> [!note]
+> Adjusting the scalability and resource management values should only be done in advanced scenarios and may impact the performance of the environment.
 
 - `gitlab_version` - Sets the GitLab version to be installed. The Toolkit finds and selects the equivalent Helm Chart version if configured. This should be set to the full semantic version, e.g. `14.0.0`. If left unset the Toolkit will look to install the latest version. Optional, default is `''`.
 - `gitlab_cloud_native_release_namespace`: Kubernetes namespace the Helm chart will be deployed to. This should only be changed when the namespace is known to be different from the typical default of `default`. Set to `default` by default.
@@ -688,13 +705,15 @@ It's recommended to let the Toolkit manage the above secrets for you by configur
 Additionally, depending on the setup, the following secrets may be copied from Linux package (Omnibus) VM backends if present to ensure consistency:
 
 - [GitLab Rails](https://docs.gitlab.com/charts/installation/secrets.html#gitlab-rails-secret) (as `gitlab-rails-secrets`) and [GitLab Shell](https://docs.gitlab.com/charts/installation/secrets.html#gitlab-shell-secret) secrets (as `gitlab-shell-token`) - Propagated from Linux package (Omnibus) backends if available to ensure synchronisation as required.
-  - :information_source:&nbsp; This includes any custom values for these secrets passed in via [Custom GitLab Secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) to Linux package (Omnibus) backends when present.
+  - > [!note]
+    > This includes any custom values for these secrets passed in via [Custom GitLab Secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) to Linux package (Omnibus) backends when present.
 
 #### Custom Kubernetes Secrets (via Custom Tasks)
 
 It's possible for you to set your own custom Kubernetes secrets as desired via a tasks hook.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
 
 This can be used to set any Kubernetes secret, including any of the ones [noted above](#kubernetes-secrets), although this is generally not recommended as noted. If you choose to configure secrets directly in this manner you would also be expected to manage any dependents such as ensuring GitLab secrets are correctly synchronised on any backends as required as well as Charts config to consume said secrets.
 

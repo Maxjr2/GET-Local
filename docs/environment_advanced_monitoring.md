@@ -20,7 +20,8 @@
 
 The Toolkit supports setting up optional monitoring of the environment of metrics such as CPU and Memory as well as GitLab specific metrics.
 
-:information_source:&nbsp; Note that the following monitoring setups are optional. You're not required to use this functionality for monitoring your environment, and you can use a different setup as desired.
+> [!note]
+> The following monitoring setups are optional. You're not required to use this functionality for monitoring your environment, and you can use a different setup as desired.
 
 While the implementation differs between Omnibus and Cloud Native Hybrid environments the same core components are used in each:
 
@@ -73,7 +74,8 @@ All of this is handled in Ansible via several settings in the [`vars.yml`](envir
 - `kube_prometheus_stack_charts_namespace` - The [Kubernetes Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for the `kube-prometheus-stack` chart. Defaults to `monitoring`.
 - `kube_prometheus_stack_charts_storage_size` - The size of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for Prometheus data storage. Must be given in the [SI or Binary notation](https://kubernetes.io/docs/reference/glossary/?all=true#term-quantity), for example a `100 GB` storage would be `100Gi`. Defaults to `100Gi`.
 - `kube_prometheus_stack_charts_app_version` - The application version of the `kube-prometheus-stack` chart to deploy. Defaults to `v0.63.0`.
-  - :information_source:&nbsp; Upgrades of the `kube-prometheus-stack` have [several moving parts](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack#upgrading-an-existing-release-to-a-new-major-version). The Toolkit pins the version it uses for this reason and regular tested updates of the version will be made in subsequent Toolkit releases. If desired, this version can be changed to perform an upgrade and the Toolkit will attempt to manage this in full, but your experience may be different.
+  > [!note]
+  > Upgrades of the `kube-prometheus-stack` have [several moving parts](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack#upgrading-an-existing-release-to-a-new-major-version). The Toolkit pins the version it uses for this reason and regular tested updates of the version will be made in subsequent Toolkit releases. If desired, this version can be changed to perform an upgrade and the Toolkit will attempt to manage this in full, but your experience may be different.
 - `kube_prometheus_stack_charts_prometheus_scrape_config_setup` - Configures if any scrape configs should be configured by the Toolkit. Setting this to `false` will remove these to allow for more flexibility if desired. Optional, defaults to `true`.
 - `consul_charts_namespace` - The [Kubernetes Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for the `consul` chart. Defaults to `consul`.
 - `consul_charts_app_version` - The application version of the `consul` chart to deploy. Typically, should not be changed to ensure compatibility with Omnibus Consul version. Defaults to `1.12.3`.
@@ -91,7 +93,8 @@ all:
 
 Once completed, Prometheus will be scraping various Kubernetes, Pod and GitLab metrics.
 
-:information_source:&nbsp; The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
+> [!important] 
+> The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
 
 ### Persistent Volume (StorageClass)
 
@@ -110,7 +113,8 @@ Additionally it's possible for you to use a separate StorageClass that's been ad
 
 Like [other areas](environment_advanced.md#custom-config) you can pass in Custom Config for the monitoring stacks also.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Any custom config passed will always take precedence and may lead to various unintended consequences or broken environments if not used carefully. This includes when setting [Scrape Config](#custom-prometheus-scrape-options) or [Rules](#custom-prometheus-rules) as detailed in later in this guide - Custom Config will always take precedence.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Any custom config passed will always take precedence and may lead to various unintended consequences or broken environments if not used carefully. This includes when setting [Scrape Config](#custom-prometheus-scrape-options) or [Rules](#custom-prometheus-rules) as detailed in later in this guide - Custom Config will always take precedence.
 
 How this works differs depending on the environment setup used as detailed in the below sections.
 
@@ -142,7 +146,8 @@ By default, the Toolkit has the following options depending on the setup:
 
 How this works for each environment type differs as detailed in the below sections.
 
-:information_source:&nbsp; Note that [Custom Config](#custom-config) will take precedence over this if the same underlying variables are specified.
+> [!note]
+> If you're using [Custom Config](#custom-config) with the same variables configured it will take precedence over custom scrape options.
 
 ### Omnibus
 
@@ -188,7 +193,8 @@ Once the rules are in place you can then configure the Toolkit to set these up a
 
 For details on how to do this for each setup, refer to the applicable section below.
 
-:information_source:&nbsp; Note that [Custom Config](#custom-config) will take precedence over this if the same underlying variables are specified.
+> [!note]
+> If you're using [Custom Config](#custom-config) with the same variables configured it will take precedence over custom rules.
 
 ### Omnibus
 

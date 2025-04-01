@@ -22,7 +22,8 @@ With [Terraform](https://www.terraform.io/), you can automatically provision mac
 
 The Toolkit provides multiple curated [Terraform Modules](../terraform/modules) that will provision the machines for a GitLab environment as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/).
 
-:information_source:&nbsp; It's recommended that users have a good working knowledge of Terraform and GitLab administration before proceeding. This documentation assumes this throughout.
+> [!important]
+> A good working knowledge of Terraform and GitLab administration before proceeding is recommended. This documentation assumes this throughout.
 
 [[_TOC_]]
 
@@ -50,7 +51,8 @@ As an example, installing Terraform with `mise` is done as follows:
     mise install terraform -y
     ```
 
-:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required via `mise` - `mise install terraform <version> -y`
+  > [!note]
+  > The version of Terraform installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required via `mise` - `mise install terraform <version> -y`
 
 With the above completed Terraform should now be available on your command line. You can check this by running `terraform version`.
 
@@ -68,9 +70,10 @@ Before you start setting up the config you should select a Terraform Module sour
 
 Terraform can retrieve Modules from various [sources](https://www.terraform.io/language/modules/sources). The Toolkit's Modules are available from Local paths, Git URL or this Project's Terraform Module Registry.
 
-:information_source:&nbsp; This documentation assumes the Local method is being used but any of these sources can be used as desired.
-
 Below we detail each source and how to configure them:
+
+> [!note]
+> This documentation assumes the Local Path method is being used but any of these sources can be used as desired.
 
 ### Local Path
 
@@ -282,25 +285,35 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_machine_type` - The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for that component.
 - `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
 - `*_disk_type` - The [GCP disk type](https://cloud.google.com/compute/docs/disks/performance#type_comparison) that should be used for the root disk. For Gitaly and OpenSearch machines this defaults to `pd-ssd`. If not set, this defaults to `default_disk_type`, which is set to `pd-standard`.
-  - :information_source:&nbsp; Disk IOPS performance in GCP is determined not only by the disk type but also several other factors such as CPU and storage size. [Refer to the GCP documentation for more information](https://cloud.google.com/compute/docs/disks/performance).
+  > [!note]
+  > Disk IOPS performance in GCP is determined not only by the disk type but also several other factors such as CPU and storage size. [Refer to the GCP documentation for more information](https://cloud.google.com/compute/docs/disks/performance).
 - `haproxy_external_external_ips` - Set the external HAProxy load balancer to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP.
 - `gitlab_rails_external_ips` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP. This setting should be used when deploying single Rails node without external load balancer.
 
-In addition to the above, the following optional settings are also available:
+> [!note]
+> Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
+
+The following optional settings are available for configuring node and disk setup:
 
 - `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Supported OS versions are listed [in the README](../README.md#requirements). Defaults to `ubuntu-2404-lts-amd64`.
 - `machine_secure_boot` - Controls whether [Secure Boot](https://cloud.google.com/security/shielded-cloud/shielded-vm#secure-boot) is enabled on the VMs. Can only be enabled for OS Images that support the `Shielded VM` feature. Defaults to `false`.
-- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
-- `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
-- `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `pd-standard`.
 - `allow_stopping_for_update` - Controls whether Terraform can restart VMs when making changes if required. Should only be disabled for additional resilience. Defaults to `true`.
 
-To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
+The following optional settings are available for configuring Object Storage setup:
 
-:information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
+> [!warning]
+> Changing the `object_storage_buckets`, `object_storage_prefix` or `object_storage_location` settings on an existing environment can lead to buckets getting removed and data loss.
+
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. 
+- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. 
+- `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
+- `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
+- `object_storage_versioning` - Controls whether Terraform will enable [versioning in GCS buckets](https://cloud.google.com/storage/docs/object-versioning). Defaults to `false`.
+
+> [!tip]
+> To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
 
 ##### Configure Machine OS Image (GCP)
 
@@ -308,9 +321,11 @@ By default, the Toolkit will configure machines using Ubuntu 24.04.
 
 However, this can be changed via the `machine_image` in the [module's environment config file](#configure-module-settings-environmenttf) to the [machine image name as given by GCP](https://cloud.google.com/compute/docs/images/os-details), e.g. `ubuntu-2204-lts` or `rhel-8`.
 
-:information_source:&nbsp; Supported OS versions are listed [in the README](../README.md#requirements).
+> [!note]
+> Supported OS versions are listed [in the README](../README.md#requirements).
 
-:exclamation:&nbsp; **{-After deployment, this value shouldn't be changed as this would trigger a full rebuild (as it's treated as the base disk) and lead to data loss-}**. [Upgrading the OS should be done directly on the machines via their standard process](environment_upgrades.md#avoid-changing-machine-os-image).
+> [!note]
+> Changing the `machine_image` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
 
 ##### Object Storage options (GCP)
 
@@ -318,13 +333,12 @@ This section gives more detail on the available options for configuring GCP Obje
 
 ###### Object Storage location (GCP)
 
-The [Terraform Google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) doesn't automatically create buckets in the same region it's configured with. [This is due to the various location permutations available in GCP that don't directly map to regions](https://cloud.google.com/storage/docs/locations).
+GCP Buckets are created in the `US` multi-region by default [in the Terraform GCP provider](https://registry.terraform.io/providers/wiardvanrij/ipv4google/latest/docs/resources/storage_bucket#location-1).
 
-Depending on the provider's version it will typically create buckets in the `US` multi-region by default. The Toolkit follows this design.
+For optimal performance, you should configure the location to a [region](https://cloud.google.com/storage/docs/locations#location-r) or [multi-region](https://cloud.google.com/storage/docs/locations#location-mr) close to your environment as desired via the `object_storage_location` setting.
 
-To ensure good performance you should select a [location](https://cloud.google.com/storage/docs/locations) that is close to the region you've selected for the environment and configure this via the `object_storage_location` variable. We recommend either picking a [Multi-Region](https://cloud.google.com/storage/docs/locations#location-mr) if it's available for built-in HA or [Region](https://cloud.google.com/storage/docs/locations#location-r) if the former isn't available. However, any location can be chosen as desired based on your requirements.
-
-:exclamation:&nbsp; **{-Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss-}**
+> [!warning]
+> Changing bucket location on existing environments destroys all buckets and their data.
 
 ###### Object Storage versioning (GCP)
 
@@ -340,11 +354,11 @@ However, it's also possible to encrypt with custom keys, known as Customer manag
 
 The Toolkit allows for you to configure encrypting storage with [Customer-managed encryption keys (CMEK)](https://cloud.google.com/kms/docs/cmek) on GCP.
 
-:exclamation:&nbsp; Enabling CMEK is an advanced set up and is strongly recommended to only be done if you are aware of its limitations and consequences. This is typically a one way decision and subsequent mismanagement of keys can result in consequences such as data loss. Refer to the [Cloud Provider's documentation](https://cloud.google.com/kms/docs/cmek) for more information.
+>>> [!important]
+Enabling CMEK is irreversible and key mismanagement can cause data loss. Refer to the [Cloud Provider's documentation](https://cloud.google.com/kms/docs/cmek) for more information.
 
-:information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the GCP service's respective documentation for further guidance.
-
-Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
+Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the [GCP service's respective documentation](https://cloud.google.com/kms/docs/compatible-services#cmek_integrations) for further guidance.
+>>>
 
 - Keys must be available in Cloud KMS and in the same location as the intended environment and services.
 - The [Cloud KMS CryptoKey Encrypter/Decrypter](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.cryptoKeyEncrypterDecrypter) role must be granted on the key(s) for the associated Service Agent or Service Account depending on the service:
@@ -357,7 +371,8 @@ Creating and managing the key(s) should be done before running the Toolkit and h
 
 Once the Key(s) are created they can be configured in Terraform via the [module's environment config file](#configure-module-settings-environmenttf) with the following variables:
 
-:information_source:&nbsp; GCP Key resource names will be in the format `projects/<project-id>/locations/<location>/keyRings/<keyring-name>/cryptoKeys/<key-name>`
+> [!tip]
+> GCP Key resource names will be in the format `projects/<project-id>/locations/<location>/keyRings/<keyring-name>/cryptoKeys/<key-name>`
 
 - `default_disk_kms_key` - The GCP Key resource name to use for all disk storages across GCE Component VMs. Defaults to `null`.
   - `*_disk_kms_key` - The GCP Key resource name to use for specific component VM disks. Will override `default_disk_kms_key` if specified. Default is `null`.
@@ -383,7 +398,8 @@ By default, the Toolkit sets up the infrastructure on the default network stack 
 
 With GCP you can spread optionally spread resources across multiple [Availability Zones](https://cloud.google.com/compute/docs/regions-zones) in the selected region, overriding the default Zone configured in `variables.tf`. By doing this it adds additional resilience for the environment in the case a Zone ever went down.
 
-:information_source:&nbsp; Cross Zone networking does have an additional cost. Refer to the [GCP pricing page](https://cloud.google.com/vpc/network-pricing) for more info.
+> [!note]
+> Cross Zone networking has additional costs. Refer to the [GCP pricing page](https://cloud.google.com/vpc/network-pricing) for more info.
 
 No matter what Network design above you have selected, spreading resources across Zones can also be applied in the [module's environment config file](#configure-module-settings-environmenttf) with the following variables:
 
@@ -414,13 +430,12 @@ While this is designed to be seemless there are several options available to adj
 
 ###### Service Account User members (GCP)
 
-Part of the GCP IAM design is to require a separate specific role for members who wish to _use_ Service Accounts, such as attaching them to VMs and for [SSH OS login](https://cloud.google.com/compute/docs/oslogin/set-up-oslogin#configure_users). This permission is called [`Service Account User`](https://cloud.google.com/iam/docs/service-account-permissions#user-role) and is separate from the permission used to create Service Accounts and manage their permissions (`Service Account Admin`).
+GCP requires the [`Service Account User` role](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountUser) for members to in turn use Service Accounts, such as for attachment to nodes and [SSH OS login](https://cloud.google.com/compute/docs/oslogin/set-up-oslogin#configure_users). Following [GCP best practices](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) the role is not recommended to be assigned as the project level. As such, the Toolkit attaches this role per Service Account to the member running Terraform by default.
 
-[GCP recommends that this role is not granted at the project level](https://cloud.google.com/iam/docs/best-practices-service-accounts#project-folder-grants) for all Service Accounts. As such, the Toolkit will attach this role specifically for each created Service Account to the member account running Terraform by default.
+To prevent provisioning and SSH login errors when multiple members need to run Terraform, you may need to configure a static list of all expected members in the [module's environment config file](#configure-module-settings-environmenttf) via the following variable:
 
-For cases where there are multiple members expected to run Terraform you may see clashes as Terraform will switch to the running account each run and Ansible fails to log in due to the mismatch. In this scenario you can configure Terraform to instead set a custom static list of members in the [module's environment config file](#configure-module-settings-environmenttf) to include the member account(s) being used by Terraform and Ansible via the following variable:
-
-:exclamation:&nbsp; **This variable must be used with caution**. Any member passed here will have access to the full list of permissions as given by the [`Service Account User` role](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountUser) for every Service Account the Toolkit creates, specifically they will have the ability to impersonate the account.
+> [!caution]
+> Members configured via this list will be able to impersonate the Service Accounts created by the toolkit. Caution should be exercised to only add members to this list that are required.
 
 - `service_account_user_members` - List of GCP IAM identities that will be granted the `Service Account User` role on each created Service Account. This should include the member accounts being used by Terraform and Ansible (for SSH OS Login). Each entrant on the list must follow the [GCP format](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam#member/members). If not set the role will be set to the account running Terraform. Optional, default is `[]`.
 
@@ -493,7 +508,8 @@ variable "external_ip_allocation" {
 - `ssh_public_key_file` - Path to the public SSH key file. Previously created in the [Setup SSH Authentication - AWS](environment_prep.md#2-setup-ssh-authentication-aws) step. Not required if another connection method is being used.
 - `external_ip_allocation` - The Allocation ID for the static external IP the environment will be accessible on. Previously created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
 
-:information_source:&nbsp; The prefix must be unique to this environment and cannot match any other environments stored within your Cloud Provider. When provisioning your environment, if you get errors due to naming conflicts then the most likely cause will be due to other resources having the same prefix as in some cases names are global on Cloud Providers.
+> [!tip]
+> Choose a unique prefix that doesn't conflict with other environments in your AWS account. Some AWS resources require unique names globally all accounts.
 
 #### Configure Terraform settings (`main.tf`)
 
@@ -604,27 +620,36 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_node_count` - The number of machines to set up for that component
 - `*_instance_type` - The [AWS Instance Type Machine Type](https://aws.amazon.com/ec2/instance-types/) (size) for that component
 - `*_disk_size` - The size of root disk to assign to the machine. For Gitaly and OpenSearch machines this defaults to `500` (GB). For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
-- `*_disk_type` - The [AWS disk type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html) that should be used for the root disk. Note that the HDD options (`st1` / `sc1`) are not available for root disks. If not set, this defaults to `default_disk_type`, which is set to `gp3`.
-  - :information_source:&nbsp; Disk IOPS performance in AWS differs depending on type. For the most common `gp3` [General Purpose SSD type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/general-purpose.html#gp3-ebs-volume-type) a baseline of 3000 IOPS is given with additional IOPS configurable. With this disk type, configuring additional IOPS is offered only for components that may require it as follows:
-    - `gitaly_disk_iops` - The amount of total IOPS to provision for the Gitaly node root disks. Defaults to `8000`.
+- `*_disk_type` - The [AWS disk type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html) or root disks. HDD types (`st1` / `sc1`) are not supported for root disks. If not set, this defaults to `default_disk_type` of `gp3`.
+  > [!note]
+  > The default [`gp3` General Purpose SSD type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/general-purpose.html#gp3-ebs-volume-type) provides 3000 baseline IOPS. Additional IOPS can be configured for select components as follows:
+  - `gitaly_disk_iops` - The amount of total IOPS to provision for the Gitaly node root disks. Defaults to `8000`.
 - `*_disk_delete_on_termination` - (Optional) Whether the root volume should be destroyed on instance termination. Defaults to `true`.
 - `haproxy_external_elastic_ip_allocation_ids` - Set the external HAProxy load balancer to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID.
 - `gitlab_rails_elastic_ip_allocation_ids` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID. This setting should be used when deploying single Rails node without external load balancer.
 
-In addition to the above, the following optional settings are also available:
+> [!note]
+> Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
-- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
-- `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
-- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
-- `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
+The following optional settings are available for configure disk setup:
+
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `gp3`.
 - `*_user_data_base64` - Custom [EC2 user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) to pass to the machine. Default is `null`.
 
-To add custom tags to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
+The following optional settings are available for configuring Object Storage setup:
 
-:information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
+> [!warning]
+> Changing the `object_storage_buckets` or `object_storage_prefix` settings on an existing environment can lead to buckets getting removed and data loss.
+
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted.
+- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets.
+- `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
+- `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
+- `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
+
+> [!tip]
+> To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
 
 ##### Configure Machine OS Image (AWS)
 
@@ -632,9 +657,11 @@ By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AM
 
 However, this can be changed via the `ami_id` setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the AWS docs on how to find the specific AMI ID you require](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html).
 
-:information_source:&nbsp; Supported OS versions are listed [in the README](../README.md#requirements).
+> [!note]
+> Supported OS versions are listed [in the README](../README.md#requirements).
 
-:exclamation:&nbsp; **{-After deployment, this value shouldn't be changed as this would trigger a full rebuild (as it's treated as the base disk) and lead to data loss-}**. [Upgrading the OS should be done directly on the machines via their standard process](environment_upgrades.md#avoid-changing-machine-os-image).
+> [!note]
+> Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
 
 ##### Object Storage versioning (AWS)
 
@@ -646,22 +673,17 @@ By default, the toolkit sets up the infrastructure on the default network stack 
 
 ##### Storage Encryption (AWS)
 
-By default, AWS doesn't encrypt storages such as disks or object storage buckets.
+The Toolkit encrypts all storage by default using:
 
-The Toolkit will aim to encrypt these by default where possible utilizing the built-in AWS [default KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#kms_keys) or creating ones where that isn't possible. It also allows for you to pass in your own KMS key(s) as desired in a flexible manner.
+1. [AWS managed KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#kms_keys) where available
+1. Customer managed encryption keys (CMEK) - can be configured globally or per service/storage
 
-An overview of how the Toolkit handles this encryption is as follows:
+The Toolkit applies these in order of precedence of customer managed encryption keys then AWS managed/created keys.
 
-- By default, it will aim to encrypt all storages and services with AWS managed KMS keys.
-  - If an AWS managed KMS key isn't available for that particular service the Toolkit will create one.
-- A custom KMS key ARN (one that's available in AWS KMS) can be configured for use instead for all storages and services.
-- Additionally, it's possible to pass custom KMS key(s) for individual storages and services as desired.
+Encryption configuration options are detailed below in this section.
 
-The above is also the precedence of how the Toolkit will handle this. For example if you provided a custom KMS key for a specific storage only the Toolkit will use it as configured but then use the default key for the rest.
-
-There are several variables available to configure in the [module's environment config file](#configure-module-settings-environmenttf) for the encryption strategy desired. To cover the scenarios above we'll split each into its own section and how to configure blow.
-
-:exclamation:&nbsp; **{- Changing encryption settings setup on an existing environment must be treated with the utmost caution-}**. **Doing so is typically considered a significant change and may trigger the recreation of the affected storages and services leading to data loss**.
+> [!warning]
+> Changing encryption settings on existing environments can destroy and recreate storage resources, causing data loss.
 
 ###### Default Encryption
 
@@ -673,9 +695,11 @@ For S3 Object Storage, which has various options, the selected default encryptio
 
 The Toolkit allows for you to configure encrypting storage with [Customer-managed encryption keys (CMEK)](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-cmk) on AWS instead of service provided keys.
 
-:exclamation:&nbsp; Enabling CMEK is an advanced set up and is strongly recommended to only be done if you are aware of its limitations and consequences. This is typically a one way decision and subsequent mismanagement of keys can result in consequences such as data loss. Refer to the [Cloud Provider's documentation](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for more information.
+>>> [!important]
+Enabling CMEK is irreversible and key mismanagement can cause data loss. Refer to the [Cloud Provider's documentation](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for more information.
 
-:information_source:&nbsp; Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the AWS service's respective documentation for further guidance.
+Ongoing management of keys such as rotations are not within the scope of this documentation. Refer to the AWS service's respective documentation for further guidance.
+>>>
 
 Creating and managing the key(s) should be done before running the Toolkit and have the following requirements:
 
@@ -689,7 +713,6 @@ Once the Key(s) are created they can be configured in Terraform via the [module'
 - `default_disk_kms_key_arn` - The AWS KMS key ARN to be used for a specific component VM disks. Default is `null`.
   - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq`, `monitor`, `opensearch_vm`, `gitlab_nfs`, `haproxy_external` and `haproxy_internal`.
 - `object_storage_kms_key_arn` - The AWS KMS key ARN to be used for a S3 Object Storage buckets. Default is `null`.
-- :information_source:&nbsp; Refer to documentation for specific Cloud Services on how to configure CMEK for each accordingly.
 - `eks_default_disk_kms_key_arn` - The AWS KMS key ARN to be used for EKS Node Group VM disks. Default is `null`.
   - `*_node_pool_disk_kms_key_arn` - The AWS KMS key ARN to be used for specific EKS Node Group VM disks. Will override `eks_default_disk_kms_key_arn` if specified. Default is `null`.
     - Available component options: `webservice`, `sidekiq`, `supporting`.
@@ -886,20 +909,27 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_size` - The [Azure Machine Size](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes) for that component.
 - `*_disk_size` - The size of root disk to assign to the machine. For Gitaly machines this defaults to `4095` (GB) for IOPS requirements. For all other machines they fall back to `default_disk_size`, which defaults to `100` (GB).
 - `*_storage_account_type` - The [Azure disk storage account type](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types) that should be used for the root disk. For Gitaly machines this defaults to `Premium_LRS` (Premium SSD). If not set, this defaults to `default_disk_type`, which is set to `Standard_LRS` (Standard HDD).
-  - :information_source:&nbsp; Disk IOPS performance in Azure is determined not only by the disk type but also several other factors such as storage size. [Refer to the Azure documentation for more information](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size).
+  > [!note]
+  > Disk IOPS performance in Azure is determined not only by the disk type but also several other factors such as storage size. [Refer to the Azure documentation for more information](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size).
 - `haproxy_external_external_ip_names` - Set the external HAProxy load balancer to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name.
 - `gitlab_rails_external_ip_names` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP name set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP name. This setting should be used when deploying single Rails node without external load balancer.
 
-In addition to the above, the following optional settings are also available:
+> [!note]
+> Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
 
-- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. :exclamation:&nbsp; **Changing this setting on existing environments will result in the removed buckets and all of their data being destroyed**.
-- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. :exclamation:&nbsp; **Changing this setting on an existing environment must be treated with the utmost caution as it will destroy the previous bucket(s) and lead to data loss**.
+The following optional settings are available for configuring node and disk setup:
+
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `Standard_LRS`.
 - `external_ip_type` - [The type of Public IP](https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses) that will be created for each VM. Can be either `Standard` (recommended) or `Basic`. Default is `Basic` for backwards compatibility.
-- `additional_tags` - A dictionary of additional [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to VMs. Optional, default is `{}`.
 
-:information_source:&nbsp; Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
+The following optional settings are available for configuring Object Storage setup:
+
+> [!warning]
+> Changing the `object_storage_buckets` or `object_storage_prefix` settings on an existing environment can lead to buckets getting removed and data loss.
+
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. 
+- `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets.
 
 ##### Configure Machine OS Image (Azure)
 
@@ -909,9 +939,11 @@ However, this can be changed via the `source_image_reference` dictionary setting
 
 When the image has been selected the setting will need the `publisher`, `offer`, `sku` and `version` fields set. For example:
 
-:information_source:&nbsp; Supported OS versions are listed [in the README](../README.md#requirements).
+> [!note]
+> Supported OS versions are listed [in the README](../README.md#requirements).
 
-:exclamation:&nbsp; **{-After deployment, this value shouldn't be changed as this would trigger a full rebuild (as it's treated as the base disk) and lead to data loss-}**. [Upgrading the OS should be done directly on the machines via their standard process](environment_upgrades.md#avoid-changing-machine-os-image).
+> [!note]
+> Changing the `source_image_reference` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
 
 ```tf
 module "gitlab_ref_arch_azure" {
@@ -1048,8 +1080,6 @@ After the config has been set up you're now ready to provision the environment. 
     ```sh
     terraform apply
     ```
-
-:information_source:&nbsp; If you ever want to deprovision resources created, you can do so by running [terraform destroy](https://www.terraform.io/docs/cli/commands/destroy.html).
 
 ## Next Steps
 

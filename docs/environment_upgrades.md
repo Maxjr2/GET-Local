@@ -68,7 +68,8 @@ This is recommended as certain infrastructure changes can trigger large destroy 
 
 In addition to this we'll endeavour to call out any config options that if changed could also lead to the above.
 
-:information_source:&nbsp; This recommendation only applies to Terraform. The equivalent in Ansible - [check mode](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html) - is not supported due to incompatibilities with how that mode runs.
+> [!note]
+> This recommendation only applies to Terraform. The equivalent in Ansible - [check mode](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html) - is not supported due to incompatibilities with how that mode runs.
 
 ### Avoid automated Toolkit updates and Terraform Auto Approve together
 
@@ -78,7 +79,8 @@ This recommendation is especially so with Production instances. If you're using 
 
 ## Environment Upgrades
 
-:information_source:&nbsp; It's strongly recommended to always [upgrade the Toolkit first](#upgrade-the-toolkit-first) before upgrading your environment to ensure you have the latest config or fixes.
+> [!important]
+> It's strongly recommended to always [upgrade the Toolkit first](#upgrade-the-toolkit-first) before upgrading your environment to ensure you have the latest config or fixes.
 
 The Toolkit fully supports handling GitLab upgrades for your environment - with both [Upgrades with downtime](https://docs.gitlab.com/ee/update/with_downtime.html) and [Zero Downtime upgrades](https://docs.gitlab.com/ee/update/zero_downtime.html) supported.
 
@@ -113,7 +115,8 @@ To perform an upgrade with downtime:
 
 For Zero Downtime Upgrades, the Toolkit translates the [documented manual process](https://docs.gitlab.com/ee/update/zero_downtime.html) to achieve the same effect as much as possible.
 
-:information_source:&nbsp; Note that Zero Downtime Upgrades are **not available** for Cloud Native Hybrid environments as they aren't supported in the [GitLab Charts](https://docs.gitlab.com/charts/installation/upgrade.html).
+> [!note]
+> Zero Downtime Upgrades are **not available** for Cloud Native Hybrid environments as they aren't supported in the [GitLab Charts](https://docs.gitlab.com/charts/installation/upgrade.html).
 
 It should be noted that achieving true Zero Downtime during an upgrade is difficult and involving. There are various ways to approach this, all with pros and cons, and typically in most cases there will always be at least very small moments of downtime depending on that approach.
 
@@ -154,15 +157,18 @@ In advanced cases where the playbook fails for any reason but you're confident t
 - `zdu_start_point` - The starting point for the Zero Downtime Upgrade process. Defaults to the first component, which is `consul`.
   - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migration`
 
-:information_source:&nbsp; If the process has failed and you're in doubt as to why it's recommend to reach out to Support for further guidance.
+> [!note]
+> If the process has failed and you're in doubt as to why it's recommend to reach out to Support for further guidance.
 
 ### Environment Downgrades
 
 [GitLab Downgrades](https://docs.gitlab.com/ee/update/package/downgrade.html) are an involved process and have several prerequisites that need to be met beforehand and manual steps that need to be performed depending on your set up such as requiring a backup of the exact version to be restored.
 
-:exclamation:&nbsp; **{- Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.-}**
+> [!warning]
+> Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.
 
-:information_source:&nbsp; It's generally recommended you contact the [GitLab Support](https://about.gitlab.com/support/) team when doing a downgrade for additional support and guidance. This is especially so if the process has failed in any way.
+> [!note]
+> It's generally recommended you contact the [GitLab Support](https://about.gitlab.com/support/) team when doing a downgrade for additional support and guidance. This is especially so if the process has failed in any way.
 
 For this reason the Toolkit cannot manage the full downgrade process. It is however possible to configure the Toolkit to perform the action of installing the older version package only as part of a downgrade at your own risk.
 
@@ -172,7 +178,8 @@ To configure the Toolkit to install an older package version several flags are r
 - `gitlab_downgrade_prerequisites_met` - Set to `true` only and when you have all prerequisites in place and know how to complete the remaining downgrade process steps manually. Disable again after downgrade has been completed.
 - `gitlab_version` - Set to the version you wish to downgrade to.
 
-:information_source:&nbsp; After the remaining downgrade steps have been completed manually it's strongly recommended to disable the above settings again (except for `gitlab_version`) to prevent any further unintentional downgrades.
+> [!important]
+> After the remaining downgrade steps have been completed manually you must disable the above settings again (except for `gitlab_version`) to prevent any further unintentional downgrades.
 
 ## OS Upgrades
 
