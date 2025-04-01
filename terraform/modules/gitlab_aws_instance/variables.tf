@@ -77,7 +77,9 @@ variable "disk_kms_key_arn" {
 }
 
 variable "data_disks" {
-  type    = any
+  type = list(
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+  )
   default = []
 }
 
