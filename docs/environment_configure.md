@@ -22,7 +22,8 @@ With [Ansible](https://docs.ansible.com/ansible/latest/index.html), you can auto
 
 The Toolkit provides multiple curated [Ansible Playbooks and Roles](../ansible) that will install and configure GitLab as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/).
 
-:information_source:&nbsp; It's recommended that users have a good working knowledge of Ansible and GitLab administration before proceeding. This documentation assumes this throughout.
+> [!important]
+> A good working knowledge of Ansible and GitLab administration before proceeding is recommended. This documentation assumes this throughout.
 
 [[_TOC_]]
 
@@ -72,9 +73,11 @@ Hopefully with this overview its clearer how Ansible in the Toolkit works. Below
 
 The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `11.0` or higher (`ansible-core 2.18`).
 
-:information_source:&nbsp; Ansible itself typically has requirements on what Python version is installed on the control node. Whatever version you chose will have a corresponding Python version requirement. **For Ansible `11.x` (`ansible-core 2.18`), [Python `3.11` or higher is required](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)**. Note that this Python requirement only applies to the box actually running Ansible and not for the target boxes - Typically the latest available version from the OS is sufficient for the latter.
+> [!important]
+> Ansible 11.x (ansible-core 2.18) requires Python 3.11+ on the node it runs from. Target nodes can use the latest Python version available from their OS.
 
-:information_source:&nbsp; For RHEL 8 / Amazon Linux 2 targets an older version of Ansible is required due to Ansible support removal. See [this section for more information](environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
+> [!important]
+> For RHEL 8 / Amazon Linux 2 targets an older version of Ansible is required due to Ansible support removal. See [this section for more information](environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
 
 When choosing an [Ansible control node](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements), we recommend that it's in the same or near location as the environment being built to avoid network slowdown. Additionally, if you plan to use a cloud machine as a control node it is _not_ recommended to use [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can lead to inconsistent behaviour.
 
@@ -112,7 +115,7 @@ If installing Ansible locally, we recommend using this approach as your local en
 
 1. Install OpenSSH Client if not already installed as per your OS.
 
-:information_source:&nbsp; Note that if you're on a macOS machine you'll also need to install `gnu-tar` by running `brew install gnu-tar`
+1. On macOS, the `gnu-tar` utility is required by some Ansible modules. It can be installed via package managers such as Homebrew - `brew install gnu-tar`
 
 ### Bring-Your-Own Ansible
 
@@ -138,7 +141,7 @@ To do this you only have to run the following before proceeding:
 
 1. Install OpenSSH Client if not already installed as per your OS.
 
-:information_source:&nbsp; Note that if you're on a macOS machine you'll also need to install `gnu-tar` by running `brew install gnu-tar`
+1. On macOS, the `gnu-tar` utility is required by some Ansible modules. It can be installed via package managers such as Homebrew - `brew install gnu-tar`
 
 ## 2. Set up the Environment's Inventory and Config
 
@@ -399,7 +402,8 @@ There are [various variables available](#full-config-list-and-further-examples) 
 
 By default, the Toolkit will deploy the latest [GitLab EE Omnibus package](https://packages.gitlab.com/gitlab/gitlab-ee) via the official repo. However, there are other methods with options available.
 
-:information_source:&nbsp; Note that the [standard GitLab Upgrade rules still apply](https://docs.gitlab.com/ee/update/#upgrade-paths) when upgrading across multiple GitLab versions. You should refer to the docs to ensure the intended upgrade can be performed directly or if you need to upgrade to a certain version first.
+> [!important]
+> GitLab must be upgraded following the [standard upgrade paths](https://docs.gitlab.com/ee/update/#upgrade-paths). You must verify the upgrade path before proceeding.
 
 The package can be installed via two different methods - Repository or Direct. Below we detail each and the options available:
 
@@ -585,12 +589,6 @@ After the config has been set up you're now ready to configure the environment. 
 
 The same commands are used when you wish to update an existing environment.
 
-:information_source:&nbsp; If you ever want to uninstall GitLab, you can do so by running:
-
-```shell
-ansible-playbook -i environments/10k/inventory playbooks/uninstall.yml
-```
-
 ### Running with Ansible Collection (optional)
 
 The Toolkit's Ansible Playbooks and Roles can be installed and run as a [Collection](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html). Through this method you don't need the source code available locally to run, only your own Inventory and Variables.
@@ -599,7 +597,8 @@ To use this method all that's required is to install the Collection from this re
 
 First, installing the Collection is done as standard via the `ansible-galaxy` command from this repo:
 
-:information_source:&nbsp; The Collection can only be installed from this repo as shown below and isn't available from Ansible Galaxy due to license compliance.
+> [!note]
+> The Collection can only be installed from this repo as shown below and isn't available from Ansible Galaxy due to license compliance.
 
 ```shell
 ansible-galaxy collection install git+https://gitlab.com/gitlab-org/gitlab-environment-toolkit.git#/ansible/

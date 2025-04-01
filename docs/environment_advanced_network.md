@@ -22,8 +22,6 @@ By default, the Toolkit will configure network setup using the default cloud pro
 
 On this page we'll detail all the supported advanced setups you can do with the Toolkit. We recommend you only do these setups if you have a good working knowledge of both the Toolkit and what the specific setups involve.
 
-:exclamation:&nbsp; **{- Changing network setup on an existing environment must be treated with the utmost caution-}**. **Doing so can be considered a significant change and may trigger the recreation of the entire environment leading to data loss**.
-
 [[_TOC_]]
 
 ## Configure network setup (GCP)
@@ -36,7 +34,8 @@ The module for GCP can configure the [network stack](https://cloud.google.com/vp
 
 In this section you will find the config required to set up each depending on your requirements.
 
-:exclamation:&nbsp; **{- Changing network setup on an existing environment must be treated with the utmost caution-}**. **Doing so can be considered a significant change in GCP and may trigger the recreation of the entire environment leading to data loss**.
+> [!warning]
+> You should not change the network type on an existing environment. This will typically trigger a total environment rebuild and result in downtime and data loss.
 
 ### Default (GCP)
 
@@ -87,7 +86,8 @@ For this advanced setup, you must have an existing network stack for the environ
 - An existing VPC in the target project
 - That the VPC has subnets in the desired regions
 
-:information_source:&nbsp; When configured, the module will set up several GCP Firewall rules in the VPC to enable the correct network for the GitLab environment depending on the setup.
+> [!note]
+> When configured, the module will set up several GCP Firewall rules in the VPC to enable the correct network for the GitLab environment depending on the setup.
 
 To configure this setup the following config should be added to the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
@@ -160,7 +160,8 @@ Additionally, for the Created and Existing network types above you can configure
 
 In this section you will find the config required to set up each depending on your requirements.
 
-:exclamation:&nbsp; **{- Changing network setup on an existing environment must be avoided-}**. **Doing so is considered a significant change in AWS and will essentially trigger the recreation of the entire environment leading to data loss**.
+> [!warning]
+> You should not change the network type on an existing environment. This will typically trigger a total environment rebuild and result in downtime and data loss.
 
 ### Default (AWS)
 
@@ -214,19 +215,25 @@ In addition to the above the following _optional_ settings change how the networ
 
 #### Created Subnet Types (Public and Private)
 
-When creating a network the Toolkit supports creating both Public and Private subnets.
+The Toolkit supports creating both Public and Private subnets with three possible configurations based on the `subnet_pub_count` and `subnet_priv_count` settings:
 
-There are several possible combinations supported. The Toolkit will dynamically configure each based on what's been configured via the  `subnet_pub_count` and `subnet_priv_count` settings as follows:
+- **Public Subnets Only (Default)**
+  - All resources are placed in public subnets and have public IPs
+  - Configuration: `subnet_pub_count` > 0 and `subnet_priv_count` = 0
+- **Public + Private Subnets**
+  - Most resources are placed in Private subnets except externally-facing ones (HAProxy External, EKS Cluster)
+  - Configuration: `subnet_pub_count` > 0 and `subnet_priv_count` > 0
+     > [!note]
+     > Public and Private subnet counts must match to ensure proper [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) configuration for Internet access
+- **Private Subnets Only**
+  - Fully offline environment with all resources in private subnets
+  - Configuration: `subnet_pub_count` = 0 and `subnet_priv_count` > 0
+  - Requires additional setup such as:
+    - Private OS package repositories
+    - Private network links for access
 
-- Public Subnets - The default. All resources are placed in public subnets and have public IPs.
-  - When `subnet_pub_count` is higher than `0` and `subnet_priv_count` is `0`.
-- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External, EKS Cluster).
-  - When `subnet_pub_count` is higher than `0` and `subnet_priv_count` is higher than `0`.
-  - :information_source:&nbsp; **In this setup the number of Public and Private subnets must be the same**. This is to ensure [NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) can be configured for each private subnet on the corresponding public subnet to allow Internet access.
-- Private Subnets - A fully offline environment. All resources are placed in private subnets, additional setup will be required for GitLab to install, such as private OS package repos for example, along with resources such as private links to access.
-  - When `subnet_pub_count` is `0` and `subnet_priv_count` is higher than `0`.
-
-:information_source:&nbsp; When Private subnets are being used most VMs won't have a public IP address. As such, when running Ansible it should be run from within the network [with its Dynamic Inventory configured to connect via private IPs](environment_configure.md#amazon-web-services-aws) (`compose.ansible_host` set to `private_ip_address`).
+> [!note]
+> When using Private subnets, most VMs won't have public IP addresses. Ansible must be run from within the network with its [Dynamic Inventory configured to use private IPs](environment_configure.md#amazon-web-services-aws) (`compose.ansible_host` set to `private_ip_address`).
 
 ### Existing (AWS)
 
@@ -259,19 +266,25 @@ module "gitlab_ref_arch_aws" {
 
 #### Existing Subnet Types (Public and Private)
 
-When providing an existing network to the Toolkit it also supports the passthrough of public / private subnets.
+When providing an existing network to the Toolkit it also supports the passthrough of public / private subnets. Like created metworks the Toolkit supports the same three possible configurations based on the `subnet_pub_count` and `subnet_priv_count` settings:
 
-There are several possible combinations supported. The Toolkit will dynamically configure each based on what's been configured via the `subnet_pub_ids` and `subnet_priv_ids` settings as follows:
+- **Public Subnets Only (Default)**
+  - All resources are placed in public subnets and have public IPs
+  - Configuration: `subnet_pub_count` > 0 and `subnet_priv_count` = 0
+- **Public + Private Subnets**
+  - Most resources are placed in Private subnets except externally-facing ones (HAProxy External, EKS Cluster)
+  - Configuration: `subnet_pub_count` > 0 and `subnet_priv_count` > 0
+     > [!note]
+     > Public and Private subnet counts must match to ensure proper [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) configuration for Internet access
+- **Private Subnets Only**
+  - Fully offline environment with all resources in private subnets
+  - Configuration: `subnet_pub_count` = 0 and `subnet_priv_count` > 0
+  - Requires additional setup such as:
+    - Private OS package repositories
+    - Private network links for access
 
-- Public Subnets - The default. All resources are placed in public subnets and have public IPs.
-  - When `subnet_pub_ids` is higher than `0` and `subnet_priv_ids` is `0`.
-- Public + Private Subnets - All resources are placed in Private subnets by default except for those externally facing (HAProxy External and EKS Cluster).
-  - When `subnet_pub_ids` is higher than `0` and `subnet_priv_ids` is higher than `0`.
-  - :information_source:&nbsp; In this setup resources running on Private Subnets require Internet access via a [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) to be configured.
-- Private Subnets - A fully offline environment. All resources are placed in private subnets, additional setup will be required for GitLab to install, such as private OS package repos for example, along with resources such as private links to access.
-  - When `subnet_pub_ids` is `0` and `subnet_priv_ids` is higher than `0`.
-
-:information_source:&nbsp; When Private subnets are being used most VMs won't have a public IP address. As such, when running Ansible it should be run from within the network [with its Dynamic Inventory configured to connect via private IPs](environment_configure.md#amazon-web-services-aws) (`compose.ansible_host` set to `private_ip_address`).
+> [!note]
+> When using Private subnets, most VMs won't have public IP addresses. Ansible must be run from within the network with its [Dynamic Inventory configured to use private IPs](environment_configure.md#amazon-web-services-aws) (`compose.ansible_host` set to `private_ip_address`).
 
 ### Custom Security Groups
 
@@ -281,22 +294,22 @@ In some advanced cases additional security group configuration may be desired de
 
 For these scenarios the Toolkit supports customisation of node Security groups as follows via the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
-:information_source:&nbsp; It's recommended that these settings be used with caution as misconfigurations may result in exposed access to the selected machines unintentionally.
+> [!caution]
+> It's recommended that these settings be used with caution as misconfigurations may result in exposed access to the selected machines unintentionally.
 
 - `gitlab_rails_security_group_ids` - A list of additional Security Groups IDs for the GitLab Rails nodes. Optional, default is `[]`.
 - `monitor_security_group_ids` - A list of additional Security Groups IDs for the Monitor node(s). Optional, default is `[]`.
 
 ### Internal Security Group Access (Default / Existing networks)
 
-An Internal Networking security group is created by the Toolkit on AWS that allows for internal networking access to be configured between resources such as VMs or EKS Clusters in the VPC. This group is membership based as a best practice, as a result anything not in this group does not have access.
+The Toolkit creates an Internal Networking security group on AWS that manages access between VPC resources (VMs, EKS Clusters) through membership. By default, resources outside this group have no access.
 
-In some advanced cases though where your resources need internal access, such as a Bastion host on the same VPC, the Toolkit does provide for a way to configure this via [Security Group referencing](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html#security-group-referencing).
+For advanced cases requiring internal access, such as Bastion hosts, you can configure additional access via [Security Group referencing](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html#security-group-referencing). This feature is only available with Default or Existing network types.
 
-In this setup you would put your resources in separate Security Group(s) within the same VPC and in turn pass those group names into the Toolkit. The Internal Networking security group will then be configured to allow internal networking access for resources in those groups. Note that due to the nature of AWS networking this is only applicable to the Default or Existing network types where the network exists separately to allow for other internal resources to be deployed outside the Toolkit.
+Configure additional Security Groups for internal access using this variable in your [environment config file](environment_provision.md#configure-module-settings-environmenttf):
 
-To pass in your Security Groups to be added for internal access this is done with the following variable in the [module's environment config file](environment_provision.md#configure-module-settings-environmenttf):
-
-:information_source:&nbsp; It's recommended that this setting be used with caution. Full Internal Networking access will be granted to all resources in the configured Security Groups.
+> [!caution]
+> It's recommended that this setting be used with caution. Full Internal Networking access will be granted to all resources in the configured Security Groups.
 
 - `internal_allowed_ingress_security_group_ids` - A list of additional Security Groups IDs to allow internal networking access to VMs or EKS Clusters. Note that the groups must be in the same VPC as the GitLab resources. Optional, default is `[]`.
 
@@ -346,8 +359,6 @@ To lock down external network access to particular CIDR blocks these _optional_ 
   - `external_ssh_allowed_ingress_cidr_blocks`- A list of CIDR blocks that configures the IP ranges that will be able to access the network over SSH.
   - `icmp_allowed_ingress_cidr_blocks`- **GCP and Azure only** - A list of CIDR blocks that configures the IP ranges that will be able to access the network over ICMP.
 
-:exclamation:&nbsp; **{- Changing network setup on an existing environment must be treated with the utmost caution-}**. **Doing so can be considered a significant change in GCP and may trigger the recreation of the entire environment leading to data loss**.
-
 ### Internal (Ansible)
 
 To lock down internal network access to particular CIDR blocks these _optional_ settings can be used in Ansible:
@@ -355,8 +366,11 @@ To lock down internal network access to particular CIDR blocks these _optional_ 
 - `gitlab_rails_monitoring_cidr_blocks` - A list of CIDR blocks to be allowed access to [GitLab's Health Check endpoints](https://docs.gitlab.com/ee/administration/monitoring/health_check.html). Required for Load Balancers to perform Health Checks. Note that if changing this setting it should include any Load Balancers performing health checks, including any Toolkit provided HAProxy Load Balancers. Default is `['0.0.0.0/0']`.
 - `postgres_trust_auth_cidr_blocks` - A list of CIDR blocks to be allowed access to [Postgres (Omnibus)](https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block). Default is `['0.0.0.0/0']`.
 - `postgres_md5_auth_cidr_blocks` - A list of CIDR blocks to be allowed access to [Postgres (Omnibus)](https://docs.gitlab.com/omnibus/settings/database.html#configure-postgresql-block) with authentication. Default is `['0.0.0.0/0']`.
-  - :information_source:&nbsp; Changes to this setting currently has some known issues in certain setups - [gitlab-org/omnibus-gitlab#6594](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594) and [gitlab-org/omnibus-gitlab#6590](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6590).
-  - :information_source:&nbsp; [There are additional considerations for this setting when using Geo](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication).
+  >>> [!note]
+  [Additional considerations for this setting when using Geo](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication).
+
+  Some known issues exist with this setting in certain setups - [gitlab-org/omnibus-gitlab#6594](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594) and [gitlab-org/omnibus-gitlab#6590](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6590).
+  >>>
 - `geo_tracking_postgres_md5_auth_cidr_blocks` - A list of CIDR blocks to be allowed access to [Geo Tracking Postgres (Omnibus)](https://docs.gitlab.com/ee/administration/geo/replication/multiple_servers.html#step-3-configure-the-geo-tracking-database-on-the-geo-secondary-site). Default is `['0.0.0.0/0']`.
 
 ## Configuring Internal Connection Type (IPs and Hostnames)
@@ -365,7 +379,11 @@ The Toolkit by default uses IPs for internal connections. However, this can be s
 
 - `internal_addr_use_hostnames` - Flag to switch the Toolkit to use internal hostnames for connections. Default is `false`.
 
-:information_source:&nbsp; On the main Cloud Providers internal hostnames are available by default (For more info - [GCP](https://cloud.google.com/compute/docs/internal-dns), [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-naming.html), [Azure](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances#reverse-dns-considerations)). Terraform output shows the hostnames for each VM. For On Prem installs hostnames and DNS will need to be configured separately.
+>>> [!note]
+Internal hostnames are available by default on major cloud providers - [GCP](https://cloud.google.com/compute/docs/internal-dns), [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-naming.html), [Azure](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances#reverse-dns-considerations)
+
+Terraform output displays these hostnames for each VM. For On Prem installations, hostnames and DNS must be configured separately.
+>>>
 
 ## Health Checks
 
@@ -403,7 +421,8 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 - Amazon Linux 2 _Main, EPEL, Postgres_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock postgresql-devel`
 - Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
 
-:information_source:&nbsp; For the most up-to-date list of packages it's recommend to check the `system_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
+> [!tip]
+> For the most up-to-date list of packages it's recommend to check the `system_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
 
 Additionally the following packages may be installed depending on the functionality enabled:
 
@@ -423,7 +442,8 @@ The Toolkit also installs several Python packages via PyPI onto the system to be
 
 When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as installing the packages via an offline PyPI repo or directly.
 
-:information_source:&nbsp; For the most up-to-date list of Python packages it's recommend to check the `python_packages` variable [in this file](../ansible/roles/common/defaults/main.yml).
+> [!tip]
+> For the most up-to-date list of Python packages it's recommend to check the `python_packages` variable [in this file](../ansible/roles/common/defaults/main.yml).
 
 ### Ansible Galaxy Roles
 

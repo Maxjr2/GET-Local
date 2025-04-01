@@ -29,7 +29,8 @@ Except for the Let's Encrypt option for External SSL termination - User provided
 
 On this page we'll detail how you can configure each type of encryption with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout. It also assumes a working level knowledge of SSL in general.**
 
-:information_source:&nbsp; Recommendations about what specific encryption strategy to use is not within the scope of this guide. You should review GitLab independently to determine the strategy as per your security requirements.
+> [!important]
+> Recommendations about what specific encryption strategy to use is not within the scope of this guide. You should review GitLab independently to determine the strategy as per your security requirements.
 
 [[_TOC_]]
 
@@ -143,19 +144,24 @@ Due to this, how the Toolkit approaches Internal SSL varies depending on the com
 
 In this section we'll go through the process for each.
 
-:information_source:&nbsp; It's also worth noting that the Cloud Providers have default encryption options that may be suitable to your needs but as stated above this should be reviewed independently to verify. Refer to the [Cloud Provider default encryption](#cloud-provider-default-encryption) section below for more details.
+> [!note]
+> Cloud Providers have default encryption options that may be suitable to your needs but as stated above this should be reviewed independently to verify. Refer to the [Cloud Provider default encryption](#cloud-provider-default-encryption) section below for more details.
 
 ### Preparing Certificates
 
 The first step is to prepare your certificates via whatever your chosen method is.
+
+> [!note]
+> The Toolkit by default uses IPs for internal connections. [However, this can be switched to use internal hostnames as discovered by Ansible](environment_advanced_network.md#configuring-internal-connection-type-ips-and-hostnames) which is generally preferred for Internal SSL.
+
+> [!tip]
+> Terraform output contains the Hostnames / IPs for you to configure your certificates with.
 
 When preparing the certificates the following conditions should be met:
 
 - Certificates are in the `.pem` format and Keys in the `.pem` or `.key` format.
 - Certificates must contain a Subject Alternative Name (SAN) as Common Name (CN) use only is deprecated.
 - The files will be copied to each component node group. As such the SAN entries should either match each node group machine's specific hostname or be an appropriate wildcard.
-  - :information_source:&nbsp; The Toolkit by default uses IPs for internal connections. [However, this can be switched to use internal hostnames as discovered by Ansible](environment_advanced_network.md#configuring-internal-connection-type-ips-and-hostnames) which is generally preferred for Internal SSL.
-  - :information_source:&nbsp; Terraform output contains the Hostnames / IPs for you to configure your certificates with.
 - For GitLab components to verify each certificate you will need either the CA file for your certificates or to upload the certificate itself to client components. Further guidance on this is given later.
 
 Once the certificates are prepared you should place them in a location that's accessible to Ansible. We recommend placing these in a folder for each component under the `ansible/environments/<env_name>/files/certificates` folder, e.g. for Postgres that would be `ansible/environments/<env_name>/files/certificates/postgres`.
@@ -197,7 +203,8 @@ Refer to the relevant section below on how to configure encryption directly for 
 
 The Toolkit can configure internal SSL setup between an external load balancer and GitLab Rails NGINX.
 
-:information_source:&nbsp; Note that this will set up SSL encryption for all components served through NGINX depending on setup such as Container Registry.
+> [!note]
+> This will set up SSL encryption for all components served through NGINX depending on setup, such as Container Registry.
 
 Certificates still need to be prepared but once ready follow the below to configure.
 

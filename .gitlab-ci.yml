@@ -110,7 +110,7 @@ check:markdownlint:
     entrypoint: [ "" ]
   script:
     - npm add -g markdownlint markdownlint-cli
-    - markdownlint *.md docs/*.md --disable MD024
+    - markdownlint *.md docs/*.md
   rules:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
 

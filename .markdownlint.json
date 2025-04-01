@@ -28,5 +28,7 @@
     "style": "fenced"
   },
   "proper-names": false,
-  "links": false
+  "links": false,
+  "no-blanks-blockquote": false,
+  "no-duplicate-heading": false
 }

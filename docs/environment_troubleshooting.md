@@ -227,7 +227,8 @@ To fix this you need to reset the WAL log on the specific server as follows:
 sudo su - gitlab-psql -c '/opt/gitlab/embedded/bin/pg_resetwal -f /var/opt/gitlab/postgresql/data'
 ```
 
-:exclamation:&nbsp; This command deletes the current record and as such may lead to data loss. It should only be run on the specific server with the corrupted log.
+> [!caution]
+> This command deletes the current record and as such may lead to data loss. It should only be run on the specific server with the corrupted log.
 
 This wipes the records from the specific server and will unblock it to start replicating again. This should **only** be run on the specific Secondary server that is failing and no others as this would lead to data loss.
 

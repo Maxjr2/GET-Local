@@ -46,9 +46,11 @@ When using Terraform, one important caveat is preparing its [State](https://www.
 
 [Terraform has numerous possible backends](https://developer.hashicorp.com/terraform/language/state/remote-state-data) where the state can be stored. As a general guidance we recommend a remote backend that can be shared between applicable users such as the targeted Cloud Provider's Object Storage or [GitLab's own managed Terraform State backend](https://docs.gitlab.com/ee/user/infrastructure/iac/terraform_state.html). Whatever backend is chosen the configuration is set in the same location - the environment's `main.tf` file.
 
-:information_source:&nbsp; You should ensure that the Terraform state is stored in a unique location, regardless of whatever backend is being used. For Cloud Provider Object Storage this would typically mean using separate buckets or using the specific Cloud Provider's Terraform backend options to store the state in a unique folder, such as the [`prefix` option for GCP GCS](https://developer.hashicorp.com/terraform/language/backend/gcs) or [`key` option for AWS](https://developer.hashicorp.com/terraform/language/backend/s3). Refer to the relevant Terraform backend documentation for more information.
+>>> [!important]
+Store Terraform state in a unique location. For cloud providers, use either separate buckets or provider-specific options like the [`prefix` for GCP](https://developer.hashicorp.com/terraform/language/backend/gcs) or [`key` for AWS](https://developer.hashicorp.com/terraform/language/backend/s3).
 
-:information_source:&nbsp; These docs assume the target Cloud Provider's Object Storage is being used.
+This documentation assumes the target Cloud Provider's Object Storage is being used.
+>>>
 
 ### Static External IP
 
@@ -66,19 +68,21 @@ Each environment is recommended to have its own project on GCP for various reaso
 
 Existing projects can also be used, but this should be checked with the Project's stakeholders as this will affect things such as total CPU quotas for example.
 
-:information_source:&nbsp; Ensure that you have the [Service Usage API](https://console.cloud.google.com/apis/api/serviceusage.googleapis.com/overview) and [Compute Engine API](https://console.developers.google.com/apis/api/compute.googleapis.com/overview) enabled.
+> [!note]
+> Ensure that you have the [Service Usage API](https://console.cloud.google.com/apis/api/serviceusage.googleapis.com/overview) and [Compute Engine API](https://console.developers.google.com/apis/api/compute.googleapis.com/overview) enabled.
 
 ### 3. Setup Provider Authentication: GCP Service Account
 
 Authentication with GCP directly is done with a [Service Account](https://cloud.google.com/iam/docs/understanding-service-accounts), which is required by both Terraform and Ansible.
 
-:information_source:&nbsp; To create and manage Service Accounts you may require permissions on your own account. Refer to the [GCP documentation for more information](https://cloud.google.com/iam/docs/service-accounts-create).
+> [!important]
+> Creating and managing Service Accounts requires additional permissions. Refer to the [GCP documentation for more information](https://cloud.google.com/iam/docs/service-accounts-create).
 
 With the above set create the Service Account as follows:
 
 1. Access GCP's [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) page.
 1. Ensure that the correct project is selected in the dropdown at the top of the page.
-1. Create an account with a descriptive name like `gitlab-qa` and take note of its email address for the next step.
+1. Create an account with a descriptive name like `gitlab-get` and take note of its email address for the next step.
 1. Assign the following [IAM roles](https://cloud.google.com/iam/docs/granting-changing-revoking-access#granting-console):
    - `Compute Admin`
    - `Kubernetes Engine Admin`
@@ -90,14 +94,17 @@ With the above set create the Service Account as follows:
    - [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)
      - `Cloud SQL Admin`
      - `Compute Network Admin`
-     - Note that the [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/redis.googleapis.com) APIs will also need to be enabled on the project for Cloud SQL.
+     > [!note]
+     > The [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/redis.googleapis.com) APIs need to be enabled on the project to configure Cloud SQL.
    - [Cloud Memorystore](environment_advanced_services.md#gcp-memorystore)
      - `Cloud Memorystore Redis Admin`
      - `Cloud Memorystore Redis Editor`
-     - Note that the [Memorystore for Redis](https://console.cloud.google.com/apis/library/redis.googleapis.com) API will also need to be enabled on the project for Memorystore.
+     > [!note]
+     > The [Memorystore for Redis](https://console.cloud.google.com/apis/library/redis.googleapis.com) API needs to be enabled on the project to configure Memorystore.
 1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be used later by Terraform and Ansible to authenticate.
 
-:information_source:&nbsp; The Toolkit will in turn create several required Service Accounts via Terraform during the provisioning stage for the resources. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-accounts-gcp) for more information.
+> [!note]
+> As part of the Terraform provisioning process, the Toolkit will create several required Service Accounts. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-accounts-gcp) for more information.
 
 ### 4. Setup SSH Authentication: SSH OS Login for GCP Service Account
 
@@ -105,14 +112,13 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
 
 1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in your preferred SSH key location.
 
-   :information_source:&nbsp; Ansible will require access to this key later via OS default setup or specific config. If the key has a passphrase, setting up an SSH Agent for Ansible is also recommended to avoid prompts.
+   > [!important]
+   > Ansible will require this key later to access nodes. If the key has further configuration applied, such as a passphrase, [additional set up in Ansible may be required](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html).
 
 1. With the `gcloud` command set it to point at your intended project
 
-   :information_source:&nbsp; You need the project's [ID](https://support.google.com/googleapi/answer/7014113?hl=en) here and not the name. You can find it in project's dashboard in GCP Console.
-
    ```terminal
-   gcloud config set project <project-id>
+   gcloud config set project <project-id> # Refer to GCP documentation on how to find ID - https://support.google.com/googleapi/answer/7014113?hl=en
    ```
 
 1. Enable OS Login by setting the metadata `enable-oslogin=TRUE`. This can either be set [project-wide](https://cloud.google.com/compute/docs/metadata/setting-custom-metadata#set-projectwide) or [per instance](https://cloud.google.com/compute/docs/metadata/setting-custom-metadata#set-custom), once the instances have been provisioned by Terraform. To set the metadata project-wide, run the following command:
@@ -123,11 +129,15 @@ In addition to creating the Service Account, set up [OS Login](https://cloud.goo
 
 1. Add the project's public SSH key to the Service Account
 
-   :information_source:&nbsp; **This command will output the SSH Username for the Service Account, typically in the format of `sa_<ID>`. Take a note of this username as later, it will be used in the Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) section.**
-
    ```terminal
    gcloud compute os-login ssh-keys add --key-file=<SSH key>.pub --impersonate-service-account=<service-account-email-address>
    ```
+
+   >>> [!tip]
+   This command will output the SSH Username for the Service Account, typically in the format of `sa_<ID>`.
+
+   Take a note of this username as later, it will be used in the Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) section.
+   >>>
 
 1. Switch back your logged in account in `gcloud` to your regular account using your email address.
 
@@ -154,7 +164,8 @@ As an example this bucket can be created via the [`gcloud storage`](https://clou
 gcloud storage buckets create gs://<env_shortname>-get-terraform-state --location=BUCKET_LOCATION
 ```
 
-:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+> [!important]
+> The bucket name should be unique and specifically not in the format of `<prefix>-terraform-state`, which is reserved for GitLab's [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/).
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
@@ -180,20 +191,20 @@ To create an access key for your user follow [the official docs](https://docs.aw
 
 ### 2. Setup SSH Authentication: AWS
 
-:information_source:&nbsp; If you intend to use an alternative method for connecting to machines, for example [AWS SSM](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html), you can skip this step.
+> [!note]
+> If you intend to use an alternative method for connecting to machines, for example [AWS SSM](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html), you can skip this step.
 
 SSH authentication for the created machines on AWS will require an SSH key. A key is required to be created and to be accessible for the Toolkit to handle the rest:
 
-1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) (ED25519 recommended) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`.
+1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_ed25519`. 
 
-   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
-   [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
+   > [!note]
+   > Ansible will require this key later to access nodes. If the key has further configuration applied, such as a passphrase, [additional set up in Ansible may be required](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html).
 
-It is also possible to use an existing SSH key pair, but it is recommended to use a new key to avoid any potential security implications.
+   > [!note]
+   > An existing SSH key pair can also be used, but it is recommended to use a new key to avoid any potential security implications.
 
-SSH usernames are provided by AWS depending on the [AMI Image](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connection-prereqs.html#connection-prereqs-get-info-about-instance) used. With the Toolkit's defaults this will typically be `ubuntu`.
-
-:information_source:&nbsp; **Take a note of this username as later, as it will be used later in the Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) section.**
+1. Find out the SSH username and take note of it as it will be used later by Ansible for accessing nodes. The username will be determined by the [AMI image](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connection-prereqs.html#connection-prereqs-get-info-about-instance) used. With the Toolkit's defaults this will typically be `ubuntu`.
 
 That's all that's required for now. Later on in this guide we'll configure the Toolkit to use this key for adding into the AWS machines as well as accessing them.
 
@@ -201,7 +212,8 @@ That's all that's required for now. Later on in this guide we'll configure the T
 
 Create a standard [AWS storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) on the intended environment's project for its Terraform State. Give this a meaningful name such named as `<env_short_name>-get-terraform-state`.
 
-:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+> [!important]
+> The bucket name should be unique and specifically not in the format of `<prefix>-terraform-state`, which is reserved for GitLab's [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/).
 
 After the Bucket is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 
@@ -214,7 +226,8 @@ A static IP, AKA an Elastic IP, can be generated in AWS as follows:
 
 Once the IP is available take note of its **allocation ID** [to specify in the Terraform `variables.tf` file](environment_provision.md#configure-variables-variablestf-1) during the environment provision steps.
 
-:information_source:&nbsp; If you are deploying a Cloud Native Hybrid GitLab setup you'll need to create an Elastic IP for each subnet in the intended VPC instead of a single one.
+> [!note]
+> If you are deploying a [Cloud Native Hybrid setup](environment_advanced_hybrid.md), Elastic IPs for each individual subnet in the intended VPC will be required.
 
 ## Azure
 
@@ -238,13 +251,15 @@ SSH authentication for the created machines on Azure will require an admin usern
 
 First think of an admin username that will be used for SSH connection to the Azure's virtual machines.
 
-:information_source:&nbsp; **Take a note of the username you select as later, it will be used in the Terraform [Configure Variables (`variables.tf`)](environment_provision.md#configure-variables-variablestf-2) and Ansible [Environment config - vars.yml](environment_configure.md#environment-config-varsyml) sections.**
-
 All that's required for an SSH key is to be created and then for this to be accessible for the Toolkit to handle the rest:
 
 1. [Generate an SSH key pair](https://docs.gitlab.com/ee/user/ssh/#generate-an-ssh-key-pair) using [supported encryption](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys#supported-ssh-key-formats) and store it in the [`keys`](../keys) directory by specifying the path, for example: `-f ./keys/id_rsa`.
 
-   :information_source:&nbsp; If you specify a passphrase when creating the key pair, Ansible will prompt for the passphrase many times.
+   > [!important]
+   > Ansible will require this key later to access nodes. If the key has further configuration applied, such as a passphrase, [additional set up in Ansible may be required](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html)
+
+   > [!tip]
+   > The SSH username is configurable and will be set later in [Terraform](environment_provision.md#configure-variables-variablestf-2).
    [Set up SSH agent to avoid this](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#setting-up-ssh-keys).
 
 It is also possible to use an existing SSH key pair, but it is recommended to use a new key to avoid any potential security implications.
@@ -257,7 +272,8 @@ Create a [storage account](https://docs.microsoft.com/en-us/azure/storage/common
 
 Then create a standard [Azure blob container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal) on the intended environment's storage account for its Terraform State. Give this a meaningful name such as `<env_short_name>-get-terraform-state`.
 
-:information_source:&nbsp; The bucket may be named as desired. However, note that the Toolkit will create a bucket later with the naming format `<prefix>-terraform-state` for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature in GitLab by default (which can also be changed if required). Each bucket requires a unique name to avoid clashes.
+> [!important]
+> The bucket name should be unique and specifically not in the format of `<prefix>-terraform-state`, which is reserved for GitLab's [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/).
 
 After the container is created this is all that's required for now. We'll configure Terraform to use it later in these docs.
 

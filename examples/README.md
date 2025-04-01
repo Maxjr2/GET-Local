@@ -14,7 +14,8 @@ In this section you'll find a selection of config examples of some of the more c
 - [10k Cloud Native Hybrid - GCP](10k_hybrid_gcp) - A 10k Reference Architecture (Cloud Native Hybrid) on GCP. HA with select components running on Kubernetes (GCP GKE).
 - [10k Geo - AWS](10k_aws_geo) - A 10k Reference Architecture (Omnibus) on AWS with Geo configured within the same region. HA with secondary Geo environment.
 
-:information_source:&nbsp; The above examples are not an exhaustive list, just a selection. The Toolkit supports [all Reference Architectures sizes (including Cloud Native Hybrid and Geo) on GCP, AWS, Azure and On Prem](../README.md#gitlab-environment-toolkit). Refer to the [documentation](../docs/) for full details on how to configure your intended setup.
+> [!note]
+> The above examples are not an exhaustive list, just a selection. The Toolkit supports [all Reference Architectures sizes (including Cloud Native Hybrid and Geo) on GCP, AWS, Azure and On Prem](../README.md#gitlab-environment-toolkit). Refer to the [documentation](../docs/) for full details on how to configure your intended setup.
 
 # How to use the examples
 

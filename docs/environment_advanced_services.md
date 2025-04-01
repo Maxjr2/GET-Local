@@ -27,24 +27,9 @@ On this page we'll detail how to set up the Toolkit to provision and/or configur
 
 [[_TOC_]]
 
-## Overview
-
-It can be more convenient to use an alternative source for select components rather than having to manage them more directly. For example, cloud services have built in HA and don't require instance level maintenance.
-
-Several components of the GitLab setup can be switched to a cloud service or custom server:
-
-- [Load Balancers](https://docs.gitlab.com/ee/administration/load_balancer.html) - [AWS ELB](https://aws.amazon.com/elasticloadbalancing/), _Custom_
-- [PostgreSQL](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#provide-your-own-postgresql-instance) - [AWS RDS](https://aws.amazon.com/rds/postgresql/), _Custom_
-- [Redis](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#providing-your-own-redis-instance) - [AWS ElastiCache](https://aws.amazon.com/elasticache/redis/), _Custom_
-- [Advanced Search](https://docs.gitlab.com/ee/user/search/advanced_search.html) - [AWS OpenSearch](https://aws.amazon.com/opensearch-service/), _Custom_
-
-:information_source:&nbsp; Support for more services is ongoing. Unless specified otherwise the above is the currently supported services by the Toolkit.
-
 ## Load Balancers
 
 The Toolkit supports select provisioning and/or configuring Load Balancer(s) that GitLab requires.
-
-:information_source:&nbsp; Load Balancer service support will continue to expand in the future. Custom load balancers are also supported.
 
 When using an alternative Load Balancer the following changes apply when deploying via the Toolkit (depending on the load balancer):
 
@@ -91,7 +76,8 @@ Once provisioned you'll see a new output at the end of the process - `elb_intern
 
 To configure GitLab to use alternative Load Balancer(s) with Ansible, point the Toolkit at the Load Balancer(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom Load Balancers. In this setup, all required balancing rules must be in place and the URL to connect to the Balancer(s) never change. For the latest balancer rules needed to configure refer to the HAProxy config files provided as part of the Toolkit - [External](../ansible/roles/haproxy/templates/haproxy_external.cfg.j2), [Internal](../ansible/roles/haproxy/templates/haproxy_internal.cfg.j2).
+> [!tip]
+> This config is the same for custom Load Balancers. In this setup, all required balancing rules must be in place and the URL to connect to the Balancer(s) never change. For the latest balancer rules needed to configure refer to the HAProxy config files provided as part of the Toolkit - [External](../ansible/roles/haproxy/templates/haproxy_external.cfg.j2), [Internal](../ansible/roles/haproxy/templates/haproxy_internal.cfg.j2).
 
 The available variables in Ansible for this are as follows:
 
@@ -129,7 +115,8 @@ How and where these are configured can be done in several ways depending on if G
   - GitLab and Praefect should be separated to avoid replication of the latter.
   - Geo Tracking DB can be configured on the same Database instance as Praefect on the secondary site (recommended) or separated
 
-:information_source:&nbsp; In each case the databases given will need to be prepared for GitLab to use, such as the creation of users. The Toolkit will attempt to do this automatically for you by default. However, this may not be compatible with your specific database depending on your setup. Refer to the [Database Preparation](#database-preparation) section below for more info.
+> [!note]
+> In each case the databases given need to be prepared for GitLab to use, such as the creation of users. The Toolkit will attempt to do this automatically for you by default. However, this may not be compatible with your specific database depending on your setup. Refer to the [Database Preparation](#database-preparation) section below for more info.
 
 This section starts with the non Geo combined databases route with guidance being given on the alternatives where appropriate.
 
@@ -174,7 +161,8 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 
 To set up a standard AWS RDS PostgreSQL service for a 10k environment with the required variables, it should look like the following in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
-:information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `rds_praefect_postgres_*` prefix instead.
+> [!note]
+> For separated out databases, use the same parameters with different prefixes. Use `rds_praefect_postgres_*` for Praefect databases or `rds_geo_tracking_postgres_*` for Geo Tracking databases respectively.
 
 ```tf
 module "gitlab_ref_arch_aws" {
@@ -203,21 +191,19 @@ Due to the above as well as ensuring that major upgrades don't happen unexpected
 
 While the above is the default behaviour it's recommended that you manage the version yourself in almost all cases by configuring the [recommended PostgreSQL version specifically for the version of GitLab you are deploying](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) and then changing that as required to do an upgrade.
 
-:information_source:&nbsp; If the specific recommended version for GitLab isn't available on AWS RDS, then the latest minor version is expected to work instead.
+> [!note]
+> If the specific recommended version for GitLab isn't available on AWS RDS, then the latest minor version is expected to work instead.
 
 Configuring how RDS version is selected in the Toolkit is done via the following variables:
 
 - `rds_postgres_version` - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `16`.
-  - :information_source:&nbsp; If performing a major upgrade, [it's recommended in the AWS documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) to run the `ANALYZE` operation after to avoid performance issues.
+  > [!important]
+  > If performing a major upgrade, [it's strongly recommended in the AWS documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) to run the `ANALYZE` operation after to avoid performance issues.
 - [`rds_postgres_auto_minor_version_upgrade`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#auto_minor_version_upgrade) - Whether automated upgrades to AWS selected minor versions should occur during the maintenance window. This is disabled by default and is not recommended being enabled as it can lead to clashes with Terraform's state. Optional, default is `false`.
-
-:information_source:&nbsp; If a separate Database Instance for Praefect is desired then this can be done with the same settings above but with the `rds_praefect_postgres_*` prefix instead.
 
 ##### AWS RDS - Parameters
 
-It's possible to configure [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html) via the Toolkit if desired.
-
-By default, the Toolkit sets the [following parameters](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/terraform/modules/gitlab_ref_arch_aws/rds.tf#L9) to follow [GitLab recommendations](https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks):
+The Toolkit allows configuration of [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html). By default, it sets the following [GitLab recommended](https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks) [parameters](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/terraform/modules/gitlab_ref_arch_aws/rds.tf#L9):
 
 ```yaml
 {
@@ -229,17 +215,15 @@ By default, the Toolkit sets the [following parameters](https://gitlab.com/gitla
 }
 ```
 
-With the following variable you can configure any [available parameter](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list), including the above in overriding fashion:
+You can configure any [available parameter](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) with:
 
-- `rds_postgres_params` - A map of [Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) to configure in RDS. Any param set here will take precedence. Optional, default is `{}`.
+- `rds_postgres_params` - A map of parameters to configure in RDS. Takes precedence over defaults. Optional, default is `{}`.
 
-:information_source:&nbsp; [RDS Parameters can be applied in one of two ways](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#problematic-plan-changes) - Immediate or Pending Reboot. In the Terraform AWS provider this is configured under each parameter via the [`apply_method` variable](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#apply_method-1), with the default being `immediate`. However some parameters only support the other method, `pending-reboot`. For this specific case, `rds_postgres_params` also allows for nested map values to configure both the `value` and `apply_method`, for example:
+Parameters can be applied either [immediately or on reboot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#problematic-plan-changes). For parameters requiring reboot, you can use nested `apply_method` map values:
 
 ```tf
 rds_postgres_params = { shared_preload_libraries = { value = "pg_stat_statements,pgaudit", apply_method = "pending-reboot" }, deadlock_timeout = 4000 }
 ```
-
-:information_source:&nbsp; Parameters for Praefect or Geo Tracking RDS databases can also be done with the same setting above but with the `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` prefixes respectively.
 
 ##### AWS RDS - Read Replicas
 
@@ -247,7 +231,8 @@ The standard setup above will deploy an [RDS instance with a standby replica](ht
 
 As an additional feature RDS also offers the ability to spin up separate [Read Replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
 
-:information_source:&nbsp; Note this Read Replicas are only desired for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
+> [!note]
+> Read Replicas can only be configured for the main GitLab database, as Database Load Balancing is not supported for other databases like Praefect.
 
 Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
 
@@ -255,7 +240,8 @@ Read Replicas, as implied, mimic their main database in most ways, so the number
 - `rds_postgres_read_replica_port` - The port read replicas will run on. Optional, default is `5432`.
 - `rds_postgres_read_replica_multi_az` - Whether each replica should itself have a standby replica to provide HA. Optional, default is `false`.
 
-:information_source:&nbsp; AWS requires that the main RDS database for which Read Replicas are being configured for must have its Backup Retention Period value (e.g. `rds_postgres_backup_retention_period`) set to 1 or higher.
+> [!note]
+> To enable Read Replicas, AWS RDS requires the main database's Backup Retention Period (`rds_postgres_backup_retention_period`) to be set to 1 or higher.
 
 Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `rds_read_replica_hosts` output (also `rds_praefect_read_replica_hosts` / `rds_geo_read_replica_hosts`), which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
 
@@ -281,14 +267,16 @@ The primary site can use a single RDS instance to house both the main GitLab dat
 
 The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://cloud.google.com/sql/docs/postgres) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-:information_source:&nbsp; Ensure that [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/sqladmin.googleapis.com) APIs are enabled on the target GCP project. The account that Terraform is running with also requires the `Cloud SQL Admin` and `Compute Network Admin` IAM roles.
+> [!important]
+> Before proceeding, enable the [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and [Cloud SQL Admin](https://console.cloud.google.com/apis/library/sqladmin.googleapis.com) APIs in your GCP project. Your Terraform service account must have the `Cloud SQL Admin` and `Compute Network Admin` IAM roles also.
 
 The variables for this service start with the prefix `cloud_sql_*` and should replace any previous `postgres_*`, `pgbouncer_*` and `praefect_postgres_*` settings. The available variables are as follows:
 
 - `cloud_sql_postgres_machine_tier`- The [GCP Cloud SQL Machine Tier](https://cloud.google.com/sql/docs/postgres/create-instance#machine-types) for the service to use without the `db-` prefix. Note that for this service the standard GCP machine sizes don't apply, instead utilizing custom sizes in most cases. For example, to deploy an instance that matches a `n1-standard-4` machine type this can be configured as `custom-4-15360`. **Required**.
 - `cloud_sql_postgres_edition` - The [Cloud SQL edition](https://cloud.google.com/sql/docs/postgres/editions-intro) to be used. Optional, defaults to `ENTERPRISE`.
 - `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Changing this value will trigger an upgrade and may lead to some downtime. Optional, defaults to `POSTGRES_16`.
-  - :information_source:&nbsp; If performing a major upgrade, [it's recommended in the GCP documentation](https://cloud.google.com/sql/docs/postgres/upgrade-major-db-version-inplace#complete_the_major_version_upgrade) to run the `ANALYZE` operation after to avoid performance issues.
+  > [!important]
+  > If performing a major upgrade, [it's strongly recommended in the GCP documentation](https://cloud.google.com/sql/docs/postgres/upgrade-major-db-version-inplace#complete_the_major_version_upgrade) to run the `ANALYZE` operation after to avoid performance issues.
 - `cloud_sql_postgres_root_password` - The root password for the instance to be used for the default `postgres` user. If not set the user will not be given a password and access won't be available until a password is given manually. Optional, default is `null`.
 - `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` (GCP default) or `PD-HDD`. Optional, default is `null`.
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
@@ -298,7 +286,8 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 - `cloud_sql_postgres_encryption_key_name` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
 - `cloud_sql_postgres_data_cache_enabled` - Toggle for [Data Cache](https://cloud.google.com/sql/docs/postgres/data-cache) feature in Cloud SQL. Feature is only available for the  Enterprise Plus edition (`cloud_sql_postgres_edition`). Optional, default is `false`.
 
-:information_source:&nbsp; If a separate Database Instance for Praefect or Geo Tracking is desired then this can be done with the same settings above but with the `cloud_sql_praefect_postgres_*` or `cloud_sql_geo_tracking_postgres_*` prefixes respectively.
+> [!note]
+> For separated out databases, use the same parameters with different prefixes. Use `cloud_sql_praefect_postgres_*` for Praefect databases or `cloud_sql_geo_tracking_postgres_*` for Geo Tracking databases respectively.
 
 To set up a standard GCP Cloud SQL PostgreSQL service for a 10k environment with the required variables, it should look like the following in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
@@ -336,8 +325,6 @@ With the following variable you can configure any [available parameter](https://
 
 - `cloud_sql_postgres_params` - A map of [Postgres parameters](https://cloud.google.com/sql/docs/postgres/flags#list-flags-postgres) to configure in Cloud SQL. Any param set here will take precedence. Optional, default is `{}`.
 
-:information_source:&nbsp; Parameters for the Praefect and Geo Tracking database can also be done if provisioned via the `cloud_sql_praefect_postgres_params` and `cloud_sql_geo_tracking_postgres_params` variables respectively.
-
 ##### GCP Cloud SQL - SSL config
 
 It's possible to configure SSL connections to a GCP Cloud SQL instance via the Toolkit via the following variable in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
@@ -346,9 +333,11 @@ It's possible to configure SSL connections to a GCP Cloud SQL instance via the T
   - Due to limitations in the Terraform provider, if this is set and then subsequently unset the last setting will remain. To disable SSL on an instance set this variable to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` first and then remove.
   - `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` will enforce mutual 2-way SSL connections. Note that this setup specifically will prevent Ansible from performing the required [Database Preparation](#database-preparation) steps and as a result users and databases may need to be created separately. Client certificates will also need to be downloaded.
 
-:information_source:&nbsp; SSL can also be configured for the Praefect or Geo Tracking databases if provisioned separately via the `cloud_sql_praefect_postgres_ssl_mode` or `cloud_sql_geo_tracking_postgres_ssl_mode` variables respectively.
+> [!note]
+> SSL can also be configured for the Praefect or Geo Tracking databases if provisioned separately via the `cloud_sql_praefect_postgres_ssl_mode` or `cloud_sql_geo_tracking_postgres_ssl_mode` variables respectively.
 
-:information_source:&nbsp; [SSL Certificates on Cloud SQL are self-signed](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance). As such, [certificates may need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) depending on the set-up to allow clients to connect.
+> [!note]
+> [SSL Certificates on Cloud SQL are self-signed](https://cloud.google.com/sql/docs/postgres/configure-ssl-instance). As such, [certificates may need to be downloaded](https://cloud.google.com/sql/docs/postgres/manage-ssl-instance) depending on the set-up to allow clients to connect.
 
 ##### GCP Cloud SQL - Maintenance config
 
@@ -424,7 +413,8 @@ The standard setup above will deploy a standalone GCP Cloud SQL instance that op
 
 As an additional feature Cloud SQL also offers the ability to spin up separate [Read Replicas](https://cloud.google.com/sql/docs/postgres/replication/create-replica) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
 
-:information_source:&nbsp; Note this Read Replicas are only desired for the main GitLab instance and not others like Praefect as only the main database can utilize Database Load Balancing.
+> [!note]
+> Read Replicas can only be configured for the main GitLab database, as Database Load Balancing is not supported for other databases like Praefect.
 
 Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
 
@@ -436,20 +426,25 @@ Once provisioned you'll see a new output added at the end of the Terraform proce
 
 ##### GCP Cloud SQL - Geo
 
-It's possible to set up Cloud SQL Read Replicas in different regions for use with Geo but be aware of the following considerations and limitations on the Cloud Provider:
+The Toolkit can configure Cloud SQL Read Replicas for use with Geo but there are limitations on the Cloud Provider that are worth consideration as detailed below.
 
-- **Replicas can only be configured within the same VPC and the same Project**.
-  - :information_source:&nbsp; Replicas can still be configured in different regions by configuring the replica to use a [subnet](https://cloud.google.com/vpc/docs/subnets) in the corresponding region.
-  - :information_source:&nbsp; It's recommended to either use the [Default](environment_advanced_network.md#default-gcp) or [Existing](environment_advanced_network.md#existing-gcp) network options for this setup to separate the VPC out from any specific Geo site state as you may in the future need to remove a site and this will be complicated if the VPC is specifically associated with it in a single Terraform state. The specific Subnet and Region will be determined either by what Region the Terraform provider has been configured with or by the specific Existing Subnet if it's been configured.
-  - :information_source:&nbsp; If a Cloud SQL replica is desired elsewhere, the Toolkit can be used to set up the instances, but setting up a custom replication solution using PostgreSQL logical replication will be required. Refer to the [Cloud SQL External Replica](https://cloud.google.com/sql/docs/postgres/replication/configure-external-replica) and [GitLab Geo External PostgreSQL](https://docs.gitlab.com/ee/administration/geo/setup/external_database.html) documentation for more information.
-- When using Customer-managed encryption keys (CMEK) you are required to use [a _different_ key for the replica when in another region](https://cloud.google.com/sql/docs/postgres/cmek#restrictions)
+>>> [!important]
+**Replicas can only be configured within the same VPC and the same Project**
+
+Replicas in different regions can be configured within the same VPC by using a [subnet](https://cloud.google.com/vpc/docs/subnets) in the corresponding region. For this setup, it's recommended to use either the [Default](environment_advanced_network.md#default-gcp) or [Existing](environment_advanced_network.md#existing-gcp) network options to separate the VPC from specific Geo site Terraform states to prevent complications when removing sites later. The Subnet and Region will be determined by either the Terraform provider's configured Region or the specified existing subnet.
+
+For replicas outside the VPC/Project, the Toolkit can create the instances, but you'll need to configure PostgreSQL logical replication manually. See the [Cloud SQL External Replica](https://cloud.google.com/sql/docs/postgres/replication/configure-external-replica) and [GitLab Geo External PostgreSQL](https://docs.gitlab.com/ee/administration/geo/setup/external_database.html) documentation for guidance.
+
+When using Customer-managed encryption keys (CMEK), you must use a [different key for replicas in different regions](https://cloud.google.com/sql/docs/postgres/cmek#restrictions).
+>>>
 
 To configure a read replica, set the following on the Secondary site's [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`) as required:
 
 - `cloud_sql_postgres_master_instance_name` must be set to the name for the primary site's Cloud SQL instance that resides within the same VPC and Project. The name will be shown in the output of the primary site's Terraform run.
 - `cloud_sql_postgres_encryption_key_name` should be set if CMEK is desired to a key that exists in the target region. If left unset the GCP default key for that region will be used.
 
-:information_source:&nbsp; `cloud_sql_postgres_root_password` is not required for this setup as the password will be replicated from the primary instance.
+> [!note]
+> `cloud_sql_postgres_root_password` is not required for this setup as the password will be replicated from the primary instance.
 
 When using Cloud SQL with Geo, the secondary site will require separate Cloud SQL instance(s) for Praefect Postgres and the Geo Tracking databases. The Tracking database and Praefect database can share a single separate instance or can be separated out into their own instances.
 
@@ -465,9 +460,11 @@ The primary site can use a single Cloud SQL instance to house both the main GitL
 
 To configure GitLab to use an alternative PostgreSQL database with Ansible, point the Toolkit at the PostgreSQL instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom PostgreSQL databases that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the PostgreSQL instance never changes.
+> [!note]
+> This config is the same for custom PostgreSQL databases that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the PostgreSQL instance never changes.
 
-:information_source:&nbsp; The Toolkit will attempt to do some database preparation by default when it's given external databases, such as creating users. However, this may not be compatible with your specific database depending on your setup. Refer to the [Database Preparation](#database-preparation) section below for more info.
+> [!note]
+> The Toolkit will attempt to do some database preparation by default when it's given external databases, such as creating users. However, this may not be compatible with your specific database depending on your setup. Refer to the [Database Preparation](#database-preparation) section below for more info.
 
 As detailed in [Database Setup Options](#database-setup-options) GitLab has several potential databases to configure. This section will start with the combined non Geo route with additional guidance given for the alternatives.
 
@@ -530,7 +527,8 @@ Due to the complexity of this area and restrictions in Ansible it's not possible
 - [Geo Tracking Database](https://docs.gitlab.com/ee/administration/geo/setup/external_database.html#configure-the-tracking-database)
 - [Required database extensions](https://docs.gitlab.com/ee/install/postgresql_extensions.html)
 
-:information_source:&nbsp; In each of the guides above only the steps that are required to be done on the actual database servers need to be followed. Steps on the GitLab side, such as adding config in `/etc/gitlab/gitlab.rb`, can be ignored as the Toolkit will still manage this for you.
+> [!note]
+> In each of the guides above only the steps that are required to be done on the actual database servers need to be followed. Steps on the GitLab side, such as adding config in `/etc/gitlab/gitlab.rb`, can be ignored as the Toolkit will still manage this for you.
 
 #### Geo
 
@@ -651,7 +649,8 @@ Once provisioned you'll see several new outputs at the end of the process. Key f
 
 The Toolkit supports provisioning a GCP Memorystore Redis service instance with everything GitLab requires or recommends such as built in HA support and encryption.
 
-:information_source:&nbsp; Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
+> [!note]
+> Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
 
 There are different variables to be set depending on the target architecture size and if it requires separate Redis instances (10k and up). First we'll detail the general settings that apply to all Redis setups:
 
@@ -671,7 +670,8 @@ For optional variables they work in a default like manner. When configuring for 
 - `memorystore_redis_transit_encryption_mode` - The [TLS mode of the Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#tlscertificate) instance for the [In-transit encryption](https://cloud.google.com/memorystore/docs/redis/in-transit-encryption). Optional, default is `DISABLED`. To enable set to `SERVER_AUTHENTICATION`.
   - Optionally `memorystore_redis_cache_transit_encryption_mode` or `memorystore_redis_persistent_transit_encryption_mode` can be used to override for separate services.
   - If you would like to enable TLS, you need to follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config) after environment is provisioned.
-  - :information_source:&nbsp; Note that the service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
+  > [!note]
+  > The service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
 - `memorystore_redis_customer_managed_key` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
   - Optionally `memorystore_redis_cache_customer_managed_key` or `memorystore_redis_persistent_customer_managed_key` can be used to override for separate services.
 - `memorystore_redis_update_timeout` - The amount of [time to wait](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) for a Memorystore Redis instance to be updated. Optional, default is `1h`.
@@ -694,7 +694,8 @@ For optional variables they work in a default like manner. When configuring for 
 
     </details>
 
-:information_source:&nbsp; Note that due to the service's design, you can't set the AUTH string (or password) directly. It's set on GCP's side during creation, and you have to then [retrieve it accordingly](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
+> [!note]
+> Due to the service's design, you can't set the AUTH string (or password) directly. It's set on GCP's side during creation, and you have to then [retrieve it accordingly](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
 
 If deploying a combined Redis setup that contains all queues (5k and lower) the following settings should be set (replacing any previous `redis_*` settings):
 
@@ -735,7 +736,8 @@ Once provisioned you'll see several new outputs at the end of the process. Keys 
 
 To configure GitLab to use alternative Redis store(s) with Ansible, point the Toolkit at the Redis instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the Redis instance(s) never changes.
+> [!note]
+> This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the Redis instance(s) never changes.
 
 The variables to set are dependent on if the setup is to have combined or separated Redis queues depending on the target Reference Architecture. The only difference is that the prefix of the variables change depending on what Redis instances you're provisioning - `redis_*`, `redis_cache_*` and `redis_persistent_*` respectively. All the variables are the same for each instance type and are described once below:
 
@@ -754,7 +756,8 @@ The variables to set are dependent on if the setup is to have combined or separa
   - **AWS only** - Default is `true`. Should only be changed when Redis store doesn't have SSL configured. ElastiCache stores provisioned by the Toolkit will always use SSL.
   - **GCP only** - Default is `false`. Should only be changed when Memorystore have SSL configured.
     - If TLS encryption was enabled via `memorystore_redis*_transit_encryption_mode`, follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config) for Redis.
-      - :information_source:&nbsp; Note that the service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
+      > [!note]
+      > The service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
 - `redis_external_enable_client` - Configures the use of the Redis `client` command, as this is restricted on certain Cloud Providers such as [GCP](https://docs.gitlab.com/omnibus/settings/redis.html#using-google-cloud-memorystore). This command is only used for debugging purposes in Omnibus.
   - **AWS only** - Default is `true`.
   - **GCP only** - Default is `false`.
@@ -767,7 +770,8 @@ After Ansible is finished running your environment will now be ready.
 
 The Toolkit supports provisioning and / or configuring an alternative search backend for [GitLab Advanced Search](https://docs.gitlab.com/ee/user/search/advanced_search.html).
 
-:information_source:&nbsp; The Reference Architectures [don't proffer guidance on sizing Search backends at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#configure-advanced-search). This is due to search backend requirements varying notably depending on data shape and search index design. However, as a general guidance in testing we've found that sizing the Search backends similarly to the Gitaly nodes looks to be a good starting point that you can then adjust accordingly.
+> [!note]
+> The [Reference Architectures do not provide specific guidance on Search backend sizing](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#configure-advanced-search) as requirements vary based on data shape and search index design. Based on testing, we recommend initially sizing Search backends similar to Gitaly nodes, then adjusting as needed.
 
 When using an alternative search backend the following changes apply when deploying via the Toolkit:
 
@@ -785,16 +789,17 @@ Like the main provisioning docs there are sections for each supported provider o
 
 The Toolkit supports provisioning an [AWS OpenSearch](https://aws.amazon.com/opensearch-service/) service domain (instance) with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-:information_source:&nbsp; [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in the AWS account before setup. [Refer to the specific section below for more info](#aws-opensearch-service---service-linked-iam-role).
+> [!note]
+> [AWS OpenSearch requires a service-linked role to be present](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/slr.html) in the AWS account before setup. [Refer to the specific section below for more info](#aws-opensearch-service---service-linked-iam-role).
 
-:information_source:&nbsp; AWS OpenSearch has strict networking requirements when deploying in a Multi AZ fashion. See [this section](#aws-opensearch-service---multi-az-networking-requirements) for more information.
+> [!note]
+> AWS OpenSearch has strict networking requirements when deploying in a Multi AZ fashion. See [this section](#aws-opensearch-service---multi-az-networking-requirements) for more information.
 
 The variables for this service start with the prefix `opensearch_service_*` and should replace any previous `opensearch_vm_*` variables in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). The available variables are as follows:
 
 - `opensearch_service_node_count` - The number of data nodes for the OpenSearch domain that serve search requests. For Multi-AZ setups the node count must match the [requirements](#aws-opensearch-service---multi-az-networking-requirements). **Required**.
 - `opensearch_service_instance_type`- The [AWS Instance Type](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html) for the OpenSearch domain to use without the `.search` suffix. For example, to use a `c5.4xlarge` OpenSearch instance type, the value of this variable should be `c5.4xlarge`. **Required**.
 - `opensearch_service_engine_version` - The [engine and version](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version) of the OpenSearch domain. Should only be changed to versions that are supported by GitLab. The setting should be given in the format `<ENGINE_VERSION>`, e.g. `OpenSearch_1.1`. If not set will use the AWS default. Optional.
-  - :information_source:&nbsp; Opensearch engine is only supported by GitLab versions 15 and higher.
 - `opensearch_service_volume_size` - The volume size per data node. Optional, default is `500`.
 - `opensearch_service_volume_type` - The type of storage to use per data node. Optional, default is `io1`.
 - `opensearch_service_volume_iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` (must be `1000` or higher) or `gp3` (only for `gp3` disks 400 GB or larger). Optional, default is `null`.
@@ -838,7 +843,8 @@ AWS OpenSearch has strict requirements when it comes to [networking for Multi-AZ
 
 To configure GitLab to use alternative search backend(s) with Ansible, point the Toolkit at the Search instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-:information_source:&nbsp; This config is the same for custom search backend(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the search backend(s) never changes.
+> [!note]
+> This config is the same for custom search backend(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the search backend(s) never changes.
 
 The available variables in Ansible for this are as follows:
 

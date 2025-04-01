@@ -100,7 +100,8 @@ An example of setting these variables would be:
 
 Enabling [AWS Object Storage Replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html) will automatically copy new items from your current primary's S3 storage buckets to your secondaries. To enable this you will first need to create the buckets for your primary and secondary sites. Once the secondary site is created. You will be able to take the object storage buckets information from the Terraform output.
 
-:exclamation:&nbsp; Ensure you copy over all the values listed below in full. Failure to do so will cause Geo Replication to fail.
+> [!caution]
+> Ensure you copy over all the values listed below in full. Failure to do so will cause Geo Replication to fail.
 
 ```json
   "object_storage_buckets": {
@@ -146,7 +147,8 @@ In addition to the above, the following optional settings are also available to 
 
 Once the settings have been added you will need to rerun `terraform apply` for the primary site. This will create the replication rules from the primary's source buckets to the secondaries.
 
-:information_source:&nbsp; Once replication is enabled AWS will only replicate new objects. AWS recommends using [batch replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html) to copy any existing items.
+> [!note]
+> Once replication is enabled AWS will only replicate new objects. AWS recommends using [batch replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html) to copy any existing items.
 
 ## VPC Peering
 
@@ -154,11 +156,13 @@ The Toolkit can configure VPC peering which allows traffic to flow in both direc
 
 When setting up VPC peering it is always required to have different subnet CIDR blocks on each network.
 
-:information_source:&nbsp; Peering is only available, within the toolkit, when using a single secondary site.
+> [!note]
+> Peering is only available, within the toolkit, when using a single secondary site.
 
 ### VPC Peering (AWS)
 
-:information_source:&nbsp; Peering can only be configured directly by the Toolkit when using a [created network](../environment_advanced_network.md#created-aws) with `create_network = true` on all Geo sites. For existing networks, peering should be configured separately.
+> [!note]
+> Peering can only be configured directly by the Toolkit when using a [created network](../environment_advanced_network.md#created-aws) with `create_network = true` on all Geo sites. For existing networks, peering should be configured separately.
 
 AWS VPC peering requires a handshake, a VPC must first request the peering and the other has to then accept it. As such, this requires Terraform to be executed a couple of times to go through this process.
 
@@ -182,7 +186,8 @@ To set up VPC peering:
    - `peer_vpc_id` - The VPC ID of the primary site.
    - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC.
 
-   :information_source:&nbsp; When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
+   > [!note]
+   > When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
 
 1. On the secondary site, provision it by running `terraform apply`. This will output some values that are required by the primary site to complete the peering setup.
 
@@ -207,7 +212,8 @@ To set up VPC peering:
 
 The Toolkit can set up peering for networks it creates in GCP. This can be used for certain Geo setups to allow traffic to flow in both directions.
 
-:information_source:&nbsp; [GCP Cloud SQL does not support setting up replicas directly in a different VPC network or a different project](../environment_advanced_services.md#gcp-cloud-sql---geo). VPC Peering in turn is not applicable to that service as a result.
+> [!important]
+> [GCP Cloud SQL does not support setting up replicas directly in a different VPC network or a different project](../environment_advanced_services.md#gcp-cloud-sql---geo). VPC Peering in turn is not applicable to that service as a result.
 
 Setting up peering for created networks is done as follows:
 

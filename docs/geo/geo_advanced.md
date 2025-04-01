@@ -75,6 +75,7 @@ After the failover or recovery process has completed, maintenance mode will be d
 
 ### Failover
 
+> [!note]
 > The Toolkit automated Geo failover process is available for Geo deployments running GitLab versions 14.2 or above.
 
 The Toolkit provides the ability to failover from a Geo primary site to a secondary site. This process will disable the current primary site and promotes the secondary site to be a standalone GitLab instance.
@@ -99,7 +100,8 @@ Once done you can perform the recovery process by running the command `ansible-p
 
 The failover and recovery process when using RDS is largely the same as the standard process. However it will also require the use of Terraform.
 
-:information_source:&nbsp; Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
+> [!note]
+> Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
 
 #### Failover
 
@@ -129,7 +131,8 @@ The RDS recovery process involves deleting the old primary RDS instance, this is
 
 The failover and recovery process when using Cloud SQL is largely the same as the standard process. However it will also require the use of Terraform.
 
-:information_source:&nbsp; Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
+> [!note]
+> Before running `terraform apply` it is advised to check the output of `terraform plan` and ensure that all changes are expected.
 
 #### Failover
 
@@ -191,9 +194,11 @@ During the setup of Geo some secrets are copied over from the primary site to th
 
 The [repository storage paths](https://docs.gitlab.com/ee/administration/repository_storage_paths.html) of Gitaly are required to match between two Geo sites. As such this means that the environment you are looking to migrate from will need to match the default structure the Toolkit creates.
 
-:information_source:&nbsp; If you have not configured anything specific with repository storage paths or [weights](https://docs.gitlab.com/ee/administration/repository_storage_paths.html#configure-where-new-repositories-are-stored) then all of your repositories will be on the required `default` storage path and no further action will be required.
+>>> [!note]
+If you have not configured anything specific with repository storage paths or [weights](https://docs.gitlab.com/ee/administration/repository_storage_paths.html#configure-where-new-repositories-are-stored) then all of your repositories will be on the required `default` storage path and no further action will be required.
 
-:information_source:&nbsp; If you think this does apply, it's strongly recommended to raise a Support ticket or engage Professional Services for more guided assistance as this can be complex and involves moving data.
+If you think this does apply, it's strongly recommended to raise a Support ticket or engage Professional Services for more guided assistance as this can be complex and involves moving data.
+>>>
 
 For reference, the Toolkit follows the documentation [defaults](https://docs.gitlab.com/ee/administration/gitaly/) and sets up the following:
 
@@ -236,9 +241,11 @@ The below settings are only required when migrating to a Cloud Native Hybrid ins
 - `geo_primary_ssh_host_keys` - A dictionary of SSH host keys and values to be used as the Chart's SSH Host Keys secret.
 - `geo_primary_registry_keys` - A dictionary of the registry `.crt` and `.pem` files to be used as the Chart's Registry authentication certificate, only required if using the Container Registry.
 
-:information_source:&nbsp; Note that these values should be base-64 encoded representations of the file contents. For example: `cat ssh_host_ecdsa_key | base64`.
+> [!note]
+> These values should be base-64 encoded representations of the file contents. For example: `cat ssh_host_ecdsa_key | base64`.
 
-:exclamation:&nbsp; These are sensitive variables. It's strongly recommended taking appropriate precautions to avoid leaking secrets such as using [secret managers or environment variables](../environment_configure.md#sensitive-variable-handling-in-ansible).
+> [!caution]
+> These are sensitive variables. It's strongly recommended taking appropriate precautions to avoid leaking secrets such as using [secret managers or environment variables](../environment_configure.md#sensitive-variable-handling-in-ansible).
 
 ```yml
 geo_primary_ssh_host_keys: {
@@ -278,7 +285,11 @@ When setting up Geo secondary sites it is possible to add more than one secondar
 
 For environments based on reference architectures 3k+, replication is handled by Patroni. When adding a new secondary site you will need to add/update the below settings in the primary site as well as the new secondary site.
 
-:information_source:&nbsp; The below settings are only required when adding new secondary sites when the database is being managed by GitLab. For external databases, replication would be set up externally.
+> [!note]
+> You will need to run the Geo playbook for each Geo secondary and should not add all secondaries into 1 command.
+
+> [!note]
+> The below settings are only required when adding new secondary sites when the database is being managed by GitLab. For external databases, replication would be set up externally.
 
 ### Primary site settings
 
@@ -290,5 +301,3 @@ For environments based on reference architectures 3k+, replication is handled by
 - `geo_primary_slot_name` - The replication slot to use for replication. This should match one of the values in `geo_primary_replication_slots`. Defaults to `"geo_secondary"`.
 
 For all reference architecture sizes, once the primary and secondary inventories have been updated, follow the normal [Geo process](./README.md) for adding a secondary site.
-
-:information_source:&nbsp; You will need to run the Geo playbook for each Geo secondary and should not add all secondaries into 1 command.

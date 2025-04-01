@@ -22,7 +22,8 @@ On this page you'll find a Quick Start Guide where we go through the steps with 
 
 For the purpose of this guide we'll go through the steps required for one of the more common setups - An [Omnibus 10k Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html) on Amazon Web Services (AWS). This will be done by running the Toolkit natively from source via a Git checkout.
 
-:information_source:&nbsp; This quick guide won't cover all the potential options available and assumes a good working knowledge of Terraform, Ansible and GitLab. It's recommended you still read the docs in full to ensure the environment is configured as per your requirements.
+> [!note]
+> This quick guide won't cover all the potential options available and assumes a good working knowledge of Terraform, Ansible and GitLab. It's recommended you still read the docs in full to ensure the environment is configured as per your requirements.
 
 [[_TOC_]]
 
@@ -30,25 +31,29 @@ For the purpose of this guide we'll go through the steps required for one of the
 
 Before starting the quick guide there are some prerequisites you should go through below.
 
-:information_source:&nbsp; **Any variable values in this guide with surrounding `<>` brackets indicates that they should be replaced.**
+> [!note]
+> Any variable values in this guide with surrounding `<>` brackets indicates that they should be replaced.
 
 ### Select an Environment Name
 
 The Toolkit needs an appropriate environment name for it to name all the infrastructure accordingly. This should be something short and unique.
 
-:information_source:&nbsp; **This will be referred to as `<ENV_NAME>` later in this guide.**
+> [!note]
+> This will be referred to as `<ENV_NAME>` later in this guide.
 
 ### Select an AWS Region
 
 You should also select an [AWS Region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions) where you want to deploy the environment such as `us-east-1`.
 
-:information_source:&nbsp; **This will be referred to as `<AWS_REGION>` later in this guide.**
+> [!note]
+> This will be referred to as `<AWS_REGION>` later in this guide.
 
 ### Select Passwords and Tokens
 
 There are various passwords and tokens to be set for GitLab. Later on in the guide you'll be asked to fill these in with any values you desire. You can generate these now or later accordingly.
 
-:information_source:&nbsp; **Passwords will be referred to as `<*_PASSWORD>` and `<*_TOKEN>` respectively later in this guide.**
+> [!note]
+> Passwords will be referred to as `<*_PASSWORD>` and `<*_TOKEN>` respectively later in this guide.
 
 ## 1. Preparing the environment provider
 
@@ -77,7 +82,8 @@ Next we need an SSH key to be configured on the machines to allow Ansible access
 
 Generating the key itself is as normal and covered in the main [GitLab docs](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair) (ED25519 recommended). Name the public and private keys as desired and copy them to `gitlab-environment-toolkit/keys`.
 
-:information_source:&nbsp; **The public SSH file name will be referred to as `<SSH_PUBLIC_KEY_FILE_NAME>` and private `<SSH_PRIVATE_KEY_FILE_NAME>` later in this guide.**
+> [!note]
+> The public SSH file name will be referred to as `<SSH_PUBLIC_KEY_FILE_NAME>` and private `<SSH_PRIVATE_KEY_FILE_NAME>` later in this guide.
 
 ### 1c. Terraform State Storage
 
@@ -87,7 +93,8 @@ With AWS this is straightforward as we can store the file on S3 object storage. 
 
 This can be named as desired, but note that **AWS requires the name to be globally unique across all users**. _Avoid_ using `<ENV_NAME>-terraform-state` as Toolkit will create a bucket with this naming format for the [Terraform Module Registry](https://docs.gitlab.com/ee/user/packages/terraform_module_registry/) feature.
 
-:information_source:&nbsp; **The Terraform state Bucket name will be referred to as `<TERRAFORM_STATE_BUCKET_NAME>` later in this guide.**
+> [!note]
+> The Terraform state Bucket name will be referred to as `<TERRAFORM_STATE_BUCKET_NAME>` later in this guide.
 
 ### 1d. Static External IP
 
@@ -97,7 +104,8 @@ Follow [AWS's docs on how to do this](https://docs.aws.amazon.com/AWSEC2/latest/
 
 Once created you'll be given an allocation ID and IP address. Keep a note of this to be used later.
 
-:information_source:&nbsp; **The IP will be referred to as `<AWS_IP>` and the allocation ID `<AWS_IP_ALLOCATION_ID>` later in this guide.**
+> [!note]
+> The IP will be referred to as `<AWS_IP>` and the allocation ID `<AWS_IP_ALLOCATION_ID>` later in this guide.
 
 ## 2. Provisioning the environment with Terraform
 
@@ -107,7 +115,8 @@ Let's go through the steps for each.
 
 Config is recommended to be placed in a new folder named after the environment under the `gitlab-environment-toolkit/terraform/environments` folder, e.g. `gitlab-environment-toolkit/terraform/environments/<ENV_NAME>`.
 
-:information_source:&nbsp; For the purposes of this guide we're running the Toolkit natively from source where the modules are all available on disk.
+> [!note]
+> For the purposes of this guide we're running the Toolkit natively from source where the modules are all available on disk.
 
 ### 2a. Installing Terraform with `mise`
 
@@ -120,7 +129,8 @@ First we need to install Terraform. To easily switch between Terraform versions 
     mise install terraform -y
     ```
 
-:information_source:&nbsp; The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required.
+> [!note]
+> The version of Terraform that's installed is set in the [`.tool-versions` file](../.tool-versions). Other versions can be installed as required.
 
 Terraform should now be installed and ready on your `PATH`.
 
@@ -274,7 +284,8 @@ Let's go through the steps for each.
 
 Config is recommended to be placed in a new folder named after the environment under the `gitlab-environment-toolkit/ansible/environments/` folder, e.g. `gitlab-environment-toolkit/ansible/environments/<ENV_NAME>/inventory`.
 
-:information_source:&nbsp; For the purposes of this guide we're running the Toolkit natively from source where the playbooks and roles are all available on disk.
+> [!note]
+> For the purposes of this guide we're running the Toolkit natively from source where the playbooks and roles are all available on disk.
 
 ### 3a. Installing Ansible with a Virtual Environment
 
@@ -302,19 +313,22 @@ First we need to install Ansible. There are various ways to install Ansible, we 
 
 1. Install OpenSSH Client if not already installed as per your OS.
 
-:information_source:&nbsp; Note that if you're on a macOS machine you'll also need to install `gnu-tar` by running `brew install gnu-tar`
+> [!note]
+> If you're on a macOS machine you'll also need to install `gnu-tar` by running `brew install gnu-tar`
 
 ### 3b. Setup Config
 
 Now we'll set up the Ansible config for the environment. There are 2 config files to configure - Dynamic Inventory (`<ENV_NAME>.aws_ec2.yml`) and Environment (`vars.yml`) - as follows:
 
-:information_source:&nbsp; Note that some of the config we set here matches config set in Terraform.
+> [!tip]
+> Some of the config we set here matches config set in Terraform.
 
 First is the Dynamic Inventory file, which configures Ansible to retrieve the machine list from AWS and their details:
 
 <details><summary>Dynamic Inventory - <code>gitlab-environment-toolkit/ansible/environments/&#60;ENV_NAME&#62;/inventory/ENV_NAME.aws_ec2.yml</code></summary>
 
-:information_source:&nbsp; Only values in `<>` brackets should be changed in this file and the rest should match. It also must be saved with the suffix `aws_ec2.yml`.
+> [!note]
+> Only values in `<>` brackets should be changed in this file and the rest should match. It also must be saved with the suffix `aws_ec2.yml`.
 
 ```yaml
 plugin: aws_ec2
@@ -342,7 +356,8 @@ Next is the Environment config file that contains all the config for configuring
 
 <details><summary>Environment - <code>gitlab-environment-toolkit/ansible/environments/&#60;ENV_NAME&#62;/inventory/vars.yml</code></summary>
 
-:information_source:&nbsp; [As mentioned earlier in this guide](#select-passwords-and-tokens) all `<*_PASSWORD>` and `<*_TOKEN>` entries should be replaced with your own.
+> [!note]
+> [As mentioned earlier in this guide](#select-passwords-and-tokens) all `<*_PASSWORD>` and `<*_TOKEN>` entries should be replaced with your own.
 
 ```yaml
 all:

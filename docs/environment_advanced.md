@@ -28,7 +28,8 @@ On this page we'll detail all the supported advanced setups you can do with the 
 
 The Toolkit allows for providing custom GitLab config that will be used when setting up components via the Linux package (Omnibus) or Helm charts.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Any custom config passed will always take precedence and may lead to various unintended consequences or broken environments if not used carefully.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Any custom config passed will always take precedence and may lead to various unintended consequences or broken environments if not used carefully.
 
 Custom config should only be used in advanced scenarios where you are fully aware of the intended effects or for areas that the Toolkit doesn't support natively due to potential permutations such as:
 
@@ -52,7 +53,13 @@ Providing custom config for components deployed via the Linux package (Omnibus) 
     - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via a variable for each different component e.g. `<component>_custom_config_file`.
     - Available component options: `common`, `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
 
-:information_source:&nbsp; From GitLab 16.0 onwards note that the config format for [Gitaly](https://docs.gitlab.com/ee/update/#gitaly-omnibus-gitlab-configuration-structure-change) and [Praefect](https://docs.gitlab.com/ee/update/#praefect-omnibus-gitlab-configuration-structure-change) respectively have changed to be under a new `['configuration']` key. When looking to add Custom Config for either of these components you can still do so normal, but you should follow the new structure. For example, to change the logging level for Gitaly you would set configure this as `gitaly['configuration']['logging']['level']`.
+>>> [!note]
+When adding custom configuration for Gitaly or Praefect from GitLab `16.0`, you need to follow the [changed configuration structure](https://docs.gitlab.com/ee/update/#gitaly-omnibus-gitlab-configuration-structure-change) and use the `['configuration']` key, for example:
+
+```rb
+gitaly['configuration']['logging']['level'] = 'warn'
+```
+>>>
 
 With the above done the file will be picked up by the Toolkit and used when configuring the Linux package (Omnibus).
 
@@ -90,7 +97,8 @@ The Toolkit has hooks to allow tasks to be run at the following points during th
 - Post Configure - Tasks to run against the environment **after** setup from the Ansible runner.
 - Uninstall - Tasks to run as part of the uninstallation process such as uninstalling any additional tools.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Running custom tasks may lead to various unintended consequences or broken environments if not used carefully.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Running custom tasks may lead to various unintended consequences or broken environments if not used carefully.
 
 Setting up common tasks is done in the same manner for each hook as follows:
 
@@ -116,7 +124,8 @@ Any task within the [Ansible library](https://docs.ansible.com/ansible/2.9/modul
 
 The Toolkit allows for copying files or folders to component node groups as desired. This can be useful when additional files are required for setup such as SSL certificates.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom files may lead to various unintended consequences or broken environments if not used carefully.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Adding custom files may lead to various unintended consequences or broken environments if not used carefully.
 
 Setting up common files is straightforward. All that's required is for you to have the files ready in a location that's reachable by Ansible on the machine it's running on and then configuring Ansible to copy the files or folder from that location to a specified one on the node group as follows:
 
@@ -124,7 +133,8 @@ Setting up common files is straightforward. All that's required is for you to ha
 1. Configure Ansible to copy the files and where to via the `*_custom_files_paths` setting (see structure below) in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file.
     - Available component options: `common`, `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
 
-:information_source:&nbsp; Files are always copied before any components are configured.
+> [!note]
+> Files are always copied before any components are configured.
 
 The `*_custom_files_paths` setting is a list of files or folders for each component that Ansible is to copy. An example for Gitaly with descriptions below is as follows:
 
@@ -151,9 +161,14 @@ With the above done the files will be copied by the Toolkit.
 
 As an additional feature, it's possible for you to pass in your own GitLab secrets, either some or all, that the Toolkit will merge with any existing secrets on the environment and subsequently propagate out.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
 
-:information_source:&nbsp; This feature is designed for Linux package (Omnibus) setups. As a convenience however on Cloud Native Hybrid environments some secrets, such as the GitLab Rails and GitLab Shell secrets, [are also propagated from Linux package (Omnibus) VMs to Kubernetes](environment_advanced_hybrid.md#kubernetes-secrets) to ensure synchronisation. The equivalent full Cloud Native version of this feature is [Custom Kubernetes Secrets (via Custom Tasks)](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
+>>> [!note]
+This feature is designed for Linux package (Omnibus) setups. As a convenience however on Cloud Native Hybrid environments some secrets, such as the GitLab Rails and GitLab Shell secrets, [are also propagated from Linux package (Omnibus) VMs to Kubernetes](environment_advanced_hybrid.md#kubernetes-secrets) to ensure synchronisation.
+
+The equivalent full Cloud Native version of this feature is [Custom Kubernetes Secrets (via Custom Tasks)](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
+>>>
 
 Custom GitLab secrets can be given as a JSON string via the following variable in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
@@ -279,7 +294,8 @@ There are several options for deploying and configuring Gitaly as detailed below
 
 The Toolkit supports setting up both of these setups. This is controlled simply by not provisioning the Praefect nodes required in Cluster. If these nodes aren't present the Toolkit automatically assumes that the environment is using Gitaly Sharded and will configure in that way.
 
-:information_source:&nbsp; Attempting to switch an existing environment from using Gitaly Cluster to Sharded or vice versa is not supported in the Toolkit and may lead to data loss.
+> [!caution]
+> Attempting to switch an existing environment from using Gitaly Cluster to Sharded or vice versa is not supported in the Toolkit and may lead to data loss.
 
 ### Gitaly Internal API Callback URL
 
@@ -311,9 +327,13 @@ By default, `openssh` will be used, but you can switch over to `gitlab-sshd` via
 The Toolkit allows you to configure the External and Internal ports used for serving Git operations over SSH, where external is the port users will use and internal is the port that the selected SSH daemon runs on. These can be configured via the following Ansible variables in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
 
 - `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure all parts of the external connection - HAProxy (Linux installs) or Kubernetes Ingress. Optional, default is `2222` (Linux - HAProxy External) / `22` (Cloud Native Hybrid, Linux - Single Node).
-  - :information_source:&nbsp; On Linux installs using the optional Toolkit provided HAProxy External load balancer the default port is set to `2222` to avoid clashes with system SSH on the HAProxy node as this is what Ansible expects to use. If a different port is desired this can be done by changing the `gitlab_shell_ssh_port` in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf) to the new value.
-    - Note however that if the desired port is `22` in this setup the system SSH port on the HAProxy External node will need to be adjusted first manually and Ansible subsequently configured to use that new system SSH port.
-- `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for `gitlab-sshd` this will change whatever port the service runs on (Note for `gitlab-sshd` [it can not be run on a port number lower than `1024`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd)). Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
+- `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for [`gitlab-sshd`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd) this will change whatever port the service is running on. Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
+
+>>> [!note]
+When using the Toolkit's optional HAProxy External load balancer, GitLab SSH traffic runs on port `2222` by default to avoid conflicts with the system SSH service (port `22`) that Ansible requires.
+
+The port can be changed via the `gitlab_shell_ssh_port` variable in your Terraform config. If port `22` is required for GitLab SSH, using a separate external load balancer is recommended.
+>>>
 
 ## Gitlab Rails SSH Host Keys handling
 
@@ -332,7 +352,8 @@ In select circumstances it may be preferable to disable this behaviour. However 
 
 The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes optionally provisioning and configuring [OpenSearch](https://opensearch.org/) nodes as a convenience to be a cluster as well as configuring GitLab to use it.
 
-:information_source:&nbsp; Note that to be able to enable Advanced Search you'll require at least a GitLab Premium License.
+> [!note]
+> To be able to enable Advanced Search you'll require at least a GitLab Premium License.
 
 Due to the nature of OpenSearch it's not possible to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance for Elasticsearch that also applies to OpenSearch can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration).
 
@@ -356,11 +377,13 @@ For all setups, the below settings configure how the service and dependents are 
 - `container_registry_external_url` - The URL registry will be available on. Optional, default is `https://registry.<external_host>`.
 - `gitlab_object_storage_registry_chunksize_mb` - The registry chunksize for multi-part uploads. Note this only applies when using Registry with Object Storage on either AWS or GCP. Consider increasing it somewhere between 25 and 50 if experiencing failures with large images, see [GitLab documentation](https://docs.gitlab.com/ee/administration/packages/container_registry.html#aws-s3-with-the-gitlab-registry-error-when-pushing-large-images) for more information. Optional, default is `10` on AWS and `5` on GCP.
 
-:information_source:&nbsp; When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates) the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
+> [!note]
+> When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates), the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
 
 ## Pages
 
-:information_source:&nbsp; Pages is currently only supported on Cloud Native Hybrid installations.
+> [!note]
+> Pages is currently only supported on Cloud Native Hybrid installations.
 
 Ansible variables are available to configure the [GitLab Charts' Pages sub-chart](https://docs.gitlab.com/charts/charts/gitlab/gitlab-pages/) as part of a GET-managed cloud-native hybrid installation:
 
@@ -914,20 +937,6 @@ all:
 
 </details>
 
-### Facts Cache (Optional)
-
-When running select playbooks, e.g. running a playbook only for `haproxy` - `ansible-playbook -i <inventory> playbooks/haproxy.yml`, some additional preparation is required when using a Static Inventory.
-
-Unlike Dynamic Inventories, in this scenario only facts for the HAProxy hosts and no others are collected. This will cause the play to fail as the Toolkit expects to be able to access facts for all hosts throughout.
-
-:information_source:&nbsp; This _doesn't_ affect playbooks that run on all hosts, such as `all.yml`, as these will gather facts at runtime.
-
-To work around this limitation a persistent [Fact Cache](https://docs.ansible.com/ansible/latest/plugins/cache.html#cache-plugins) is recommended where all host facts are saved and made available on subsequent runs.
-
-An example would be the [`jsonfile`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/jsonfile_cache.html#ansible-collections-ansible-builtin-jsonfile-cache) cache where all facts are saved to disk. This would only need to be generated once initially and only run again if any of the hosts change.
-
-Refer to the [Ansible docs](https://docs.ansible.com/ansible/latest/plugins/cache.html#cache-plugins) for more info.
-
 ## System Packages
 
 The Toolkit will install system packages on every node it requires for setting up GitLab.
@@ -1000,7 +1009,8 @@ Passing in your policies is done in Terraform via the following variables in you
 
 The Toolkit also allows for there to be a [Permissions Boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) to be set for all IAM Roles it creates.
 
-:exclamation:&nbsp; **This is an advanced feature, and it must be used with caution**. Boundaries must allow for all Policies the Toolkit uses to be allowed, or your environment will become unstable. [The latest list of policies used by the Toolkit is shown here](https://gitlab.com/search?search=2012-10-17&nav_source=navbar&project_id=14292404&group_id=9970&search_code=true&repository_ref=main).
+> [!caution]
+> **This is an advanced feature, and it must be used with caution**. Boundaries must allow for all Policies the Toolkit uses to be allowed, or your environment will become unstable. [The latest list of policies used by the Toolkit is shown here](https://gitlab.com/search?search=2012-10-17&nav_source=navbar&project_id=14292404&group_id=9970&search_code=true&repository_ref=main).
 
 While the Toolkit will be designed in line with least privilege and ensuring all such IAM entities only have the access they require to do their role you may have a general policy to always apply a "global" permissions boundary as an additional security measure.
 
@@ -1012,7 +1022,8 @@ The Toolkit will then apply this boundary on the next `terraform apply` run.
 
 ### Custom IAM Path (AWS)
 
-:exclamation:&nbsp; This feature may be deprecated and removed in the future. It is specifically not known to work with AWS EKS at this time and as a result is not supported for Cloud Native Hybrid set-ups. For more information please refer to this [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/746).
+> [!caution]
+> This feature may be deprecated and removed in the future. It is specifically not known to work with AWS EKS at this time and as a result is not supported for Cloud Native Hybrid setups. For more information please refer to this [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/746).
 
 The Toolkit allows to configure a custom [Path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) for all IAM Roles and Policies it creates. As detailed in the AWS documentation, you can use a single path, or nest multiple paths as a folder structure. This allows to match your company organizational structure.
 
