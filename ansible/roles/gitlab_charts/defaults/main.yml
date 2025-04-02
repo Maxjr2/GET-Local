@@ -34,6 +34,10 @@ gitlab_charts_webservice_requests_memory_gb: 5
 gitlab_charts_webservice_limits_memory_gb: 7
 gitlab_charts_webservice_requests_cpu: 4
 
+# Convert CPU request to worker count: parse millicores ('m') or direct float or int values.
+# Count will be number of full CPU cores or 1 if lower.
+gitlab_charts_webservice_worker_processes: "{{ [(gitlab_charts_webservice_requests_cpu | replace('m','') | float / 1000) | int, 1] | max if (gitlab_charts_webservice_requests_cpu is string and 'm' in gitlab_charts_webservice_requests_cpu) else [gitlab_charts_webservice_requests_cpu | float | int, 1] | max }}"
+
 gitlab_charts_webservice_min_replicas_scaler: 0.75
 gitlab_charts_webservice_max_unavailable_scaler: 0.1
 gitlab_charts_webservice_max_replicas: ""
