@@ -16,7 +16,7 @@ gitlab:
       requests:
         cpu: "{{ gitlab_charts_webservice_requests_cpu }}"
         memory: "{{ gitlab_charts_webservice_requests_memory_gb }}G"
-    workerProcesses: "{{ gitlab_charts_webservice_requests_cpu }}"
+    workerProcesses: "{{ gitlab_charts_webservice_worker_processes }}"
     ingress:
       proxyBodySize: 0  # Bigger file uploads, e.g. imports
       useGeoClass: false
