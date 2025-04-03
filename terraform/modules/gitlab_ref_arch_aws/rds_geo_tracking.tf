@@ -6,6 +6,8 @@ locals {
 
   rds_geo_tracking_postgres_major_version = floor(var.rds_geo_tracking_postgres_version)
 
+  rds_geo_tracking_postgres_is_snapshot = var.rds_geo_tracking_snapshot_identifier == null
+
   # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks
   rds_geo_tracking_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, statement_timeout = 15000, deadlock_timeout = 5000 }
 }
@@ -92,6 +94,7 @@ resource "aws_db_instance" "gitlab_geo_tracking" {
 
   deletion_protection = var.rds_geo_tracking_postgres_deletion_protection
 
+  snapshot_identifier   = local.rds_geo_tracking_postgres_is_snapshot ? null : var.rds_geo_tracking_snapshot_identifier
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
 
@@ -168,7 +171,8 @@ resource "aws_db_instance" "gitlab_geo_tracking_read_replica" {
     ignore_changes = [
       username,
       storage_encrypted,
-      kms_key_id
+      kms_key_id,
+      snapshot_identifier
     ]
   }
 }
