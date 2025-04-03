@@ -6,7 +6,8 @@ locals {
 
   rds_postgres_major_version = floor(var.rds_postgres_version)
 
-  rds_postgres_is_primary = var.rds_postgres_replication_database_arn == null
+  rds_postgres_is_primary  = var.rds_postgres_replication_database_arn == null
+  rds_postgres_is_snapshot = var.rds_snapshot_identifier == null
 
   # https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks
   rds_postgres_default_params = { password_encryption = "scram-sha-256", log_min_duration_statement = 1000, idle_in_transaction_session_timeout = 60000, statement_timeout = 15000, deadlock_timeout = 5000 }
@@ -99,6 +100,7 @@ resource "aws_db_instance" "gitlab" {
 
   deletion_protection = var.rds_postgres_deletion_protection
 
+  snapshot_identifier   = local.rds_postgres_is_snapshot ? null : var.rds_snapshot_identifier
   skip_final_snapshot   = true
   copy_tags_to_snapshot = true
 
@@ -119,7 +121,8 @@ resource "aws_db_instance" "gitlab" {
   lifecycle {
     ignore_changes = [
       storage_encrypted,
-      kms_key_id
+      kms_key_id,
+      snapshot_identifier
     ]
   }
 }

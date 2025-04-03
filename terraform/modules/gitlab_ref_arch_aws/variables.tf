@@ -1183,6 +1183,11 @@ variable "rds_postgres_lifecycle_support" {
   type        = string
   default     = null
 }
+variable "rds_snapshot_identifier" {
+  description = "Specifies whether or not to create this database from a snapshot. This correlates to the snapshot ID you'd find in the RDS console"
+  type        = string
+  default     = null
+}
 
 variable "rds_postgres_read_replica_count" {
   type    = number
@@ -1364,6 +1369,11 @@ variable "rds_praefect_postgres_deletion_protection" {
   type    = bool
   default = false
 }
+variable "rds_praefect_snapshot_identifier" {
+  description = "Specifies whether or not to create this database from a snapshot. This correlates to the snapshot ID you'd find in the RDS console"
+  type        = string
+  default     = null
+}
 
 ## Geo Tracking PostgreSQL
 variable "rds_geo_tracking_postgres_instance_type" {
@@ -1502,6 +1512,11 @@ variable "rds_geo_tracking_postgres_monitoring_role_arn" {
 variable "rds_geo_tracking_postgres_deletion_protection" {
   type    = bool
   default = false
+}
+variable "rds_geo_tracking_snapshot_identifier" {
+  description = "Specifies whether or not to create this database from a snapshot. This correlates to the snapshot ID you'd find in the RDS console"
+  type        = string
+  default     = null
 }
 
 ## RDS Performance Insights
