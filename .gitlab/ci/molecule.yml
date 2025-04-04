@@ -13,6 +13,7 @@
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
     FF_NETWORK_PER_BUILD: true
+  interruptible: true
   before_script:
     - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
     - ./get-docker.sh
@@ -25,18 +26,23 @@
 .molecule-merge-requests:
   extends: .molecule
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
-    - changes:
-      - ansible/playbooks
-      - ansible/roles
-      - ansible/molecule
-      - ansible/requirements
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - ansible/playbooks/**/*
+        - ansible/roles/**/*
+        - ansible/molecule/**/*
+        - ansible/requirements/**/*
 
 .molecule-os:
   extends: .molecule
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - ansible/playbooks/**/*
+        - ansible/roles/**/*
+        - ansible/molecule/**/*
+        - ansible/requirements/**/*
       when: manual
     - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
 
