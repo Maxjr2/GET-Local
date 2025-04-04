@@ -79,7 +79,8 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
   lifecycle {
     ignore_changes = [
       at_rest_encryption_enabled,
-      kms_key_id
+      kms_key_id,
+      snapshot_name
     ]
   }
 }
@@ -173,7 +174,8 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   lifecycle {
     ignore_changes = [
       at_rest_encryption_enabled,
-      kms_key_id
+      kms_key_id,
+      snapshot_name
     ]
   }
 }
@@ -262,7 +264,8 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   lifecycle {
     ignore_changes = [
       at_rest_encryption_enabled,
-      kms_key_id
+      kms_key_id,
+      snapshot_name
     ]
   }
 }
