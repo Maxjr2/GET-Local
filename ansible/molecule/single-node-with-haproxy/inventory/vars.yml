@@ -3,8 +3,9 @@ all:
     external_url: "http://docker"
     cloud_provider: none
 
-    gitlab_repo_script_url: "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
     gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
 
     common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
+
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"

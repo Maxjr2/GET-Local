@@ -1,2 +1,33 @@
 ---
-- import_playbook: ../../playbooks/all.yml
+- name: Configure GitLab
+  hosts: localhost
+  tasks:
+    - name: Run all.yml for site1
+      command: ansible-playbook -i ./inventories/site1 ../../playbooks/all.yml
+      ignore_errors: true
+      no_log: true
+      register: site1_playbook_run
+
+    - name: Show playbook output for site1
+      debug:
+        msg: "{{ site1_playbook_run.stdout_lines }}"
+
+    - name: Site1 all.yml failure
+      fail: "ERROR: {{ site1_playbook_run.stderr_lines }}"
+      when: site1_playbook_run is failure
+
+    - name: Run all.yml for site2
+      command: ansible-playbook -i ./inventories/site2 ../../playbooks/all.yml
+      ignore_errors: true
+      no_log: true
+      register: site2_playbook_run
+
+    - name: Show playbook output for site2
+      debug:
+        msg: "{{ site2_playbook_run.stdout_lines }}"
+
+    - name: Site2 all.yml failure
+      fail: "ERROR: {{ site2_playbook_run.stderr_lines }}"
+      when: site2_playbook_run is failure
+
+- ansible.builtin.import_playbook: ../../playbooks/gitlab_geo.yml

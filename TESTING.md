@@ -39,11 +39,17 @@ To enable compatibility with being run inside of a pipeline, the `external_url` 
 
 When using Molecule to build infrastructure, if you need to log in to the instance you can define the environment variable `GITLAB_ROOT_PASSWORD` which will be used as the initial root password when building the instance. If you have not defined the environment variable then you will need to [reset the root password](https://docs.gitlab.com/security/reset_user_password/) before you can log in.
 
-By default, Molecule will assume that the Docker socket is in the default location of `/var/run/docker.sock` if this is not the case on your machine you will need to set the `DOCKER_HOST` environment variable before running Molecule commands. If there is an issue with the Docker socket location this will typically show as the following error:
+Depending on the scenario being run you may need to define some secrets to be used for each componenet. The following list of available environment variables can be set to be used accross any scenario:
 
-```sh
-CRITICAL Unable to contact the Docker daemon. Please refer to https://docs.docker.com/config/daemon/ for managing the daemon
-```
+- `MOLECULE_CONSUL_PASSWORD`
+- `MOLECULE_GITLAB_ROOT_PASSWORD`
+- `MOLECULE_GITALY_TOKEN`
+- `MOLECULE_PGBOUNCER_PASSWORD`
+- `MOLECULE_POSTGRES_PASSWORD`
+- `MOLECULE_PRAEFECT_EXTERNAL_TOKEN`
+- `MOLECULE_PRAEFECT_INTERNAL_TOKEN`
+- `MOLECULE_PRAEFECT_POSTGRES_PASSWORD`
+- `MOLECULE_REDIS_PASSWORD`
 
 ### Molecule commands
 
@@ -52,6 +58,20 @@ In the command above, the `test` keyword triggers the complete Molecule sequence
 When debugging, it's often helpful to keep the infrastructure running after tests complete. To do this, replace `test` with `converge` in the command. This creates and runs the scenario but doesn't destroy it afterward. You can later remove the infrastructure separately using the `destroy` keyword.
 
 For more information on available commands, refer to the [Getting started with Molecule](https://ansible.readthedocs.io/projects/molecule/getting-started/#run-a-full-test-sequence) documentation.
+
+### Troubleshooting
+
+#### Unable to contact the Docker daemon
+
+By default, Molecule will assume that the Docker socket is in the default location of `/var/run/docker.sock` if this is not the case on your machine you will need to set the `DOCKER_HOST` environment variable before running Molecule commands. If there is an issue with the Docker socket location this will typically show as the following error:
+
+```sh
+CRITICAL Unable to contact the Docker daemon. Please refer to https://docs.docker.com/config/daemon/ for managing the daemon
+```
+
+#### Molecule scenarios getting stuck
+
+Some Molecule scenarios will require more resource than the default that is made available to Docker. If you see some scenarios hang for long periods of time without progressing to the next task, you may need to increase the CPU cores and memory available to Docker.
 
 ## Testing on cloud infrastructure
 

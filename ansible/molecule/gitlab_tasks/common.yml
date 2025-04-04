@@ -6,6 +6,7 @@
 
     # Start service manager
     GITLAB_OMNIBUS_CONFIG= /opt/gitlab/embedded/bin/runsvdir-start &
+  when: omnibus_node
 
 - name: Install Requests
   pip:

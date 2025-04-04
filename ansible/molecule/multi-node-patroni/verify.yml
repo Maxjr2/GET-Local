@@ -1,0 +1,26 @@
+- name: HAProxy Verify
+  hosts: localhost
+  tasks:
+    - name: Output curl command
+      debug:
+        msg: "Running: curl -s 'http://docker:1936/haproxy?stats'"
+
+    - name: Get HAProxy stats
+      ansible.builtin.shell: >
+        curl -s 'http://docker:1936/haproxy?stats'
+      register: localhost_haproxy_stats
+      changed_when: false
+
+    - name: Check if gitlab-rails1 is UP
+      ansible.builtin.set_fact:
+        localhost_rails_status: "UP"
+      when: "'gitlab-rails1' in localhost_haproxy_stats.stdout and 'UP</td>' in localhost_haproxy_stats.stdout"
+
+    - name: Check if gitlab-rails1 is DOWN
+      ansible.builtin.set_fact:
+        localhost_rails_status: "DOWN"
+      when: "'gitlab-rails1' in localhost_haproxy_stats.stdout and 'DOWN</td>' in localhost_haproxy_stats.stdout"
+
+    - name: Display HAProxy status
+      ansible.builtin.debug:
+        msg: "GitLab Rails status: {{ localhost_rails_status | default('Not found or connection failed') }}"

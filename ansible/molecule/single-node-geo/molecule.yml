@@ -14,7 +14,7 @@ provisioner:
 platforms:
   - &default_platform
     name: site1-gitlab-rails-1
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2204}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2404}-ansible:latest"
     pre_build_image: true
     privileged: true
     command: ""
@@ -25,24 +25,14 @@ platforms:
       - /run
       - /tmp
       - /run/lock
+    network_mode: "molecule_network"
     networks:
-      - name: "single-node-geo"
-    network_mode: "single-node-geo"
-  - <<: *default_platform
-    name: site1-haproxy-external-1
-    exposed_ports:
-      - 80/udp
-      - 80/tcp
+      - name: molecule_network
     published_ports:
       - 0.0.0.0:80:80/udp
       - 0.0.0.0:80:80/tcp
   - <<: *default_platform
     name: site2-gitlab-rails-1
-  - <<: *default_platform
-    name: site2-haproxy-external-1
-    exposed_ports:
-      - 80/udp
-      - 80/tcp
     published_ports:
       - 0.0.0.0:81:80/udp
       - 0.0.0.0:81:80/tcp
