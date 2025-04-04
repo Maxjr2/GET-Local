@@ -26,7 +26,7 @@
 .molecule-merge-requests:
   extends: .molecule
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - ansible/playbooks/**/*
         - ansible/roles/**/*
@@ -37,7 +37,7 @@
   extends: .molecule
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - ansible/playbooks/**/*
         - ansible/roles/**/*
