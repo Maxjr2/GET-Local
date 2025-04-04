@@ -153,6 +153,7 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - [`rds_postgres_backup_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#backup_window) - The daily time range where backups will be taken, e.g. `09:46-10:16`. Optional, default is `null`.
 - [`rds_postgres_delete_automated_backups`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#delete_automated_backups) - Whether automated backups (if taken) will be deleted when the RDS instance is deleted. Optional, default is `true`.
 - [`rds_postgres_maintenance_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#maintenance_window) - The window to perform maintenance in, e.g. `Mon:00:00-Mon:03:00`. Optional, default is `null`. Must not overlap with `rds_postgres_backup_window`.
+- [`rds_snapshot_identifier`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#snapshot_identifier-1) - Name of a snapshot identifier from which to restore data for the initial creation of the database. Optional, default is `null`.
 - [`rds_postgres_deletion_protection`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#deletion_protection-1) - The database can't be deleted when this value is set to true. Default is `false`.
 - [`rds_postgres_lifecycle_support`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#engine_lifecycle_support-1) - The [support lifecycle](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/extended-support-overview.html) type to set for new databases - Extended or Standard. By default, databases are created with Extended support unless disabled. Accepted values are `open-source-rds-extended-support` or `open-source-rds-extended-support-disabled`. Optional, default is `null`.
 - [`rds_postgres_tags`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#tags) - A map of tags to assign to RDS instance. Optional, default is `{}`.
@@ -181,24 +182,23 @@ Once provisioned you'll see several new outputs at the end of the process. Key f
 
 ##### AWS RDS - Version
 
-When it comes to the version of PostgreSQL being deployed in AWS RDS, it's first worth noting that [AWS has several rules in place that can impact this on the server side](https://aws.amazon.com/rds/faqs/#Database_Engine_Versions), such as removing minor versions after a year or enabling minor upgrades by default. These rules can in turn can cause issues with Terraform, and its state as they happen automatically.
+>>> [!important]
+It's strongly recommended to explicitly set the version of Postgres as detailed in this section when deploying via the Toolkit to ensure you have full control when the database is upgraded.
 
-Due to the above as well as ensuring that major upgrades don't happen unexpectedly, the Toolkit handles RDS version as follows:
+Additionally when the database has been upgraded it's recommended to run the [`ANALYZE` operation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) on the database after to ensure optimum performance.
+>>>
 
-- The Toolkit will ask AWS RDS to deploy the current GitLab recommended version of PostgreSQL as chosen by AWS.
-  - Conversely, if AWS decide to change the recommended version at a later date, Terraform will instruct AWS to upgrade the database to that version on the next run.
-- The Toolkit disables any auto upgrade behaviour (`auto_minor_version_upgrade`) for the RDS instance to avoid any Terraform clashes.
+AWS RDS has specific [version management policies](https://aws.amazon.com/rds/faqs/#Database_Engine_Versions) that can affect PostgreSQL deployments, including automatic removal of minor versions after one year and default enabling of minor upgrades. These automated behaviors can conflict with Terraform state management.
 
-While the above is the default behaviour it's recommended that you manage the version yourself in almost all cases by configuring the [recommended PostgreSQL version specifically for the version of GitLab you are deploying](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) and then changing that as required to do an upgrade.
+To prevent unexpected upgrades and Terraform state conflicts, the Toolkit manages PostgreSQL versions as follows:
 
-> [!note]
-> If the specific recommended version for GitLab isn't available on AWS RDS, then the latest minor version is expected to work instead.
+- Deploys the current GitLab-recommended PostgreSQL version available on AWS RDS
+- Disables automatic version upgrades
+- Updates to AWS's recommended version on subsequent Terraform runs if AWS changes their recommendation
 
 Configuring how RDS version is selected in the Toolkit is done via the following variables:
 
 - `rds_postgres_version` - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `16`.
-  > [!important]
-  > If performing a major upgrade, [it's strongly recommended in the AWS documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) to run the `ANALYZE` operation after to avoid performance issues.
 - [`rds_postgres_auto_minor_version_upgrade`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#auto_minor_version_upgrade) - Whether automated upgrades to AWS selected minor versions should occur during the maintenance window. This is disabled by default and is not recommended being enabled as it can lead to clashes with Terraform's state. Optional, default is `false`.
 
 ##### AWS RDS - Parameters
@@ -274,9 +274,6 @@ The variables for this service start with the prefix `cloud_sql_*` and should re
 
 - `cloud_sql_postgres_machine_tier`- The [GCP Cloud SQL Machine Tier](https://cloud.google.com/sql/docs/postgres/create-instance#machine-types) for the service to use without the `db-` prefix. Note that for this service the standard GCP machine sizes don't apply, instead utilizing custom sizes in most cases. For example, to deploy an instance that matches a `n1-standard-4` machine type this can be configured as `custom-4-15360`. **Required**.
 - `cloud_sql_postgres_edition` - The [Cloud SQL edition](https://cloud.google.com/sql/docs/postgres/editions-intro) to be used. Optional, defaults to `ENTERPRISE`.
-- `cloud_sql_postgres_version` - The [Postgres version](https://cloud.google.com/sql/docs/postgres/db-versions) to be used. Changing this value will trigger an upgrade and may lead to some downtime. Optional, defaults to `POSTGRES_16`.
-  > [!important]
-  > If performing a major upgrade, [it's strongly recommended in the GCP documentation](https://cloud.google.com/sql/docs/postgres/upgrade-major-db-version-inplace#complete_the_major_version_upgrade) to run the `ANALYZE` operation after to avoid performance issues.
 - `cloud_sql_postgres_root_password` - The root password for the instance to be used for the default `postgres` user. If not set the user will not be given a password and access won't be available until a password is given manually. Optional, default is `null`.
 - `cloud_sql_postgres_disk_type` - The initial disk type for the instance. Options are `PD-SSD` (GCP default) or `PD-HDD`. Optional, default is `null`.
 - `cloud_sql_postgres_disk_size` - The disk size for the instance. Note that the disk will autoresize as required. Optional, default is `100`.
@@ -305,6 +302,18 @@ module "gitlab_ref_arch_gcp" {
 Once the variables are set in your file you can proceed to provision the service as normal. Note that this can take several minutes on GCP's side.
 
 Once provisioned the database will be configured, and you'll see several new outputs at the end of the process. Key from this is the `cloud_sql_host` output, which contains the [Private IP](https://cloud.google.com/sql/docs/postgres/configure-private-ip#connect_to_an_instance_using_its_private_ip) address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
+
+##### GCP Cloud SQL - Version
+
+>>> [!important]
+It's strongly recommended to explicitly set the version of Postgres as detailed in this section when deploying via the Toolkit to ensure you have full control when the database is upgraded.
+
+Additionally when the database has been upgraded it's recommended to run the [`ANALYZE` operation](https://cloud.google.com/sql/docs/postgres/upgrade-major-db-version-inplace) after to ensure optimum performance.
+>>>
+
+GCP Cloud SQL Postgres version can be configured via the following variable:
+
+- [`cloud_sql_postgres_version`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#database_version-1) - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `POSTGRES_16`.
 
 ##### GCP Cloud SQL - Parameters
 
@@ -566,51 +575,40 @@ Like the main provisioning docs there are sections for each supported provider o
 
 #### AWS ElastiCache
 
-The Toolkit supports provisioning an AWS ElastiCache Redis service instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
+The Toolkit supports provisioning AWS ElastiCache Redis service instances with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
-There are different variables to be set depending on the target architecture size and if it requires separate Redis instances (10k and up). First we'll detail the general settings that apply to all Redis setups:
+>>> [!note]
+The configuration can differ depending on your target GitLab Reference Architecture. Smaller deployments (5k users and below) typically use a combined Redis setup, while larger deployments separate Redis into dedicated instances for different queues. The variable prefixes will differ based on your approach:
 
-The variables to set are dependent on if the setup is to have combined or separated Redis queues depending on the target Reference Architecture. For the latter, some variables will have a different prefix depending on what Redis instances you're provisioning - `elasticache_redis_*`, `elasticache_redis_cache_*` and `elasticache_redis_persistent_*`, each replacing any applicable existing `redis_*`, `redis_cache_*` or `redis_persistent_*` variables respectively. These will be called out below.
+- Combined setup: `elasticache_redis_*`
+- Separated setup: `elasticache_redis_cache_*` and `elasticache_redis_persistent_*`
 
-For required variables they need to be set for each Redis service you are provisioning:
+These also replace any existing `redis_*`, `redis_cache_*` or `redis_persistent_*` variables respectively.
+>>>
 
-- `elasticache_redis_instance_type` - The [AWS Instance Type](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheNodes.SupportedTypes.html) of the Redis instance to use without the `cache.` prefix. For example, to use a `cache.m5.2xlarge` ElastiCache instance type, the value of this variable should be `m5.2xlarge`. **Required**.
-  - `elasticache_redis_cache_instance_type` or `elasticache_redis_persistent_instance_type` when setting up separate services.
-- `elasticache_redis_node_count` - The number of replicas of the Redis instance to have for failover purposes. This should be set to at least `2` or higher for HA and `1` if this isn't a requirement. **Required**.
-  - `elasticache_redis_cache_node_count` or `elasticache_redis_persistent_node_count` when setting up separate services.
-- `elasticache_redis_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
-  - `elasticache_redis_cache_kms_key_arn` or `elasticache_redis_persistent_kms_key_arn` when setting up separate services.
+For each Redis service, you must configure:
 
-Next are optional variables. The following variables can be set once with the `elasticache_redis_*` prefix, which will apply to every provisioned service, but you can also additionally override this behaviour with specific variables as follows:
+- `elasticache_redis_instance_type` / `elasticache_redis_cache_instance_type` / `elasticache_redis_persistent_instance_type` - The [AWS Instance Type](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheNodes.SupportedTypes.html) of the Redis instance to use without the `cache.` prefix. For example, to use a `cache.m5.2xlarge` ElastiCache instance type, the value of this variable should be `m5.2xlarge`. **Required**.
+- `elasticache_redis_node_count` / `elasticache_redis_cache_node_count` / `elasticache_redis_persistent_node_count` - The number of replicas of the Redis instance to have for failover purposes. This should be set to at least `2` or higher for HA and `1` if this isn't a requirement. **Required**.
+- `elasticache_redis_password` / `elasticache_redis_cache_password` / `elasticache_redis_persistent_password` - The password of the Redis instance. Must follow the [requirements as mandated by AWS](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html#auth-overview). **Required**.
 
-- `elasticache_redis_password` - The password of the Redis instance. Must follow the [requirements as mandated by AWS](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html#auth-overview). **Required**.
-  - Optionally `elasticache_redis_cache_password` or `elasticache_redis_persistent_password` can be used to override for separate services.
-- `elasticache_redis_engine_version` - The version of the Redis instance. Should only be changed to versions that are supported by GitLab. Optional, default is `7.0`.
-  - Optionally `elasticache_redis_cache_engine_version` or `elasticache_redis_persistent_engine_version` can be used to override for separate services.
-- `elasticache_redis_port` - The port of the Redis instance. Should only be changed if required. Optional, default is `6379`.
-  - Optionally `elasticache_redis_cache_port` or `elasticache_redis_persistent_port` can be used to override for separate services.
-- `elasticache_redis_multi_az` - Specifies if the Redis instance is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
-  - Optionally `elasticache_redis_cache_multi_az` or `elasticache_redis_persistent_multi_az` can be used to override for separate services.
-- `elasticache_redis_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access ElastiCache over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
-  - Optionally `elasticache_redis_cache_allowed_ingress_cidr_blocks` or `elasticache_redis_persistent_allowed_ingress_cidr_blocks` can be used to override for separate services.
-- [`elasticache_redis_maintenance_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#maintenance_window) - The weekly time range for when maintenance on the instance is performed, e.g. `sun:05:00-sun:09:00`. Optional, default is `null`. Must not overlap with `elasticache_redis_snapshot_window`.
-  - Optionally `elasticache_redis_cache_maintenance_window` or `elasticache_redis_persistent_maintenance_window` can be used to override for separate services.
-- [`elasticache_redis_snapshot_retention_limit`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_retention_limit) - The number of days to retain backups for. Optional, default is `null`.
-  - Optionally `elasticache_redis_cache_snapshot_retention_limit` or `elasticache_redis_persistent_snapshot_retention_limit` can be used to override for separate services.
-- [`elasticache_redis_snapshot_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_window) - The daily time range where backups will be taken, e.g. `09:46-10:16`. Optional, default is `null`.
-  - Optionally `elasticache_redis_cache_snapshot_window` or `elasticache_redis_persistent_snapshot_window` can be used to override for separate services.
-- `elasticache_redis_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
+The following optional variables work in a fallback like manner. Even when using separate instances if the combined `elasticache_redis_*` variable is configured only it will apply to all unless the separated config is also specified:
+
+- `elasticache_redis_engine_version` / `elasticache_redis_cache_engine_version` / `elasticache_redis_persistent_engine_version` - The version of the Redis instance. Should only be changed to versions that are supported by GitLab. Optional, default is `7.0`.
+- `elasticache_redis_port` / `elasticache_redis_cache_port` / `elasticache_redis_persistent_port` - The port of the Redis instance. Should only be changed if required. Optional, default is `6379`.
+- `elasticache_redis_multi_az` / `elasticache_redis_cache_multi_az` / `elasticache_redis_persistent_multi_az` - Specifies if the Redis instance is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
+- `elasticache_redis_allowed_ingress_cidr_blocks` / `elasticache_redis_cache_allowed_ingress_cidr_blocks` / `elasticache_redis_persistent_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access ElastiCache over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
+- [`elasticache_redis_maintenance_window` / `elasticache_redis_cache_maintenance_window` / `elasticache_redis_persistent_maintenance_window` ](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#maintenance_window) - The weekly time range for when maintenance on the instance is performed, e.g. `sun:05:00-sun:09:00`. Optional, default is `null`. Must not overlap with `elasticache_redis_snapshot_window`.
+- [`elasticache_redis_snapshot_retention_limit` / `elasticache_redis_persistent_snapshot_retention_limit` / `elasticache_redis_persistent_snapshot_retention_limit`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_retention_limit) - The number of days to retain backups for. Optional, default is `null`.
+- [`elasticache_redis_snapshot_window` / `elasticache_redis_cache_snapshot_window` / `elasticache_redis_persistent_snapshot_window`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_window) - The daily time range where backups will be taken, e.g. `09:46-10:16`. Optional, default is `null`.
+- `elasticache_redis_default_subnet_count` / `elasticache_redis_cache_default_subnet_count` / `elasticache_redis_persistent_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
+- `elasticache_redis_kms_key_arn` / `elasticache_redis_cache_kms_key_arn` / `elasticache_redis_persistent_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws) on initial creation. If not set AWS provided keys will be used instead. Optional, default is `null`.
 
 The following optional variables do not default to the `elasticache_redis_*` prefix if set and must be set for each specific service if desired:
 
-- [`elasticache_redis_final_snapshot_identifier`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#final_snapshot_identifier) - Name of final snapshot to create if cluster is destroyed. If `null` no snapshot is created. Note that this can cause name clashes if a cluster has been destroyed multiple times and the snapshot persists. Optional, default is `null`.
-  - `elasticache_redis_cache_snapshot_name` or `elasticache_redis_persistent_final_snapshot_identifier` when setting up separate services.
-- [`elasticache_redis_snapshot_name`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_name) - Name of a snapshot from which to restore data for the initial creation into the new node group. Optional, default is `null`.
-  - `elasticache_redis_cache_snapshot_name` or `elasticache_redis_persistent_snapshot_name` when setting up separate services.
+- [`elasticache_redis_snapshot_name` / `elasticache_redis_cache_snapshot_name` / `elasticache_redis_persistent_snapshot_name`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#snapshot_name) - Name of a snapshot from which to restore data for initial instance creation. Optional, default is `null`.
+- [`elasticache_redis_final_snapshot_identifier` / `elasticache_redis_cache_final_snapshot_identifier` / `elasticache_redis_persistent_final_snapshot_identifier`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#final_snapshot_identifier) - Name of final snapshot to create if cluster is destroyed. If `null` no snapshot is created. Note that this can cause name clashes if a cluster has been destroyed multiple times and the snapshot persists. Optional, default is `null`.
 - [`elasticache_redis_tags` / `elasticache_redis_cache_tags` / `elasticache_redis_persistent_tags`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#tags) - A map of [tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html) to assign to ElastiCache instance. Optional, default is `{}`.
-  - `elasticache_redis_cache_tags` or `elasticache_redis_persistent_tags` when setting up separate services.
-
-If deploying a combined Redis setup that contains all queues (5k and lower) the following settings should be set (replacing any previous `redis_*` settings):
 
 As an example, to set up a standard AWS ElastiCache Redis service for a [5k](https://docs.gitlab.com/ee/administration/reference_architectures/5k_users.html) environment with the required variables should look like the following in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
@@ -647,39 +645,39 @@ Once provisioned you'll see several new outputs at the end of the process. Key f
 
 #### GCP Memorystore
 
-The Toolkit supports provisioning a GCP Memorystore Redis service instance with everything GitLab requires or recommends such as built in HA support and encryption.
+The Toolkit supports provisioning GCP Memorystore Redis service instances with everything GitLab requires or recommends such as built in HA support and encryption.
 
-> [!note]
+>>> [!note]
+The configuration can differ depending on your target GitLab Reference Architecture. Smaller deployments (5k users and below) typically use a combined Redis setup, while larger deployments separate Redis into dedicated instances for different queues. The variable prefixes will differ based on your approach:
+
+- Combined setup: `memorystore_redis_*`
+- Separated setup: `memorystore_redis_cache_*` and `memorystore_redis_persistent_*`
+
+These also replace any existing `redis_*`, `redis_cache_*` or `redis_persistent_*` variables respectively.
+>>>
+
+> [!tip]
 > Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
 
-There are different variables to be set depending on the target architecture size and if it requires separate Redis instances (10k and up). First we'll detail the general settings that apply to all Redis setups:
+Before configuring a Memorystore instance you should be aware of the following caveats:
 
-The variables to set are dependent on if the setup is to have combined or separated Redis queues depending on the target Reference Architecture. For the latter, some variables will have a different prefix depending on what Redis instances you're provisioning - `memorystore_redis_*`, `memorystore_redis_cache_*` and `memorystore_redis_persistent_*`, each replacing any applicable existing `redis_*`, `redis_cache_*` or `redis_persistent_*` variables respectively. These will be called out below.
+- AUTH Password can not be configured directly, it's generated automatically on the service's end and [subsequently needs to be retrieved](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
+- The assigned port is typically `6379` but this can differ at the service's discretion on creation.
+- If SSH is enabled, the service will use automatically generated self signed certificates. These will need to be downloaded for clients to be [configured with to connect](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config).
 
-For required variables they need to be set for each Redis service you are provisioning:
+For each Redis service, you must configure:
 
-- `memorystore_redis_memory_size_gb` - The memory size in GiB of the Redis instance to use. Note that this is [how the service's machine specs are decided](https://cloud.google.com/memorystore/docs/redis/scaling-instances). Should be an integer. **Required**.
-  - `memorystore_redis_cache_memory_size_gb` or `memorystore_redis_persistent_memory_size_gb` when setting up separate services.
-- `memorystore_redis_node_count` - The number of replicas of the Redis instance to have for failover purposes. This should be set to at least `2` or higher for HA and `1` if this isn't a requirement. **Required**.
-  - `memorystore_redis_cache_node_count` or `memorystore_redis_persistent_node_count` when setting up separate services.
+- `memorystore_redis_memory_size_gb` / `memorystore_redis_cache_memory_size_gb` / `memorystore_redis_persistent_memory_size_gb` - The memory size in GiB of the Redis instance to use. Note that this is [how the service's machine specs are decided](https://cloud.google.com/memorystore/docs/redis/scaling-instances). Should be an integer. **Required**.
+- `memorystore_redis_node_count` / `memorystore_redis_cache_node_count` / `memorystore_redis_persistent_node_count` - The number of replicas of the Redis instance to have for failover purposes. This should be set to at least `2` or higher for HA and `1` if this isn't a requirement. **Required**.
 
-For optional variables they work in a default like manner. When configuring for any Redis types the main `memorystore_redis_*` variable can be set once and this will apply to all but you can also additionally override this behaviour with specific variables as follows:
+The following optional variables work in a fallback like manner. Even when using separate instances if the combined `memorystore_redis_*` variable is configured only it will apply to all unless the separated config is also specified:
 
-- `memorystore_redis_version` - The version of the Redis instance. Should only be changed to versions [that are supported by GitLab](https://docs.gitlab.com/ee/install/requirements.html#redis-versions). Optional, default is `7.0`.
-  - Optionally `memorystore_redis_cache_version` or `memorystore_redis_persistent_version` can be used to override for separate services.
-- `memorystore_redis_transit_encryption_mode` - The [TLS mode of the Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#tlscertificate) instance for the [In-transit encryption](https://cloud.google.com/memorystore/docs/redis/in-transit-encryption). Optional, default is `DISABLED`. To enable set to `SERVER_AUTHENTICATION`.
-  - Optionally `memorystore_redis_cache_transit_encryption_mode` or `memorystore_redis_persistent_transit_encryption_mode` can be used to override for separate services.
-  - If you would like to enable TLS, you need to follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config) after environment is provisioned.
-  > [!note]
-  > The service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
-- `memorystore_redis_customer_managed_key` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
-  - Optionally `memorystore_redis_cache_customer_managed_key` or `memorystore_redis_persistent_customer_managed_key` can be used to override for separate services.
-- `memorystore_redis_update_timeout` - The amount of [time to wait](https://developer.hashicorp.com/terraform/plugin/framework/resources/timeouts) for a Memorystore Redis instance to be updated. Optional, default is `1h`.
-  - Optionally `memorystore_redis_cache_update_timeout` or `memorystore_redis_persistent_update_timeout` can be used to override for separate services.
-- [`memorystore_redis_weekly_maintenance_window_day`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#day) - The day of week that maintenance updates occur, e.g. `MONDAY`. Optional, default is `null`.
-  - Optionally `memorystore_redis_cache_weekly_maintenance_window_day` or `memorystore_redis_persistent_weekly_maintenance_window_day` can be used to override for separate services.
-- [`memorystore_redis_weekly_maintenance_window_start_time`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#start_time) - Start time when maintenance updates occur. Optional, default is `null`.
-  - Optionally `memorystore_redis_cache_weekly_maintenance_window_start_time` or `memorystore_redis_persistent_weekly_maintenance_window_start_time` can be used to override for separate services.
+- `memorystore_redis_version` / `memorystore_redis_cache_version` / `memorystore_redis_persistent_version` - The version of the Redis instance. Should only be changed to versions [that are supported by GitLab](https://docs.gitlab.com/ee/install/requirements.html#redis-versions). Optional, default is `7.0`.
+- `memorystore_redis_transit_encryption_mode` / `memorystore_redis_cache_transit_encryption_mode` / `memorystore_redis_persistent_transit_encryption_mode` - The [TLS mode of the Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#tlscertificate) instance for the [In-transit encryption](https://cloud.google.com/memorystore/docs/redis/in-transit-encryption). Optional, default is `DISABLED`. To enable set to `SERVER_AUTHENTICATION`.
+- `memorystore_redis_customer_managed_key` / `memorystore_redis_cache_customer_managed_key` / `memorystore_redis_persistent_customer_managed_key` - The GCP Key resource name for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-gcp). If not set Google provided keys will be used instead. Optional, default is `null`.
+- `memorystore_redis_update_timeout` / `memorystore_redis_cache_update_timeout` / `memorystore_redis_persistent_update_timeout` - The amount of [time to wait](https://developer.hashicorp.com/terraform/plugin/framework/resources/timeouts) for a Memorystore Redis instance to be updated. Optional, default is `1h`.
+- [`memorystore_redis_weekly_maintenance_window_day` / `memorystore_redis_cache_weekly_maintenance_window_day` / `memorystore_redis_persistent_weekly_maintenance_window_day`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#day) - The day of week that maintenance updates occur, e.g. `MONDAY`. Optional, default is `null`.
+- [`memorystore_redis_weekly_maintenance_window_start_time` / `memorystore_redis_cache_weekly_maintenance_window_start_time` / `memorystore_redis_persistent_weekly_maintenance_window_start_time`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance#start_time) - Start time when maintenance updates occur. Optional, default is `null`.
   - <details><summary>Example value</summary>
 
       ```tf
@@ -693,11 +691,6 @@ For optional variables they work in a default like manner. When configuring for 
      ```
 
     </details>
-
-> [!note]
-> Due to the service's design, you can't set the AUTH string (or password) directly. It's set on GCP's side during creation, and you have to then [retrieve it accordingly](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string).
-
-If deploying a combined Redis setup that contains all queues (5k and lower) the following settings should be set (replacing any previous `redis_*` settings):
 
 As an example, to set up a standard GCP Memorystore Redis service for a [5k](https://docs.gitlab.com/ee/administration/reference_architectures/5k_users.html) environment with the required variables should look like the following in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
@@ -736,31 +729,36 @@ Once provisioned you'll see several new outputs at the end of the process. Keys 
 
 To configure GitLab to use alternative Redis store(s) with Ansible, point the Toolkit at the Redis instance(s) in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`)
 
-> [!note]
-> This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the Redis instance(s) never changes.
+>>> [!note]
+This config is the same for custom Redis instance(s) that have been provisioned outside of Omnibus or Cloud Services. For this setup, it is required that HA is in place and the URL to connect to the Redis instance(s) never changes.
 
-The variables to set are dependent on if the setup is to have combined or separated Redis queues depending on the target Reference Architecture. The only difference is that the prefix of the variables change depending on what Redis instances you're provisioning - `redis_*`, `redis_cache_*` and `redis_persistent_*` respectively. All the variables are the same for each instance type and are described once below:
+The config can also differ depending on your environment and whether you have a combined or separated Redis setup. The variable prefixes will differ based on your approach:
 
-- `redis_password` - The password for the instance. **Required**.
-  - Becomes `redis_cache_password` and `redis_persistent_password` when setting up separate stores.
-  - **GCP only** - Password for the Redis instances should be copied from the Google Cloud console following [Getting the AUTH string](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string) guidance.
-- `redis_host` - The hostname of the Redis instance. Provided in Terraform outputs if provisioned earlier. **Required**.
-  - Becomes `redis_cache_host` or `redis_persistent_host` when setting up separate stores.
-  - **GCP only** - With this service this will typically be an internal IP. This can be retrieved directly via the GCP console.
-- `redis_port` - The port of the Redis instance. Default is `6379`
-  - Becomes `redis_cache_port` or `redis_persistent_port` when setting up separate stores. Will default to `redis_port` if not specified.
-  - **GCP only** - Note that while typically the port on this service is `6379`, it may differ at times. This can be checked directly via the GCP console.
-  - **AWS only** - No changes are needed. Optional parameter. Should only be changed when custom port was specified during provisioning.
-  - **GCP only** - Provided in Terraform outputs if provisioned earlier.
-- `redis_external_ssl` - Sets GitLab to use SSL connections to the Redis store.
-  - **AWS only** - Default is `true`. Should only be changed when Redis store doesn't have SSL configured. ElastiCache stores provisioned by the Toolkit will always use SSL.
-  - **GCP only** - Default is `false`. Should only be changed when Memorystore have SSL configured.
-    - If TLS encryption was enabled via `memorystore_redis*_transit_encryption_mode`, follow guidance on [how to configure internal SSL](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config) for Redis.
-      > [!note]
-      > The service will generate its own CA certificate, and [you will need to download it from GCP directly](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority).
-- `redis_external_enable_client` - Configures the use of the Redis `client` command, as this is restricted on certain Cloud Providers such as [GCP](https://docs.gitlab.com/omnibus/settings/redis.html#using-google-cloud-memorystore). This command is only used for debugging purposes in Omnibus.
-  - **AWS only** - Default is `true`.
-  - **GCP only** - Default is `false`.
+- Combined setup: `redis_*`
+- Separated setup: `redis_cache_*` and `redis_persistent_*`
+>>>
+
+>>> [!tip] GCP Memorystore
+For GCP Memorystore, the following configuration should be retrieved before setting here:
+
+- [`redis_host` and `redis_password`](https://cloud.google.com/memorystore/docs/redis/managing-auth#getting_the_auth_string)
+- `redis_port` - While typically the port on this service is `6379`, it may differ at times. This can be checked directly via the GCP console.
+- If SSL has been enabled, the service's generated self signed [certificates will also need to be retrieved](https://cloud.google.com/memorystore/docs/redis/enabling-in-transit-encryption#downloading_the_certificate_authority) and [configured accordingly for clients in Ansible](environment_advanced_ssl.md#configuring-internal-ssl-via-custom-files-and-custom-config).
+>>>
+
+For each Redis service, you must configure:
+
+- `redis_host` / `redis_cache_host` / `redis_persistent_host` - The hostname of the Redis instance. Provided in Terraform outputs if provisioned earlier. **Required**.
+- `redis_password` / `redis_cache_password` / `redis_persistent_password` - The password for the instance. **Required**.
+
+The following optional variables work in a fallback like manner. Even when using separate instances if the combined `redis_*` variable is configured only it will apply to all unless the separated config is also specified:
+
+- `redis_port` / `redis_cache_port` / `redis_persistent_port` - The port of the Redis instance. Default is `6379`
+- `redis_external_ssl` / `redis_cache_external_ssl` / `redis_persistent_external_ssl` - Sets GitLab to use SSL connections to the Redis store. Default is `false` except when `cloud_provider` is `aws`, which enables SSL by default.
+
+The following additional variables are available for handling specific service considerations:
+
+- `redis_external_enable_client` - Configures the use of the Redis `client` command, as this is restricted on certain Cloud Providers such as [GCP](https://docs.gitlab.com/omnibus/settings/redis.html#using-google-cloud-memorystore). This command is only used for debugging purposes in Omnibus. Default is `true` except when `cloud_provider` is `gcp`.
 
 Once set, Ansible can then be run as normal. During the run it will configure the various GitLab components to use the database as well as any additional tasks such as setting up a separate database in the same instance for Praefect.
 
