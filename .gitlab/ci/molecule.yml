@@ -1,0 +1,113 @@
+########################
+##      Molecule      ##
+########################
+
+.molecule:
+  stage: molecule
+  image: registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:dev
+  tags:
+    - saas-linux-medium-amd64
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    FF_NETWORK_PER_BUILD: true
+  before_script:
+    - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
+    - ./get-docker.sh
+    - pip install molecule docker molecule-plugins[docker]
+  script:
+    - cd ansible
+    - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
+    - molecule test --scenario-name $MOLECULE_SCENARIO
+
+.molecule-merge-requests:
+  extends: .molecule
+  rules:
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - changes:
+      - ansible/playbooks
+      - ansible/roles
+      - ansible/molecule
+      - ansible/requirements
+
+.molecule-os:
+  extends: .molecule
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
+
+## Merge Request Jobs
+
+ubuntu2404:single-node-with-haproxy:
+  extends: .molecule-merge-requests
+  variables:
+    MOLECULE_SCENARIO: single-node-with-haproxy
+
+ubuntu2404:single-node:
+  extends: .molecule-merge-requests
+  variables:
+    MOLECULE_SCENARIO: single-node
+
+ubuntu2404:single-node-geo:
+  extends: .molecule-merge-requests
+  tags:
+    - saas-linux-large-amd64
+  variables:
+    MOLECULE_SCENARIO: single-node-geo
+
+## OS Jobs
+
+ubuntu2004:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: ubuntu2004
+
+ubuntu2204:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: ubuntu2204
+
+ubuntu2404:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: ubuntu2404
+
+debian11:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: debian11
+
+debian12:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: debian12
+
+amazonlinux2023:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: amazonlinux2023
+
+# Substitute for RHEL 9
+rockylinux9:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: rockylinux9
+
+## Runner tag sizes
+
+# - saas-linux-small-amd64
+# - saas-linux-medium-amd64
+# - saas-linux-large-amd64
+# - saas-linux-xlarge-amd64
+# - saas-linux-2xlarge-amd64

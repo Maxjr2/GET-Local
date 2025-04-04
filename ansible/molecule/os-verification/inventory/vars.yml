@@ -1,0 +1,3 @@
+all:
+  vars:
+    cloud_provider: none

@@ -1,0 +1,16 @@
+all:
+  vars:
+    external_url: "http://docker"
+    cloud_provider: none
+
+    gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
+
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
+
+    consul_password: "{{ lookup('env','MOLECULE_CONSUL_PASSWORD') }}"
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+    gitaly_token: "{{ lookup('env','MOLECULE_GITALY_TOKEN') }}"
+    pgbouncer_password: "{{ lookup('env','MOLECULE_PGBOUNCER_PASSWORD') }}"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
+    redis_password: "{{ lookup('env','MOLECULE_REDIS_PASSWORD') }}"

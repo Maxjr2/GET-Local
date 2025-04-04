@@ -3,12 +3,12 @@ all:
     external_url: "http://docker:81"
     cloud_provider: none
 
-    geo_secondary_external_url: "https://docker:81"
-    geo_secondary_internal_url: "https://docker:81"
+    geo_secondary_external_url: "http://docker:81"
+    geo_secondary_internal_url: "http://docker:81"
     geo_secondary_site_group_name: "site2"
     geo_secondary_site_name: "Site 2"
 
-    gitlab_repo_script_url: "https://packages.gitlab.com/install/repositories/gitlab/nightly-builds/script.deb.sh"
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/../gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/../gitlab_configs/gitlab_rails.rb.j2"
 
-    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.yml"
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
