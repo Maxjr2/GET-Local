@@ -26,8 +26,10 @@ stages:
       when: never
     - !reference [.on_merge_request_and_merged_events, rules]
 
-.on_default_branch:
+.on_default_branch_except_schedule:
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
 .on_tag_events:
@@ -40,15 +42,15 @@ stages:
 
 gemnasium-dependency_scanning:
   rules:
-    - !reference [.on_merge_request_and_merged_events, rules]
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
 
 gemnasium-python-dependency_scanning:
   rules:
-    - !reference [.on_merge_request_and_merged_events, rules]
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
 
 secret_detection:
   rules:
-    - !reference [.on_merge_request_and_merged_events, rules]
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
   allow_failure: false
 
 container_scanning:
@@ -58,11 +60,11 @@ container_scanning:
     CI_APPLICATION_TAG: dev
     GIT_STRATEGY: fetch
   rules:
-    - !reference [.on_default_branch, rules]
+    - !reference [.on_default_branch_except_schedule, rules]
 
 kics-iac-sast:
   rules:
-    - !reference [.on_merge_request_and_merged_events, rules]
+    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
   allow_failure: false
 
 #########################
@@ -188,7 +190,7 @@ upload-docker-image-dev:
     - docker build --build-arg install_python_latest_pkgs=true -t $CI_REGISTRY_IMAGE:dev .
     - docker push $CI_REGISTRY_IMAGE:dev
   rules:
-    - !reference [.on_default_branch, rules]
+    - !reference [.on_default_branch_except_schedule, rules]
 
 upload-docker-image-release:
   extends: .upload-docker-image-base

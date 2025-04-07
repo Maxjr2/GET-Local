@@ -224,6 +224,10 @@ LOG:  aborting startup due to startup process failure
 To fix this you need to reset the WAL log on the specific server as follows:
 
 ```sh
+# Stop the Patroni service
+gitlab-ctl stop patroni
+
+# Run the following command as the gitlab-psql user via sudo su
 sudo su - gitlab-psql -c '/opt/gitlab/embedded/bin/pg_resetwal -f /var/opt/gitlab/postgresql/data'
 ```
 

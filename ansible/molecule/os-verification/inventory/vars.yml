@@ -1,3 +1,4 @@
 all:
   vars:
+    external_url: "http://docker"
     cloud_provider: none
