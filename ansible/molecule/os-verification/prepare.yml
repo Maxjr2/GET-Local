@@ -1,0 +1,12 @@
+---
+- name: Prepare Rocky Linux hosts
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Remove curl-minimal package on Rocky Linux
+      ansible.builtin.dnf:
+        name: curl-minimal
+        state: absent
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version | int >= 9

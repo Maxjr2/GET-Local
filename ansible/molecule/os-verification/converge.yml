@@ -1,2 +1,3 @@
 ---
 - import_playbook: ../../playbooks/common.yml
+- import_playbook: ../../playbooks/haproxy.yml

@@ -23,47 +23,60 @@
     - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
     - molecule test --scenario-name $MOLECULE_SCENARIO
 
-.molecule-merge-requests:
-  extends: .molecule
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - ansible/playbooks/**/*
-        - ansible/roles/**/*
-        - ansible/molecule/**/*
-        - ansible/requirements/**/*
-
 .molecule-os:
   extends: .molecule
   allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - ansible/playbooks/**/*
-        - ansible/roles/**/*
-        - ansible/molecule/**/*
-        - ansible/requirements/**/*
+        - ansible/roles/common/**/*
+        - ansible/roles/haproxy/**/*
       when: manual
     - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
 
 ## Merge Request Jobs
 
 ubuntu2404:single-node-with-haproxy:
-  extends: .molecule-merge-requests
+  extends: .molecule
   variables:
     MOLECULE_SCENARIO: single-node-with-haproxy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ansible/playbooks/common.yml
+        - ansible/playbooks/gitlab_rails.yml
+        - ansible/playbooks/haproxy.yml
+        - ansible/roles/common/**/*
+        - ansible/roles/gitlab_rails/**/*
+        - ansible/roles/haproxy/**/*
 
 ubuntu2404:single-node:
-  extends: .molecule-merge-requests
+  extends: .molecule
   variables:
     MOLECULE_SCENARIO: single-node
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ansible/playbooks/common.yml
+        - ansible/playbooks/gitlab_rails.yml
+        - ansible/roles/common/**/*
+        - ansible/roles/gitlab_rails/**/*
 
 ubuntu2404:single-node-geo:
-  extends: .molecule-merge-requests
+  extends: .molecule
   tags:
     - saas-linux-large-amd64
   variables:
     MOLECULE_SCENARIO: single-node-geo
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ansible/playbooks/common.yml
+        - ansible/playbooks/gitlab_rails.yml
+        - ansible/playbooks/gitlab_geo.yml
+        - ansible/roles/common/**/*
+        - ansible/roles/gitlab_rails/**/*
+        - ansible/roles/gitlab_geo/**/*
 
 ## OS Jobs
 
