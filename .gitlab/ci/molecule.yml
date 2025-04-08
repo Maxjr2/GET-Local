@@ -23,6 +23,12 @@
     - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
     - molecule test --scenario-name $MOLECULE_SCENARIO
 
+.on_web_pipelines:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web" && $RUN_MOLECULE_SCENARIOS == "true"
+      when: manual
+      allow_failure: true
+
 .molecule-os:
   extends: .molecule
   allow_failure: true
@@ -33,6 +39,7 @@
         - ansible/roles/haproxy/**/*
       when: manual
     - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
+    - !reference [.on_web_pipelines, rules]
 
 ## Merge Request Jobs
 
@@ -49,6 +56,7 @@ ubuntu2404:single-node-with-haproxy:
         - ansible/roles/common/**/*
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/haproxy/**/*
+    - !reference [.on_web_pipelines, rules]
 
 ubuntu2404:single-node:
   extends: .molecule
@@ -61,11 +69,12 @@ ubuntu2404:single-node:
         - ansible/playbooks/gitlab_rails.yml
         - ansible/roles/common/**/*
         - ansible/roles/gitlab_rails/**/*
+    - !reference [.on_web_pipelines, rules]
 
 ubuntu2404:single-node-geo:
   extends: .molecule
   tags:
-    - saas-linux-large-amd64
+    - saas-linux-xlarge-amd64
   variables:
     MOLECULE_SCENARIO: single-node-geo
   rules:
@@ -77,6 +86,7 @@ ubuntu2404:single-node-geo:
         - ansible/roles/common/**/*
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/gitlab_geo/**/*
+    - !reference [.on_web_pipelines, rules]
 
 ## OS Jobs
 
