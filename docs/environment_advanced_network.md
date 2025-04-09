@@ -456,6 +456,7 @@ When `offline_setup` is configured, the Toolkit will not attempt to run these ro
 - [`geerlingguy.docker`](https://github.com/geerlingguy/ansible-role-docker) - Installs Docker on HAProxy and OpenSearch nodes.
   - If `docker_add_repo` has been configured to `false` the Toolkit will assume a local repo is already present on the node and run the role.
   - If `docker_repo_url` has been configured to a URL, the Toolkit will assume this is available locally and run the role.
+  - Before running the Toolkit download the specific versions of [HAProxy](https://hub.docker.com/_/haproxy/) and [OpenSearch](https://hub.docker.com/r/opensearchproject/opensearch) docker images on the relevant nodes. To determine the exact tag needed for your installation, check the Toolkit default variables: [`haproxy_docker_image`](../ansible/roles/haproxy/defaults/main.yml) and [`opensearch_docker_image`](../ansible/roles/opensearch/defaults/main.yml).
 
 ### GitLab Omnibus Package
 
