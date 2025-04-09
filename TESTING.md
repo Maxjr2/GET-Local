@@ -13,6 +13,9 @@ Developers should prioritize Molecule testing during regular development cycles,
 
 ### Installation
 
+> [!note]
+> Ensure you've followed [the Toolkits installation documentation for Ansible](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_configure.md#1-install-ansible) before you proceed.
+
 Molecule is exclusively available through pip, Python's package installer. To install Molecule along with its required dependencies, run the following command:
 
 ```sh
