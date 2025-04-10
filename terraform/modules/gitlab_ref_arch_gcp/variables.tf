@@ -143,6 +143,10 @@ variable "gitaly_disks" {
   )
   default = []
 }
+variable "gitaly_server_side_backups_enable" {
+  type    = bool
+  default = false
+}
 
 variable "gitlab_nfs_node_count" {
   type    = number

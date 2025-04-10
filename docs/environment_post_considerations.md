@@ -31,7 +31,13 @@ The Toolkit doesn't configure any automated backups for the various pieces of da
 For setting up backups, implement a strategy as per your requirements. Refer to the [main GitLab documentation](https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html) on this subject and how to implement. The following however should also be noted:
 
 - The Toolkit _does_ create a `backups` Object Storage bucket and configures GitLab to use it by default as a convenience with its Rake task. Automated backups aren't configured however so if using this Object Storage as the backup source the actual backup Rake process [should be configured as desired](https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#configuring-cron-to-make-daily-backups).
+  - The Toolkit _does_ support configuration for [Gitaly server-side backups](https://docs.gitlab.com/administration/gitaly/configure_gitaly/#configure-server-side-backups) to assist to [Back up and restore large reference architectures](https://docs.gitlab.com/administration/backup_restore/backup_large_reference_architectures). To implement the configurations:
+    - **AWS & GCP Only** - Add `gitaly_server_side_backups_enable = true` to the `environments.tf` terraform configuration file. This will create the required IAM configurations for the Gitaly nodes to be able to access the `backups` bucket.
+    - Add `gitaly_server_side_backups_enable: true` to the `vars.yaml` ansible configuration file in the `inventory` directory. This will add the configuration to the Gitaly nodes to direct them to the bucket.
+
 - Object Storage buckets such as `uploads` are **not** backed up with the GitLab provided Rake tasks. It's recommended to enable backups for these buckets as per the object storage provider used.
+
+:information_source:&nbsp; If using Terraform from the Toolkit it must be noted that a `terraform destroy` command will **destroy all data and lead to data loss**. Issuing this command in any situation must be considered fully.
 
 ## Security
 

@@ -177,6 +177,9 @@ gitaly_ssl_ca_file: ""
 gitaly_ssl_port: "9999"
 gitaly_ssl: "{{ gitaly_ssl_cert != '' and gitaly_ssl_key != '' }}"
 
+## Gitaly Server Side Backup
+gitaly_server_side_backups_enable: false
+
 # Pages
 pages_enable: "{{ pages_external_url != '' and 'pages' in gitlab_object_storage_list }}"
 pages_external_url: ""

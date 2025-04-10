@@ -40,6 +40,13 @@ resource "google_storage_bucket_iam_member" "gitlab_sidekiq_object_storage_bucke
   role   = "roles/storage.objectAdmin"
   member = module.sidekiq.service_account.member
 }
+resource "google_storage_bucket_iam_member" "gitlab_gitaly_object_storage_buckets_member" {
+  for_each = (var.gitaly_server_side_backups_enable && var.gitaly_node_count > 0) ? { for k, v in google_storage_bucket.gitlab_object_storage_buckets : k => v if contains(["backups"], k) } : tomap({})
+
+  bucket = each.value.name
+  role   = "roles/storage.objectAdmin"
+  member = module.gitaly.service_account.member
+}
 
 ## Kubernetes
 ### Webservice (Node or Workload Identity ADC) - All Buckets except Backup & Registry
