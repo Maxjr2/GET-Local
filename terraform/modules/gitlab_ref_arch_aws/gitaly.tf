@@ -21,6 +21,7 @@ module "gitaly" {
   user_data_base64           = var.gitaly_user_data_base64
 
   iam_instance_policy_arns = flatten([
+    var.gitaly_server_side_backups_enable && local.gitlab_s3_backups_policy_create ? [aws_iam_policy.gitlab_s3_backups_policy[0].arn] : [],
     var.default_iam_instance_policy_arns,
     var.gitaly_iam_instance_policy_arns
   ])

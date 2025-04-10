@@ -54,6 +54,14 @@ gitaly['configuration'] = {
   },
   prometheus_listen_addr: '0.0.0.0:9236',
 
+{% if gitlab_version == '' or gitlab_version is version('16.3', '>=') %}
+{% if gitaly_server_side_backups_enable %}
+  backup: {
+    go_cloud_url: '{{ gitaly_server_side_backups_url }}'
+  },
+{% endif %}
+{% endif %}
+
 {% if 'praefect' in groups %}
   auth: {
     token: '{{ praefect_internal_token }}',

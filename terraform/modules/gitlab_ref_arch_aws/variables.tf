@@ -204,6 +204,10 @@ variable "gitaly_user_data_base64" {
   default     = null
   description = "Custom EC2 user data. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html for more information"
 }
+variable "gitaly_server_side_backups_enable" {
+  type    = bool
+  default = false
+}
 
 variable "gitlab_nfs_node_count" {
   type    = number

@@ -8,3 +8,5 @@ gitaly_cluster_storage_path: "/var/opt/gitlab/git-data"
 gitaly_sharded_storage_path: "{{ '/mnt/gitlab' if cloud_provider != 'azure' else '/var/opt/gitlab/git-data' }}"
 
 gitaly_callback_internal_api_url: "{{ (('https://' if gitlab_rails_nginx_ssl else 'http://') + internal_lb_host) if 'haproxy_internal' in groups and 'gitlab_rails' in groups else external_url_sanitised }}"
+
+gitaly_server_side_backups_url: "{{ ('s3://' + gitlab_object_storage_bucket_names['backups'] + '?region=' + aws_region) if cloud_provider == 'aws' else ('gs://' + gitlab_object_storage_bucket_names['backups']) if cloud_provider == 'gcp' else '' }}"

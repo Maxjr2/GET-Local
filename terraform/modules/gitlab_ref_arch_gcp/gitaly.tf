@@ -23,6 +23,7 @@ module "gitaly" {
 
   service_account_prefix       = var.service_account_prefix
   service_account_user_members = var.service_account_user_members
+  service_account_profiles     = var.gitaly_server_side_backups_enable ? ["object_storage"] : null
   custom_service_account_email = lookup(var.custom_service_account_emails, "gitaly", null)
 
   geo_site       = var.geo_site
