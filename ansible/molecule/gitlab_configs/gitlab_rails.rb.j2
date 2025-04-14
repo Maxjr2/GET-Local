@@ -10,3 +10,9 @@ package['detect_init'] = false
 
 # Explicitly disable attempt to update kernel parameters
 package['modify_kernel_parameters'] = false
+
+# Gitlab testing license activation
+gitlab_rails['env'] = {
+    "GITLAB_LICENSE_MODE" => "test",
+    "CUSTOMER_PORTAL_URL" => "https://customers.staging.gitlab.com"
+}
