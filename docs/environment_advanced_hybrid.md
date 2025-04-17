@@ -509,7 +509,7 @@ For EKS a [Cluster is required to be spread across at least 2 Availability Zones
 
 #### Deprovisioning
 
-If you ever want to deprovision resources created, with a Cloud Native Hybrid on AWS **you must run [helm uninstall gitlab](https://helm.sh/docs/helm/helm_uninstall/)** before running [terraform destroy](https://www.terraform.io/docs/cli/commands/destroy.html). This ensures all resources are correctly removed.
+Refer to the Toolkits [uninstallation documentation](environment_post_considerations.md#uninstalling) for correct steps to deprovision an AWS install of Cloud Native Hybrid.
 
 ## 3. Setting up authentication for the provisioned Kubernetes Cluster
 
