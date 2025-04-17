@@ -60,3 +60,22 @@ By default, the Toolkit doesn't configure any additional logging monitoring outs
 This is due to there being various logging strategies that are available for you to consider based on requirements and cost that's best handled directly.
 
 However, the Toolkit does aim to provide reasonable hooks for you to set up whatever log monitoring as desired such as [Custom Tasks](environment_advanced.md#custom-tasks) or [Custom Files](environment_advanced.md#custom-files).
+
+## Uninstalling
+
+### Routine Uninstall
+
+To uninstall GitLab using the Toolkit, use the uninstall playbook. Run `ansible-playbook -i environments/<your_environment>/inventory playbooks/uninstall.yml` from the `ansible/` directory. This leaves the resources provisioned by Terraform intact.
+
+With GitLab Omnibus, Terraform is sufficient to completely destroy all defined infrastructure and uninstall GitLab. Run `terraform destroy` from `terraform/environments/<your_environment>/`.
+
+> [!warning]
+> `terraform destroy` completely destroys all infrastructure defined in the environment. To keep the infrastructure and remove GitLab, only run the Ansible uninstall playbook.
+
+### Cloud Native Uninstall
+
+With Cloud Native installs, it is a requirement to run the uninstall playbook before using Terraform to deprovision any resources. This ensures all resources are correctly removed. Failure to do so can put the cluster into an error state.
+
+### Uninstall Custom Tasks
+
+[Custom tasks](environment_advanced.md#custom-tasks) can be run as part of the uninstallation process.
