@@ -27,3 +27,4 @@ get-python-env
 .idea
 .ansible
 ansible/.ansible
+ansible/custom_components
