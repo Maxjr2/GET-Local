@@ -25,6 +25,7 @@
   template:
     src: templates/secondary-database.rb.j2
     dest: /etc/gitlab/gitlab.geo.secondary-database.rb
+    mode: '0600'
 
 - name: Secondary database - Remove existing cluster information for Patroni
   import_tasks: secondary-database-patroni-workaround.yml

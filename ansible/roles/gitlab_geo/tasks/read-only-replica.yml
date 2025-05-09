@@ -2,6 +2,7 @@
   template:
     src: templates/read-only-replica.rb.j2
     dest: /etc/gitlab/gitlab.geo.read-only-replica.rb
+    mode: '0600'
 
 - name: Read-only Replica - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
