@@ -2,6 +2,7 @@
   template:
     src: templates/primary-database.rb.j2
     dest: /etc/gitlab/gitlab.geo.primary-database.rb
+    mode: '0600'
 
 - name: Disable auto_migrate and re-enable for single node
   block:

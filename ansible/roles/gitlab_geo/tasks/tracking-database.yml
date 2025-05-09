@@ -4,6 +4,7 @@
       template:
         src: templates/tracking-database.rb.j2
         dest: /etc/gitlab/gitlab.geo.tracking-database.rb
+        mode: '0600'
 
     - name: Tracking Database - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure

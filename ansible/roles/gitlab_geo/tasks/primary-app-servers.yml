@@ -4,6 +4,7 @@
       template:
         src: templates/primary-app-servers.rb.j2
         dest: /etc/gitlab/gitlab.geo.primary-app-servers.rb
+        mode: '0600'
 
     - name: Primary App Servers - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure
