@@ -14,13 +14,19 @@
     name: "{{ gitlab_cloud_native_release_namespace }}"
 
 - name: Setup Monitoring Namespaces if configured
-  kubernetes.core.k8s:
-    name: "{{ item }}"
-    kind: Namespace
-    state: present
-  loop:
-    - "{{ kube_prometheus_stack_charts_namespace }}"
-    - "{{ consul_charts_namespace }}"
+  block:
+    - name: Setup kube-prometheus-stack namespace
+      kubernetes.core.k8s:
+        name: "{{ kube_prometheus_stack_charts_namespace }}"
+        kind: Namespace
+        state: present
+
+    - name: Setup Consul namespace
+      kubernetes.core.k8s:
+        name: "{{ consul_charts_namespace }}"
+        kind: Namespace
+        state: present
+      when: "'consul' in groups"
   when: cloud_native_hybrid_monitoring_setup
   tags:
     - reconfigure

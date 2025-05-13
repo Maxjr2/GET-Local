@@ -64,9 +64,9 @@ You can also [customize Prometheus scrape definitions](environment_advanced_moni
 
 ## Cloud Native Hybrid (`kube-prometheus-stack`)
 
-In Cloud Native Hybrid environments the Toolkit utilises the [`kube-prometheus-stack`](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) and [`consul`](https://artifacthub.io/packages/helm/hashicorp/consul) Helm Charts to configure metrics scraping.
+In Cloud Native Hybrid environments, the Toolkit utilises the [`kube-prometheus-stack`](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack) Helm Chart to configure metrics scraping. This chart is deployed alongside GitLab in the same Kubernetes cluster. When Consul nodes are provisioned, the [`consul`](https://artifacthub.io/packages/helm/hashicorp/consul) Helm Chart is also deployed in the same cluster.
 
-In this setup the two charts are deployed alongside GitLab in the same Kubernetes cluster. `kube-prometheus-stack` configures Prometheus via the Prometheus Operator to scrape various Kubernetes, Pod and GitLab metrics via [`ServiceMonitors`](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md#using-servicemonitors). Consul is also deployed and hooked up to the Omnibus Consul cluster to provide automated discovery for the Omnibus backends.
+`kube-prometheus-stack` configures Prometheus via the Prometheus Operator to scrape various Kubernetes, Pod and GitLab metrics via [`ServiceMonitors`](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md#using-servicemonitors). If Consul nodes are present, the Consul chart is connected to the Omnibus Consul cluster to provide automated discovery for the Omnibus backends. If Consul nodes are not provisioned, the Toolkit automatically falls back to static scrape configurations based on the components present in your environment.
 
 All of this is handled in Ansible via several settings in the [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
@@ -93,7 +93,7 @@ all:
 
 Once completed, Prometheus will be scraping various Kubernetes, Pod and GitLab metrics.
 
-> [!important] 
+> [!important]
 > The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
 
 ### Persistent Volume (StorageClass)
