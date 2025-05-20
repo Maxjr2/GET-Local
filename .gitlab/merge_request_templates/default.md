@@ -47,4 +47,4 @@ When ready for review, the Author applies the ~"workflow::ready for review" labe
   - [ ] For Terraform changes: set up a previous version environment, then run a `terraform plan` with your new changes and ensure nothing will be destroyed. If anything will be destroyed and this can't be avoided please add a comment to the current MR.
 - [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Framework](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/framework/) team if unsure.
 
-/label ~"section::platforms"
+/label ~"group::framework"

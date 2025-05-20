@@ -16,4 +16,4 @@ Before raising a bug, please read through our Troubleshooting guide to determine
 /label ~type::
 /label ~bug:: ~feature:: ~maintenance::
 
-/label ~"section::core platform"
+/label ~"group::framework"
