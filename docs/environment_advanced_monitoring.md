@@ -32,7 +32,7 @@ The Toolkit will configure these in each case, including scrape config, dashboar
 
 On this page we'll detail how to deploy the monitoring setup for each environment type with the Toolkit. Head to the relevant section below depending on the type of environment you have. **It's also worth noting this guide assumes a working knowledge of Prometheus and Consul as well as being supplementary to the rest of the docs.**
 
-[[_TOC_]]
+[TOC]
 
 ## Omnibus
 
@@ -120,7 +120,7 @@ How this works differs depending on the environment setup used as detailed in th
 
 ### Omnibus
 
-As Prometheus is packaged within Omnibus [the standard approach detailed here](environment_advanced.md#omnibus) for the `monitor` node can be followed for any [valid config](https://docs.gitlab.com/ee/administration/monitoring/prometheus/).
+As Prometheus is packaged within Omnibus, [the standard approach](environment_advanced.md#linux-package-omnibus) for deploying a `monitor` node can be followed for any [valid config](https://docs.gitlab.com/ee/administration/monitoring/prometheus/).
 
 ### Cloud Native Hybrid (`kube-prometheus-stack`)
 

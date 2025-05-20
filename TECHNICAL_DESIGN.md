@@ -4,7 +4,7 @@ This document serves as the Technical Design and Vision for the [GitLab Environm
 
 Unless specified otherwise, all additions or changes to the Toolkit should align with this document.
 
-[[_TOC_]]
+[TOC]
 
 ## What is the GitLab Environment Toolkit?
 

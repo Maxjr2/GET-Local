@@ -25,7 +25,7 @@ you have strong working knowledge and experience in Kubernetes. For most users a
 
 On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architecture with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
-[[_TOC_]]
+[TOC]
 
 ## Overview
 

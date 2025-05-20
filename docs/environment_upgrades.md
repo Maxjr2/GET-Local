@@ -22,7 +22,7 @@ When discussing upgrades there's not only the Environment to consider but also t
 
 On this page we'll detail how both work. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
-[[_TOC_]]
+[TOC]
 
 ## Toolkit Upgrades
 
@@ -94,7 +94,7 @@ However, the [standard GitLab Upgrade rules still apply](https://docs.gitlab.com
 
 Upgrades to Postgres version differ depending on the source as follows:
 
-- Cloud Providers ([RDS](environment_advanced_services.md#aws-rds-version), [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)) - Version handling and upgrades can differ notably depending on the provider. The Toolkit exposes the relevant variable to change what version should be used by the provider, but it's recommended to refer to the provider's documentation for what values are available and how upgrades are processed.
+- Cloud Providers ([RDS](environment_advanced_services.md#aws-rds---version), [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)) - Version handling and upgrades can differ notably depending on the provider. The Toolkit exposes the relevant variable to change what version should be used by the provider, but it's recommended to refer to the provider's documentation for what values are available and how upgrades are processed.
 - Linux package (Omnibus) - Upgrades to the database can be done by following the [documentation](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
 
 ### Upgrades with Downtime

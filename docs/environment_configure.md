@@ -25,7 +25,7 @@ The Toolkit provides multiple curated [Ansible Playbooks and Roles](../ansible) 
 > [!important]
 > A good working knowledge of Ansible and GitLab administration before proceeding is recommended. This documentation assumes this throughout.
 
-[[_TOC_]]
+[TOC]
 
 ## Overview
 
@@ -392,7 +392,7 @@ Passwords and Secrets settings are what they suggest - all the various passwords
 - `praefect_external_token` **_Gitaly Cluster only_** - Sets the [external access token for Gitaly Cluster and Praefect](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#secrets).
 - `praefect_internal_token` **_Gitaly Cluster only_** - Sets the [internal access token for Gitaly Cluster and Praefect](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#secrets).
 - `praefect_postgres_password` **_Gitaly Cluster only_** - Sets the [password for Praefect's database user](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#secrets).
-- `gitaly_token` **_Gitaly Sharded only_** - Sets the [shared authentication token for Gitaly](https://docs.gitlab.com/ee/administration/gitaly/#configure-gitaly). Only used in [Gitaly Sharded](environment_advanced.md#gitaly-setups-cluster-or-sharded) setups.
+- `gitaly_token` **_Gitaly Sharded only_** - Sets the [shared authentication token for Gitaly](https://docs.gitlab.com/ee/administration/gitaly/#configure-gitaly). Only used in [Gitaly Sharded](environment_advanced.md#gitaly-deployment-types---cluster-or-sharded) setups.
 
 #### Notable Optional Config
 

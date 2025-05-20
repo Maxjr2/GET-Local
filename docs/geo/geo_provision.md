@@ -18,7 +18,7 @@
   - [GitLab Environment Toolkit - Geo - Advanced](geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](../environment_troubleshooting.md)
 
-[[_TOC_]]
+[TOC]
 
 ## Terraform
 

@@ -136,7 +136,7 @@ check:markdown-internal-link-check:
     entrypoint: [""]
   needs: []
   script:
-    - lychee --offline --no-progress --include-fragments docs/**/*.md
+    - find . -type f -name "*.md" | xargs lychee --offline --no-progress --quiet --include-fragments
   rules:
     - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
   retry: 2

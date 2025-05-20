@@ -20,7 +20,7 @@
 
 On this page you'll find troubleshooting guidance for various areas when using the GitLab Environment Toolkit.
 
-[[_TOC_]]
+[TOC]
 
 ## Troubleshooting
 
@@ -397,7 +397,7 @@ The pod's pre-actions or additional checks, done via [Init Containers](https://k
 
 Typically, this is due to a misconfiguration, specifically that the pods have failed to connect to the backends. To debug further, the following steps are recommended:
 
-- Double check that the [configuration](environment_advanced_hybrid.md#4-configuring-the-helm-charts-deployment-with-ansible) is correct. Some examples:
+- Double check that the [configuration](environment_advanced_hybrid.md#4-configuring-the-cloud-native-deployment-with-ansible) is correct. Some examples:
   - If using any external services ([RDS](environment_advanced_services.md#configuring-with-ansible-1) / [ElastiCache](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_advanced_services.md#configuring-with-ansible-2) / [Internal LB](environment_advanced_services.md#configuring-with-ansible)) that the config for each has been added for the environment to use them.
 - [Debug the Init Containers](https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/). In particular checking the logs of each Init Container may prove to be very useful as errors thrown by these containers aren't typically surfaced. An example of how this can be done as follows:
   - Get the name of any `webservice` pods - `kubectl get pods -l app=webservice`
