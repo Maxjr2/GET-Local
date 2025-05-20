@@ -1,4 +1,4 @@
-s3:
+{{ container_registry_aws_storage_driver }}:
   bucket: {{ gitlab_object_storage_bucket_names['registry'] }}
   use_iam_profile: true
   region: {{ aws_region }}

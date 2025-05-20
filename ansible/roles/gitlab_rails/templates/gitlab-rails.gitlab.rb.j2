@@ -88,6 +88,8 @@ letsencrypt['enable'] = false
 registry['enable'] = true
 registry_external_url "{{ container_registry_external_url }}"
 
+registry['debug_addr'] = "0.0.0.0:5001" # https://docs.gitlab.com/administration/monitoring/prometheus/registry_exporter/
+
 # Registry NGINX SSL Config
 {% if gitlab_rails_nginx_external_ssl_user %}
 ## External NGINX SSL - Single Node (User Provided)
