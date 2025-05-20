@@ -22,7 +22,7 @@ Preparation is required prior to building out an environment depending on where 
 
 This page starts off with general guidance around fundamentals but then will split off into the steps for each supported specific provider. As such, you should only follow the section for your provider after the general sections.
 
-[[_TOC_]]
+[TOC]
 
 ## Overview
 
@@ -104,7 +104,7 @@ With the above set create the Service Account as follows:
 1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be used later by Terraform and Ansible to authenticate.
 
 > [!note]
-> As part of the Terraform provisioning process, the Toolkit will create several required Service Accounts. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-accounts-gcp) for more information.
+> As part of the Terraform provisioning process, the Toolkit will create several required Service Accounts. Refer to the [Service Accounts (GCP) section](environment_provision.md#service-account-options-gcp) for more information.
 
 ### 4. Setup SSH Authentication: SSH OS Login for GCP Service Account
 

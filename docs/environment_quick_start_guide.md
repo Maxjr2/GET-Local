@@ -25,7 +25,7 @@ For the purpose of this guide we'll go through the steps required for one of the
 > [!note]
 > This quick guide won't cover all the potential options available and assumes a good working knowledge of Terraform, Ansible and GitLab. It's recommended you still read the docs in full to ensure the environment is configured as per your requirements.
 
-[[_TOC_]]
+[TOC]
 
 ## Prerequisites
 

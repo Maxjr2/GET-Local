@@ -32,7 +32,7 @@ On this page we'll detail how you can configure each type of encryption with the
 > [!important]
 > Recommendations about what specific encryption strategy to use is not within the scope of this guide. You should review GitLab independently to determine the strategy as per your security requirements.
 
-[[_TOC_]]
+[TOC]
 
 ## External SSL
 
@@ -186,7 +186,7 @@ For each component the general steps to configure Internal SSL encryption is as 
 
 - **For Omnibus Components** - Upload your certificates to the component node groups via [Custom Files](environment_advanced.md#custom-files), including any CA files to client nodes.
   - Certificates and Keys should be uploaded to `/etc/gitlab/ssl` and CA files to `/etc/gitlab/trusted-certs` in mode `644` on every client. The Toolkit will create these folders as a convenience.
-  - Set the desired config for each component and client node groups via [Custom Config](environment_advanced.md#omnibus).
+  - Set the desired config for each component and client node groups via [Custom Config](environment_advanced.md#linux-package-omnibus).
 - **For Cloud Native Hybrid components** - Upload your certificates as [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
   - Typically, in this setup all that will be required is to upload [CA files](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities) as [Kubernetes secrets](https://kubernetes.io/docs/concepts/configuration/secret/). These can be with any name, but then these must match in the config. You can also choose to do this directly via `kubectl` if desired after initial deployment.
   - Set the desired [config](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities

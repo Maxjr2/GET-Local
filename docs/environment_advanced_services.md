@@ -25,7 +25,7 @@ The Toolkit supports using alternative sources for select components, such as cl
 
 On this page we'll detail how to set up the Toolkit to provision and/or configure these alternatives. **It's also worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
-[[_TOC_]]
+[TOC]
 
 ## Load Balancers
 

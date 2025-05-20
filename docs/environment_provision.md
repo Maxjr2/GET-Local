@@ -25,7 +25,7 @@ The Toolkit provides multiple curated [Terraform Modules](../terraform/modules) 
 > [!important]
 > A good working knowledge of Terraform and GitLab administration before proceeding is recommended. This documentation assumes this throughout.
 
-[[_TOC_]]
+[TOC]
 
 ## 1. Install Terraform
 

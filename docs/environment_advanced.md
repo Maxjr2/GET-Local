@@ -22,7 +22,7 @@ The Toolkit by default will deploy the latest version of the selected [Reference
 
 On this page we'll detail all the supported advanced setups you can do with the Toolkit. We recommend you only do these setups if you have a good working knowledge of both the Toolkit and what the specific setups involve.
 
-[[_TOC_]]
+[TOC]
 
 ## Custom Config
 

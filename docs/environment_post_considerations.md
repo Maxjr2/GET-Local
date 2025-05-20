@@ -22,7 +22,7 @@ The Toolkit deploys a _base_ GitLab environment based on the [Reference Architec
 
 The goal rather is for the Toolkit to give you a good base to tweak as desired per your requirements. On this page we'll call out common considerations you may want to explore.
 
-[[_TOC_]]
+[TOC]
 
 ## Backups
 

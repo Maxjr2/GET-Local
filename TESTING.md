@@ -7,7 +7,7 @@ The GitLab Environment Toolkit (GET) provides a collection of tools and automati
 
 Developers should prioritize Molecule testing during regular development cycles, reserving cloud infrastructure testing for comprehensive validation of features that directly interact with cloud provider services.
 
-[[_TOC_]]
+[TOC]
 
 ## Molecule Testing
 
