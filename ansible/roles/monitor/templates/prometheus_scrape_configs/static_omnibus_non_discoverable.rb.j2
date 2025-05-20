@@ -24,3 +24,16 @@
   ],
 },
 {% endif %}
+{% if container_registry_enable %}
+# Registry
+{
+  'job_name': 'registry',
+  'static_configs': [
+    'targets': [
+{% for ip in gitlab_rails_int_addrs %}
+      "{{ ip }}:5001",
+{% endfor %}
+    ],
+  ],
+},
+{% endif %}
