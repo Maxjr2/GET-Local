@@ -500,6 +500,11 @@ In particular, this can happen when you have configured a separated Redis setup,
 
 If this issue is occurring, switch to either a combined Redis or separated Redis clusters as recommended and go through set up again. Note that after setup you may also need to clear browser caches to clear out the old issue on clients.
 
+### `OpenSSL::Cipher::CipherError` error after running GET playbook on a restored environment with transferred secrets 
+
+The playbook may have overwritten the secrets copied from the source environment. Ensure you have correctly transferred the secrets from the
+source environment to the restored target environment using one of the methods described [here](environment_post_considerations.md#restores). 
+
 ## Other
 
 ### macOS: Python package install failure `fatal error: 'openssl/opensslv.h' file not found`

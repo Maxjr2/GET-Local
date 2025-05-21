@@ -39,6 +39,15 @@ For setting up backups, implement a strategy as per your requirements. Refer to 
 
 :information_source:&nbsp; If using Terraform from the Toolkit it must be noted that a `terraform destroy` command will **destroy all data and lead to data loss**. Issuing this command in any situation must be considered fully.
 
+## Restores
+
+When restoring a Toolkit-provisioned GitLab environment refer to the [main GitLab documentation](https://docs.gitlab.com/administration/backup_restore/restore_gitlab/) on this subject. The following however should also be noted:
+
+- When restoring a GitLab backup to a new Toolkit-provisioned environment the secrets from the source environment must be transferred to the restored environment. The Toolkit synchronizes secrets from the first Omnibus node to all other Omnibus nodes and, for a Hybrid deployment, to Kubernetes. To ensure the secrets from the source environment are fully deployed to the restored environment use one of the following methods: 
+
+  - Copy the `/etc/gitlab/gitlab-secrets.json` file from an Omnibus node in the source environment to _all_ Omnibus nodes in the target environment and run the Toolkit to propagate the secrets to Kubernetes (for a Hybrid deployment).
+  - Configure [custom GitLab secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) for the GitLab Rails and GitLab Shell secrets which are then deployed by the Toolkit to all Omnibus nodes and to Kubernetes, noting that any new keys added to a secret by an upgrade will by overwritten by the custom setting which will hence need to be updated as required.  
+
 ## Security
 
 Security is a significant area and typically is very dependent on your specific requirements.
