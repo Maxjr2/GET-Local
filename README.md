@@ -43,14 +43,11 @@ Host machine:
 Target machine(s):
 
 - GitLab version: `15.0.0` and upwards.
-- OS: Ubuntu 20.04 / 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
+- OS: Ubuntu 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.
   - ARM based hardware is supported for Linux package (Omnibus) environments.
 - Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service.
-
-> [!important]
-> RHEL 8 and Amazon Linux 2 support is deprecated due to Ansible support removal. See [this section for more information](docs/environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
 
 ## Documentation
 

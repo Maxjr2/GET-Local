@@ -76,9 +76,6 @@ The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](
 > [!important]
 > Ansible 11.x (ansible-core 2.18) requires Python 3.11+ on the node it runs from. Target nodes can use the latest Python version available from their OS.
 
-> [!important]
-> For RHEL 8 / Amazon Linux 2 targets an older version of Ansible is required due to Ansible support removal. See [this section for more information](environment_troubleshooting.md#deprecation-ansible-support-for-rhel-8--amazon-linux-2-targets-from-release-100-ansible-core-217).
-
 When choosing an [Ansible control node](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements), we recommend that it's in the same or near location as the environment being built to avoid network slowdown. Additionally, if you plan to use a cloud machine as a control node it is _not_ recommended to use [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can lead to inconsistent behaviour.
 
 It's [also strongly recommended that a recent version of `openssh` is installed on the machine](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html#controlpersist-and-paramiko) where Ansible is going to be run to ensure consistent connections.
