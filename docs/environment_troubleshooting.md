@@ -260,20 +260,6 @@ To fix, adjust the Redis password to not contain any URL forbidden characters an
 
 [This is due to an issue with certain Python plugins](https://github.com/ansible/ansible/issues/32554#issuecomment-642896861) on your system. You can work around this by running `export no_proxy="*"` before running the `ansible-playbook` commands.
 
-### Amazon Linux 2 install issue due to repository change after 2022-08-22
-
-[Dedicated Omnibus GitLab packages were made available for Amazon Linux 2](https://about.gitlab.com/blog/2022/05/02/amazon-linux-2-support-and-distro-specific-packages/) from version `14.9.0`. To support this the official package repositories were further changed from `15.3.0` onwards.
-
-As a result, for existing setups before the release of `15.3.0` (August 22, 2022) the package repository on the machines will be changed over.
-
-This changeover will cause failures until the repository cache is reset as a one off as detailed in the above linked blog post:
-
-```sh
-if yum list installed gitlab-runner; then yum clean all ; yum makecache; fi
-```
-
-After the cache is reset the setup should work again as normal.
-
 ### Unable to execute ssh command line on a controller due to: [Errno 24] Too many open files
 
 [This can occur for some people if Ansible is trying run multiple tasks at once](https://github.com/ansible/ansible/issues/12259). The safest way to resolve this is to lower the `forks` setting in your `ansible.cfg` file to `20`. The `ansible.cfg` file can be found at `./ansible/ansible.cfg` within your toolkit checkout.
@@ -304,27 +290,6 @@ This error is usually caused by incomplete database migrations that happened dur
 1. Run the command manually in the [Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html) to get further error output
 1. Check the [status of database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations) - all migrations should be `up`. If some migrations have the `down` status, follow [Run incomplete database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#run-incomplete-database-migrations) guidance or contact the Support team for assistance. [Database migration logs](https://docs.gitlab.com/ee/administration/logs/#migrationslog) can be checked for the progress of migrations.
 
-### Python install failure due to `module 'tarfile' has no attribute 'data_filter'` on RHEL 8
-
-The following error could occur on RHEL 8 based distros due to a security update to the specific variant of Python that comes installed:
-
-```sh
-    :stderr: WARNING: Running pip install with root privileges is generally not a good idea. Try `__main__.py install --user` instead.
-    Exception:
-    Traceback (most recent call last):
-      File "/usr/lib/python3.6/site-packages/pip/utils/__init__.py", line 565, in untar_file
-        tarfile.data_filter(member.replace(name=fn), location)
-    AttributeError: module 'tarfile' has no attribute 'data_filter'
-```
-
-This update introduced a new dependency on the `python-libs` package but was notably not linked correctly in the package manager config so subsequently didn't update as expected.
-
-This issue looks to have subsequently been fixed but if you see the above error this can be addressed by running the following package command on the box and then running GET Ansible again:
-
-```sh
-yum update python3-pip python-libs
-```
-
 ### Let's Encrypt `acme.sh` renewal failures on HAProxy Linux Package nodes
 
 A bug was introduced with [GitLab Environment Toolkit `3.1.0`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases/3.1.0) with the switch to `acme.sh` as the tool to generate Let's Encrypt SSL certificates on HAProxy Linux Package nodes that prevented automatic renewals from happening due to a permissions issue.
@@ -337,25 +302,13 @@ If you're unable to upgrade or for some reason the certs still have not renewed,
 /opt/acme.sh/acme.sh --renew --domain <external_host>
 ```
 
-### Deprecation: Ansible support for RHEL 8 / Amazon Linux 2 targets from release `10.0` (Ansible Core `2.17`)
+### OS Deprecation Failures
 
-With the release of Ansible `10.0` (Ansible Core `2.17`) several large changes were made with Python support on target hosts that as a result has removed support for RHEL 8 and Amazon Linux 2 targets:
+The following errors presented on systems where upstream deprecations has occurred:
 
-- [Targets running Python versions lower than `3.7` are no longer supported](https://github.com/ansible-collections/news-for-maintainers/issues/54). This impacts all EL 8 distros, namely RHEL 8, which come with `3.6` installed.
-- [Targets that depend on the Yum package manager are also no longer supported](https://github.com/ansible/ansible/issues/83428#issuecomment-2161516707) due to Ansible removing its own yum module due to it depending on Python 2. This impacts all EL 7 distros, namely Amazon Linux 2.
-
-This means any of the OS targets above will no longer be supported by Ansible after community version `9.x` and Core version `2.16` reach end of life [Nov 2024](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and [May 2025](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix) respectively.
-
-**As a result support for RHEL 8 and Amazon Linux 2 with the Toolkit are deprecated and support will end by May 2025.**
-
-Users targeting these OSes will need to install Ansible `9.x` / Ansible Core `2.16` for Ansible to continue working. For reference attempting to run Ansible `10.x` / Ansible Core `2.17` or higher on these OSes will trigger the following errors:
-
-- RHEL 8 - `SyntaxError: future feature annotations is not defined`
-- Amazon Linux 2 - Errors relating to package manager such as `Module not found: rpm`
-
-Due to the above it's recommended that users upgrade to newer version of RHEL / Amazon Linux 2 at your earliest convenience to ensure continued support.
-
-**Note that this deprecation only pertains to the GitLab Environment Toolkit and Ansible**. The GitLab application itself is not impacted by this notice. For the latest information on supported operating systems for the GitLab application, head to this [documentation page](https://docs.gitlab.com/ee/administration/package_information/supported_os.html).
+- Python error `module 'tarfile' has no attribute 'data_filter'` - This occurred on RHEL 8 systems due to a specific security update relating to the `python-libs` package that needed to be updated.
+- Ansible error `SyntaxError: future feature annotations is not defined` - This occurred on RHEL 8 systems when using Ansible versions `10.0` (Ansible Core `2.17`) or higher due to this [Ansible version removing support for this OS target's Python version](https://github.com/ansible-collections/news-for-maintainers/issues/54).
+- Ansible errors related to package manager such as `Module not found: rpm` - This occurred on Amazon Linux 2 systems when using Ansible versions `10.0` (Ansible Core `2.17`) or higher due to this [Ansible version removing support for the `yum` package manager](https://github.com/ansible/ansible/issues/83428#issuecomment-2161516707).
 
 ## Cloud Native Hybrid
 

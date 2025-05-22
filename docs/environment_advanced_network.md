@@ -418,7 +418,6 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 
 - Ubuntu / Debian _Main_ - `aptitude curl openssh-server ca-certificates tzdata python3-pip nfs-common postfix jq libpq-dev`
 - RHEL _Main, EPEL_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
-- Amazon Linux 2 _Main, EPEL, Postgres_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock postgresql-devel`
 - Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
 
 > [!tip]
@@ -438,7 +437,7 @@ There are various ways this can be tackled. While this is outside the scope of t
 
 ### Python Packages
 
-The Toolkit also installs several Python packages via PyPI onto the system to be used by Ansible as required - `pexpect<=4.9.0, psycopg2<=3.2.1`. On Amazon Linux 2 it also installs the the following packages - `requests<=2.32.3', urllib3<2.0.0`.
+The Toolkit also installs several Python packages via PyPI onto the system to be used by Ansible as required - `pexpect<=4.9.0, psycopg2<=3.2.1`.
 
 When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as installing the packages via an offline PyPI repo or directly.
 
