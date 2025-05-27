@@ -1,5 +1,5 @@
 ---
-- hosts: all:!gitlab_*_node_pool:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
 
   roles:
