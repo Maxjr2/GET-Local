@@ -42,6 +42,15 @@ The following upgrade paths are supported for the Toolkit.
 - Upgrades to a new major version **require an upgrade stop of the latest release of the previous major version**. For example to upgrade to GitLab Environment Toolkit `3.0.x` requires an upgrade first to the last `2.x` version (`2.8.6`).
   - Upgrades to the latest patch release of a new major version are also supported, for example `2.8.6` to `3.0.2`.
 
+The Toolkit follows GitLab's [Version Support Policy](https://about.gitlab.com/support/statement-of-support/#version-support), which supports the current major version and previous two major versions.
+The following table shows the maximum GitLab versions supported by GET version:
+
+| GET Version | Max GitLab Version |
+|-------------|-------------------|
+| 2.8.x - 3.2.x | 16.11 |
+| 3.3.x - 3.5.x | 17.11 |
+| 3.6.x and up | Current |
+
 ### Review Toolkit release notes
 
 When updating the Toolkit, check the [Toolkit's release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) for any specific callouts such as any changes made in a backwards compatible manner.

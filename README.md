@@ -42,7 +42,7 @@ Host machine:
 
 Target machine(s):
 
-- GitLab version: `15.0.0` and upwards.
+- GitLab version: `16.0.0` and upwards.
 - OS: Ubuntu 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
   - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
   - Admin access to the OS is also required by GET to install various dependencies.
