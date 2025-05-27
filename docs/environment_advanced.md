@@ -941,6 +941,23 @@ all:
 
 </details>
 
+For any hosts you explicitly wish for the Toolkit to ignore you can place them in the `get_ignored` group, which the Toolkit will then proceed to ignore:
+
+<details><summary>Inventory with explicitly ignored <code>get_ignored</code> group</summary>
+
+```yml
+all:
+  children:
+    get_ignored:
+      hosts:
+        host-1:
+          ansible_host: <HOST-1-ADDRESS>
+        host-2:
+          ansible_host: <HOST-2-ADDRESS>
+```
+
+</details>
+
 ## System Packages
 
 The Toolkit will install system packages on every node it requires for setting up GitLab.

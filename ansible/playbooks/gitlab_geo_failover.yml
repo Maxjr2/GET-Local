@@ -1,6 +1,6 @@
 ---
 # Omnibus or Cloud Native Hybrid
-- hosts: all:!gitlab_*_node_pool:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
   any_errors_fatal: false
   ignore_unreachable: true
@@ -16,7 +16,7 @@
       tags: disable-primary
       when: groups | select('match', 'gitaly|gitlab_rails') | length > 0
 
-- hosts: all:!gitlab_*_node_pool:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
   ignore_unreachable: true
   roles:

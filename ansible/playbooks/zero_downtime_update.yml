@@ -1,7 +1,7 @@
 ---
 - import_playbook: playbook_prep.yml
 
-- hosts: all:!praefect_postgres:!gitlab_nfs:!haproxy_*
+- hosts: all:!praefect_postgres:!gitlab_nfs:!haproxy_*:!gitlab_*_node_pool:!ungrouped:!get_ignored
   order: sorted
   roles:
     - zero_downtime_upgrade

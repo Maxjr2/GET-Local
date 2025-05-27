@@ -1,6 +1,6 @@
 ---
 # For individual playbooks against specific hosts that require information from others
-- hosts: all:!gitlab_*_node_pool:!ungrouped
+- hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
   gather_facts: false
   order: sorted
