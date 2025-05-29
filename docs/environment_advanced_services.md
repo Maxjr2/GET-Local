@@ -657,7 +657,7 @@ These also replace any existing `redis_*`, `redis_cache_*` or `redis_persistent_
 >>>
 
 > [!tip]
-> Ensure that [Memorystore for Redis API](https://console.cloud.google.com/apis/library/redis.googleapis.com) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
+> Ensure that [Memorystore for Redis API](https://cloud.google.com/memorystore/docs/redis/reference/rest) is enabled on your target GCP project. Refer to the [GCP instructions](https://cloud.google.com/memorystore/docs/redis/create-instance-terraform) for more information.
 
 Before configuring a Memorystore instance you should be aware of the following caveats:
 

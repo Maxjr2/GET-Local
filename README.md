@@ -44,9 +44,10 @@ Target machine(s):
 
 - GitLab version: `16.0.0` and upwards.
 - OS: Ubuntu 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
-  - The Toolkit has been designed to target clean OS installations. It may work with existing installations, but this is not currently being tested.
+  - OS support is dependent on [Linux Package (Omnibus) availability](https://docs.gitlab.com/administration/package_information/supported_os/).
+  - The Toolkit supports clean OS installations.
   - Admin access to the OS is also required by GET to install various dependencies.
-  - ARM based hardware is supported for Linux package (Omnibus) environments.
+  - ARM based hardware is supported for Linux package (Omnibus) environments where packages are available.
 - Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service.
 
 ## Documentation
