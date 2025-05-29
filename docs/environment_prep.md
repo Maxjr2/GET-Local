@@ -95,12 +95,12 @@ With the above set create the Service Account as follows:
      - `Cloud SQL Admin`
      - `Compute Network Admin`
      > [!note]
-     > The [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://console.cloud.google.com/apis/library/redis.googleapis.com) APIs need to be enabled on the project to configure Cloud SQL.
+     > The [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://cloud.google.com/memorystore/docs/redis/reference/rest) APIs need to be enabled on the project to configure Cloud SQL.
    - [Cloud Memorystore](environment_advanced_services.md#gcp-memorystore)
      - `Cloud Memorystore Redis Admin`
      - `Cloud Memorystore Redis Editor`
      > [!note]
-     > The [Memorystore for Redis](https://console.cloud.google.com/apis/library/redis.googleapis.com) API needs to be enabled on the project to configure Memorystore.
+     > The [Memorystore for Redis](https://cloud.google.com/memorystore/docs/redis/reference/rest) API needs to be enabled on the project to configure Memorystore.
 1. [Create and download a Service Account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) to a [secure location](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys). This key will be used later by Terraform and Ansible to authenticate.
 
 > [!note]
