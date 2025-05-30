@@ -28,10 +28,10 @@
     mode: '0600'
 
 - name: Secondary database - Remove existing cluster information for Patroni
-  import_tasks: secondary-database-patroni-workaround.yml
+  import_tasks: secondary-database-remove-patroni-cluster.yml
   when:
     - geo_secondary_postgres_is_ha
-    - geo_run_patroni_workaround
+    - geo_secondary_remove_patroni_cluster
 
 - name: Secondary Database - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure

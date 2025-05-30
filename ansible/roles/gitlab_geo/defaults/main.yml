@@ -28,7 +28,8 @@ geo_secondary_site_gcp_zone: ""
 geo_secondary_site_gcp_gke_location: "{{ geo_secondary_site_gcp_zone }}"
 geo_secondary_site_aws_region: ""
 
-geo_run_patroni_workaround: true
+geo_run_patroni_workaround: true # Deprecated, replaced by geo_secondary_remove_patroni_cluster - TODO Remove in 4.x
+geo_secondary_remove_patroni_cluster: "{{ geo_run_patroni_workaround }}"
 
 geo_primary_postgres_host: "{{ internal_lb_host if geo_primary_postgres_is_ha else geo_primary_site_postgres_int_ip }}"
 

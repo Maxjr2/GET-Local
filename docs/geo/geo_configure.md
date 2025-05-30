@@ -43,7 +43,7 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 - `geo_primary_site_group_name`/`geo_secondary_site_group_name` - These should match the `geo_site` that was set in Terraform for the site you want to use as a primary/secondary, any `-` should be replaced with `_` as the names are altered when pulled from the cloud provider.
 - `geo_primary_site_name`/`geo_secondary_site_name` - A name plain text name for each site, this will be displayed in the main Geo settings page.
 - `geo_primary_registry_url` - The URL for the container registry. Optional, will default to `https://registry.{{ Geo primary URL }}`
-- `geo_run_patroni_workaround` - When adding a new secondary site it is sometimes required to run some extra steps for Patroni to connect to the primary site. This is only required to be run as part of an initial setup and should be set to `false` for all subsequent runs. Defaults to `true`.
+- `geo_secondary_remove_patroni_cluster` - When adding a new secondary site it is required to run some extra steps for Patroni to connect to the primary site. This is only required to be run as part of an initial setup and should be set to `false` for all subsequent runs. Defaults to `true`.
 - `geo_secondary_site_count` - The number of secondary sites that will be replicating from the primary site. Defaults to 1.
 
 You can also remove the GitLab license from the sites that will not be set as the primary before running the `ansible-playbook` command. To remove the license from the secondary site you can just remove the `gitlab_license_file` or `gitlab_subscription_activation_code` setting from the secondary `vars.yml` file.
@@ -102,7 +102,11 @@ To set up multiple Geo secondary sites, see [Geo - Advanced - Multiple Geo Secon
 
 ### Upgrades
 
-To perform upgrades of each environment of a Geo setup you would follow the same steps above. Namely:
+To perform upgrades of each environment of a Geo setup you would follow the same general upgrade process:
 
-- Run the main Ansible `all.yml` playbook on each site
-- Run the `gitlab-geo.yml` playbook again after each site has been upgraded
+1. Add or update `gitlab_version` in your [`vars.yml`](../environment_configure.md#environment-config-varsyml) to the GitLab version you are updating to. The Toolkit will target the latest version otherwise.
+1. `cd` to the `ansible/` directory if not already there.
+1. Run the Ansible `all.yml` playbook against the primary site.
+1. Run the Ansible `all.yml` playbook against all secondary sites.
+1. Add or update `geo_secondary_remove_patroni_cluster` in you your [`vars.yml`](../environment_configure.md#environment-config-varsyml) to `false`. This will prevent the secondary site from restarting replication.
+1. Run the `gitlab-geo.yml` playbook.

@@ -1,0 +1,26 @@
+- name: Remove Patroni Cluster - Stop Patroni on secondary site
+  command: |
+    gitlab-ctl stop patroni
+
+- name: Remove Patroni Cluster - Delete PostgreSQL data dirs on the secondary site
+  file:
+    state: absent
+    path: ~gitlab-psql/data
+
+- name: Remove Patroni Cluster - Remove Patroni from existing cluster
+  expect:
+    command: |
+      /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yaml remove postgresql-ha
+    responses:
+      (.*)Please confirm the cluster name to remove: "postgresql-ha"
+      (.*)You are about to remove all information in DCS for postgresql-ha, please type(.*): "Yes I am aware"
+      (.*)This cluster currently is healthy. Please specify the master name to continue: "{{ geo_secondary_site_postgres_primary_nodename }}"
+    timeout: 60
+
+- name: Remove Patroni Cluster - gitlab-ctl reconfigure
+  command: |
+    gitlab-ctl reconfigure
+
+- name: Remove Patroni Cluster - Start Patroni on secondary site
+  command: |
+    gitlab-ctl start patroni
