@@ -30,7 +30,7 @@ In this section is guidance on upgrading the Toolkit that should be followed thr
 
 ### Upgrade the Toolkit first
 
-It's strongly recommended upgrading the Toolkit first before [upgrading the environment](#environment-upgrades). 
+It's strongly recommended upgrading the Toolkit first before [upgrading the environment](#environment-upgrades).
 
 This is to ensure the latest config, fixes and GitLab configuration are used. An example of this is an unexpected upstream component change that needs to be handled.
 
@@ -110,7 +110,7 @@ Upgrades to Postgres version differ depending on the source as follows:
 
 For Upgrades with Downtime, the process is straightforward and follows the same steps as the initial environment setup. The Toolkit will perform upgrades much in the same way as the first build - any _provisioning_ changes are handled by Terraform and _configuration_ changes handled by Ansible.
 
-Typically, this should be seamless and running the same commands just as you did in the main runs is sufficient to perform GitLab upgrades.
+Typically, this should be seamless and running the same commands just as you did in the main runs is sufficient to perform GitLab upgrades. If you're upgrading a Geo environment, follow the guidance in the [Geo Upgrades](./geo/geo_configure.md#upgrades) section.
 
 To perform an upgrade with downtime:
 
