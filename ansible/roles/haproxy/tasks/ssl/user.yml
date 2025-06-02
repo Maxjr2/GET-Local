@@ -1,37 +1,25 @@
 ---
-- name: Check if External SSL certificate is provided
-  stat:
-    path: "{{ external_ssl_files_host_certificate_file }}"
-  delegate_to: localhost
-  become: false
-  register: ssl_pem
-
-- name: Fail if External SSL certificate is missing
+- name: Fail if External SSL certificate is not provided
   fail:
-    msg: "External SSL certificate file '{{ external_ssl_files_host_certificate_file | basename }}' could not be found in path '{{ external_ssl_files_host_certificate_file | realpath }}'. Check that the file is present as configured and run again. Exiting..."
-  when: not ssl_pem.stat.exists
+    msg: "External SSL certificate not provided. Ensure 'external_ssl_files_host_certificate' has been configured or there is a valid file available at location defined by 'external_ssl_files_host_certificate_file' and run again. Exiting..."
+  when: external_ssl_files_host_certificate | length == 0
 
-- name: Check if External SSL key is provided
-  stat:
-    path: "{{ external_ssl_files_host_key_file }}"
-  delegate_to: localhost
-  become: false
-  register: ssl_key
-
-- name: Fail if External SSL key is missing
+- name: Fail if External SSL key is not provided
   fail:
-    msg: "External SSL key file '{{ external_ssl_files_host_key_file | basename }}' could not be found in path '{{ external_ssl_files_host_key_file | realpath }}'. Check that the file is present as configured and run again. Exiting..."
-  when: not ssl_key.stat.exists
+    msg: "External SSL key not provided. Ensure 'external_ssl_files_host_key' has been configured or there is a valid file available at location defined by 'external_ssl_files_host_key_file' and run again. Exiting..."
+  when: external_ssl_files_host_key | length == 0
 
-- name: Copy over User provided SSL Certificates
+- name: Copy over User provided SSL files (HAProxy)
   copy:
-    src: "{{ item.hostfile }}"
-    dest: "{{ item.targetfile }}"
+    content: "{{ item.content }}"
+    dest: "{{ item.dest_path }}"
     owner: '99' # HAProxy Docker User ID
     mode: '0600'
   loop:
-    - { hostfile: "{{ external_ssl_files_host_certificate_file }}", targetfile: "/opt/haproxy/ssl/{{ external_host }}.pem" }
-    - { hostfile: "{{ external_ssl_files_host_key_file }}", targetfile: "/opt/haproxy/ssl/{{ external_host }}.pem.key" }
+    - { content: "{{ external_ssl_files_host_certificate }}", dest_path: "/opt/haproxy/ssl/{{ external_host }}.pem" }
+    - { content: "{{ external_ssl_files_host_key }}", dest_path: "/opt/haproxy/ssl/{{ external_host }}.pem.key" }
+  no_log: true
+  diff: false
 
 - name: Remove any old User provided SSL Certificates
   file:
