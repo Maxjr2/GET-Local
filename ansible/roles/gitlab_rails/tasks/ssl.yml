@@ -1,38 +1,26 @@
 ---
 - name: Copy External SSL certificates (Single Node)
   block:
-    - name: Check if External SSL certificate is provided (Single Node)
-      stat:
-        path: "{{ external_ssl_files_host_certificate_file }}"
-      delegate_to: localhost
-      become: false
-      register: ssl_pem
-
-    - name: Fail if External SSL certificate is missing (Single Node)
+    - name: Fail if External SSL certificate is not provided (Single Node)
       fail:
-        msg: "External SSL certificate file '{{ external_ssl_files_host_certificate_file | basename }}' could not be found in path '{{ external_ssl_files_host_certificate_file | realpath }}'. Check that the file is present as configured and run again. Exiting..."
-      when: not ssl_pem.stat.exists
+        msg: "External SSL certificate not provided. Ensure 'external_ssl_files_host_certificate' has been configured or there is a valid file available at location defined by 'external_ssl_files_host_certificate_file' and run again. Exiting..."
+      when: external_ssl_files_host_certificate | length == 0
 
-    - name: Check if External SSL key is provided (Single Node)
-      stat:
-        path: "{{ external_ssl_files_host_key_file }}"
-      delegate_to: localhost
-      become: false
-      register: ssl_key
-
-    - name: Fail if External SSL key is missing (Single Node)
+    - name: Fail if External SSL key is not provided (Single Node)
       fail:
-        msg: "External SSL key file '{{ external_ssl_files_host_key_file | basename }}' could not be found in path '{{ external_ssl_files_host_key_file | realpath }}'. Check that the file is present as configured and run again. Exiting..."
-      when: not ssl_key.stat.exists
+        msg: "External SSL key not provided. Ensure 'external_ssl_files_host_key' has been configured or there is a valid file available at location defined by 'external_ssl_files_host_key_file' and run again. Exiting..."
+      when: external_ssl_files_host_key | length == 0
 
-    - name: Copy over User provided SSL Certificates (Single Node)
+    - name: Copy over User provided SSL files (Single Node)
       copy:
-        src: "{{ item.hostfile }}"
-        dest: "{{ item.targetfile }}"
+        content: "{{ item.content }}"
+        dest: "{{ item.dest_path }}"
         mode: '0600'
       loop:
-        - { hostfile: "{{ external_ssl_files_host_certificate_file }}", targetfile: "/etc/gitlab/ssl/{{ external_host }}.crt" }
-        - { hostfile: "{{ external_ssl_files_host_key_file }}", targetfile: "/etc/gitlab/ssl/{{ external_host }}.key" }
+        - { content: "{{ external_ssl_files_host_certificate }}", dest_path: "/etc/gitlab/ssl/{{ external_host }}.crt" }
+        - { content: "{{ external_ssl_files_host_key }}", dest_path: "/etc/gitlab/ssl/{{ external_host }}.key" }
+      no_log: true
+      diff: false
   when: gitlab_rails_nginx_external_ssl_user
 
 - name: Copy GitLab Rails NGINX Internal SSL certificates (Multi Node)

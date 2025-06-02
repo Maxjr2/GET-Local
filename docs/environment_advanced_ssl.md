@@ -48,32 +48,42 @@ The Toolkit supports two sources of certificates for External SSL termination: *
 
 For users who already have certificates for their intended GitLab environment the Toolkit can use these as given to set up External SSL termination.
 
-At a high level the Toolkit will simply take the certificate and key files and use them to configure HAProxy (Linux Package (Omnibus)), GitLab Rails (Linux Package (Omnibus)) or NGINX Ingress (Cloud Native Hybrid) respectively to use them. Below are the steps to configure this.
+At a high level the Toolkit will simply take the certificate and key and use them to configure HAProxy (Linux Package (Omnibus)), GitLab Rails (Linux Package (Omnibus)) or NGINX Ingress (Cloud Native Hybrid) respectively to use them. Below are the steps to configure this.
 
 #### Setup user provided certificates for Toolkit use
 
-The first step is to provide the certificates themselves for the Toolkit to use. By default, the certificates should meet the following conditions:
+The first step is to prepare the certificates themselves for the Toolkit to use. By default, the certificates should meet the following conditions:
 
-- Certificate and key files are named in the formats `<hostname>.pem` and `<hostname>.key` respectively
 - Certificates must contain [Subject Alternative Name(s) (SAN)](https://support.dnsimple.com/articles/what-is-ssl-san) as Common Name (CN) use only is deprecated.
-  - SAN entries should cover any additional hostnames that are expected to be used with the environment. This includes additional features such as the [Container Registry](environment_advanced.md#container-registry-gcp-aws) (`registry.<external_host>`).
-- Certificate and key files are located in the `ansible/environments/<env_name>/files/certificates` folder
+- SAN entries should cover any additional hostnames that are expected to be used with the environment. This includes additional features such as the [Container Registry](environment_advanced.md#container-registry-gcp-aws) (`registry.<external_host>`).
 - Certificate file contains the [full chain](https://www.digicert.com/kb/ssl-support/pem-ssl-creation.htm).
 
-You can optionally store your SSL files in a different location as well as use different names if desired with additional configuration. This will be detailed further in the next section.
+The certificates can be provided to the Toolkit with two methods:
 
-Once the SSL certificate and key files are in the desired location you can proceed to the next step.
+- Direct contents - Passing the certificate and key contents directly
+- Files - In the Toolkit default location or a custom one.
+
+Refer to the below sections on how to configure each.
 
 #### Configure Variables for user provided certificates
 
-After the SSL certificate and key are in place you then need to configure the Toolkit to use them. This is done as normal in Ansible via the Inventory Variables.
+After the SSL certificate and key are ready you then need to configure the Toolkit to use them. This is done as normal in Ansible using the Inventory Variables.
 
 There are two main variables to set in the Inventory Variables [`vars.yml`](environment_configure.md#environment-config-varsyml) file that configures the Toolkit to use External SSL termination with user provided certificates:
 
 - `external_url` - Set [previously](environment_configure.md) this is the main URL the environment is expected to be reached on. For External SSL termination this should be changed to a URL that starts with `https://`.
 - `external_ssl_source` - Sets what source is being used for the External SSL certificates. In this setup it should be set to `user`.
 
-When the certificates are configured as the Toolkit expects then, as detailed in the previous section, an example of how the config would look is as follows:
+With the above configured the Toolkit will expect the certificate and key to be in the default location as detailed in the previous section. However you can further configure the Toolkit as follows to get the certificate and key using different sources as follows:
+
+**Direct Contents**
+
+You can pass in the contents of the certificate and key files directly into Ansible. This can be desired in cases where you wish for Ansible to access this directly, for example an external secrets manager. This can be configured with the following:
+
+- `external_ssl_files_host_certificate` - File contents of the main certificate file.
+- `external_ssl_files_host_key` - File contents of the main key file.
+
+An example of how this looks when loading the files from AWS Secrets Manager would be:
 
 ```yml
 all:
@@ -81,12 +91,28 @@ all:
     [...]
     external_url: "https://<hostname>"
     external_ssl_source: "user"
+    external_ssl_files_host_certificate: "{{ lookup('aws_secret', 'myapp/ssl/certificate') }}"
+    external_ssl_files_host_key: "{{ lookup('aws_secret', 'myapp/ssl/key') }}"
 ```
 
-If the files are stored in another location or have a different name, the following variables are available to customize where the Toolkit will look for the files:
+**Custom Files Location**
+
+You can pass in the certificate and key files from a custom location if it's available to the Ansible host with the following:
 
 - `external_ssl_files_host_certificate_file` - Set to the full file path of the certificate on the host machine running Ansible. Note that with this setting you can also pass in a path to a `.crt` file if desired as the contents are the same as a `.pem` file.
 - `external_ssl_files_host_key_file` - Set to the full file path of the key on the host machine running Ansible.
+
+An example of how looks would be:
+
+```yml
+all:
+  vars:
+    [...]
+    external_url: "https://<hostname>"
+    external_ssl_source: "user"
+    external_ssl_files_host_certificate_file: "/path/to/custom/location/my-custom-cert.pem"
+    external_ssl_files_host_key_file: "/path/to/custom/location/my-custom-key.key"
+```
 
 Once the config is in place you're ready to [configure the environment](#configure-the-environment).
 

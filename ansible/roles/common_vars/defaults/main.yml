@@ -49,8 +49,12 @@ external_ssl_letsencrypt_issuer_email: ""
 
 ### User Provided Certificates
 external_ssl_files_host_path: "{{ inventory_path }}/../files/certificates"
+
 external_ssl_files_host_certificate_file: "{{ external_ssl_files_host_path }}/{{ external_host }}.pem"
+external_ssl_files_host_certificate: "{{ lookup('file', external_ssl_files_host_certificate_file) if external_url_ssl and external_ssl_source == 'user' else '' }}"
+
 external_ssl_files_host_key_file: "{{ external_ssl_files_host_path }}/{{ external_host }}.key"
+external_ssl_files_host_key: "{{ lookup('file', external_ssl_files_host_key_file) if external_url_ssl and external_ssl_source == 'user' else '' }}"
 
 ## Load Balancers
 
