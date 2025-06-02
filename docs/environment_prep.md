@@ -69,7 +69,7 @@ Each environment is recommended to have its own project on GCP for various reaso
 Existing projects can also be used, but this should be checked with the Project's stakeholders as this will affect things such as total CPU quotas for example.
 
 > [!note]
-> Ensure that you have the [Service Usage API](https://console.cloud.google.com/apis/api/serviceusage.googleapis.com/overview) and [Compute Engine API](https://console.developers.google.com/apis/api/compute.googleapis.com/overview) enabled.
+> Ensure that you have the [Service Usage API](https://cloud.google.com/service-usage/docs/overview) and [Compute Engine API](https://cloud.google.com/compute/docs/reference/rest/v1) enabled.
 
 ### 3. Setup Provider Authentication: GCP Service Account
 
