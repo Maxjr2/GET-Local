@@ -6,12 +6,12 @@
 
 - name: Secondary Frontend App Servers - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
+  retries: 3
 
 - name: Secondary Frontend App Servers - Run gitlab-ctl restart
   command: gitlab-ctl restart
   register: result
   retries: 3
-  delay: 5
   until: result is success
 
 - name: Secondary Frontend App Servers - Run migrations for Geo tracking database

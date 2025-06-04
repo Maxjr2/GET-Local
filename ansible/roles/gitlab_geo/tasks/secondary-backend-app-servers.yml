@@ -7,9 +7,9 @@
 - name: Secondary Backend App Servers - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
   register: result
-  retries: 2
-  delay: 5
+  retries: 3
   until: result is success
 
 - name: Secondary Backend App Servers - Run gitlab-ctl restart
   command: gitlab-ctl restart
+  retries: 3

@@ -20,6 +20,8 @@
 - name: Remove Patroni Cluster - gitlab-ctl reconfigure
   command: |
     gitlab-ctl reconfigure
+  retries: "{{ geo_remove_patroni_cluster_reconfigure_retries | int }}"
+  delay: "{{ geo_remove_patroni_cluster_reconfigure_delay | int }}"
 
 - name: Remove Patroni Cluster - Start Patroni on secondary site
   command: |

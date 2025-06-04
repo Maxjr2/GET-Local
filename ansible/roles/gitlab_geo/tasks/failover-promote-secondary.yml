@@ -197,6 +197,7 @@
 
     - name: Failover Promote Secondary - Reconfigure GitLab
       command: gitlab-ctl reconfigure
+      retries: 3
   when:
     - ('postgres_primary' in group_names) or
       ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups and not postgres_external)
@@ -212,7 +213,6 @@
       register: result
       until: result.status == 200
       retries: 20
-      delay: 5
       become: false
       delegate_to: localhost
       run_once: true
