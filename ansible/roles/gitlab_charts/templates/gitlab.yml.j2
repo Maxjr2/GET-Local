@@ -111,12 +111,11 @@ gitlab:
     registry:
       enabled: false
 {% endif %}
-  toolbox:
 {% if cloud_provider != 'none' %}
+  toolbox:
     backups:
       objectStorage:
         {{ lookup('template', 'object_storage/toolbox_backups_object_storage.' + cloud_provider + '.yml.j2') | indent(width=8) }}
-{% endif %}
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -131,6 +130,7 @@ gitlab:
         iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
 {% if gitlab_operator %}
       name: "gitlab-toolbox"
+{% endif %}
 {% endif %}
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
@@ -219,8 +219,8 @@ global:
     workload: "support"
   serviceAccount:
     enabled: true
-  appConfig:
 {% if cloud_provider != 'none' %}
+  appConfig:
     object_store:
       enabled: true
       connection:
@@ -370,12 +370,14 @@ global:
     tls:
       enabled: false
 {% endif %}
+{% if ('praefect' in groups and praefect_ssl) or ('gitaly' in groups and gitaly_ssl) %}
   certificates:
     customCAs:
 {% if 'praefect' in groups and praefect_ssl %}
       - secret: praefect-ca
 {% elif 'gitaly' in groups and gitaly_ssl %}
       - secret: gitaly-ca
+{% endif %}
 {% endif %}
   minio:
     enabled: false
