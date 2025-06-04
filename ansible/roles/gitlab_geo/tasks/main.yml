@@ -119,6 +119,7 @@
 
 - name: Restart GitLab rails on secondary site
   command: gitlab-ctl restart
+  retries: 3
   tags:
     - secondary
     - workhorse
@@ -128,6 +129,7 @@
 
 - name: Restart backend app servers on primary site
   command: gitlab-ctl restart
+  retries: 3
   tags:
     - primary-backend-app-servers
     - primary

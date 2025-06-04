@@ -8,6 +8,7 @@
 
     - name: Tracking Database - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure
+      retries: 3
 
     - name: Tracking Database - Run gitlab-ctl restart for updates to take effect
       command: gitlab-ctl restart

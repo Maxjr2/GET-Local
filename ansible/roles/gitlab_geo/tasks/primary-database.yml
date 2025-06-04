@@ -16,6 +16,7 @@
 
     - name: Primary Database - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure
+      retries: 3
 
     - name: Primary Database - Restart Postgres
       command: gitlab-ctl restart
@@ -35,8 +36,7 @@
 - name: Primary Database - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
   register: result
-  retries: 2
-  delay: 10
+  retries: 3
   until: result is success
 
 - name: Primary Database - Restart Postgres

@@ -8,6 +8,7 @@
 
     - name: Primary App Servers - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure
+      retries: 3
 
     - name: Primary App Servers - Set geo primary node
       command: gitlab-ctl set-geo-primary-node

@@ -6,3 +6,4 @@
 
 - name: Read-only Replica - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
+  retries: 3
