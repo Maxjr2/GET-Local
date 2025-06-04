@@ -25,6 +25,9 @@ you have strong working knowledge and experience in Kubernetes. For most users a
 
 On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architecture with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
+> [!note]
+> With Terraform, GET supports deploying Kubernetes clusters on AWS and GCP. With Ansible, it is possible to build Cloud Native Hybrid from other providers following [Custom Servers (On Prem)](environment_advanced.md#custom-servers-on-prem) documentation.
+
 [TOC]
 
 ## Overview
