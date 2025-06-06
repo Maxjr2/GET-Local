@@ -70,22 +70,22 @@ For both Linux package and Cloud Native Hybrid environments it's required to add
 GCP:
 
 ```yaml
-- key: labels.gitlab_node_prefix
+  - key: labels.gitlab_node_prefix
     separator: ''
-- key: labels.gitlab_geo_site
+  - key: labels.gitlab_geo_site
     separator: ''
-- key: labels.gitlab_geo_full_role
+  - key: labels.gitlab_geo_full_role
     separator: ''
 ```
 
 AWS:
 
 ```yaml
-- key: tags.gitlab_node_prefix
+  - key: tags.gitlab_node_prefix
     separator: ''
-- key: tags.gitlab_geo_site
+  - key: tags.gitlab_geo_site
     separator: ''
-- key: tags.gitlab_geo_full_role
+  - key: tags.gitlab_geo_full_role
     separator: ''
 ```
 
@@ -94,7 +94,8 @@ Once all the settings are added, the steps for [GitLab Environment Toolkit - Con
 Once done we can then run the command to enable Geo itself - `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo.yml`.
 
 > [!note]
-> Due to the way the GitLab Charts work, Cloud Native Hybrid sites will not work until the full Geo setup has been completed.
+> Due to the way the GitLab Charts work, Cloud Native Hybrid sites will not work until the full Geo setup has been
+> completed (e.g. some Kubernetes Pods will not start due to database connection errors).
 
 > [!note]
 > When passing in multiple inventories the second inventory's variables will take precedence over the first.
