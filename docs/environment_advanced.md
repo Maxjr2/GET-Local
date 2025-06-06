@@ -368,6 +368,38 @@ Enabling Advanced Search on your environment is designed to be as easy possible 
 - Ansible will then configure the GitLab environment near the end of its run to enable Advanced Search against those nodes and perform the first index.
   - If it's desired to complete indexing before enabling the search feature (e.g. for large datasets that may require long indexing times), set the `advanced_search_enable` variable to `false`. Indexing will be started while the search feature is still disabled. Once indexing is complete, set `advanced_search_enable` to `true` (or remove the variable to use the default setting) and run Ansible again to enable search.
 
+### Advanced Search Config Options
+
+The following options are available to manage how Advanced Search is configured in the GitLab environment:
+
+#### Advanced Search Custom Config
+
+It's possible to pass additional custom configuration for Advanced Search through the `advanced_search_custom_config` variable. This allows you to configure any valid [GitLab Advanced Search setting](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html#advanced-search-configuration) beyond the default ones set by the Toolkit, for example:
+
+```yaml
+advanced_search_custom_config:
+ elasticsearch_indexed_file_size_limit_kb: 10240
+ elasticsearch_indexed_field_length_limit: 20000
+ elasticsearch_max_bulk_size_mb: 100
+ elasticsearch_max_bulk_concurrency: 10
+```
+
+> [!warning]
+Custom configuration is only applied during the initial Advanced Search setup or when `advanced_search_retry_setup` is `true`. This prevents overriding settings that have subsequently been manually configured through the GitLab UI, but also means your custom configuration may not be applied if you add it after initial setup without enabling `advanced_search_retry_setup`.
+
+#### Advanced Search Retry Setup
+
+The `advanced_search_retry_setup` variable can be used to force a complete reconfiguration of Advanced Search:
+
+```yml
+advanced_search_retry_setup: true
+```
+
+When enabled, this will reset and reapply the Advanced Search config, including Custom Config, along with performing a full reindex.
+
+> [!warning]
+This operation will delete the existing search index and search functionality will be unavailable during re-indexing, which can take significant time depending on your data size.
+
 ## Container Registry (GCP, AWS)
 
 The Toolkit configures the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) by default on GCP and AWS environments when [External SSL](environment_advanced_ssl.md#external-ssl) is enabled in a best practice fashion, including the management of Object Storage.
