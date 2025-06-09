@@ -70,11 +70,44 @@
     - secrets
     - gitlab-secrets
 
-- name: Restart PostgreSQL
+- name: Restart PostgreSQL (Single Node)
   command: gitlab-ctl restart
   register: result
   retries: 2
   until: result is success
+  when: groups['postgres'] | length == 1
+  tags:
+    - reconfigure
+    - restart
+
+- name: Restart PostgreSQL (Multi Node) # Ensures failover occurs - Requires Consul to be active to trigger first
+  block:
+    - name: Restart PostgreSQL
+      command: gitlab-ctl restart-except consul
+      when: gitlab_version == '' or gitlab_version is version('17.2', '>=')
+
+    - name: Restart PostgreSQL (<17.2)
+      command: "gitlab-ctl restart {{ item }}"
+      loop:
+        - patroni
+        - node-exporter
+        - logrotate
+        - postgres-exporter
+        - pgbouncer
+        - pgbouncer-exporter
+      loop_control:
+        label: "{{ item }}"
+      register: result
+      retries: 2
+      until: result is success
+      when: gitlab_version != '' and gitlab_version is version('17.2', '<')
+
+    - name: Restart Consul
+      command: gitlab-ctl restart consul
+      register: result
+      retries: 2
+      until: result is success
+  when: groups['postgres'] | length > 1
   tags:
     - reconfigure
     - restart

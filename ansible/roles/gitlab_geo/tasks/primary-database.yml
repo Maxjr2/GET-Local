@@ -39,8 +39,8 @@
   retries: 3
   until: result is success
 
-- name: Primary Database - Restart Postgres
-  command: gitlab-ctl restart
+- name: Primary Database - Restart {{ 'patroni' if geo_primary_postgres_is_ha else 'postgresql' }}
+  command: "gitlab-ctl restart {{ 'patroni' if geo_primary_postgres_is_ha else 'postgresql' }}"
   register: result
   retries: 3
   until: result is success
