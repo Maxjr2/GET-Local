@@ -385,14 +385,14 @@ advanced_search_custom_config:
 ```
 
 > [!warning]
-Custom configuration is only applied during the initial Advanced Search setup or when `advanced_search_retry_setup` is `true`. This prevents overriding settings that have subsequently been manually configured through the GitLab UI, but also means your custom configuration may not be applied if you add it after initial setup without enabling `advanced_search_retry_setup`.
+Custom configuration is only applied during the initial Advanced Search setup or when `advanced_search_reconfigure` is `true`. This prevents overriding settings that have subsequently been manually configured through the GitLab UI, but also means your custom configuration may not be applied if you add it after initial setup without enabling `advanced_search_reconfigure`.
 
-#### Advanced Search Retry Setup
+#### Advanced Search Reconfigure
 
-The `advanced_search_retry_setup` variable can be used to force a complete reconfiguration of Advanced Search:
+The `advanced_search_reconfigure` variable can be used to force a complete reconfiguration of Advanced Search:
 
 ```yml
-advanced_search_retry_setup: true
+advanced_search_reconfigure: true
 ```
 
 When enabled, this will reset and reapply the Advanced Search config, including Custom Config, along with performing a full reindex.
