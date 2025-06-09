@@ -80,13 +80,22 @@
   tags: reconfigure
 
 - name: Restart Non Gitaly components
-  command: "gitlab-ctl restart {{ item.name }}"
-  loop:
-    - { name: "node-exporter" }
-    - { name: "consul", condition: "{{ 'consul' in groups }}"}
-  loop_control:
-    label: "{{ item.name }}"
-  when: (item.condition is not defined or item.condition)
+  block:
+    - name: Restart Non Gitaly components
+      command: gitlab-ctl restart-except gitaly
+      when: gitlab_version == '' or gitlab_version is version('17.2', '>=')
+
+    - name: Restart Non Gitaly components (<17.2)
+      command: "gitlab-ctl restart {{ item.name }}"
+      loop:
+        - { name: "node-exporter" }
+        - { name: "logrotate" }
+        - { name: "consul", condition: "{{ 'consul' in groups }}"}
+      loop_control:
+        label: "{{ item.name }}"
+      when:
+        - gitlab_version != '' and gitlab_version is version('17.2', '<')
+        - (item.condition is not defined or item.condition)
   tags:
     - reconfigure
     - restart
