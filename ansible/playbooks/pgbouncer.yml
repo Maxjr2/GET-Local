@@ -4,5 +4,6 @@
 - hosts: pgbouncer
   become: true
   gather_facts: false
+  environment: "{{ remote_env | default(omit) }}"
   roles:
     - pgbouncer

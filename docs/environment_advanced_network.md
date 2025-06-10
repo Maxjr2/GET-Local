@@ -404,6 +404,9 @@ The Toolkit supports setting up an [offline environment without internet access]
 
 In this section we'll detail each of these areas below.
 
+> [!tip]
+> If the target hosts are running behind a proxy, Ansible can be configured to use this via [remote environment variables](environment_configure.md#ansible-remote-environment-variables).
+
 ### Ansible Offline Setup
 
 In an offline environment Ansible will need to be run in the same network as the environment itself. As such, the Dynamic Inventory will need to be switched to return internal IPs instead. This can be done for [GCP](environment_configure.md#google-cloud-platform-gcp) / [AWS](environment_configure.md#amazon-web-services-aws) by changing the `compose.ansible_host` setting  to `private_ip_address`. Azure does not need any additional changes.

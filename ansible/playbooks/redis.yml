@@ -7,5 +7,6 @@
     - redis_persistent_*
   become: true
   gather_facts: false
+  environment: "{{ remote_env | default(omit) }}"
   roles:
     - redis

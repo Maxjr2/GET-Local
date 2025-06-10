@@ -486,7 +486,7 @@ gitlab_rails_password: "{{ lookup('amazon.aws.aws_secret', 'gitlab_rails_passwor
 
 Note that region is required here but since you've already configured it earlier in your `vars.yml` file as `aws_region` this can be reused.
 
-### Alternative Ansible connection options
+### Ansible connection options
 
 The Toolkit has been designed and tested with the main Ansible connection option of SSH throughout. However, there are [other connection options](https://docs.ansible.com/ansible/latest/plugins/connection.html) available for Ansible directly or via community plugins.
 
@@ -523,6 +523,30 @@ If the requirements have been met Ansible can be configured as follows to use th
     ```
 
 Once in place you can use the same commands but Ansible will now connect over AWS SSM accordingly.
+
+### Ansible remote environment variables
+
+The Toolkit supports setting additional [remote environment variables](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_environment.html) on target hosts as required. This may be needed in situations such as when the target hosts are running behind a proxy or require custom environment variables for package repositories.
+
+Configuring remote environment variables is done through the `remote_env` variable in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml), which can be set to a map of any environment variables to be set on target hosts.
+
+Below is an example of configuring the standard `http_proxy`, `https_proxy` and `no_proxy` environment variables when there is a proxy running on `http://proxy.example.com:8080`:
+
+```yaml
+remote_env:
+  http_proxy: http://proxy.example.com:8080
+  https_proxy: http://proxy.example.com:8080
+  no_proxy: localhost,127.0.0.1
+```
+
+>>> [!note]
+Remote environment variables only affect Ansible tasks executed on target hosts, not the host running Ansible itself. 
+
+To configure GitLab to have its own [custom environment variables](https://docs.gitlab.com/omnibus/settings/environment-variables/), this can be done via [Custom Config](environment_advanced.md#custom-config)
+>>>
+
+> [!tip]
+> A breakdown of what tasks in Ansible will use internet access can be found in the [Ansible Offline Setup](environment_advanced_network.md#ansible-offline-setup) section.
 
 ### Config Examples
 
