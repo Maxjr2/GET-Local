@@ -31,7 +31,7 @@
   import_tasks: secondary-database-remove-patroni-cluster.yml
   when:
     - geo_secondary_postgres_is_ha
-    - geo_secondary_remove_patroni_cluster
+    - geo_secondary_initialize_patroni_cluster
 
 - name: Secondary Database - Run gitlab-ctl reconfigure
   command: gitlab-ctl reconfigure
