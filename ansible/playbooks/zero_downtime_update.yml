@@ -3,6 +3,7 @@
 
 - hosts: all:!praefect_postgres:!gitlab_nfs:!haproxy_*:!gitlab_*_node_pool:!ungrouped:!get_ignored
   order: sorted
+  environment: "{{ remote_env | default(omit) }}"
   roles:
     - zero_downtime_upgrade
   become: true

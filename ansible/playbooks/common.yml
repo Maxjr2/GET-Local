@@ -2,5 +2,6 @@
 - hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
   gather_facts: false
+  environment: "{{ remote_env | default(omit) }}"
   roles:
     - common

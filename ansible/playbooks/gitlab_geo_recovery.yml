@@ -2,6 +2,7 @@
 # Omnibus or Cloud Native Hybrid
 - hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
+  environment: "{{ remote_env | default(omit) }}"
   roles:
     - common_vars
   tasks:

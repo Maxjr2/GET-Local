@@ -5,6 +5,7 @@
 
 # Omnibus or Cloud Native Hybrid
 - hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
+  environment: "{{ remote_env | default(omit) }}"
   become: true
   roles:
     - { role: gitlab_geo, when: "groups | select('match', 'gitaly|gitlab_rails') | length > 0" }
