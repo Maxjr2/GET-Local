@@ -5,6 +5,7 @@
 
     - name: Secondary Database - Run gitlab-ctl stop sidekiq
       command: gitlab-ctl stop sidekiq
+      retries: 3
   when: not geo_secondary_is_multi_node
 
 - name: Secondary Database - Copy psql certificate
