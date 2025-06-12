@@ -2,7 +2,7 @@
 # Omnibus or Cloud Native Hybrid
 - hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
-  environment: "{{ remote_env | default(omit) }}"
+  environment: "{{ remote_env }}"
   any_errors_fatal: false
   ignore_unreachable: true
   ignore_errors: true
@@ -19,7 +19,7 @@
 
 - hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
   become: true
-  environment: "{{ remote_env | default(omit) }}"
+  environment: "{{ remote_env }}"
   ignore_unreachable: true
   roles:
     - common_vars

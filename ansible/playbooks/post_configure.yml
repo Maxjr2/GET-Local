@@ -1,6 +1,6 @@
 ---
 - hosts: localhost
   gather_facts: false
-  environment: "{{ remote_env | default(omit) }}"
+  environment: "{{ remote_env }}"
   roles:
     - post_configure

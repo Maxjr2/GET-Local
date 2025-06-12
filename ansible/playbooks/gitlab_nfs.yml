@@ -2,6 +2,6 @@
 - hosts: gitlab_nfs
   become: true
   gather_facts: false
-  environment: "{{ remote_env | default(omit) }}"
+  environment: "{{ remote_env }}"
   roles:
     - gitlab_nfs
