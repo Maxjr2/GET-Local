@@ -1,5 +1,8 @@
-# Ansible Galaxy Role defaults
+# Group Variables
+## Remote Environment variables
+remote_env: {}
 
+# Ansible Galaxy Role defaults
 ## geerlingguy.node_exporter
 node_exporter_version: "1.9.1"
 node_exporter_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
