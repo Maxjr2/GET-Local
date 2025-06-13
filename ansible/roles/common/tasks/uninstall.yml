@@ -20,13 +20,22 @@
   retries: 2
   delay: 3
 
-- name: Remove GitLab repository (Ubuntu)
-  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/ubuntu/ --yes"
-  when: ansible_facts['distribution'] == "Ubuntu"
+- name: Remove GitLab repository and keys (Ubuntu / Debian)
+  block:
+    - name: Remove GitLab repository file (Ubuntu / Debian)
+      ansible.builtin.file:
+        path: "/etc/apt/sources.list.d/gitlab_{{ gitlab_edition }}.list"
+        state: absent
 
-- name: Remove GitLab repository (Debian)
-  command: "apt-add-repository -r https://packages.gitlab.com/gitlab/{{ gitlab_edition }}/debian/ --yes"
-  when: ansible_facts['distribution'] == "Debian"
+    - name: Remove GitLab GPG keyring (Ubuntu / Debian)
+      ansible.builtin.file:
+        path: "/usr/share/keyrings/gitlab_{{ gitlab_edition }}-archive-keyring.gpg"
+        state: absent
+
+    - name: Update apt cache after repository removal (Ubuntu / Debian)
+      ansible.builtin.apt:
+        update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Remove GitLab repository (RHEL)
   yum_repository:
