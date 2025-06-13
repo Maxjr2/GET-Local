@@ -25,6 +25,9 @@ platforms:
       - /run
       - /tmp
       - /run/lock
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
   - <<: *default_platform
     name: haproxy-external-1
 scenario:

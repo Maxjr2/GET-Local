@@ -8,7 +8,9 @@
   tags:
     - saas-linux-medium-amd64
   services:
-    - docker:dind
+    - name: ${GITLAB_DEPENDENCY_PROXY}docker:dind
+      alias: docker
+      entrypoint: ["sh", "-c", "dockerd-entrypoint.sh --registry-mirror=https://mirror.gcr.io"]
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
@@ -45,6 +47,7 @@
       changes:
         - ansible/roles/common/**/*
         - ansible/roles/haproxy/**/*
+        - ansible/molecule/os-verification/*
       when: manual
     - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
     - !reference [.on_web_pipelines, rules]
