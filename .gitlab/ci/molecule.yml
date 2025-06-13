@@ -65,7 +65,7 @@ ubuntu2404:single-node-with-haproxy:
         - ansible/playbooks/common.yml
         - ansible/playbooks/gitlab_rails.yml
         - ansible/playbooks/haproxy.yml
-        - ansible/roles/common/**/*
+        - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/haproxy/**/*
     - !reference [.on_web_pipelines, rules]
@@ -80,7 +80,7 @@ ubuntu2404:single-node:
       changes:
         - ansible/playbooks/common.yml
         - ansible/playbooks/gitlab_rails.yml
-        - ansible/roles/common/**/*
+        - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
     - !reference [.on_web_pipelines, rules]
 
@@ -97,7 +97,7 @@ ubuntu2404:single-node-geo:
         - ansible/playbooks/common.yml
         - ansible/playbooks/gitlab_rails.yml
         - ansible/playbooks/gitlab_geo.yml
-        - ansible/roles/common/**/*
+        - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/gitlab_geo/**/*
     - !reference [.on_web_pipelines, rules]

@@ -1,0 +1,48 @@
+---
+- name: Verify GitLab repository removal
+  hosts: all
+  gather_facts: true
+  roles:
+    - common_vars
+  tasks:
+    - name: Verify GitLab repository removal (Debian/Ubuntu)
+      block:
+        - name: Check that GitLab repository is not in sources.list
+          shell: grep -r "packages.gitlab.com" /etc/apt/sources.list
+          register: sources_check
+          failed_when: sources_check.rc == 0  # Fail if grep FINDS something
+          changed_when: false
+
+        - name: Check that no GitLab repository files exist in sources.list.d
+          shell: find /etc/apt/sources.list.d -name "*.list" -exec grep -l "packages.gitlab.com" {} \; 2>/dev/null
+          register: sources_files_check
+          failed_when: sources_files_check.stdout != ""
+          changed_when: false
+
+        - name: Verify apt update works without errors
+          apt:
+            update_cache: true
+          register: apt_update
+          failed_when: apt_update.failed
+
+        - name: Check that GitLab packages are not available (Debian/Ubuntu)
+          shell: apt-cache policy gitlab-ee | grep -i "packages.gitlab.com" || true
+          register: package_check_deb
+          failed_when: package_check_deb.stdout != ""
+          changed_when: false
+      when: omnibus_node and ansible_facts['os_family'] == 'Debian'
+
+    - name: Verify GitLab repository removal (RHEL / Amazon Linux 2023 )
+      block:
+        - name: Check that GitLab repository files do not exist
+          stat:
+            path: "/etc/yum.repos.d/gitlab_{{ gitlab_edition }}.repo"
+          register: repo_file_check
+          failed_when: repo_file_check.stat.exists
+
+        - name: Check for any remaining GitLab repository configuration references
+          shell: grep -r "packages.gitlab.com" /etc/yum.repos.d/ 2>/dev/null || true
+          register: config_check_rhel
+          failed_when: config_check_rhel.stdout != ""
+          changed_when: false
+      when: omnibus_node and ansible_facts['os_family'] == 'RedHat'

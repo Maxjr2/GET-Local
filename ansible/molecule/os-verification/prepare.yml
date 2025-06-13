@@ -1,5 +1,5 @@
 ---
-- name: Prepare Rocky Linux hosts
+- name: Prepare OS hosts
   hosts: all
   gather_facts: true
   tasks:
@@ -10,3 +10,15 @@
       when:
         - ansible_distribution == "Rocky"
         - ansible_distribution_major_version | int >= 9
+
+    - name: Install needed packages for Amazon Linux 2023
+      ansible.builtin.package:
+        name:
+          - tar
+          - iproute # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_vars_facts.html#package-requirements-for-fact-gathering
+        state: present
+      when: ansible_facts['distribution'] == "Amazon"
+
+    - name: Re-gather facts after package installation (Amazon Linux 2023)
+      ansible.builtin.setup:
+      when: ansible_facts['distribution'] == "Amazon"
