@@ -109,6 +109,7 @@
       import_tasks: license.yml
       when:
         - gitlab_environment_settings.current_license_plan not in ['premium', 'ultimate']
+        - gitlab_subscription_activation_code != '' or gitlab_license_text != ''
         - gitlab_edition != 'gitlab-ce'
       tags:
         - license
