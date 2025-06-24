@@ -29,7 +29,7 @@ gitlab:
         secretName: gitlab-webservice-ssl
 {% endif %}
     nodeSelector:
-      workload: webservice
+      workload: "{{ gitlab_charts_webservice_node_selector }}"
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -85,7 +85,7 @@ gitlab:
         cpu: "{{ gitlab_charts_sidekiq_requests_cpu }}"
         memory: "{{ gitlab_charts_sidekiq_requests_memory_gb }}G"
     nodeSelector:
-      workload: sidekiq
+      workload: "{{ gitlab_charts_sidekiq_node_selector }}"
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -185,7 +185,7 @@ gitlab:
 # EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
   gitaly:
     nodeSelector:
-      workload: gitaly
+      workload: "{{ gitlab_charts_gitaly_node_selector }}"
     resources:
       limits:
         memory: "{{ gitlab_charts_gitaly_limits_memory_gb }}G"
@@ -216,7 +216,7 @@ gitlab:
 global:
   # Deploy pods to Supporting node pool by default unless otherwise configured
   nodeSelector:
-    workload: "support"
+    workload: "{{ gitlab_charts_supporting_node_selector }}"
   serviceAccount:
     enabled: true
 {% if cloud_provider != 'none' %}
@@ -532,7 +532,7 @@ nginx-ingress:
   controller:
     kind: DaemonSet
     nodeSelector:
-      workload: webservice
+      workload: "{{ gitlab_charts_webservice_node_selector }}"
     scope:
       enabled: false
     metrics:
