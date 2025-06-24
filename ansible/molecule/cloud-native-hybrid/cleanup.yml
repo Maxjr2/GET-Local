@@ -1,0 +1,6 @@
+---
+- name: Cleanup k3d cluster
+  hosts: localhost
+  tasks:
+    - name: Delete k3d Cluster
+      command: k3d cluster delete {{ molecule_cluster_name }}
