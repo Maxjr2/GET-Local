@@ -21,6 +21,28 @@
         - "'gitlab_rails' not in groups"
   when: gitlab_environment_settings.authorized_keys_enabled
 
+# Enable Incremental Logging for Linux Package. Enabled by default in Cloud Native.
+# https://docs.gitlab.com/administration/cicd/job_logs/#incremental-logging
+- name: Enable Incremental Logging (Linux Package)
+  block:
+    - name: Enable Incremental Logging
+      command: "gitlab-rails runner 'ApplicationSetting.last.update(ci_job_live_trace_enabled: true)'"
+      when:
+        - gitlab_version == '' or gitlab_version is version('17.11', '>=')
+        - not gitlab_environment_settings.ci_job_live_trace_enabled
+
+    - name: Enable Incremental Logging (<17.11)
+      command: "gitlab-rails runner 'Feature.enable(:ci_enable_live_trace)'"
+      when: gitlab_version != '' and gitlab_version is version('17.11', '<')
+  delegate_to: "{{ groups['gitlab_rails'][0] }}"
+  delegate_facts: true
+  become: true
+  tags: reconfigure
+  when:
+    - "'gitlab_rails' in groups"
+    - gitlab_object_storage_type == 'object_storage'
+    - geo_secondary_site_group_name not in groups
+
 - name: Enable 'gitlab_environment_toolkit_instance' setting
   block:
     - name: Enable 'gitlab_environment_toolkit_instance' setting via GitLab Rails

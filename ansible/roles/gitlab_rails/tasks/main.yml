@@ -255,15 +255,6 @@
     - reconfigure
     - restart
 
-# https://docs.gitlab.com/ee/administration/job_logs.html#enable-or-disable-incremental-logging
-- name: Enable Incremental Logging (Object Storage)
-  command: "gitlab-rails runner 'Feature.enable(:ci_enable_live_trace)'"
-  tags: reconfigure
-  when:
-    - "'gitlab_rails_primary' in group_names"
-    - gitlab_object_storage_type == 'object_storage'
-    - geo_secondary_site_group_name not in groups
-
 - name: Create skip-auto-reconfigure file
   file:
     path: /etc/gitlab/skip-auto-reconfigure
