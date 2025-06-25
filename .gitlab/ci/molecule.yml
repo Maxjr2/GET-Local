@@ -20,6 +20,7 @@
     - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
     - ./get-docker.sh
     - pip install molecule docker molecule-plugins[docker]
+    - curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
   script:
     - cd ansible
     - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
@@ -100,6 +101,35 @@ ubuntu2404:single-node-geo:
         - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/gitlab_geo/**/*
+    - !reference [.on_web_pipelines, rules]
+
+cloud-native-hybrid:
+  extends: .molecule
+  tags:
+    - saas-linux-large-amd64
+  variables:
+    MOLECULE_SCENARIO: cloud-native-hybrid
+  rules:
+    - !reference [.molecule-skip-jobs, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ansible/molecule/cloud-native-hybrid/*
+        - ansible/roles/common/**/!(uninstall.yml)
+        - ansible/roles/gitlab_charts/**/*
+        - ansible/roles/postgres/**/*
+        - ansible/roles/redis/**/*
+    - !reference [.on_web_pipelines, rules]
+
+cloud-native:
+  extends: .molecule
+  variables:
+    MOLECULE_SCENARIO: cloud-native
+  rules:
+    - !reference [.molecule-skip-jobs, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - ansible/molecule/cloud-native/*
+        - ansible/roles/gitlab_charts/**/*
     - !reference [.on_web_pipelines, rules]
 
 ## OS Jobs
