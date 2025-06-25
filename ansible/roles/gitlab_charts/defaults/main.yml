@@ -30,7 +30,7 @@ gitlab_charts_direct_install: "{{ offline_setup or gitlab_charts_ref.startswith(
 gitlab_charts_show_values: false
 
 gitlab_charts_webservice_node_selector: webservice
-gitlab_charts_sidekiq_node_selectorq: sidekiq
+gitlab_charts_sidekiq_node_selector: sidekiq
 gitlab_charts_supporting_node_selector: support
 gitlab_charts_gitaly_node_selector: gitaly
 
