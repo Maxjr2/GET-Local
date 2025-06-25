@@ -1,0 +1,2 @@
+---
+- import_playbook: ../molecule_tasks/k3d/prepare.yml
