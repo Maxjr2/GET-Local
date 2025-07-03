@@ -183,6 +183,7 @@
       delegate_to: localhost
       become: false
       run_once: true
+      changed_when: false
 
     - name: Find all SSH host keys on primary Rails node
       ansible.builtin.find:
@@ -199,6 +200,7 @@
       with_items: "{{ ssh_host_keys.files }}"
       no_log: true
       when: "'gitlab_rails_primary' in group_names"
+      changed_when: false
 
     - name: Copy all SSH host keys to secondary Rails nodes
       copy:
@@ -215,6 +217,7 @@
       delegate_to: localhost
       become: false
       run_once: true
+      changed_when: false
   when:
     - groups['gitlab_rails'] | length > 1
     - gitlab_shell_ssh_sync_keys
@@ -235,12 +238,15 @@
             AuthorizedKeysCommandUser git
           Match all        # End match, settings apply to all users again
         state: "{{ 'present' if gitlab_shell_ssh_daemon == 'openssh' else 'absent' }}"
+      register: sshd_config_result
 
     - name: Reload OpenSSH service if being used
       service:
         name: "{{ 'sshd' if ansible_facts['os_family'] == 'RedHat' else 'ssh' }}"
         state: reloaded
-      when: gitlab_shell_ssh_daemon == 'openssh'
+      when:
+        - gitlab_shell_ssh_daemon == 'openssh'
+        - sshd_config_result.changed
   tags:
     - reconfigure
     - secrets
