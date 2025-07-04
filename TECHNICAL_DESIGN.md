@@ -280,6 +280,19 @@ As a general rule we prefer [Custom Config](docs/environment_advanced.md#custom-
 
 In other words we should only be handling variables in GET that are needed strictly to achieve deployment of GitLab at scale to stay lean and reduce maintenance burden. Variables not fitting this description should only be encapsulated when there's a strong enough reason to do so, for example if the variable requires to be set across multiple components.
 
+#### No Direct Handling of Feature Flags
+
+[Feature flags](https://docs.gitlab.com/ee/development/feature_flags/) support the development and rollout of experimental features in GitLab. Feature flags are not tools for managing configuration and are primarily designed for internal GitLab development and SaaS operations.
+
+Due to the complexity of managing feature flags across diverse self-managed environments, and the potential risks associated with enabling experimental features in production deployments, the Toolkit does not provide direct support for feature flag management.
+
+Instead, all environment-specific configurations should be managed through application settings.
+
+This approach ensures that configuration changes are transparent, auditable, and align with the Toolkit's [Shared Responsibility](#shared-responsibility) model, where users maintain control over their environment's configuration while the Toolkit focuses on deployment automation.
+
+> [!note]
+> This policy only pertains to direct handling of Feature Flags by the Toolkit. Users retain full control of their GitLab environment and can continue to enable or disable feature flags as required.
+
 #### Secrets and Keys
 
 Any Secrets and/or Keys for use with the Toolkit are expressly forbidden to be committed in the repo.
