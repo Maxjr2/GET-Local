@@ -165,6 +165,28 @@ gitlab_rails['shared_path'] = '{{ gitlab_nfs_path }}/shared'
 gitlab_ci['builds_directory'] = '{{ gitlab_nfs_path }}/builds'
 {% endif %}
 
+# Pages
+{% if pages_enable %}
+gitlab_pages['enable'] = true
+pages_external_url "{{ pages_external_url }}"
+
+# Pages NGINX SSL Config
+{% if gitlab_rails_pages_nginx_external_ssl %}
+## External NGINX SSL - Single Node (User Provided)
+pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/{{ pages_host }}.crt"
+pages_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/{{ pages_host }}.key"
+
+{% else %}
+## External Load Balancer SSL Termination
+pages_nginx['listen_port'] = 80
+pages_nginx['listen_https'] = false
+{% endif %}
+
+{% if gitlab_object_storage_type == 'object_storage' %}
+gitlab_rails['pages_local_store_enabled'] = false
+{% endif %}
+{% endif %}
+
 {% if 'consul' in groups %}
 # Consul Agent (Monitoring Auto Discovery)
 consul['enable'] = true

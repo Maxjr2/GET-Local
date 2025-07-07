@@ -1,6 +1,6 @@
 frontend http-in
     bind *:80
-{% if external_url_ssl and external_ssl_source != '' %}
+{% if (external_url_ssl and external_ssl_source != '') or (pages_enable and pages_ssl_enable) %}
     bind *:443 ssl crt /usr/local/etc/haproxy/ssl/ strict-sni
 
     http-request set-header X-Forwarded-Proto https if { ssl_fc }
@@ -10,6 +10,13 @@ frontend http-in
     acl letsencrypt path_beg /.well-known/acme-challenge/
     use_backend letsencrypt if letsencrypt
 {% endif %}
+{% endif %}
+
+{% if pages_enable %}
+    acl gitlab-pages hdr(host) -i {{ pages_host }}
+    acl gitlab-pages-wildcard hdr(host) -m reg -i .*\.{{ pages_host }}
+    use_backend gitlab-pages if gitlab-pages
+    use_backend gitlab-pages if gitlab-pages-wildcard
 {% endif %}
 
 {% if container_registry_enable %}
@@ -70,4 +77,16 @@ backend gitlab-registry
 {% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
 backend letsencrypt
     server acme-sh host.docker.internal:88
+{% endif %}
+
+{% if pages_enable %}
+backend gitlab-pages
+    option forwardfor
+{% if pages_ssl_enable %}
+    redirect scheme https if !{ ssl_fc }
+{% endif %}
+
+{% for ip in gitlab_rails_int_addrs %}
+    server gitlab-rails{{loop.index}} {{ ip }}:80 check inter 3s fall 1
+{% endfor %}
 {% endif %}
