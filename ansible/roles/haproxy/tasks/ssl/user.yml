@@ -21,6 +21,33 @@
   no_log: true
   diff: false
 
+- name: Copy Pages External SSL certificates for GitLab pages (HAProxy)
+  block:
+    - name: Fail if Pages External SSL certificate is not provided
+      fail:
+        msg: "Pages External SSL certificate not provided. Ensure 'pages_ssl_cert' has been configured or there is a valid file available at location defined by 'pages_ssl_cert' and run again. Exiting..."
+      when: pages_ssl_cert | length == 0
+
+    - name: Fail if Pages External SSL key is not provided
+      fail:
+        msg: "Pages External SSL key not provided. Ensure 'pages_ssl_key' has been configured or there is a valid file available at location defined by 'pages_ssl_key' and run again. Exiting..."
+      when: pages_ssl_key | length == 0
+
+    - name: Copy over Pages External SSL files (HAProxy)
+      copy:
+        content: "{{ item.content }}"
+        dest: "{{ item.dest_path }}"
+        owner: '99' # HAProxy Docker User ID
+        mode: '0600'
+      loop:
+        - { content: "{{ pages_ssl_cert }}", dest_path: "/opt/haproxy/ssl/{{ pages_host }}.pem" }
+        - { content: "{{ pages_ssl_key }}", dest_path: "/opt/haproxy/ssl/{{ pages_host }}.pem.key" }
+      no_log: true
+      diff: false
+  when:
+    - pages_enable
+    - pages_ssl_enable
+
 - name: Remove any old User provided SSL Certificates
   file:
     path: "{{ item }}"

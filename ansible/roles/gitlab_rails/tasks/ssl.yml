@@ -23,6 +23,30 @@
       diff: false
   when: gitlab_rails_nginx_external_ssl_user
 
+- name: Copy Pages External SSL certificates (Single Node)
+  block:
+    - name: Fail if Pages External SSL certificate is not provided (Single Node)
+      fail:
+        msg: "Pages External SSL certificate not provided. Ensure 'pages_ssl_cert' has been configured or there is a valid file available at location defined by 'pages_ssl_cert' and run again. Exiting..."
+      when: pages_ssl_cert | length == 0
+
+    - name: Fail if Pages External SSL key is not provided (Single Node)
+      fail:
+        msg: "Pages External SSL key not provided. Ensure 'pages_ssl_key' has been configured or there is a valid file available at location defined by 'pages_ssl_key' and run again. Exiting..."
+      when: pages_ssl_key | length == 0
+
+    - name: Copy over Pages External SSL files (Single Node)
+      copy:
+        content: "{{ item.content }}"
+        dest: "{{ item.dest_path }}"
+        mode: '0600'
+      loop:
+        - { content: "{{ pages_ssl_cert }}", dest_path: "/etc/gitlab/ssl/{{ pages_host }}.crt" }
+        - { content: "{{ pages_ssl_key }}", dest_path: "/etc/gitlab/ssl/{{ pages_host }}.key" }
+      no_log: true
+      diff: false
+  when: gitlab_rails_pages_nginx_external_ssl
+
 - name: Copy GitLab Rails NGINX Internal SSL certificates (Multi Node)
   block:
     - name: Copy over any GitLab Rails NGINX SSL files
