@@ -82,20 +82,6 @@ Once all settings are in place we can run the `terraform apply` command against 
 By default, object storage replication will be handled by GitLab, if required, object storage replication can be configured to be handled by the cloud provider instead. To do so you will first need to disable Ansible from enabling replication by adding `geo_enable_object_storage_replication: false` into your primary site's Ansible inventory.
 Next you will need to follow the below steps for your cloud provider.
 
-### GCP Bucket Replication
-
-For Cloud Native Hybrid environments using GCP, depending on your bucket setup, you will need to add at least one of the following labels to the secondary config to enable object storage replication with the primary in the `environment.tf` file:
-
-- `geo_primary_site_object_storage_prefix` - The prefix used for buckets on the primary site. If a custom prefix was used for the buckets on the primary with the `object_storage_prefix` setting, this should match that value, if no custom naming was used this should match the `prefix` setting for the primary site.
-- `geo_primary_site_object_storage_buckets` - The list of all bucket names used on the primary site to set up replication with. Should be set only if the list of buckets on the Primary site was changed via the [`object_storage_buckets`](../environment_provision.md#configure-module-settings-environmenttf) setting.
-
-An example of setting these variables would be:
-
-```tf
-  geo_primary_site_object_storage_buckets = ["artifacts", "backups", "dependency-proxy"]
-  geo_primary_site_object_storage_prefix = "geo-primary-bucket-prefix"
-```
-
 ### AWS S3 Bucket Replication
 
 Enabling [AWS Object Storage Replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html) will automatically copy new items from your current primary's S3 storage buckets to your secondaries. To enable this you will first need to create the buckets for your primary and secondary sites. Once the secondary site is created. You will be able to take the object storage buckets information from the Terraform output.
