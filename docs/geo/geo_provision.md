@@ -73,7 +73,10 @@ module "gitlab_ref_arch_*" {
   [...]
 ```
 
-Once the configuration has been updated, you may need to add some additional configuration settings depending on your setup. If you are using cloud provided [object storage replication](./geo_provision.md#object-storage-replication) or [VPC Peering](./geo_provision.md#vpc-peering) then you should read the corresponding sections below. 
+Once the configuration has been updated, you may need to add some additional configuration settings depending on your setup. If you are using cloud provided [object storage replication](./geo_provision.md#object-storage-replication) or [VPC Peering](./geo_provision.md#vpc-peering) then you should read the corresponding sections below.
+
+> [!tip]
+> If you are deploying two Geo environments on GCP and into the same Project you'll need to configure unique [Service Account Prefixes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_provision.md#service-account-prefix-gcp) for each.
 
 Once all settings are in place we can run the `terraform apply` command against the primary site followed by any secondary sites.
 
