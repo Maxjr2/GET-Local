@@ -167,7 +167,7 @@ In advanced cases where the playbook fails for any reason but you're confident t
   - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migration`
 
 > [!note]
-> If the process has failed and you're in doubt as to why it's recommend to reach out to Support for further guidance.
+> If the upgrade process fails and you need assistance troubleshooting the issue, contact GitLab Support for guidance.
 
 ### Environment Downgrades
 
