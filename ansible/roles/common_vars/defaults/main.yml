@@ -428,8 +428,6 @@ geo_secondary_praefect_postgres_host: ""
 geo_disable_secondary_proxying: false
 geo_enable_object_storage_replication: true
 
-geo_migration_task: "{{ 'geo:db:migrate' if ((gitlab_version != '') and (gitlab_version is version('14.6', '<'))) else 'db:migrate:geo' }}"
-
 geo_sql_replication_password: "{{ postgres_password }}"
 geo_sql_replication_password_md5: "{{ (geo_sql_replication_password + 'gitlab_replicator') | md5 }}"
 

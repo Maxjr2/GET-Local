@@ -15,7 +15,7 @@
   until: result is success
 
 - name: Secondary Frontend App Servers - Run migrations for Geo tracking database
-  command: gitlab-rake {{ geo_migration_task }}
+  command: gitlab-rake db:migrate:geo
   when:
     - ('gitlab_rails_primary' in group_names)
     - geo_secondary_postgres_is_ha
