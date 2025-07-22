@@ -261,14 +261,6 @@
     - reconfigure
     - restart
 
-- name: Create skip-auto-reconfigure file
-  file:
-    path: /etc/gitlab/skip-auto-reconfigure
-    state: touch
-    mode: '0644'
-    access_time: preserve
-    modification_time: preserve
-
 - name: Run Custom Tasks
   block:
     - name: Check if Custom Tasks file exists

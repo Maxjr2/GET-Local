@@ -94,14 +94,22 @@
         - reconfigure
         - common_prep
 
-    # Workaround for https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6364
-    - name: Create skip-unmigrated-data-check file
+    - name: Configure Omnibus install skip files
       file:
-        path: /etc/gitlab/skip-unmigrated-data-check
+        path: "/etc/gitlab/{{ item.name }}"
         state: touch
+        mode: '0644'
         access_time: preserve
         modification_time: preserve
-      when: omnibus_node
+      loop:
+        - { name: "skip-auto-reconfigure" }
+        - { name: "skip-fail-config-check", condition: "{{ gitlab_version == '' or gitlab_version is version('18.2', '>=') }}" }
+        - { name: "skip-unmigrated-data-check", condition: "{{ gitlab_version != '' and gitlab_version is version('16.5', '<') }}" }
+      loop_control:
+        label: "{{ item.name }}"
+      when:
+        - omnibus_node
+        - (item.condition is not defined or item.condition)
       tags:
         - reconfigure
         - common_prep
