@@ -14,7 +14,6 @@ gitlab_kas['enable'] = false
 # Praefect Configuration
 praefect['enable'] = true
 
-{% if gitlab_version == '' or gitlab_version is version('15.10', '>=') %}
 praefect['configuration'] = {
 {% if praefect_ssl %}
   listen_addr: nil,
@@ -66,47 +65,6 @@ praefect['configuration'] = {
   ],
   prometheus_listen_addr: '0.0.0.0:9652',
 }
-{% else %}
-{% if praefect_ssl %}
-praefect['listen_addr'] = nil
-praefect['tls_listen_addr'] = "0.0.0.0:{{ praefect_ssl_port }}"
-praefect['certificate_path'] = "/etc/gitlab/ssl/praefect_cert.pem"
-praefect['key_path'] = "/etc/gitlab/ssl/praefect_key.pem"
-{% else %}
-praefect['listen_addr'] = '0.0.0.0:2305'
-{% endif %}
-
-praefect['auth_token'] = '{{ praefect_external_token }}'
-
-praefect['database_host'] = '{{ praefect_postgres_migrations_host if (db_migrate is defined and db_migrate == true) else praefect_postgres_host }}'
-praefect['database_port'] = {{ praefect_postgres_migrations_port if (db_migrate is defined and db_migrate == true) else praefect_postgres_port }}
-praefect['database_user'] = '{{ praefect_postgres_username }}'
-praefect['database_password'] = '{{ praefect_postgres_password }}'
-praefect['database_dbname'] = '{{ praefect_postgres_database_name }}'
-
-## Praefect Cache settings
-praefect['database_direct_host'] = '{{ praefect_postgres_cache_host }}'
-praefect['database_direct_port'] = {{ praefect_postgres_cache_port }}
-
-praefect['virtual_storages'] = {
-  'default' => {
-    'nodes' => {
-      'gitaly-1' => {
-        'address' => "{{ 'tls' if gitaly_ssl else 'tcp' }}://{{ gitaly_primary_int_addr }}:{{ gitaly_ssl_port if gitaly_ssl else '8075' }}",
-        'token'   => "{{ praefect_internal_token }}"
-      },
-{% for ip in gitaly_secondary_int_addrs %}
-      'gitaly-{{ loop.index + 1 }}' => {
-        'address' => "{{ 'tls' if gitaly_ssl else 'tcp' }}://{{ ip }}:{{ gitaly_ssl_port if gitaly_ssl else '8075' }}",
-        'token'   => "{{ praefect_internal_token }}"
-      },
-{% endfor %}
-    }
-  }
-}
-
-praefect['prometheus_listen_addr'] = '0.0.0.0:9652'
-{% endif %}
 
 praefect['auto_migrate'] = {{ (db_migrate is defined and db_migrate == true) | lower }}
 

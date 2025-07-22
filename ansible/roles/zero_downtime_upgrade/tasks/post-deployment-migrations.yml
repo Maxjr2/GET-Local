@@ -45,7 +45,7 @@
 - name: Run Geo DB migrations and verify secondary site
   block:
     - name: Run migrations on secondary site
-      command: gitlab-rake {{ geo_migration_task }}
+      command: gitlab-rake db:migrate:geo
 
     - name: Run Geo check on secondary site
       command: gitlab-rake gitlab:geo:check

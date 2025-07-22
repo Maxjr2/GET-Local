@@ -34,7 +34,6 @@ consul['monitoring_service_discovery'] = true
 node_exporter['listen_address'] = '0.0.0.0:9100'
 
 # Gitaly Config
-{% if gitlab_version == '' or gitlab_version is version('15.10', '>=') %}
 gitaly['configuration'] = {
 {% if gitaly_ssl %}
   tls_listen_addr: '0.0.0.0:{{ gitaly_ssl_port }}',
@@ -90,41 +89,6 @@ gitaly['configuration'] = {
   ],
 {% endif %}
 }
-
-{% else %}
-{% if gitaly_ssl %}
-gitaly['tls_listen_addr'] = "0.0.0.0:{{ gitaly_ssl_port }}"
-gitaly['certificate_path'] = "/etc/gitlab/ssl/gitaly_cert.pem"
-gitaly['key_path'] = "/etc/gitlab/ssl/gitaly_key.pem"
-{% else %}
-gitaly['listen_addr'] = "0.0.0.0:8075"
-{% endif %}
-
-gitaly['pack_objects_cache_enabled'] = {{ gitaly_pack_objects_cache | lower }}
-gitaly['ruby_num_workers'] = {{ gitaly_ruby_num_workers }}
-gitaly['prometheus_listen_addr'] = "0.0.0.0:9236"
-
-{% if 'praefect' in groups %}
-gitaly['auth_token'] = '{{ praefect_internal_token }}'
-
-git_data_dirs({
-  "{{ gitaly_node }}" => {
-    "path" => "{{ gitaly_cluster_storage_path }}"
-  }
-})
-
-{% else %}
-gitaly['auth_token'] = '{{ gitaly_token }}'
-
-git_data_dirs({
-{% if 'gitaly_primary' in group_names %}
-  "default" => { "path" => "{{ gitaly_sharded_storage_path }}/default" },
-{% endif %}
-  "storage{{ gitaly_number }}" => { 'path' => "{{ gitaly_sharded_storage_path }}/storage{{ gitaly_number }}" },
-})
-
-{% endif %}
-{% endif %}
 
 custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{gitaly,common}.*.rb"))
 custom_confs.each { |conf|

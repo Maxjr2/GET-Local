@@ -1,27 +1,10 @@
-{% if gitlab_version == '' or gitlab_version is version('14.1', '>=') %}
 roles ["sidekiq_role"]
-{% else %}
-# Avoid running unnecessary services on the Sidekiq server
-gitaly['enable'] = false
-postgresql['enable'] = false
-redis['enable'] = false
-puma['enable'] = false
-gitlab_workhorse['enable'] = false
-prometheus['enable'] = false
-alertmanager['enable'] = false
-gitlab_exporter['enable'] = false
-nginx['enable'] = false
-gitlab_kas['enable'] = false
-{% endif %}
 
 external_url '{{ external_url_sanitised }}'
 
 # Sidekiq Config
 sidekiq['enable'] = true
 sidekiq['listen_address'] = '0.0.0.0'
-{% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
-sidekiq['max_concurrency'] = 20
-{% endif %}
 sidekiq['queue_groups'] = [
 {% for cpu in range(ansible_processor_vcpus) %}
   "*",
@@ -69,7 +52,7 @@ gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "{{ gitlab
 {% endif %}
 
 ## Object Storage - CI Secure Files (15.7+)
-{% if 'ci_secure_files' in gitlab_object_storage_list and (gitlab_version == '' or gitlab_version is version('15.7', '>=')) %}
+{% if 'ci_secure_files' in gitlab_object_storage_list %}
 gitlab_rails['ci_secure_files_object_store_enabled'] = true
 gitlab_rails['ci_secure_files_object_store_remote_directory'] = "{{ gitlab_object_storage_bucket_names['ci_secure_files'] }}"
 gitlab_rails['ci_secure_files_object_store_connection'] = {
@@ -164,7 +147,7 @@ gitlab_rails['db_username'] = '{{ postgres_username }}'
 gitlab_rails['db_password'] = '{{ postgres_password }}'
 gitlab_rails['db_database'] = '{{ postgres_database_name }}'
 
-{% if postgres_load_balancing_hosts | length > 0 and not (gitlab_version != '' and gitlab_version is version('14.1', '<')) %}
+{% if postgres_load_balancing_hosts | length > 0 %}
 gitlab_rails['db_load_balancing'] = { 'hosts' => {{ postgres_load_balancing_hosts }} }
 {% endif %}
 

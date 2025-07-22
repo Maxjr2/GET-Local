@@ -134,7 +134,7 @@ gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "{{ gitlab
 {% endif %}
 
 ## Object Storage - CI Secure Files (15.7+)
-{% if 'ci_secure_files' in gitlab_object_storage_list and (gitlab_version == '' or gitlab_version is version('15.7', '>=')) %}
+{% if 'ci_secure_files' in gitlab_object_storage_list %}
 gitlab_rails['ci_secure_files_object_store_enabled'] = true
 gitlab_rails['ci_secure_files_object_store_remote_directory'] = "{{ gitlab_object_storage_bucket_names['ci_secure_files'] }}"
 gitlab_rails['ci_secure_files_object_store_connection'] = {
@@ -280,9 +280,7 @@ sidekiq['enable'] = false
 ## Sidekiq - Local
 sidekiq['enable'] = true
 sidekiq['listen_address'] = '0.0.0.0'
-{% if gitlab_version != '' and gitlab_version is version('15.7', '<') %}
-sidekiq['max_concurrency'] = 20
-{% endif %}
+
 {% if 'gitaly' in groups %}
 ### Sidekiq - Scale up workers dynamically to 1/4 of CPUS unless single node
 sidekiq['queue_groups'] = [
@@ -398,13 +396,9 @@ git_data_dirs({{ storage_config }})
 ## Gitaly - Local
 gitaly['enable'] = true
 
-{% if gitlab_version == '' or gitlab_version is version('15.10', '>=') %}
 gitaly['configuration'] = {
   prometheus_listen_addr: '0.0.0.0:9236',
 }
-{% else %}
-gitaly['prometheus_listen_addr'] = "0.0.0.0:9236"
-{% endif %}
 
 {% endif %}
 
