@@ -87,7 +87,10 @@
         login_password: "{{ postgres_admin_password }}"
         name: "{{ item }}"
         login_db: "{{ postgres_database_name }}"
-      loop: ['pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
+      loop: [
+        'amcheck', 'pg_trgm', 'btree_gist',
+        'plpgsql', 'pg_stat_statements'
+      ]
   when:
     - postgres_external
     - postgres_external_prep
