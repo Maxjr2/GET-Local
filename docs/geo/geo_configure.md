@@ -43,11 +43,11 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 - `geo_primary_site_group_name`/`geo_secondary_site_group_name` - These should match the `geo_site` that was set in Terraform for the site you want to use as a primary/secondary, any `-` should be replaced with `_` as the names are altered when pulled from the cloud provider.
 - `geo_primary_site_name`/`geo_secondary_site_name` - A name plain text name for each site, this will be displayed in the main Geo settings page.
 - `geo_primary_registry_url` - The URL for the container registry. Optional, will default to `https://registry.{{ Geo primary URL }}`
-- `geo_secondary_initialize_patroni_cluster` - When adding a new secondary site it is required to run some extra steps for Patroni to connect to the primary site. This is only required to be run as part of an initial setup and should be set to `false` for all subsequent runs. Defaults to `true`.
+- `geo_secondary_force_initialize_patroni_cluster` - When running the GitLab Geo playbook, you can set this to `true` if you want to force the Toolkit to reinitialize the Patroni Cluster on the secondary site. This will removal all PostgreSQL data from the secondary and restarts replication. Defaults to `false`.
 - `geo_secondary_site_count` - The number of secondary sites that will be replicating from the primary site. Defaults to 1.
 
-> [!caution]
-> When using `geo_secondary_initialize_patroni_cluster`, this will trigger replication to restart. Depending on the amount of data to be replicated this can cause a reconfigure to timeout. It's possible to configure the Toolkit to retry the reconfigure operation attempts and time between attempts via the `geo_remove_patroni_cluster_reconfigure_retries` and `geo_remove_patroni_cluster_reconfigure_delay` settings respectively until replication is complete. As an example, at a transfer speed of 30 Mbps, and a database size of 100 GB, resynchronization could take approximately 8 hours.
+> [! caution]
+> When using `geo_secondary_force_initialize_patroni_cluster`, this will trigger replication to restart. Depending on the amount of data to be replicated this can cause a reconfigure to timeout. It's possible to configure the Toolkit to retry the reconfigure operation attempts and time between attempts via the `geo_remove_patroni_cluster_reconfigure_retries` and `geo_remove_patroni_cluster_reconfigure_delay` settings respectively until replication is complete. As an example, at a transfer speed of 30 Mbps, and a database size of 100 GB, resynchronization could take approximately 8 hours.
 
 You can also remove the GitLab license from the sites that will not be set as the primary before running the `ansible-playbook` command. To remove the license from the secondary site you can just remove the `gitlab_license_file` or `gitlab_subscription_activation_code` setting from the secondary `vars.yml` file.
 
@@ -112,5 +112,4 @@ To perform upgrades of each environment of a Geo setup you would follow the same
 1. `cd` to the `ansible/` directory if not already there.
 1. Run the Ansible `all.yml` playbook against the primary site.
 1. Run the Ansible `all.yml` playbook against all secondary sites.
-1. Add or update `geo_secondary_initialize_patroni_cluster` in you your [`vars.yml`](../environment_configure.md#environment-config-varsyml) to `false`. This will prevent the secondary site from restarting replication.
-1. Run the `gitlab-geo.yml` playbook.
+2. Run the `gitlab-geo.yml` playbook.
