@@ -174,7 +174,7 @@ check:docker-image:
   extends: .upload-docker-image-base
   script:
     - docker build -t $CI_REGISTRY_IMAGE:test .
-    - docker run --rm $CI_REGISTRY_IMAGE:test bash -c "ansible --version && gcloud --version && aws --version && az --version && mise --version && mise install terraform && kubectl version --client && helm version"
+    - docker run --rm $CI_REGISTRY_IMAGE:test bash -c "ansible --version && gcloud --version && aws --version && az --version && mise --version && mise install terraform && terraform version && kubectl version --client && helm version"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
