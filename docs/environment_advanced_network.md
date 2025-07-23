@@ -436,7 +436,7 @@ Additionally the following packages may be installed depending on the functional
 
 When `offline_setup` is configured the Toolkit will not attempt to set up any repos or install the required packages. As such, you are required to ensure the packages are present before running Ansible. Note this also disables any setup of [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades).
 
-There are various ways this can be tackled. While this is outside the scope of this guide, all that's required here is that the packages are present beforehand. Some examples include installing the packages via an [offline repo](https://help.ubuntu.com/community/AptGet/Offline/Repository), directly via `deb` / `rpm` files.
+There are various ways this can be tackled. While this is outside the scope of this guide, all that's required here is that the packages are present beforehand. Some examples include installing the packages via an offline repo, directly via `deb` / `rpm` files.
 
 ### Python Packages
 

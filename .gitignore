@@ -28,3 +28,4 @@ get-python-env
 .ansible
 ansible/.ansible
 ansible/custom_components
+__pycache__
