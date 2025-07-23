@@ -13,15 +13,7 @@ SHELL ["/bin/bash", "-c"]
 
 ENV PATH="/root/.local/bin:$PATH"
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl jq unzip gnupg && rm -rf /var/lib/apt/lists/*
-
-# Install Mise
-RUN curl https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /usr/share/keyrings/mise-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list && \
-    apt-get update && apt-get install -y --no-install-recommends mise && rm -rf /var/lib/apt/lists/*
-
-# Add Terraform plugin (via Mise)
-RUN mise plugins install terraform -y
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl unzip && rm -rf /var/lib/apt/lists/*
 
 # Install Ansible
 ## Install Python Packages (Including Ansible)
@@ -46,6 +38,14 @@ ENV GCP_AUTH_KIND="application"
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
 
 RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip nano git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
+
+# Install Mise
+RUN curl https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /usr/share/keyrings/mise-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list && \
+    apt-get update && apt-get install -y --no-install-recommends mise && rm -rf /var/lib/apt/lists/*
+
+# Add Terraform plugin (via Mise)
+RUN mise plugins install terraform -y
 
 # Install cloud tools
 ## gcloud cli
