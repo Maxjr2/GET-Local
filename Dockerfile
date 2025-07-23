@@ -32,7 +32,7 @@ USER root
 WORKDIR /gitlab-environment-toolkit
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH="/root/.local/bin:$PATH"
+ENV PATH="/root/.local/share/mise/shims:/root/.local/bin:$PATH"
 
 ENV GCP_AUTH_KIND="application"
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
