@@ -511,19 +511,22 @@ After Ansible is finished running your environment will now be ready.
 
 #### Database Preparation
 
-When using an external database several preparation steps are required for GitLab to use them, including the setup of users, databases and extensions.
+When using an external database, several preparation steps are required for GitLab to use it, including the setup of users, databases, and extensions.
 
-As a convenience, the Toolkit will attempt to do this for you automatically via either via Ansible's [`community.postgres`](https://docs.ansible.com/ansible/latest/collections/community/postgresql/) collection on one of the Linux package (Omnibus) machines in the environment or via `psql` commands from the [`postgres` docker image](https://hub.docker.com/_/postgres) for Cloud Native Hybrid environments (as external databases typically will only be available within the network).
+As a convenience, the Toolkit will attempt to do this for you automatically depending on the environment type as follows:
 
-This has been designed to work as seamlessly as possible and it should do for most use cases but note the following caveats below in this section.
+- Linux package (Omnibus): Through Ansible's [`community.postgres`](https://docs.ansible.com/ansible/latest/collections/community/postgresql/) collection on one of the machines.
+- Cloud Native: Through `psql` commands from a temporary Kubernetes pod. The Toolkit uses either the [GitLab CNG Toolbox image](https://gitlab.com/gitlab-org/build/CNG/container_registry/2128654) (when `gitlab_version` is specified) or the [`postgres:alpine` image](https://hub.docker.com/_/postgres) as a fallback.
+
+This has been designed to work as seamlessly as possible and should work for most use cases. However, note the following caveats in this section.
 
 ##### Database Preparation - Cloud Native Hybrid
 
-For Cloud Native Hybrid setups, Ansible will seek to do the database preparation by temporally deploying the latest [`postgres` docker image](https://hub.docker.com/_/postgres) into the cluster and running `psql` commands via that pod accordingly. This is to account for the recommended scenario that the database server in question will only be available internally on the network.
+For Cloud Native Hybrid setups, Ansible will perform database preparation by temporarily deploying the [GitLab CNG Toolbox image](https://gitlab.com/gitlab-org/build/CNG/container_registry/2128654) (when `gitlab_version` is specified) or the [`postgres:alpine` image](https://hub.docker.com/_/postgres) into the cluster and running `psql` commands via that pod. This approach accounts for the recommended scenario where the database server is only available internally on the network.
 
-This has been designed to work seamlessly thanks to `psql` being backwards compatible however if the image needs to be adjusted for any reason it can be done with the following variable in your Ansible [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`):
+This has been designed to work seamlessly thanks to `psql` being backwards compatible. However, if the image needs to be adjusted for any reason, it can be done with the following variable in your Ansible [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`):
 
-- `psql_image` - A Docker image that has the PostgreSQL `psql` CLI installed. It's recommended to have the latest version of `psql` to ensure comparability with the database server version. Optional, default is `postgres:alpine`.
+- `psql_image` - A Docker image that has the PostgreSQL `psql` CLI installed. It's recommended to use the latest version of `psql` to ensure compatibility with the database server version. Optional, default is `registry.gitlab.com/gitlab-org/build/cng/gitlab-toolbox-ee:v<gitlab_version>` if `gitlab_version` has been set or `postgres:alpine`.
 
 ##### Database Preparation - Manual
 

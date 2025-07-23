@@ -22,6 +22,21 @@
 
 - name: Configure database on externally managed Postgres
   block:
+    - name: Configure Database Preparation admin password secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          kind: Secret
+          type: Opaque
+          metadata:
+            name: "gitlab-postgres-admin-password"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+          stringData:
+            password: "{{ postgres_admin_password }}"
+      when: postgres_admin_password != postgres_password
+      no_log: true
+      diff: false
+
     - name: Deploy psql pod
       kubernetes.core.k8s:
         kind: Pod
@@ -39,7 +54,10 @@
                   - name: PGUSER
                     value: "{{ postgres_admin_username }}"
                   - name: PGPASSWORD
-                    value: "{{ postgres_admin_password }}"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "{{ 'gitlab-postgres-admin-password' if postgres_admin_password != postgres_password else 'gitlab-postgres-password' }}"
+                        key: password
                   - name: PGHOST
                     value: "{{ postgres_host }}"
                   - name: PGPORT
@@ -49,7 +67,10 @@
                   - name: GL_PGUSER
                     value: "{{ postgres_username.split('@')[0] }}"
                   - name: GL_PGPASSWORD
-                    value: "{{ postgres_password }}"
+                    valueFrom:
+                      secretKeyRef:
+                        name: gitlab-postgres-password
+                        key: password
             nodeSelector:
               workload: "support"
       no_log: true
@@ -95,6 +116,16 @@
         state: absent
       no_log: true
       diff: true
+
+    - name: Remove Database Preparation admin password secret
+      kubernetes.core.k8s:
+        kind: Secret
+        name: "gitlab-postgres-admin-password"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        state: absent
+      when: postgres_admin_password != postgres_password
+      no_log: true
+      diff: false
   when:
     - postgres_external
     - postgres_external_prep

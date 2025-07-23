@@ -326,7 +326,8 @@ secondary_cloud_native_hybrid_geo: "{{ cloud_native_hybrid_geo and geo_secondary
 cloud_native_hybrid_geo_role: ""
 cloud_native_hybrid_geo_unified_url: false
 
-psql_image: postgres:alpine # For external Postgres setup via Kubernetes. psql is backwards compatible
+# For external Postgres setup via Kubernetes. Use Toolbox if version is passed else use latest psql as failsafe as it's backwards compatible
+psql_image: "{{ 'registry.gitlab.com/gitlab-org/build/cng/gitlab-toolbox-ee:v' + gitlab_version if gitlab_version != '' else 'postgres:alpine' }}"
 
 ################################################################################
 ## GitLab Component Custom Config / Tasks / Files
