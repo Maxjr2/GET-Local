@@ -327,8 +327,7 @@ cloud_native_hybrid_geo_role: ""
 cloud_native_hybrid_geo_unified_url: false
 
 # For external Postgres setup via Kubernetes. Use Toolbox if version is passed else use latest psql as failsafe as it's backwards compatible
-psql_image: "{{ 'registry.gitlab.com/gitlab-org/build/cng/gitlab-toolbox-ee:v' + gitlab_version if gitlab_version != '' else 'postgres:alpine' }}"
-
+psql_image: "{{ 'registry.gitlab.com/gitlab-org/build/cng/gitlab-toolbox-ee:v' + gitlab_version + ('-fips' if gitlab_edition == 'gitlab-fips' else '') if gitlab_version != '' else 'postgres:alpine' }}"
 ################################################################################
 ## GitLab Component Custom Config / Tasks / Files
 ################################################################################
