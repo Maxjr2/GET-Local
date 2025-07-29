@@ -41,8 +41,15 @@ postgresql['sql_user_password'] = "{{ (postgres_password + 'gitlab') | md5 }}"
 postgresql['pgbouncer_user_password'] = "{{ (pgbouncer_password + 'pgbouncer') | md5 }}"
 {% endif %}
 
-postgresql['trust_auth_cidr_addresses'] = {{ postgres_trust_auth_cidr_blocks }}
 postgresql['md5_auth_cidr_addresses'] = {{ postgres_md5_auth_cidr_blocks }}
+{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+{% if groups['postgres'] | length > 1 %}
+# Configure trust auth for Patroni local socket and other members as required
+# https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
+postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (postgres_int_addrs | map('regex_replace', '$', '/32')) + (postgres_trust_auth_cidr_blocks | default([])) }}
+{% else %}
+postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (postgres_trust_auth_cidr_blocks | default([])) }}
+{% endif %}
 
 gitlab_rails['auto_migrate'] = false
 

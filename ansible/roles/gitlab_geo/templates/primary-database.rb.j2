@@ -6,6 +6,13 @@ patroni['replication_slots'] = {
 {% endfor %}
 }
 
+{% if geo_secondary_postgres_is_ha %}
+# Configure Primary and Secondary Patroni access (via load balancer) for replication calls
+# https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
+{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (geo_primary_site_postgres_int_addrs | map('regex_replace', '$', '/32')) + [internal_lb_host + '/32']  + (postgres_trust_auth_cidr_blocks | default([])) }}
+{% endif %}
+
 patroni['postgresql']['max_replication_slots'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
 patroni['postgresql']['max_wal_senders'] = {{ ((geo_primary_postgres_count | int) + (geo_secondary_site_count | int)) * 2 }}
 
@@ -24,6 +31,19 @@ geo_primary_role['enable'] = true
 gitlab_rails['db_password'] = "{{ postgres_password }}"
 
 postgresql['sql_user_password'] = "{{ (postgres_password + 'gitlab') | md5 }}"
-postgresql['listen_address'] = "{{ geo_primary_site_postgres_int_ip }}"
+
+{% if 'gitlab_rails' in group_names %}
+# Configure co-located PostgreSQL single node to accept replication calls
+postgresql['listen_address'] = '0.0.0.0'
+postgresql['md5_auth_cidr_addresses'] = {{ postgres_md5_auth_cidr_blocks }}
+{% endif %}
+
+{% if geo_secondary_postgres_is_ha %}
+# Configure Secondary Patroni access for replication calls
+# https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
+{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (geo_secondary_site_postgres_int_addrs | map('regex_replace', '$', '/32')) + (postgres_trust_auth_cidr_blocks | default([])) }}
+{% endif %}
+
 postgresql['max_replication_slots'] = {{ geo_max_replication_slots }}
 {% endif %}
