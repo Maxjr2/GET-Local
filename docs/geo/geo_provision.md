@@ -53,7 +53,6 @@ module "gitlab_ref_arch_*" {
   [...]
 ```
 
-
 ### Geo variables configuration
 
 Next you need to add some new labels to every site within you deployment. These labels are used to identify each site as belonging to your Geo deployment:

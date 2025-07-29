@@ -46,7 +46,13 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 - `geo_secondary_force_initialize_patroni_cluster` - When running the GitLab Geo playbook, you can set this to `true` if you want to force the Toolkit to reinitialize the Patroni Cluster on the secondary site. This will removal all PostgreSQL data from the secondary and restarts replication. Defaults to `false`.
 - `geo_secondary_site_count` - The number of secondary sites that will be replicating from the primary site. Defaults to 1.
 
-> [! caution]
+>>> [!important]
+**PostgreSQL Replication Security**
+
+For PostgreSQL replication between Geo sites, it is **strongly recommended** to use private network connections and never expose PostgreSQL ports to the internet such as internal VPC peering.
+>>>
+
+> [!warning]
 > When using `geo_secondary_force_initialize_patroni_cluster`, this will trigger replication to restart. Depending on the amount of data to be replicated this can cause a reconfigure to timeout. It's possible to configure the Toolkit to retry the reconfigure operation attempts and time between attempts via the `geo_remove_patroni_cluster_reconfigure_retries` and `geo_remove_patroni_cluster_reconfigure_delay` settings respectively until replication is complete. As an example, at a transfer speed of 30 Mbps, and a database size of 100 GB, resynchronization could take approximately 8 hours.
 
 You can also remove the GitLab license from the sites that will not be set as the primary before running the `ansible-playbook` command. To remove the license from the secondary site you can just remove the `gitlab_license_file` or `gitlab_subscription_activation_code` setting from the secondary `vars.yml` file.

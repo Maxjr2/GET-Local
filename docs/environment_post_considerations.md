@@ -52,7 +52,9 @@ When restoring a Toolkit-provisioned GitLab environment refer to the [main GitLa
 
 Security is a significant area and typically is very dependent on your specific requirements.
 
-As a general rule the Toolkit will look to use reasonable setup practices in relation to security, but it's **strongly** recommended that you undertake a full review of the environment's setup to ensure it meets your requirements.
+Following the [Shared Responsibility Model](../TECHNICAL_DESIGN.md#shared-responsibility), the Toolkit configures GitLab application security best practices and, when using supported cloud providers, base infrastructure security configurations. However, infrastructure hardening, ongoing security maintenance, compliance requirements, and operational security strictly remain the user's responsibility.
+
+As a general rule the Toolkit will look to use reasonable setup practices in relation to security, but it's **strongly** recommended that you undertake a full review of the environment's setup to ensure it meets your requirements. This is particularly important for custom server deployments where infrastructure security is entirely user-managed.
 
 In addition to this we have [further documentation on various practices that apply to any GitLab environment that you may also want to consider](https://docs.gitlab.com/ee/security/index.html#securing-your-gitlab-installation).
 

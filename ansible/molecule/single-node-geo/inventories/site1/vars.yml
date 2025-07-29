@@ -14,3 +14,4 @@ all:
     gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/../gitlab_configs/gitlab_rails.rb.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
