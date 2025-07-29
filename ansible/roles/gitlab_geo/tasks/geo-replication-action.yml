@@ -1,0 +1,47 @@
+- name: Fail if External PostgreSQL
+  fail:
+    msg: "External PostgreSQL is not supported"
+  when: postgres_external
+
+- name: "{{ geo_replication_action | capitalize }} Geo Replication"
+  block:
+    - name: "{{ geo_replication_action | capitalize }} Geo Replication - Single Node"
+      command: gitlab-ctl geo-replication-{{ geo_replication_action }}
+      register: single_node_result
+      retries: 2
+      until: single_node_result is success
+      when:
+        - "'postgres' not in groups"
+        - "'gitlab_rails' in group_names"
+
+    - name: "{{ geo_replication_action | capitalize }} Geo Replication - Standalone PostgreSQL"
+      command: gitlab-ctl geo-replication-{{ geo_replication_action }}
+      register: standalone_result
+      retries: 2
+      until: standalone_result is success
+      when:
+        - "'postgres_primary' in groups"
+        - "'postgres_secondary' not in groups"
+        - "'postgres' in group_names"
+
+    - name: "{{ geo_replication_action | capitalize }} Geo Replication - Patroni Cluster (Standby Leader)"
+      block:
+        # Non-standby leaders return 1, while the leader returns 0
+        - name: Get Patroni Standby Leader
+          command: gitlab-ctl patroni check-standby-leader
+          register: patroni_leader_status
+          failed_when:
+            - patroni_leader_status.rc != 0
+            - ('I am not the leader' not in patroni_leader_status.stderr)
+
+        - name: "{{ geo_replication_action | capitalize }} geo replication on Patroni standby leader"
+          command: gitlab-ctl geo-replication-{{ geo_replication_action }}
+          register: patroni_result
+          retries: 2
+          until: patroni_result is success
+          when:
+            - ('I am the leader' in patroni_leader_status.stderr)
+      when:
+        - "'postgres_primary' in groups"
+        - "'postgres_secondary' in groups"
+        - "'postgres' in group_names"

@@ -164,6 +164,12 @@ To enable [Container Registry replication](https://docs.gitlab.com/ee/administra
 - `geo_container_registry_notification_secret` (Primary and Secondary) - Secret value for the container registry authorization header and for the Geo event notification endpoint to use. Value should be set to the same value that is a case-sensitive alphanumeric string on both Primary and Secondary sites.
 - `geo_primary_registry_url` - The Primary site's Registry URL. When using the default on the primary this will be `https://registry.<geo_primary_external_host>`.
 
+## Pause and Resume Geo Database Replication
+
+The toolkit provides the ability to pause and resume Geo replication, to understand when this could be used, refer to the [Pausing and resuming replication documentation](https://docs.gitlab.com/administration/geo/replication/pause_resume_replication/).
+
+Once ready you can trigger either process by running the required Ansible command: `ansible-playbook -i <secondary sites inventory> playbooks/<gitlab_geo_pause_replication/gitlab_geo_resume_replication>.yml
+
 ## Migrating from an external Primary Site using Geo
 
 This section details how to setup Geo replication when the primary site is an external resource that is not provisioned by the Toolkit. This guide is intended to be used when migrating from a non Toolkit provisioned environment to a new instance that will be managed by the Toolkit. In this scenario, Geo is the mechanism to transfer data from one instance to another and is not intended to be used as a standard Geo deployment.

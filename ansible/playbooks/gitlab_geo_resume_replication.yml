@@ -1,0 +1,11 @@
+---
+- hosts: all:!gitlab_*_node_pool:!ungrouped:!get_ignored
+  environment: "{{ remote_env }}"
+  become: true
+  tasks:
+    - name: Resume Geo Replication
+      vars:
+        geo_replication_action: "resume"
+      import_role:
+        name: gitlab_geo
+        tasks_from: geo-replication-action
