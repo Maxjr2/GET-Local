@@ -9,7 +9,7 @@ postgresql['sql_user_password'] = "{{ (praefect_postgres_password + 'praefect') 
 postgresql['shared_preload_libraries'] = 'pg_stat_statements'
 
 {# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
-postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (postgres_trust_auth_cidr_blocks | default([])) }}
+postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (praefect_int_addrs | map('regex_replace', '$', '/32')) + (postgres_trust_auth_cidr_blocks | default([])) }}
 
 gitlab_rails['auto_migrate'] = false
 
