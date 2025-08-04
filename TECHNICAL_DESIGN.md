@@ -153,7 +153,7 @@ The latest Terraform version we support is noted [here in the documentation](REA
 
 #### Variable Defaults (`null`)
 
-For any variables we add in Terraform for the Providers we use, we use [`null` values](https://developer.hashicorp.com/terraform/language/expressions/types#null) first as a rule.
+For any variables we add in Terraform for the Providers we use, we use [`null` values](https://developer.hashicorp.com/packer/docs/templates/hcl_templates/expressions#null) first as a rule.
 
 In Terraform `null` is equivalent to something not being set at all and the Cloud Provider's default is then used instead gracefully. This in turn avoids it being set definitively in Terraform's state and avoids any clashes between Terraform, it's state and the Cloud Provider such as when a user changes a setting or if a Cloud Provider changes a default either in its Terraform Provider or directly on it's service(s).
 

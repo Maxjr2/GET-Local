@@ -426,6 +426,9 @@ The Toolkit can configure [GitLab Pages](https://docs.gitlab.com/administration/
 - `pages_ssl_key_file` - Path to key file for SSL certificate that the Pages daemon will serve. Must be specified with `pages_ssl_cert_file`. Required if `pages_external_url` protocol is HTTPS.
   - `pages_ssl_key` - An alternative to `pages_ssl_key_file` if the private key is not stored in a local file, to pass the private key contents directly to Ansible. Use `pages_ssl_key`, or `pages_ssl_key_file`, but not both. This approach can be used to retrieve the private key via a lookup.
 
+GitLab Pages has [numerous configuration options](https://docs.gitlab.com/administration/pages/#global-settings) beyond the core setup that the Toolkit provides.
+For additional Pages settings such as access control, single-domain setup, or other customizations, use the Toolkit's [Custom Config](#custom-config) and [Custom Tasks](#custom-tasks) features.
+
 ## Custom Servers (On Prem)
 
 While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
