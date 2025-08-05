@@ -49,11 +49,17 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 >>> [!important]
 **PostgreSQL Replication Security**
 
-For PostgreSQL replication between Geo sites, it is **strongly recommended** to use private network connections and never expose PostgreSQL ports to the internet such as internal VPC peering.
+For PostgreSQL replication between Geo sites, it is **strongly recommended** to use private network connections, such as internal VPC peering, and never expose PostgreSQL ports to the internet.
 >>>
 
 > [!warning]
 > When using `geo_secondary_force_initialize_patroni_cluster`, this will trigger replication to restart. Depending on the amount of data to be replicated this can cause a reconfigure to timeout. It's possible to configure the Toolkit to retry the reconfigure operation attempts and time between attempts via the `geo_remove_patroni_cluster_reconfigure_retries` and `geo_remove_patroni_cluster_reconfigure_delay` settings respectively until replication is complete. As an example, at a transfer speed of 30 Mbps, and a database size of 100 GB, resynchronization could take approximately 8 hours.
+
+>>> [!important]
+**Secrets**
+
+When defining the [secrets](../environment_configure.md#environment-config-varsyml) for your Geo deployment, most secrets can be unique and do not need to be the same across both sites. The exceptions to this rule, if being used, are the `postgres_password`, `pgbouncer_password`, and `patroni_password`. These must be the same across both sites to prevent issues during a failover. More information is available in the [GitLab Geo documentation](https://docs.gitlab.com/administration/geo/setup/database/).
+>>>
 
 You can also remove the GitLab license from the sites that will not be set as the primary before running the `ansible-playbook` command. To remove the license from the secondary site you can just remove the `gitlab_license_file` or `gitlab_subscription_activation_code` setting from the secondary `vars.yml` file.
 
