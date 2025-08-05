@@ -99,6 +99,57 @@
     - secrets
     - gitlab-secrets
 
+# https://docs.gitlab.com/administration/sidekiq/#configure-the-container-registry-when-using-an-external-sidekiq
+- name: Propagate GitLab Registry Key from Rails to Sidekiq nodes
+  block:
+    - name: Check if GitLab Registry Key file exists on primary Rails node
+      stat:
+        path: "/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key"
+      register: gitlab_registry_key_file_path
+      delegate_to: "{{ groups['gitlab_rails_primary'][0] }}"
+      run_once: true
+
+    - name: Process GitLab Registry Key if it exists
+      block:
+        - name: Read GitLab Registry Key file from primary Rails node
+          slurp:
+            path: "/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key"
+          register: gitlab_registry_key_slurp
+          delegate_to: "{{ groups['gitlab_rails_primary'][0] }}"
+          no_log: true
+          run_once: true
+
+        - name: Save GitLab Registry Key file contents as fact
+          set_fact:
+            gitlab_registry_key_content: "{{ gitlab_registry_key_slurp.content }}"
+          delegate_to: localhost
+          delegate_facts: true
+          become: false
+          no_log: true
+          run_once: true
+
+        - name: Check if GitLab Rails etc directory exists on Sidekiq node
+          stat:
+            path: "/var/opt/gitlab/gitlab-rails/etc"
+          register: gitlab_rails_etc_dir
+
+        - name: Write GitLab Registry Key file to Sidekiq node
+          copy:
+            content: "{{ hostvars['localhost'].gitlab_registry_key_content | b64decode }}"
+            dest: "/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key"
+            owner: git
+            group: git
+            mode: "0644"
+          no_log: true
+          when: gitlab_rails_etc_dir.stat.exists
+      when: gitlab_registry_key_file_path.stat.exists
+  when:
+    - "'gitlab_rails_primary' in groups"
+    - container_registry_enable
+  tags:
+    - reconfigure
+    - secrets
+
 - name: Restart Sidekiq
   command: gitlab-ctl restart
   register: result
