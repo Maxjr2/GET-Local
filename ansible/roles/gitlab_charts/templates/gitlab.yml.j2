@@ -541,14 +541,16 @@ nginx-ingress:
       use-forwarded-headers: true
 {% endif %}
 
-{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
+{% if gitlab_version != '' and gitlab_version is version('18.3', '<') %}
 certmanager:
-  install: true
+  install: {{ (external_url_ssl and external_ssl_source == 'letsencrypt') | lower }}
+{% else %}
+installCertmanager: {{ (external_url_ssl and external_ssl_source == 'letsencrypt') | lower }}
+{% endif %}
+
+{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
 certmanager-issuer:
   email: "{{ external_ssl_letsencrypt_issuer_email }}"
-{% else %}
-certmanager:
-  install: false
 {% endif %}
 
 # Run outside of cluster
