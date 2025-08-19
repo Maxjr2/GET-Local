@@ -41,10 +41,8 @@ When ready for review, the Author applies the ~"workflow::ready for review" labe
   - [ ] MR has a green pipeline
   - [ ] MR has no new security alerts in the widget from the `Secret Detection` and `IaC Scan (SAST)` jobs.
 - Code:
-  - [ ] Check the area changed works as expected. Consider testing it in different environment sizes (1k,3k,10k,etc.).
-  - [ ] Documentation created/updated in the same MR.
-  - [ ] If this MR adds an optional configuration - check that all permutations continue to work.
-  - [ ] For Terraform changes: set up a previous version environment, then run a `terraform plan` with your new changes and ensure nothing will be destroyed. If anything will be destroyed and this can't be avoided please add a comment to the current MR.
-- [ ] Create any follow-up issue(s) to support the new feature across other supported cloud providers or advanced configurations. Create 1 issue for each provider/configuration. Contact the [Framework](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/framework/) team if unsure.
+  - [ ] Check the area changed works as expected across all expected permutations.
+  - [ ] Check that the changes work across upgrades.
+  - [ ] Documentation created/updated in the same MR if applicable
 
-/label ~"group::framework"
+/label ~"group::operate"

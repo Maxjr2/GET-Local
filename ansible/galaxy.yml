@@ -8,7 +8,7 @@ description: |
 documentation: "https://gitlab.com/gitlab-org/gitlab-environment-toolkit#documentation"
 issues: "https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues"
 authors:
-    - "GitLab Delivery: Framework team"
+    - "GitLab Delivery: Operate team"
 dependencies:
     "google.cloud": ">=1.1.2"
     "azure.azcollection": ">=1.10"
