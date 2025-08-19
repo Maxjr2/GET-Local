@@ -230,6 +230,7 @@ praefect_postgres_admin_password: "{{ praefect_postgres_password if praefect_pos
 praefect_postgres_database_name: "praefect_production"
 praefect_postgres_external: "{{ 'praefect_postgres' not in groups and praefect_postgres_host != '' }}"
 praefect_postgres_external_prep: "{{ true if praefect_postgres_host != postgres_host else postgres_external_prep }}"
+praefect_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 
 # GitLab Monitor
 monitor_int_addr: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'monitor' in groups else '' }}"
