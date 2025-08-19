@@ -87,5 +87,5 @@ If there has been any specific changes in Terraform relating to optional feature
   - `#support_self-managed`
 
 /label ~"type::maintenance" ~"maintenance::release"
-/label ~"group::framework"
+/label ~"group::operate"
 /cc @gitlab-org/software-delivery/get-maintainers

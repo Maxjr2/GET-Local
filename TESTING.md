@@ -342,4 +342,4 @@ module "gitlab_ref_arch_azure" {
 
 ## Further guidance or questions
 
-If you require any additional guidance or have any questions please [reach out to the Framework team](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/framework/#working-with-us).
+If you require any additional guidance or have any questions please [reach out to the Operate team](https://handbook.gitlab.com/handbook/engineering/infrastructure-platforms/gitlab-delivery/operate).
