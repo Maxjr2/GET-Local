@@ -62,7 +62,7 @@ In the command above, the `test` keyword triggers the complete Molecule sequence
 
 When debugging, it's often helpful to keep the infrastructure running after tests complete. To do this, replace `test` with `converge` in the command. This creates and runs the scenario but doesn't destroy it afterward. You can later remove the infrastructure separately using the `destroy` keyword.
 
-For more information on available commands, refer to the [Getting started with Molecule](https://ansible.readthedocs.io/projects/molecule/getting-started/#run-a-full-test-sequence) documentation.
+For more information on available commands, refer to the [Getting started with Molecule](https://ansible.readthedocs.io/projects/molecule/getting-started-playbooks/) documentation.
 
 ### Troubleshooting
 
