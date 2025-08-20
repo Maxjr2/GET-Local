@@ -5,7 +5,10 @@ patroni['enable'] = false
 
 # PostgreSQL configuration
 postgresql['listen_address'] = '0.0.0.0'
-postgresql['sql_user_password'] = "{{ (praefect_postgres_password + 'praefect') | md5 }}"
+
+postgresql['sql_user'] = "{{ praefect_postgres_username }}"
+postgresql['sql_user_password'] = "{{ (praefect_postgres_password + praefect_postgres_username) | md5 }}"
+
 postgresql['shared_preload_libraries'] = 'pg_stat_statements'
 
 postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] }}

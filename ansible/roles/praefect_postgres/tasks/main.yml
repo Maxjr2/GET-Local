@@ -49,18 +49,16 @@
     - reconfigure
     - restart
 
-- name: Check if Database is available for Praefect
-  shell: /opt/gitlab/embedded/bin/psql -U gitlab-psql -d template1 -h 127.0.0.1 -c "SELECT 1 FROM pg_roles WHERE rolname='{{ praefect_postgres_username }}';"
+- name: Check if Praefect Database exists
+  command: gitlab-psql -c "SELECT 1 FROM pg_database WHERE datname='{{ praefect_postgres_database_name }}';"
   register: praefect_database_check_result
   retries: 5
   delay: 10
   until: praefect_database_check_result is success
   tags: reconfigure
 
-- name: Setup Database on Postgres
-  shell: |
-    /opt/gitlab/embedded/bin/psql -U gitlab-psql -d template1 -h 127.0.0.1 -c "CREATE ROLE {{ praefect_postgres_username }} WITH LOGIN CREATEDB PASSWORD '{{ praefect_postgres_password }}';"
-    /opt/gitlab/embedded/bin/psql -U {{ praefect_postgres_username }} -d template1 -h 127.0.0.1 -c "CREATE DATABASE {{ praefect_postgres_database_name }} WITH ENCODING=UTF8;"
+- name: Create Praefect Database on Postgres
+  command: gitlab-psql -c "CREATE DATABASE {{ praefect_postgres_database_name }} WITH OWNER {{ praefect_postgres_username }} ENCODING UTF8;"
   when: "'(0 rows)' in praefect_database_check_result.stdout"
   tags: reconfigure
 
