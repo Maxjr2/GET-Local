@@ -64,7 +64,7 @@
         login_port: "{{ postgres_port }}"
         login_user: "{{ postgres_admin_username }}"
         login_password: "{{ postgres_admin_password }}"
-        db: "template1"
+        login_db: "template1"
         name: "{{ postgres_username.split('@')[0] }}"
         password: "{{ postgres_password }}"
         role_attr_flags: CREATEDB
@@ -86,7 +86,7 @@
         login_user: "{{ postgres_admin_username }}"
         login_password: "{{ postgres_admin_password }}"
         name: "{{ item }}"
-        db: "{{ postgres_database_name }}"
+        login_db: "{{ postgres_database_name }}"
       loop: ['pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
   when:
     - postgres_external

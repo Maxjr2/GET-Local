@@ -37,7 +37,7 @@
         login_port: "{{ geo_tracking_postgres_port }}"
         login_user: "{{ geo_tracking_postgres_admin_username }}"
         login_password: "{{ geo_tracking_postgres_admin_password }}"
-        db: "template1"
+        login_db: "template1"
         name: "{{ geo_tracking_postgres_user.split('@')[0] }}"
         password: "{{ geo_tracking_postgres_password }}"
         role_attr_flags: CREATEDB
@@ -59,7 +59,7 @@
         login_user: "{{ geo_tracking_postgres_admin_username }}"
         login_password: "{{ geo_tracking_postgres_admin_password }}"
         name: "{{ item }}"
-        db: "{{ geo_tracking_postgres_database }}"
+        login_db: "{{ geo_tracking_postgres_database }}"
       loop: ['pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
   when:
     - geo_tracking_postgres_external

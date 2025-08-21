@@ -59,7 +59,7 @@
         login_port: "{{ praefect_postgres_port }}"
         login_user: "{{ praefect_postgres_admin_username }}"
         login_password: "{{ praefect_postgres_admin_password }}"
-        db: "template1"
+        login_db: "template1"
         name: "{{ praefect_postgres_username.split('@')[0] }}"
         password: "{{ praefect_postgres_password }}"
         role_attr_flags: CREATEDB
@@ -81,7 +81,7 @@
         login_user: "{{ praefect_postgres_admin_username }}"
         login_password: "{{ praefect_postgres_admin_password }}"
         name: "{{ item }}"
-        db: "{{ praefect_postgres_database_name }}"
+        login_db: "{{ praefect_postgres_database_name }}"
       loop: ['pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
   when:
     - praefect_postgres_external
