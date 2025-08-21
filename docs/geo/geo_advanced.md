@@ -82,6 +82,13 @@ The Toolkit provides the ability to failover from a Geo primary site to a second
 
 Before running the failover process you should ensure you have read and completed any required steps outlined in the [Disaster recovery for planned failover](https://docs.gitlab.com/ee/administration/geo/disaster_recovery/planned_failover.html) documentation.
 
+When using Advanced Search, and the original primary and secondary sites use authentication for OpenSearch, you must set the following variables for the secondary site to ensure this is correctly configured during failover.
+
+- `geo_secondary_advanced_search_username`: Username for OpenSearch authentication for the secondary site. **Required**
+- `geo_secondary_advanced_search_password`: Password for OpenSearch authentication for the secondary site. **Required**
+- `geo_secondary_advanced_search_hosts`: - A list of search backend URLs GitLab should use for Advanced Search. Only required when using an external search provider.
+  - When using a service such as AWS OpenSearch this will typically be only one address but still be provided in list format, e.g. `["https://<AWS_OPENSEARCH_URL>"]`.
+
 Once you get to the [Promote the secondary site](https://docs.gitlab.com/ee/administration/geo/disaster_recovery/planned_failover.html#promote-the-secondary-site) step in the documentation you can proceed to perform a failover. To do the failover you can use the existing inventories to disable the primary and promote the secondary in a single command `ansible-playbook -i environments/my-geo-deployment/<secondary>/inventory -i environments/my-geo-deployment/<primary>/inventory playbooks/gitlab_geo_failover.yml`. If using multiple secondaries you will need to choose a single secondary that will be promoted to a stand a lone instance until recovery is run.
 
 After failover has occurred it's important to update your inventories to reflect the new roles they now perform and to avoid misconfiguration on subsequent runs. The original primary and secondary inventories need updating. For all environment types you will need to update the settings mentioned in the [Adding Geo specific config](geo_configure.md) section.
