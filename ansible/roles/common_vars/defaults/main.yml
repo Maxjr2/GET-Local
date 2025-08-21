@@ -460,3 +460,7 @@ geo_tracking_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 
 # Registry
 geo_primary_registry_url: "{{ ('https://registry.' + geo_primary_external_url | regex_replace('^https?:\/\/')) if geo_primary_external_url != '' else '' }}"
+
+geo_secondary_advanced_search_hosts: "{{ ((groups[geo_secondary_site_group_name + '_opensearch_primary'] | default([])) + (groups[geo_secondary_site_group_name + '_opensearch_secondary'] | default([]))) | sort | map('extract', hostvars, internal_addr_lookup) | list }}"
+geo_secondary_advanced_search_username: ""
+geo_secondary_advanced_search_password: ""

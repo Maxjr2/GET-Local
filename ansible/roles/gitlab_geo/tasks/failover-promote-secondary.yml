@@ -190,6 +190,27 @@
       when: gitlab_operator
   when: cloud_native_hybrid_geo
 
+- name: Restart Sidekiq
+  command: gitlab-ctl restart
+  register: result
+  retries: 2
+  until: result is success
+  when:
+    - ('sidekiq' in group_names)
+    - (geo_secondary_site_group_name in group_names)
+  tags: opensearch
+
+- name: Reconfigure Advanced Search
+  become: false
+  delegate_to: localhost
+  run_once: true
+  import_tasks: advanced_search.yml
+  when:
+    - ('opensearch' in groups or advanced_search_external)
+    - (geo_secondary_site_group_name in group_names)
+    - gitlab_edition != 'gitlab-ce'
+  tags: opensearch
+
 - name: Removing the former secondary’s tracking database
   block:
     - name: Failover Promote Secondary - Remote Tracking database data dir
