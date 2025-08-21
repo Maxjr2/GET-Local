@@ -35,6 +35,9 @@ frontend internal-patroni-leader
     option tcplog
     option clitcpka
 
+    acl allowed_ips src {{ haproxy_internal_patroni_leader_allowed_ips }}
+    tcp-request connection reject unless allowed_ips
+
     default_backend patroni-leader
 {% endif %}
 

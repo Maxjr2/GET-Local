@@ -20,6 +20,22 @@
 
 [TOC]
 
+## HAProxy Access Control for Database Replication
+
+When using Geo replication, the Toolkit will utilise HAProxy as an internal load balancer that handles database connections between the primary and secondary sites. By default, this connection accepts traffic from any IP address, but you can restrict access to improve security.
+
+To limit which IP addresses can connect to the internal Patroni leader database, configure the `haproxy_internal_patroni_leader_allowed_ips` variable in your primary site's Ansible inventory:
+
+```yaml
+# Allow specific IP addresses or CIDR blocks (space-separated)
+haproxy_internal_patroni_leader_allowed_ips: "192.168.1.0/24 10.0.0.5"
+
+# Default: allow all IPs (less secure)
+haproxy_internal_patroni_leader_allowed_ips: "0.0.0.0/0"
+```
+
+When configured with specific IP addresses, HAProxy will reject TCP connections that don't originate from the allowed sources, helping prevent unauthorized access to your database replication traffic.
+
 ## Custom Servers with Geo (On Prem)
 
 On Prem servers are supported by the toolkit, details on how to work with On Prem servers can be found in our [Custom Servers (On Prem)](../environment_advanced.md#custom-servers-on-prem) documentation.
@@ -34,7 +50,7 @@ To use a single unified URL to access the primary and secondary sites with the T
 - Primary URL: This is a URL that will always route traffic to the primary site.
 - Secondary URL: This is a URL that will always route traffic to the secondary site.
 
- With the URLs setup you will now need to change a few settings within your inventories to enable this feature.
+With the URLs setup you will now need to change a few settings within your inventories to enable this feature.
 
 ```yaml
 external_url: "<Unified URL>"
