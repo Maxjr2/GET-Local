@@ -22,6 +22,9 @@
 
 ## HAProxy Access Control for Database Replication
 
+> [!note]
+> This section only applies when using GitLab Linux package PostgreSQL clusters. If you're using external databases (AWS RDS, GCP Cloud SQL), this configuration is not applicable as HAProxy is not used for database connections.
+
 When using Geo replication, the Toolkit will utilise HAProxy as an internal load balancer that handles database connections between the primary and secondary sites. By default, this connection accepts traffic from any IP address, but you can restrict access to improve security.
 
 To limit which IP addresses can connect to the internal Patroni leader database, configure the `haproxy_internal_patroni_leader_allowed_ips` variable in your primary site's Ansible inventory:
