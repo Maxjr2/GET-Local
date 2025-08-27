@@ -1,17 +1,29 @@
-- name: Maintenance Mode - Set Maintenance Mode to {{ maintenance_mode_state }} for Omnibus environments
-  command: |
-    gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
-  with_inventory_hostnames:
-    - "gitlab_rails_primary:gitlab_rails_secondary:{{ site_group_name }}"
-  delegate_to: "{{ node }}"
-  register: result
-  loop_control:
-    loop_var: node
+- name: Maintenance Mode - Set Maintenance Mode for Omnibus environments
+  block:
+    - name: Maintenance Mode - Set Maintenance Mode to {{ maintenance_mode_state }} on GitLab Rails Primary node
+      command: |
+        gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
+      register: primary_result
+      ignore_errors: true
+      when: ('gitlab_rails_primary' in group_names)
+
+    - name: Maintenance Mode - Set Maintenance Mode to {{ maintenance_mode_state }} on GitLab Rails Secondary nodes
+      command: |
+        gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
+      with_inventory_hostnames:
+        - "{{ site_group_name }}_gitlab_rails_secondary"
+      delegate_to: "{{ node }}"
+      register: secondary_result
+      loop_control:
+        loop_var: node
+      until: secondary_result.rc == 0
+      ignore_errors: true
+      run_once: true
+      retries: 1
+      when: hostvars[groups['gitlab_rails_primary'][0]]['primary_result']['rc'] != 0
   when:
-    - (result.rc | default(1)) != 0 # Keep going until the command is successful on any node
     - not cloud_native_hybrid_geo
     - (site_group_name in group_names)
-  run_once: true
 
 - name: Maintenance Mode - Set Maintenance mode to {{ maintenance_mode_state }} for Cloud Native Hybrid environments
   block:
