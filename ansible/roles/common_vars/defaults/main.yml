@@ -61,8 +61,11 @@ external_ssl_files_host_key: "{{ lookup('file', external_ssl_files_host_key_file
 ### HAProxy
 #### haproxy_internal_primary_site_group_name: Sets the group name for haproxy_internal_int_addr for Geo or non Geo deployments
 haproxy_internal_primary_site_group_name: "{% if geo_primary_site_group_name + '_haproxy_internal_primary' in groups %}{{ geo_primary_site_group_name }}_haproxy_internal_primary{% elif 'haproxy_internal' in groups %}haproxy_internal{% else %}{% endif %}"
-haproxy_internal_int_addr: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'haproxy_internal' in groups else ''}}"
+haproxy_internal_int_addr: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if haproxy_internal_primary_site_group_name in groups else ''}}"
 haproxy_external_int_addr: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'haproxy_external' in groups else '' }}"
+# HAProxy IPs for NGinx real_ip trust configuration
+haproxy_internal_int_ip: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if haproxy_internal_primary_site_group_name in groups else '' }}"
+haproxy_external_int_ip: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if 'haproxy_external' in groups else '' }}"
 
 ### Internal Load Balancer
 internal_lb_host: "{{ haproxy_internal_int_addr }}"

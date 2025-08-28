@@ -39,10 +39,10 @@ nginx['real_ip_recursive'] = 'on'
 nginx['real_ip_trusted_addresses'] = [
   '127.0.0.0/8',
 {% if 'haproxy_external' in groups %}
-  '{{ haproxy_external_int_addr }}',
+  '{{ haproxy_external_int_ip }}',
 {% endif %}
 {% if 'haproxy_internal' in groups %}
-  '{{ haproxy_internal_int_addr }}',
+  '{{ haproxy_internal_int_ip }}',
 {% endif %}
 {% for cidr_block in gitlab_rails_nginx_real_ip_trusted_cidr_blocks %}
   "{{ cidr_block }}",
