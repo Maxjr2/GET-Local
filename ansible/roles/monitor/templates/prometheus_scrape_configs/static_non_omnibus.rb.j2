@@ -4,8 +4,8 @@
   'job_name': 'non_omnibus_node',
   'static_configs': [
     'targets': [
-{% for ip in ([haproxy_external_int_addr] + [haproxy_internal_int_addr] + opensearch_int_addrs) if ip != '' %}
-      "{{ ip }}:9100",
+{% for addr in ([haproxy_external_int_addr] + [haproxy_internal_int_addr] + opensearch_int_addrs) if addr != '' %}
+      "{{ addr }}:9100",
 {% endfor %}
 {% if 'gitlab_nfs' in groups %}
       "{{ gitlab_nfs_int_addr }}:9100",
@@ -20,8 +20,8 @@
   'job_name': 'haproxy',
   'static_configs': [
     'targets': [
-{% for ip in ([haproxy_external_int_addr] + [haproxy_internal_int_addr]) if ip != '' %}
-      "{{ ip }}:1936",
+{% for addr in ([haproxy_external_int_addr] + [haproxy_internal_int_addr]) if addr != '' %}
+      "{{ addr }}:1936",
 {% endfor %}
     ],
   ],

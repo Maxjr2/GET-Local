@@ -4,8 +4,8 @@
   'job_name': 'pgbouncer',
   'static_configs': [
     'targets': [
-{% for ip in pgbouncer_int_addrs %}
-      "{{ ip }}:9188",
+{% for addr in pgbouncer_int_addrs %}
+      "{{ addr }}:9188",
 {% endfor %}
     ],
   ],
@@ -17,8 +17,8 @@
   'job_name': 'praefect',
   'static_configs': [
     'targets': [
-{% for ip in praefect_int_addrs %}
-      "{{ ip }}:9652",
+{% for addr in praefect_int_addrs %}
+      "{{ addr }}:9652",
 {% endfor %}
     ],
   ],
@@ -30,8 +30,8 @@
   'job_name': 'registry',
   'static_configs': [
     'targets': [
-{% for ip in gitlab_rails_int_addrs %}
-      "{{ ip }}:5001",
+{% for addr in gitlab_rails_int_addrs %}
+      "{{ addr }}:5001",
 {% endfor %}
     ],
   ],
