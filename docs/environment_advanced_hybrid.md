@@ -374,22 +374,35 @@ The above can be configured in Terraform via the following settings in your [`en
 - `eks_node_group_custom_ami_id` - The AMI ID of the custom image to be used for the Node Groups. Defaults to `null`.
 - `eks_node_group_custom_ami_userdata_type` - The type of `user data` script to configure. Can be one of `bootstrap` or `nodeadm`. Defaults to `bootstrap`.
 
-#### EKS Addon Versions
+#### EKS Addons
 
-The Toolkit will enable several [EKS Addons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html) as required. AWS regularly releases new versions for these addons accordingly outside the main EKS cluster versions, and it's possible to configure the Toolkit to upgrade the addons specifically on subsequent Terraform runs as desired.
+The Toolkit will enable several [EKS Addons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html) as required. EKS addons are AWS-managed components that provide essential functionality such as networking, DNS resolution, and storage integration. The Toolkit allows you to manage both addon versions and, where supported, custom configuration settings.
 
-It's recommended to manage these versions via the Toolkit to ensure Terraform is aware of them in its state to avoid any issues. As such, there are variables available for each to control what version they run on along with the option to just select whatever is the latest with the following caveats:
+##### EKS Addon Versions
+
+AWS regularly releases new versions for EKS addons outside the main EKS cluster version releases. The Toolkit provides variables to control addon versions and enables automatic upgrades on subsequent Terraform runs when desired.
+
+It's recommended to manage these versions via the Toolkit to ensure Terraform maintains awareness of them in its state and avoid potential conflicts. The following considerations apply when managing addon versions:
 
 - Setting the variables to `latest` will instruct Terraform to retrieve whatever the latest version is for each and upgrade them to it.
 - Upgrades will only occur when Terraform is run.
-- When using specific versions you should take care to make sure they are compatible with the EKS version. If upgrading the EKS version it's likely that the AMI and addon versions will change as well.
+- When using specific versions, ensure compatibility with your EKS cluster version.
+- EKS cluster version upgrades may require corresponding addon and AMI version updates.
 
-The variables to configure each can be set in Terraform as follows in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
+The following variables control addon versions in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file:
 
-- `eks_kube_proxy_version` - Version to use for the [EKS Kube Proxy addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
-- `eks_coredns_version` - Version to use for the [EKS CoreDNS addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
-- `eks_vpc_cni_version` - Version to use for the [EKS VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
-- `eks_ebs_csi_driver_version` - Version to use for the [EBS CSI Driver addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html). Can either be set to a specific version or just `latest` for the most up-to-date version. Defaults to `null`.
+- `eks_kube_proxy_version` - Version for the [EKS Kube Proxy addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html). Accepts specific versions or `latest`. Defaults to `null`.
+- `eks_coredns_version` - Version for the [EKS CoreDNS addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html). Accepts specific versions or `latest`. Defaults to `null`.
+- `eks_vpc_cni_version` - Version for the [EKS VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html). Accepts specific versions or `latest`. Defaults to `null`.
+- `eks_ebs_csi_driver_version` - Version for the [EBS CSI Driver addon](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html). Accepts specific versions or `latest`. Defaults to `null`.
+
+##### EKS Addon Configuration
+
+Beyond version management, some EKS addons support custom configuration to meet specific operational requirements, such as configuring [CoreDNS for scaling](https://docs.aws.amazon.com/eks/latest/userguide/coredns-autoscaling.html).
+
+The following variables are available in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file for configuring select addons:
+
+- `eks_coredns_configuration_values` - Custom configuration map for the [CoreDNS addon](https://docs.aws.amazon.com/eks/latest/userguide/coredns-autoscaling.html). Defaults to `null`.
 
 #### EKS IAM Access Entries
 

@@ -629,6 +629,8 @@ resource "aws_eks_addon" "coredns" {
   addon_name    = "coredns"
   addon_version = var.eks_coredns_version == "latest" ? data.aws_eks_addon_version.coredns[0].version : var.eks_coredns_version
 
+  configuration_values = var.eks_coredns_configuration_values != null ? jsonencode(var.eks_coredns_configuration_values) : null
+
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
