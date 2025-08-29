@@ -194,10 +194,13 @@ moved {
 }
 
 locals {
-  default_vpc_id     = local.default_network ? aws_default_vpc.default[0].id : null
-  default_subnet_ids = local.default_network ? data.aws_subnets.defaults[0].ids : null
+  default_vpc_id         = local.default_network ? aws_default_vpc.default[0].id : null
+  default_vpc_cidr_block = local.default_network ? aws_default_vpc.default[0].cidr_block : null
+  default_subnet_ids     = local.default_network ? data.aws_subnets.defaults[0].ids : null
+
 
   vpc_id          = local.create_network ? aws_vpc.gitlab_vpc[0].id : var.vpc_id
+  vpc_cidr_block  = local.create_network ? aws_vpc.gitlab_vpc[0].cidr_block : null
   subnet_pub_ids  = local.create_network ? aws_subnet.gitlab_vpc_sn_pub[*].id : var.subnet_pub_ids
   subnet_priv_ids = local.create_network ? aws_subnet.gitlab_vpc_sn_priv[*].id : var.subnet_priv_ids
 
@@ -210,9 +213,9 @@ locals {
 output "network" {
   value = {
     "vpc_id"                   = local.default_network ? local.default_vpc_id : local.vpc_id
-    "vpc_subnet_pub_ids"       = local.subnet_pub_ids
+    "vpc_subnet_pub_ids"       = local.default_network ? local.default_subnet_ids : local.subnet_pub_ids
     "vpc_subnet_priv_ids"      = local.subnet_priv_ids
-    "vpc_cidr_block"           = var.vpc_cidr_block
+    "vpc_cidr_block"           = local.default_network ? local.default_vpc_cidr_block : local.vpc_cidr_block
     "vpc_route_table_pub_ids"  = aws_route_table.gitlab_vpc_route_table_pub[*].id
     "vpc_route_table_priv_ids" = aws_route_table.gitlab_vpc_route_table_priv[*].id
     "peer_connection_id"       = one(module.gitlab_aws_vpc_peering[*].peer_connection_id)

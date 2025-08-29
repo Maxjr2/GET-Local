@@ -5,10 +5,12 @@ include:
   - template: Jobs/SAST-IaC.latest.gitlab-ci.yml
   - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@2.1.0
   - local: .gitlab/ci/molecule.yml
+  - local: .gitlab/ci/terraform_test.yml
 
 stages:
   - test
-  - molecule
+  - terraform_test
+  - ansible_molecule_test
   - upload
   - container_scan
 
@@ -30,11 +32,11 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
 .on_tag_events:
   rules:
-    - if: '$CI_COMMIT_TAG'
+    - if: "$CI_COMMIT_TAG"
 
 #################################
 ##            SAST             ##
@@ -42,15 +44,24 @@ stages:
 
 gemnasium-dependency_scanning:
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
 
 gemnasium-python-dependency_scanning:
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
 
 secret_detection:
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
   allow_failure: false
 
 container_scanning:
@@ -64,7 +75,10 @@ container_scanning:
 
 kics-iac-sast:
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
   allow_failure: false
 
 #########################
@@ -75,13 +89,16 @@ check:terraform-fmt:
   stage: test
   image:
     name: "hashicorp/terraform"
-    entrypoint: [ "" ]
+    entrypoint: [""]
   before_script:
     - terraform version
   script:
     - terraform fmt -check -recursive -diff .
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
 
 check:tflint:
   stage: test
@@ -92,7 +109,10 @@ check:tflint:
     - cd terraform/modules
     - tflint -c "$PWD/../../.tflint.hcl" --recursive
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
 
 check:ansible-lint:
   stage: test
@@ -104,19 +124,25 @@ check:ansible-lint:
     - pip install jmespath
     - ansible-lint
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
   retry: 2
 
 check:markdownlint:
   stage: test
   image:
     name: node:lts-alpine3.19
-    entrypoint: [ "" ]
+    entrypoint: [""]
   script:
     - npm add -g markdownlint markdownlint-cli
     - markdownlint *.md docs/*.md
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
 
 check:markdown-external-link-check:
   stage: test
@@ -126,7 +152,10 @@ check:markdown-external-link-check:
   script:
     - /src/markdown-link-check *.md docs/*.md
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
   retry: 2
 
 check:markdown-internal-link-check:
@@ -138,7 +167,10 @@ check:markdown-internal-link-check:
   script:
     - find . -type f -name "*.md" | xargs lychee --offline --no-progress --quiet --include-fragments
   rules:
-    - !reference [.on_merge_request_and_merged_events_except_schedule_and_tag, rules]
+    - !reference [
+        .on_merge_request_and_merged_events_except_schedule_and_tag,
+        rules,
+      ]
   retry: 2
 
 ########################

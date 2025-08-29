@@ -1,0 +1,49 @@
+.terraform_test:
+  stage: terraform_test
+  image: registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:dev
+  interruptible: true
+  variables:
+    TF_IN_AUTOMATION: "true"
+    TF_INPUT: "false"
+  before_script:
+    - mise install terraform -y
+    - cd $TERRAFORM_TEST_DIRECTORY
+    - echo "Running terraform init in $(pwd)"
+    - terraform init -backend=false
+  script:
+    - terraform test
+
+terraform_test:aws:
+  extends: .terraform_test
+  variables:
+    TERRAFORM_TEST_DIRECTORY: terraform/modules/test/mock/aws
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - terraform/modules/gitlab_aws_instance/**/*
+        - terraform/modules/gitlab_aws_vpc_peering/**/*
+        - terraform/modules/gitlab_ref_arch_aws/**/*
+        - terraform/modules/test/mock/aws/**/*
+
+terraform_test:gcp:
+  extends: .terraform_test
+  variables:
+    TERRAFORM_TEST_DIRECTORY: terraform/modules/test/mock/gcp
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - terraform/modules/gitlab_gcp_instance/**/*
+        - terraform/modules/gitlab_gcp_service_account/**/*
+        - terraform/modules/gitlab_ref_arch_gcp/**/*
+        - terraform/modules/test/mock/gcp/**/*
+
+terraform_test:azure:
+  extends: .terraform_test
+  variables:
+    TERRAFORM_TEST_DIRECTORY: terraform/modules/test/mock/azure
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - terraform/modules/gitlab_azure_instance/**/*
+        - terraform/modules/gitlab_ref_arch_azure/**/*
+        - terraform/modules/test/mock/azure/**/*

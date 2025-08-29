@@ -2,6 +2,10 @@ output "machine_names" {
   value = google_compute_instance.gitlab[*].name
 }
 
+output "machine_types" {
+  value = google_compute_instance.gitlab[*].machine_type
+}
+
 output "internal_addresses" {
   value = {
     for _, v in google_compute_instance.gitlab[*] : "${v.name}.c.${v.project}.internal" => v.network_interface[0].network_ip
@@ -27,4 +31,12 @@ output "zones" {
 output "service_account" {
   description = "Details of the service account associated with the created instances"
   value       = var.node_count > 0 ? module.google_service_account[0].details : null
+}
+
+output "machine_boot_disk_types" {
+  value = try(google_compute_instance.gitlab[*].boot_disk[0].initialize_params[0].type, "")
+}
+
+output "machine_boot_disk_sizes" {
+  value = try(google_compute_instance.gitlab[*].boot_disk[0].initialize_params[0].size, 0)
 }
