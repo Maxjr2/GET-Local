@@ -2,6 +2,10 @@ output "instance_ids" {
   value = aws_instance.gitlab[*].id
 }
 
+output "instance_types" {
+  value = aws_instance.gitlab[*].instance_type
+}
+
 output "external_addresses" {
   value = aws_instance.gitlab[*].public_ip
 }
@@ -27,4 +31,12 @@ output "data_disk_volume_ids" {
 
 output "security_group_ids" {
   value = try(flatten(aws_instance.gitlab[0].vpc_security_group_ids), "")
+}
+
+output "instance_volume_type" {
+  value = try(aws_instance.gitlab[*].root_block_device[0].volume_type, "")
+}
+
+output "instance_volume_size" {
+  value = try(aws_instance.gitlab[*].root_block_device[0].volume_size, 0)
 }

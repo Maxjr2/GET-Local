@@ -3,14 +3,19 @@
 ########################
 
 .molecule:
-  stage: molecule
+  stage: ansible_molecule_test
   image: registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:dev
   tags:
     - saas-linux-medium-amd64
   services:
     - name: ${GITLAB_DEPENDENCY_PROXY}docker:dind
       alias: docker
-      entrypoint: ["sh", "-c", "dockerd-entrypoint.sh --registry-mirror=https://mirror.gcr.io"]
+      entrypoint:
+        [
+          "sh",
+          "-c",
+          "dockerd-entrypoint.sh --registry-mirror=https://mirror.gcr.io",
+        ]
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
@@ -176,9 +181,7 @@ rockylinux9:os-verification:
   variables:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: rockylinux9
-
 ## Runner tag sizes
-
 # - saas-linux-small-amd64
 # - saas-linux-medium-amd64
 # - saas-linux-large-amd64

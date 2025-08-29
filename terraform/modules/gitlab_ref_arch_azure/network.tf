@@ -56,3 +56,10 @@ resource "azurerm_subnet_nat_gateway_association" "nat_gateway" {
   subnet_id      = azurerm_subnet.gitlab.id
   nat_gateway_id = azurerm_nat_gateway.nat_gateway[0].id
 }
+
+output "network" {
+  value = {
+    "vpc_name"   = azurerm_virtual_network.gitlab.name
+    "vpc_subnet" = azurerm_subnet.gitlab.address_prefixes
+  }
+}

@@ -15,3 +15,11 @@ output "external_addresses" {
 output "virtual_machine_ids" {
   value = azurerm_linux_virtual_machine.gitlab[*].virtual_machine_id
 }
+
+output "virtual_machine_sizes" {
+  value = azurerm_linux_virtual_machine.gitlab[*].size
+}
+
+output "virtual_machine_disk_size" {
+  value = try(azurerm_linux_virtual_machine.gitlab[*].os_disk[0].disk_size_gb, 0)
+}

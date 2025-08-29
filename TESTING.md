@@ -9,6 +9,27 @@ Developers should prioritize Molecule testing during regular development cycles,
 
 [TOC]
 
+## Terraform Testing
+
+The GitLab Environment Toolkit employs Terraform's built-in testing framework to validate infrastructure configurations without deploying actual cloud resources. This testing approach uses mock providers to simulate cloud services, enabling fast and cost-effective validation of Terraform modules and configurations.
+
+Terraform testing focuses specifically on infrastructure-as-code validation, ensuring that Terraform modules produce the expected resource configurations across different scenarios and input combinations.
+
+### Running Tests
+
+All Terraform test commands should be executed from the directory containing the `.tftest.hcl files`, for example `./terraform/modules/test/mock/aws`. The tests can then be run using:
+
+```sh
+# Initialize
+terraform init
+
+# Run All Tests
+terraform test
+
+#Run a Specific Test File
+terraform test -filter 10k.tftest.hcl
+```
+
 ## Molecule Testing
 
 ### Installation
