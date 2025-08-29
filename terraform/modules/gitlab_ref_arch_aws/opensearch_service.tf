@@ -76,6 +76,12 @@ resource "aws_opensearch_domain" "gitlab" {
   }, var.opensearch_service_tags, var.custom_tags, var.opensearch_service_custom_tags)
 
   depends_on = [aws_iam_service_linked_role.gitlab_opensearch_role[0]]
+
+  lifecycle {
+    ignore_changes = [
+      domain_name,
+    ]
+  }
 }
 
 # Note - Security policy applies VPC limit in security.tf
