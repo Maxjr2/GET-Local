@@ -142,4 +142,4 @@ RUN pip3 install pipdeptree==2.16.1
 
 RUN printf "Amazon Linux 2023 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n" >> /root/py_list.txt
 
-CMD cat /root/py_list.txt
+CMD ["cat", "/root/py_list.txt"]

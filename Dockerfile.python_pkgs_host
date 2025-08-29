@@ -9,4 +9,4 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends build-essent
 RUN pip3 install ansible==$ansible_version
 RUN pip3 install -r ansible-python-packages.txt
 
-CMD pip3 freeze
+CMD ["pip3", "freeze"]
