@@ -59,7 +59,7 @@
         login_port: "{{ praefect_postgres_port }}"
         login_user: "{{ praefect_postgres_admin_username }}"
         login_password: "{{ praefect_postgres_admin_password }}"
-        login_db: "template1"
+        login_db: "{{ praefect_postgres_login_database }}"
         name: "{{ praefect_postgres_username.split('@')[0] }}"
         password: "{{ praefect_postgres_password }}"
         role_attr_flags: CREATEDB
@@ -73,6 +73,7 @@
         login_password: "{{ praefect_postgres_password }}"
         name: "{{ praefect_postgres_database_name }}"
         encoding: UTF-8
+        maintenance_db: "{{ praefect_postgres_maintenance_database }}"
 
     - name: Enable required Postgres extensions
       community.postgresql.postgresql_ext:
