@@ -414,6 +414,8 @@ This method can be customised in several ways via the following variables in you
 - `gitlab_edition` - Sets the GitLab edition to install, i.e. CE or EE. If left unset the Toolkit will look to install the EE edition as recommended for the Reference Architectures. Note that several components of the GitLab architecture are only available in the EE package such as Consul, PgBouncer and Patroni (Postgres HA), CE can only be configured on environments that don't have these components such as the [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) and [2k](https://docs.gitlab.com/ee/administration/reference_architectures/2k_users.html) Reference Architectures. Can be set to `gitlab-ee`, `gitlab-ce` or `gitlab-fips`. Optional, default is `gitlab-ee`. 
 - `gitlab_repo_script_url` - The URL of the installation script to use to set up the repo. Should only be changed if a custom repo is to be used. Optional, defaults to the official GitLab repository installation script for the selected `gitlab_edition` and OS. Can also be specified via the environment variable `GITLAB_REPO_SCRIPT_URL`.
 - `gitlab_repo_package` - The full name of the GitLab package to be installed from the repo. Should only be changed if a custom package is to be used. Optional, defaults to the official package name for the selected `gitlab_edition` and `gitlab_version` (if specified). Can also be specified via the environment variable `GITLAB_REPO_PACKAGE`.
+  > [!important]
+  > When installing a custom package, you must also set `gitlab_version` to match the exact version of GitLab in your custom package. This ensures the Toolkit configures the package correctly for that specific version.
 
 ###### Direct
 
