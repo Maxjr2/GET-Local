@@ -37,7 +37,7 @@
         login_port: "{{ geo_tracking_postgres_port }}"
         login_user: "{{ geo_tracking_postgres_admin_username }}"
         login_password: "{{ geo_tracking_postgres_admin_password }}"
-        login_db: "template1"
+        login_db: "{{ geo_tracking_postgres_login_database }}"
         name: "{{ geo_tracking_postgres_user.split('@')[0] }}"
         password: "{{ geo_tracking_postgres_password }}"
         role_attr_flags: CREATEDB
@@ -51,6 +51,7 @@
         login_password: "{{ geo_tracking_postgres_password }}"
         name: "{{ geo_tracking_postgres_database }}"
         encoding: UTF-8
+        maintenance_db: "{{ geo_tracking_postgres_maintenance_database }}"
 
     - name: Tracking Database - Enable required Postgres extensions
       community.postgresql.postgresql_ext:
