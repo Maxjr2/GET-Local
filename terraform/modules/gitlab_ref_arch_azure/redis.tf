@@ -12,6 +12,7 @@ module "redis" {
   source_image_reference = var.source_image_reference
   disk_size              = coalesce(var.redis_disk_size, var.default_disk_size)
   storage_account_type   = coalesce(var.redis_storage_account_type, var.default_storage_account_type)
+  data_disks             = var.redis_data_disks
 
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id
@@ -49,6 +50,7 @@ module "redis_cache" {
   source_image_reference = var.source_image_reference
   disk_size              = coalesce(var.redis_cache_disk_size, var.default_disk_size)
   storage_account_type   = coalesce(var.redis_cache_storage_account_type, var.default_storage_account_type)
+  data_disks             = var.redis_cache_data_disks
 
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id
@@ -84,6 +86,7 @@ module "redis_persistent" {
   source_image_reference = var.source_image_reference
   disk_size              = coalesce(var.redis_persistent_disk_size, var.default_disk_size)
   storage_account_type   = coalesce(var.redis_persistent_storage_account_type, var.default_storage_account_type)
+  data_disks             = var.redis_persistent_data_disks
 
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id

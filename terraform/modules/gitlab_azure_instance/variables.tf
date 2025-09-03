@@ -103,3 +103,17 @@ variable "additional_tags" {
   type        = map(any)
   default     = {}
 }
+
+variable "data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}

@@ -23,3 +23,12 @@ output "virtual_machine_sizes" {
 output "virtual_machine_disk_size" {
   value = try(azurerm_linux_virtual_machine.gitlab[*].os_disk[0].disk_size_gb, 0)
 }
+
+output "data_disk_names" {
+  value = [for k, v in azurerm_managed_disk.gitlab : v.name]
+}
+
+output "data_disk_ids" {
+  description = "Azure Managed Disk IDs for data disks provisioned for this instance."
+  value       = [for k, v in azurerm_managed_disk.gitlab : v.id]
+}

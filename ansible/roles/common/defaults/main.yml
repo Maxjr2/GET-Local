@@ -67,8 +67,10 @@ gitlab_gpg_key_url: https://packages.gitlab.com/gpg.key
 ## GCP gives an ID that can be used as an alias to the device name
 ## AWS gives no ID and requires the block device path
 disk_device_prefix:
+  azure: "/dev/disk/azure/scsi1/lun"
   gcp: "/dev/disk/by-id/google-"
   aws: "/dev/"
+
 mkfs_opts: "-m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard"
 mount_opts: "discard,defaults"
 mount_state: mounted

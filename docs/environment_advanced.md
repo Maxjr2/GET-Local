@@ -185,7 +185,7 @@ gitlab_custom_secrets_json: |
   }
 ```
 
-## Data Disks (GCP, AWS)
+## Data Disks (GCP, AWS, Azure)
 
 The Toolkit supports provisioning and configuring extra disks, AKA data disks, for each group of machines (i.e. for all Gitaly nodes). With this set up you can have additional disk volumes mounted for storing data for added resilience and flexibility.
 
@@ -241,6 +241,32 @@ gitaly_data_disks = [
     - `interval` - The interval in hours between snapshots e.g. `24`. Possible values are `1`, `2`, `3`, `4`, `6`, `8`, `12` or `24`.
     - `retain_count` - Number of snapshots that should be retained.
 
+**Azure**
+
+```tf
+gitaly_data_disks = [
+  { name = "data", size = 500, storage_account_type = "Premium_LRS", lun = 0, caching = "ReadWrite", tier = "P20" },
+  { name = "logs", size = 100, storage_account_type = "StandardSSD_LRS", lun = 1, caching = "ReadOnly" }
+]
+```
+
+- `*_data_disks` - The data disk configuration that will be used for every node in the group.
+  - `name` - The name for each disk attached. Must be unique per machine. **Required**.
+  - `size` - The size of the disk in GB. **Optional**, default is inherited from the instance's `disk_size`.
+  - `storage_account_type` - The [type of storage account](https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types) for the disk. **Optional**, default is inherited from the instance's `storage_account_type`.
+    - `Standard_LRS` - Standard locally redundant storage
+    - `StandardSSD_LRS` - Standard SSD locally redundant storage
+    - `Premium_LRS` - Premium SSD locally redundant storage
+    - `UltraSSD_LRS` - Ultra SSD storage (requires specific VM sizes)
+  - `lun` - The Logical Unit Number of the data disk, which needs to be unique within the VM. **Required**.
+  - `caching` - Specifies the caching requirements for the data disk. **Optional**, default is `ReadWrite`.
+    - `None` - No caching
+    - `ReadOnly` - Read-only caching
+    - `ReadWrite` - Read and write caching
+  - `tier` - The performance tier of the data disk. Only applicable for Premium SSD storage. **Optional**, default is `null`.
+    - [Available tiers](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size)
+    - Each tier provides different IOPS and throughput capabilities
+
 ### Configuring with Ansible
 
 The next step is to configure and mount the disks.
@@ -267,10 +293,19 @@ gitaly_data_disks:
   - { device_name: '/dev/sdg', mount_dir: '/var/log/gitlab' }
 ```
 
+**Azure**
+
+```yaml
+gitaly_data_disks:
+  - { device_name: '0', mount_dir: '/var/opt/gitlab' }
+  - { device_name: '1', mount_dir: '/var/log/gitlab' }
+```
+
 - `*_disks` - The main setting for each node group.
   - `device_name` - The block device name of the disk. Differs depending on Cloud Provider (see below). **Required**.
     - GCP - Device name is the same as its main name. Can be either the short name of the attached disks, e.g. `data`, or the full path, e.g. `/dev/disk/by-id/google-data`.
     - AWS - Must be the block device name you provisioned with Terraform (i.e. `/dev/sd[f-p]`). Can be either the short name of device name, e.g. `sdf`, or the full path, e.g. `/dev/sdf`.
+    - Azure - Device name should be the LUN number configured in Terraform, e.g. `0`, `1`, etc., or the full path, e.g. `/dev/disk/azure/scsi1/lun0`.
   - `mount_dir` - The path on the machine to mount the disk on.
 
 Note that for AWS, the Toolkit will create symlinks to [match the block device name to the attached NVMe path](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html#identify-nvme-ebs-device).

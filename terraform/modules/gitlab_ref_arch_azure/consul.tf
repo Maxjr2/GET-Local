@@ -12,6 +12,7 @@ module "consul" {
   source_image_reference = var.source_image_reference
   disk_size              = coalesce(var.consul_disk_size, var.default_disk_size)
   storage_account_type   = coalesce(var.consul_storage_account_type, var.default_storage_account_type)
+  data_disks             = var.consul_data_disks
 
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.gitlab.id

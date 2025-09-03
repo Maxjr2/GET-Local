@@ -427,7 +427,7 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 
 Additionally the following packages may be installed depending on the functionality enabled:
 
-- `nvme-cli` - [Data Disks](environment_advanced.md#data-disks-gcp-aws) (AWS)
+- `nvme-cli` - [Data Disks](environment_advanced.md#data-disks-gcp-aws-azure) (AWS)
 - `socat` - [Let's Encrypt SSL setup on HAProxy External nodes](environment_advanced_ssl.md#lets-encrypt-generated-certificates).
 - `unattended-upgrades` (Ubuntu / Debian) / `dnf-automatic` (RHEL 9, Amazon Linux 2023) - [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades)
 - `nfs-kernel-server` (Ubuntu / Debian) / `nfs-utils` (RHEL 9, Amazon Linux 2023) - [NFS Server setup for Object Data](environment_advanced.md#nfs-for-object-data)
