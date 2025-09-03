@@ -83,6 +83,19 @@ variable "consul_disk_size" {
   type    = string
   default = null
 }
+variable "consul_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "gitaly_node_count" {
   type    = number
@@ -100,6 +113,19 @@ variable "gitaly_disk_size" {
   type    = string
   default = "4095"
 }
+variable "gitaly_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "gitlab_nfs_node_count" {
   type    = number
@@ -116,6 +142,19 @@ variable "gitlab_nfs_storage_account_type" {
 variable "gitlab_nfs_disk_size" {
   type    = string
   default = null
+}
+variable "gitlab_nfs_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "gitlab_rails_node_count" {
@@ -139,6 +178,19 @@ variable "gitlab_rails_external_ip_names" {
   type        = list(string)
   default     = []
 }
+variable "gitlab_rails_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "haproxy_external_node_count" {
   type    = number
@@ -160,6 +212,19 @@ variable "haproxy_external_external_ip_names" {
   type    = list(string)
   default = []
 }
+variable "haproxy_external_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "haproxy_internal_node_count" {
   type    = number
@@ -176,6 +241,19 @@ variable "haproxy_internal_storage_account_type" {
 variable "haproxy_internal_disk_size" {
   type    = string
   default = null
+}
+variable "haproxy_internal_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "monitor_node_count" {
@@ -194,6 +272,19 @@ variable "monitor_disk_size" {
   type    = string
   default = null
 }
+variable "monitor_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "opensearch_vm_node_count" {
   type    = number
@@ -210,6 +301,19 @@ variable "opensearch_vm_storage_account_type" {
 variable "opensearch_vm_disk_size" {
   type    = string
   default = null
+}
+variable "opensearch_vm_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "pgbouncer_node_count" {
@@ -228,6 +332,19 @@ variable "pgbouncer_disk_size" {
   type    = string
   default = null
 }
+variable "pgbouncer_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "postgres_node_count" {
   type    = number
@@ -244,6 +361,19 @@ variable "postgres_storage_account_type" {
 variable "postgres_disk_size" {
   type    = string
   default = null
+}
+variable "postgres_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "praefect_node_count" {
@@ -262,6 +392,19 @@ variable "praefect_disk_size" {
   type    = string
   default = null
 }
+variable "praefect_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "praefect_postgres_node_count" {
   type    = number
@@ -278,6 +421,19 @@ variable "praefect_postgres_storage_account_type" {
 variable "praefect_postgres_disk_size" {
   type    = string
   default = null
+}
+variable "praefect_postgres_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "redis_node_count" {
@@ -296,6 +452,19 @@ variable "redis_disk_size" {
   type    = string
   default = null
 }
+variable "redis_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "redis_cache_node_count" {
   type    = number
@@ -312,6 +481,19 @@ variable "redis_cache_storage_account_type" {
 variable "redis_cache_disk_size" {
   type    = string
   default = null
+}
+variable "redis_cache_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 variable "redis_persistent_node_count" {
@@ -330,6 +512,19 @@ variable "redis_persistent_disk_size" {
   type    = string
   default = null
 }
+variable "redis_persistent_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
+}
 
 variable "sidekiq_node_count" {
   type    = number
@@ -346,6 +541,19 @@ variable "sidekiq_storage_account_type" {
 variable "sidekiq_disk_size" {
   type    = string
   default = null
+}
+variable "sidekiq_data_disks" {
+  type = list(
+    object({
+      name                 = string,
+      size                 = optional(number),
+      storage_account_type = optional(string),
+      lun                  = number,
+      caching              = optional(string),
+      tier                 = optional(string)
+    })
+  )
+  default = []
 }
 
 #Networking
