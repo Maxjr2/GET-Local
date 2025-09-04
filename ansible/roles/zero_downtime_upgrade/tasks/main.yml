@@ -1,5 +1,6 @@
 - name: Update Consul nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: consul
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('consul') >= zdu_update_order.index(zdu_start_point)
@@ -8,7 +9,8 @@
     loop_var: hostname_result
 
 - name: Update Postgres nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: postgres
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('postgres') >= zdu_update_order.index(zdu_start_point)
@@ -17,7 +19,8 @@
     loop_var: hostname_result
 
 - name: Update PgBouncer nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: pgbouncer
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('pgbouncer') >= zdu_update_order.index(zdu_start_point)
@@ -26,7 +29,8 @@
     loop_var: hostname_result
 
 - name: Update Redis nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: redis
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('redis') >= zdu_update_order.index(zdu_start_point)
@@ -35,7 +39,8 @@
     loop_var: hostname_result
 
 - name: Update Gitaly nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: gitaly
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('gitaly') >= zdu_update_order.index(zdu_start_point)
@@ -44,13 +49,15 @@
     loop_var: hostname_result
 
 - name: Update Praefect deploy node with all migrations
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: praefect
   when:
     - "'praefect_primary' in group_names"
     - zdu_update_order.index('praefect') >= zdu_update_order.index(zdu_start_point)
 
 - name: Update other Praefect nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: praefect
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('praefect') >= zdu_update_order.index(zdu_start_point)
@@ -60,16 +67,18 @@
 
 - name: Update GitLab Rails deploy node with pre migrations
   include_tasks:
-    file: update-gitlab.yml
+    file: update-rails.yml
     apply:
       environment:
         SKIP_POST_DEPLOYMENT_MIGRATIONS: "true"
+  vars:
+    skip_post_migrations: "true"
   when:
     - "'gitlab_rails_primary' in group_names"
     - zdu_update_order.index('gitlab_rails') >= zdu_update_order.index(zdu_start_point)
 
 - name: Update other GitLab Rails nodes
-  include_tasks: update-gitlab.yml
+  include_tasks: update-rails.yml
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('gitlab_rails') >= zdu_update_order.index(zdu_start_point)
@@ -78,7 +87,8 @@
     loop_var: hostname_result
 
 - name: Update Sidekiq nodes
-  include_tasks: update-gitlab.yml
+  include_role:
+    name: sidekiq
   when:
     - inventory_hostname == hostname_result
     - zdu_update_order.index('sidekiq') >= zdu_update_order.index(zdu_start_point)
