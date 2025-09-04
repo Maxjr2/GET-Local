@@ -10,6 +10,14 @@
     wait: true
   when: not gitlab_operator
 
+- name: Uninstall Prometheus Stack
+  kubernetes.core.helm:
+    release_name: gitlab-kube-prometheus-stack
+    release_namespace: "{{ kube_prometheus_stack_charts_namespace }}"
+    state: absent
+    wait: true
+  when: cloud_native_hybrid_monitoring_setup
+
 - name: Uninstall GitLab Operator
   block:
     - name: Uninstall an instance of GitLab
