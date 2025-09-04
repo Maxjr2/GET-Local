@@ -17,7 +17,6 @@ ansible_facts_gathered: false
 ################################################################################
 
 cloud_provider: ''
-cloud_provider_labels_name: "{{ 'labels' if cloud_provider == 'gcp' else 'tags' }}"
 
 internal_addr_use_hostnames: false
 internal_ip_lookup: {gcp: ['networkInterfaces', 0, 'networkIP'], aws: ['private_ip_address'], azure: ['private_ipv4_addresses', 0], none: ['ansible_default_ipv4', 'address']}
@@ -84,8 +83,6 @@ omnibus_node: true
 gitlab_version: "{{ lookup('env','GITLAB_VERSION') }}"
 ## Alternatively set to "gitlab-ce" to install the Community Edition (Does not work for environments with Consul, PGBouncer or Patroni - 3k+)
 gitlab_edition: "gitlab-ee"
-
-gitlab_node_type: "{{ lookup('vars', cloud_provider_labels_name, default = {}).gitlab_node_type | default((group_names | reject('match', '.*_primary|.*_secondary|' + geo_primary_site_group_name + '|' + geo_secondary_site_group_name) | first), true) | replace('-', '_') }}"
 
 gitlab_shell_ssh_daemon: "openssh"  # openssh or gitlab-sshd
 gitlab_shell_ssh_port: "{{ '22' if cloud_native_hybrid_environment or (groups['gitlab_rails'] | length == 1 and 'haproxy_external' not in groups and gitlab_shell_ssh_daemon == 'openssh') else '2222' }}"

@@ -62,17 +62,11 @@
         - sysctl
         - common_prep
 
-    - name: Mount any data disks
-      block:
-        - name: Get Group Data Disks Config
-          set_fact:
-            group_data_disks: "{{ lookup('vars', gitlab_node_type + '_data_disks', default=[]) }}"
-          tags: nvme
-
-        - name: Mount data disks
-          import_tasks: data_disks.yml
-          when: group_data_disks | length > 0
-      when: cloud_provider != 'none'
+    - name: Mount data disks (GCP / AWS / Azure)
+      import_tasks: data_disks.yml
+      when:
+        - group_data_disks | length > 0
+        - cloud_provider != 'none'
       tags:
         - data_disks
         - common_prep

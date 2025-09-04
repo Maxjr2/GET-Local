@@ -75,6 +75,10 @@ mkfs_opts: "-m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard"
 mount_opts: "discard,defaults"
 mount_state: mounted
 
+# Data Disks detection
+group_data_disks_name: "{{ lookup('vars', ('labels' if cloud_provider == 'gcp' else 'tags'), default = {}).gitlab_node_type | default('') }}"
+group_data_disks: "{{ lookup('vars', group_data_disks_name + '_data_disks', default=[]) if group_data_disks_name != '' else [] }}"
+
 ## Each entry should be an array of hashes in the below format specifying the
 ## disk device name and mount dir for the target group
 ## Example:
