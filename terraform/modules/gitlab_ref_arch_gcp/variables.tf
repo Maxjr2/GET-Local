@@ -1451,6 +1451,6 @@ variable "subnet_cidr" {
 
 variable "gke_gitlab_charts_namespace" {
   type        = string
-  default     = "default"
+  default     = null
   description = "Deprecated. Replaced by gke_gitlab_cloud_native_namespace"
 }
