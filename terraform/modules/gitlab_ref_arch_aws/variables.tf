@@ -2130,5 +2130,5 @@ variable "default_kms_key_arn" {
 variable "eks_gitlab_charts_namespace" {
   description = "Deprecated. Replaced by eks_gitlab_cloud_native_namespace"
   type        = string
-  default     = "default"
+  default     = null
 }
