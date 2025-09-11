@@ -301,7 +301,6 @@ First we need to install Ansible. There are various ways to install Ansible, we 
 1. Install Ansible, and it's required Python packages via pip:
 
     ```sh
-    pip3 install ansible
     pip3 install -r ansible/requirements/requirements.txt
     ```
 

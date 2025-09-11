@@ -42,7 +42,7 @@ Authentication is fully dependent on the provider and are detailed fully in each
 
 ### Terraform State
 
-When using Terraform, one important caveat is preparing its [State](https://www.terraform.io/docs/state/index.html) file. Terraform's State is integral to how it works. For every action it will store and update the state with the full environment status each time. It then refers to this for subsequent actions to ensure the environment is always exactly as configured.
+When using Terraform, one important caveat is preparing its [State](https://developer.hashicorp.com/terraform/language/state) file. Terraform's State is integral to how it works. For every action it will store and update the state with the full environment status each time. It then refers to this for subsequent actions to ensure the environment is always exactly as configured.
 
 [Terraform has numerous possible backends](https://developer.hashicorp.com/terraform/language/state/remote-state-data) where the state can be stored. As a general guidance we recommend a remote backend that can be shared between applicable users such as the targeted Cloud Provider's Object Storage or [GitLab's own managed Terraform State backend](https://docs.gitlab.com/ee/user/infrastructure/iac/terraform_state.html). Whatever backend is chosen the configuration is set in the same location - the environment's `main.tf` file.
 
