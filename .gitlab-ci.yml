@@ -147,7 +147,7 @@ check:markdownlint:
 check:markdown-external-link-check:
   stage: test
   image:
-    name: ghcr.io/tcort/markdown-link-check:3.12.2
+    name: ghcr.io/tcort/markdown-link-check
     entrypoint: [""]
   script:
     - /src/markdown-link-check *.md docs/*.md

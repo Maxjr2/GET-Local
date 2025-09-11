@@ -8,7 +8,7 @@ Unless specified otherwise, all additions or changes to the Toolkit should align
 
 ## What is the GitLab Environment Toolkit?
 
-The GitLab Environment Toolkit (`GET`) is a collection of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying GitLab at scale as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). It uses the official [Linux package (Omnibus)](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/) packages.
+The GitLab Environment Toolkit (`GET`) is a collection of opinionated [Terraform](https://developer.hashicorp.com/terraform) and [Ansible](https://www.ansible.com/) scripts to assist with deploying GitLab at scale as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). It uses the official [Linux package (Omnibus)](https://docs.gitlab.com/omnibus/) or [Helm](https://docs.gitlab.com/charts/) packages.
 
 The Toolkit supports provisioning and configuring machines and other related infrastructure respectively:
 
@@ -92,7 +92,7 @@ Some examples:
 
 ### Use Industry Leading Tools and Avoid Custom Implementations
 
-We use industry leading tools natively for Provisioning and Configuration wherever possible - [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/). These tools are large, complex and mature it wouldn't be viable to try and replace or augment these.
+We use industry leading tools natively for Provisioning and Configuration wherever possible - [Terraform](https://developer.hashicorp.com/terraform) and [Ansible](https://www.ansible.com/). These tools are large, complex and mature it wouldn't be viable to try and replace or augment these.
 
 We avoid custom code/implementations wherever possible as this will add additional maintenance cost.
 
@@ -128,7 +128,7 @@ We're unable to support or accept any contributions for any additional Cloud Pro
 
 ### Terraform
 
-Our Terraform code follows a simple encapsulation approach through [Terraform Modules](https://www.terraform.io/docs/language/modules/develop/index.html).
+Our Terraform code follows a simple encapsulation approach through [Terraform Modules](https://developer.hashicorp.com/terraform/language/modules/develop).
 
 There are modules created for each Cloud Provider (due to the numerous differences between them). Infrastructure code that can repeat often is a candidate to be moved into its own module.
 

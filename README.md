@@ -2,7 +2,7 @@
 
 ![alt text](https://gitlab.com/uploads/-/system/project/avatar/14292404/tanuki-blueprint.png "GitLab Environment Toolkit")
 
-The GitLab Environment Toolkit (`GET`) is a set of opinionated [Terraform](https://www.terraform.io/) and [Ansible](https://www.ansible.com/) scripts to assist with deploying scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures).
+The GitLab Environment Toolkit (`GET`) is a set of opinionated [Terraform](https://developer.hashicorp.com/terraform) and [Ansible](https://www.ansible.com/) scripts to assist with deploying scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures).
 
 The Toolkit supports the following features:
 

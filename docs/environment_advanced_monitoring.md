@@ -26,7 +26,7 @@ The Toolkit supports setting up optional monitoring of the environment of metric
 While the implementation differs between Omnibus and Cloud Native Hybrid environments the same core components are used in each:
 
 - [Prometheus](https://prometheus.io/) - For metrics collection and storage.
-- [Consul](https://www.consul.io/) - Component auto-discovery.
+- [Consul](https://developer.hashicorp.com/consul) - Component auto-discovery.
 
 The Toolkit will configure these in each case, including scrape config, dashboard(s).
 

@@ -18,7 +18,7 @@
   - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
-With [Terraform](https://www.terraform.io/), you can automatically provision machines and associated dependencies on a provider.
+With [Terraform](https://developer.hashicorp.com/terraform), you can automatically provision machines and associated dependencies on a provider.
 
 The Toolkit provides multiple curated [Terraform Modules](../terraform/modules) that will provision the machines for a GitLab environment as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/).
 
@@ -68,7 +68,7 @@ Follow the official [Docker installation instructions](https://docs.docker.com/e
 
 Before you start setting up the config you should select a Terraform Module source to use.
 
-Terraform can retrieve Modules from various [sources](https://www.terraform.io/language/modules/sources). The Toolkit's Modules are available from Local paths, Git URL or this Project's Terraform Module Registry.
+Terraform can retrieve Modules from various [sources](https://developer.hashicorp.com/terraform/language/modules/configuration). The Toolkit's Modules are available from Local paths, Git URL or this Project's Terraform Module Registry.
 
 Below we detail each source and how to configure them:
 
@@ -91,7 +91,7 @@ module "gitlab_ref_arch_gcp" {
 
 ### Git URL
 
-Terraform can also pull the Modules directly from this repo via a [Git URL](https://www.terraform.io/language/modules/sources#generic-git-repository).
+Terraform can also pull the Modules directly from this repo via a [Git URL](https://developer.hashicorp.com/terraform/language/block/module#git-repository).
 
 For example, to configure the `gitlab_ref_arch_gcp` module to pull from the repo you would configure it follows:
 
@@ -118,7 +118,7 @@ module "gitlab_ref_arch_gcp" {
 }
 ```
 
-Note the `version` setting here [can be changed as desired to any constraint](https://www.terraform.io/language/expressions/version-constraints#version-constraint-syntax) that's `2.0.0` or greater.
+Note the `version` setting here [can be changed as desired to any constraint](https://developer.hashicorp.com/terraform/language/expressions/version-constraints#version-constraint-syntax) that's `2.0.0` or greater.
 
 ## 3. Set up the Environment's config
 
@@ -201,7 +201,7 @@ provider "google" {
 ```
 
 - `terraform` - The main Terraform config block.
-  - `backend "gcs"` - The [`gcs` backend](https://www.terraform.io/docs/language/settings/backends/gcs.html) config block.
+  - `backend "gcs"` - The [`gcs` backend](https://developer.hashicorp.com/terraform/language/backend/gcs) config block.
     - `bucket` - The name of the bucket [previously created](environment_prep.md#5-setup-terraform-state-storage-bucket-gcp-cloud-storage) to store the State.
     - `prefix` - The name of the folder to create in the bucket to store the State.
   - `required_providers` - Config block for the required provider(s) Terraform needs to download and use.
@@ -466,7 +466,7 @@ module "gitlab_ref_arch_gcp" {
 
 Finally, the last thing to configure is authentication. This is required to allow Terraform to access GCP (provider) as well as its State Storage Bucket (backend).
 
-Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication) and [backend](https://www.terraform.io/docs/language/settings/backends/gcs.html#configuration-variables), you can select any method that is desired.
+Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication) and [backend](https://developer.hashicorp.com/terraform/language/backend/gcs#configuration-variables), you can select any method that is desired.
 
 All the methods given involve the Service Account file you generated previously. We've found the authentication methods that work best with the Toolkit in terms of ease of use are as follows:
 
@@ -538,7 +538,7 @@ provider "aws" {
 ```
 
 - `terraform` - The main Terraform config block.
-  - `backend "s3"` - The [`s3` backend](https://www.terraform.io/docs/language/settings/backends/s3.html) config block.
+  - `backend "s3"` - The [`s3` backend](https://developer.hashicorp.com/terraform/language/backend/s3) config block.
     - `bucket` - The name of the bucket [previously created](environment_prep.md#3-setup-terraform-state-storage-aws-s3) to store the State.
     - `key` - The file path and name to store the state in (example: `path/to/my/key`- [must not start with '/'](https://github.com/hashicorp/terraform/blob/main/internal/backend/remote-state/s3/backend.go#L30-L41)).
     - `region` - The AWS region of the bucket.
@@ -726,7 +726,7 @@ Once the Key(s) are created they can be configured in Terraform via the [module'
 
 Finally, the last thing to configure is authentication. This is required to allow Terraform to access AWS (provider) as well as its State Storage Bucket (backend).
 
-Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication) and [backend](https://www.terraform.io/docs/language/settings/backends/s3.html#configuration), you can select any method that is desired.
+Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication) and [backend](https://developer.hashicorp.com/terraform/language/backend/s3#configuration), you can select any method that is desired.
 
 All the methods given involve the AWS Access Key you generated previously. We've found that the easiest and secure way to do this is with the official [environment variables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables):
 
@@ -815,7 +815,7 @@ provider "azurerm" {
 ```
 
 - `terraform` - The main Terraform config block.
-  - `backend "azurerm"` - The [`azurerm` backend](https://www.terraform.io/docs/language/settings/backends/azurerm.html) config block.
+  - `backend "azurerm"` - The [`azurerm` backend](https://developer.hashicorp.com/terraform/language/backend/azurerm) config block.
     - `resource_group_name` - The name of the resource group previously created in the [Create Azure Resource Group](environment_prep.md#1-create-azure-resource-group) step.
     - `storage_account_name` - The name of the storage account previously created in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
     - `container_name` - The name of the container [previously created](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) to store the State.
@@ -968,7 +968,7 @@ The module for Azure will handle the networking by default by setting up the inf
 
 Finally, the last thing to configure is authentication. This is required to allow Terraform to access Azure (provider) as well as its State Storage Bucket (backend).
 
-Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) and [backend](https://www.terraform.io/docs/language/settings/backends/azurerm.html), you can select any method that is desired.
+Terraform provides multiple ways to authenticate with the [provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) and [backend](https://developer.hashicorp.com/terraform/language/backend/azurerm), you can select any method that is desired.
 
 If you are planning to run the toolkit locally, use [Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) authentication method. Otherwise, you can use either a Service Principal or Managed Service Identity when running Terraform non-interactively. Refer to [Authenticating to Azure](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as Environment Variables following the Terraform instructions for the specific authentication type to fully authenticate for both the provider and backend.
 
@@ -978,13 +978,13 @@ There may be times when you have to pass in sensitive variables in the Terraform
 
 The Toolkit has been designed to be open in terms of sensitive variables as there are various strategies that could be used to secure them depending on your preferences. As long as the variables are configured in Terraform at runtime the Toolkit isn't concerned where they come from.
 
-Some of these strategies are Environment Variables and [Terraform Data Sources](https://www.terraform.io/docs/language/data-sources/index.html), the latter being able to pull in variables from various sources such as Secret Managers.
+Some of these strategies are Environment Variables and [Terraform Data Sources](https://developer.hashicorp.com/terraform/language/data-sources), the latter being able to pull in variables from various sources such as Secret Managers.
 
 Below are some examples of select sources that are well suited to this.
 
 #### Environment Variables
 
-[Terraform can read any Environment Variable on the machine running it](https://www.terraform.io/docs/cli/config/environment-variables.html#tf_var_name) with the prefix `TF_VAR_*`.
+[Terraform can read any Environment Variable on the machine running it](https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_var_name) with the prefix `TF_VAR_*`.
 
 Terraform will treat all `TF_VAR_*` environment variables as variables, and you can set those in your config as desired. This is ideal for sensitive variables and in CI for overriding any variables as desired.
 
@@ -992,7 +992,7 @@ As an example, on an AWS environment, if you wanted to set the `ssh_public_key_f
 
 #### Terraform Data Sources
 
-Terraform has multiple [Data Sources](https://www.terraform.io/docs/language/data-sources/index.html) available depending on the cloud provider that you can utilize to pull in variables from other sources, such as Secret Managers.
+Terraform has multiple [Data Sources](https://developer.hashicorp.com/terraform/language/data-sources) available depending on the cloud provider that you can utilize to pull in variables from other sources, such as Secret Managers.
 
 As the Terraform config files you've configured are normal Terraform files, you can configure Data Sources to first collect variables and then pass them into the Toolkit's modules.
 

@@ -100,7 +100,6 @@ If installing Ansible locally, we recommend using this approach as your local en
 1. Install Ansible, and it's required Python packages via pip:
 
     ```sh
-    pip3 install ansible
     pip3 install -r ansible/requirements/requirements.txt
     ```
 
