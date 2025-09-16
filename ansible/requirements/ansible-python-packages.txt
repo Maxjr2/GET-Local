@@ -1,4 +1,4 @@
-ansible
+ansible~=11.0
 google-auth
 requests
 netaddr

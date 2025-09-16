@@ -74,6 +74,7 @@ ubuntu2404:single-node-with-haproxy:
         - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/haproxy/**/*
+        - ansible/requirements/**/*
     - !reference [.on_web_pipelines, rules]
 
 ubuntu2404:single-node:
@@ -135,6 +136,7 @@ cloud-native:
       changes:
         - ansible/molecule/cloud-native/*
         - ansible/roles/gitlab_charts/**/*
+        - ansible/requirements/**/*
     - !reference [.on_web_pipelines, rules]
 
 ## OS Jobs
