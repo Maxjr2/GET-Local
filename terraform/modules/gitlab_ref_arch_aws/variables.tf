@@ -78,10 +78,10 @@ variable "object_storage_force_destroy" {
   type        = bool
   default     = true
 }
-variable "object_storage_versioning" {
-  description = "Enable S3 bucket versioning"
-  type        = bool
-  default     = false
+variable "object_storage_versioning_status" {
+  description = "Versioning state of the bucket. Valid values are Enabled, Suspended, or Disabled"
+  type        = string
+  default     = null
 }
 variable "object_storage_destination_buckets" {
   description = "A map of buckets to replicate to, format: name = arn"
@@ -2130,5 +2130,11 @@ variable "default_kms_key_arn" {
 variable "eks_gitlab_charts_namespace" {
   description = "Deprecated. Replaced by eks_gitlab_cloud_native_namespace"
   type        = string
+  default     = null
+}
+
+variable "object_storage_versioning" {
+  description = "Deprecated. Replaced by object_storage_versioning_status"
+  type        = bool
   default     = null
 }

@@ -13,13 +13,16 @@ resource "aws_s3_bucket" "gitlab_object_storage_buckets" {
   tags = merge(var.object_storage_tags, var.custom_tags, var.object_storage_custom_tags, try(var.object_storage_buckets_custom_tags[each.value], null))
 }
 
+locals {
+  versioning_status = var.object_storage_versioning != null ? (var.object_storage_versioning ? "Enabled" : "Disabled") : var.object_storage_versioning_status
+}
 resource "aws_s3_bucket_versioning" "gitlab_object_storage_buckets" {
-  for_each = aws_s3_bucket.gitlab_object_storage_buckets
+  for_each = local.versioning_status != null ? aws_s3_bucket.gitlab_object_storage_buckets : tomap({})
 
   bucket = each.value.id
 
   versioning_configuration {
-    status = var.object_storage_versioning ? "Enabled" : "Disabled"
+    status = local.versioning_status
   }
 }
 

@@ -310,7 +310,7 @@ The following optional settings are available for configuring Object Storage set
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. 
 - `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_versioning` - Controls whether Terraform will enable [versioning in GCS buckets](https://cloud.google.com/storage/docs/object-versioning). Defaults to `false`.
+- `object_storage_versioning_status` - [S3 bucket versioning status](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning#versioning_configuration). Valid values are `"Enabled"` (stores multiple object variants), `"Suspended"` (suspend versioning but keep existing versions for cost optimization), or `null` (no versioning configuration). Defaults to `null`.
 
 > [!tip]
 > To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
@@ -645,7 +645,7 @@ The following optional settings are available for configuring Object Storage set
 - `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted.
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets.
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_versioning` - Controls whether Object Storage versioning is enabled for the buckets. Refer to the [Object Storage versioning (AWS)](#object-storage-versioning-aws) below for more info.
+- `object_storage_versioning_status` - [S3 bucket versioning status](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning#versioning_configuration). Valid values are `"Enabled"` (stores multiple object variants), `"Suspended"` (suspend versioning but keep existing versions for cost optimization), or `Disabled` (no versioning configuration). If not set no configuration is passed and the default on AWS's side of `Disabled` is used. Defaults to `null`.
 - `object_storage_block_public_access` - Controls whether [public access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html) is blocked for object storage. Should only be changed when public access to objects is required, for example [Proxy Download](https://docs.gitlab.com/ee/administration/object_storage.html#proxy-download). Optional, default is `true`.
 
 > [!tip]
@@ -662,10 +662,6 @@ However, this can be changed via the `ami_id` setting in the [module's environme
 
 > [!note]
 > Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
-
-##### Object Storage versioning (AWS)
-
-The Toolkit can enable [versioning in S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html) within AWS by setting the `object_storage_versioning` flag to `true`. This will enable the storing of multiple variants of an object in the same bucket. As this can lead to increased storage costs it is recommended to set up a [storage lifecycle configuration](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html) to remove older versions of stored objects.
 
 ##### Configure network setup (AWS)
 
