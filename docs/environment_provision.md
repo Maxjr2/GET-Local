@@ -613,7 +613,9 @@ output "gitlab_ref_arch_aws" {
 - `module "gitlab_ref_arch_aws"` - Module config block with name.
   - `source` - The relative path to the `gitlab_ref_arch_aws` module. We assume you're creating config in the `terraform/environments/` folder here but if you're in a different location this setting must be updated to the correct path.
   - `prefix` - The name prefix of the project. Set in `variables.tf`.
-  - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`. Not required if another connection method is being used.
+  - SSH key configuration - There are 3 options for SSH configuration settings; provide the public key, provide a key pair name, or set neither variable to forgo the use of ssh connection method.
+    - `ssh_public_key` - The SSH key value, typically read from an SSH key file set as `ssh_public_key_file` in `variables.tf`. Not required if another connection method is being used.
+    - `ssh_key_name` - The name of a Key Pair that is already available in your AWS Account and Region. You will need access the associated private key to leverage this variable.
 
 Next in the file are the various machine settings, separated the same as the Reference Architectures. To avoid repetition we'll describe each setting once:
 

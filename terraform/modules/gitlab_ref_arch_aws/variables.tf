@@ -65,6 +65,12 @@ variable "ssh_public_key" {
   default = null
 }
 
+variable "ssh_key_name" {
+  description = "Name of an existing AWS Key Pair to use for SSH access to instances. Takes precedence over ssh_public_key if both are provided."
+  type        = string
+  default     = null
+}
+
 variable "object_storage_buckets" {
   type    = list(string)
   default = ["artifacts", "backups", "dependency-proxy", "lfs", "mr-diffs", "packages", "terraform-state", "uploads", "registry", "ci-secure-files", "pages"]
