@@ -7,7 +7,7 @@ locals {
 }
 
 resource "aws_key_pair" "ssh_key" {
-  count = var.ssh_public_key != null ? 1 : 0
+  count = var.ssh_public_key != null && var.ssh_key_name == null ? 1 : 0
 
   key_name   = "${var.prefix}-ssh-key"
   public_key = var.ssh_public_key
