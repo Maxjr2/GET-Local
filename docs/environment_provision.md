@@ -310,7 +310,7 @@ The following optional settings are available for configuring Object Storage set
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets. 
 - `object_storage_location` - The [GCS Location](https://cloud.google.com/storage/docs/locations) buckets are created in. Refer to the [Object Storage Location (GCP)](#object-storage-location-gcp) below for more info.
 - `object_storage_force_destroy` - Controls whether Terraform can delete all objects (including any locked objects) from the bucket so that the bucket can be destroyed without error. Consider setting this value to `false` for production systems. Defaults to `true`.
-- `object_storage_versioning_status` - [S3 bucket versioning status](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning#versioning_configuration). Valid values are `"Enabled"` (stores multiple object variants), `"Suspended"` (suspend versioning but keep existing versions for cost optimization), or `null` (no versioning configuration). Defaults to `null`.
+- `object_storage_versioning` - Controls whether Terraform will enable [versioning in GCS buckets](https://cloud.google.com/storage/docs/object-versioning). Defaults to `false`.
 
 > [!tip]
 > To add custom labels to the different resources created by Terraform you can follow the steps in the [Custom Tags/Labels](environment_advanced.md#custom-tagslabels) documentation.
