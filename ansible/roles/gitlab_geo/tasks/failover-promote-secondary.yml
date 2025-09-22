@@ -103,7 +103,7 @@
       delegate_to: localhost
       run_once: true
       set_fact:
-        gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'registry':{'replication':{'primaryApiUrl': omit }}}}}, recursive=True ) }}"
+        gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'registry':{'replication':{'enabled': omit, 'primaryApiUrl': omit }}}}}, recursive=True ) }}"
       when:
         - container_registry_enable
 
