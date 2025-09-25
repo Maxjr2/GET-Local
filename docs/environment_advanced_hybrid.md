@@ -18,10 +18,7 @@
   - [GitLab Environment Toolkit - Geo - Advanced](geo/geo_advanced.md)
 - [GitLab Environment Toolkit - Troubleshooting](environment_troubleshooting.md)
 
-The Toolkit by default will deploy the latest version of the selected [Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/). However, it can also support deploying our alternative [Cloud Native Hybrid Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) where select stateless components are deployed in Kubernetes via our [Helm charts](https://docs.gitlab.com/charts/) or [Operator](https://docs.gitlab.com/operator/) instead of static compute VMs. To achieve this the Toolkit can provision the Kubernetes cluster via Terraform and then configure the Cloud Native deployment via Ansible.
-
-While the Toolkit can deploy such an architecture it should be noted that this is an advanced setup as running services in Kubernetes is well known to be complex. **This setup is only recommended** if
-you have strong working knowledge and experience in Kubernetes. For most users a standard Reference Architecture on static compute VMs typically will suffice, Hybrid architectures should only be used if the specific benefits of Kubernetes are desired.
+The Toolkit can be used to deploy the [Cloud Native Hybrid Reference Architectures](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) where select components are deployed in Kubernetes via our [Helm charts](https://docs.gitlab.com/charts/) or [Operator](https://docs.gitlab.com/operator/) instead of static compute VMs.
 
 On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architecture with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
@@ -32,45 +29,34 @@ On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architec
 
 ## Overview
 
-As detailed in the docs, a Cloud Native Hybrid Reference Architecture is an alternative approach where select stateless components are deployed in Kubernetes via Helm Charts or Operator. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
-
-To achieve this with the Toolkit it can provision the Kubernetes cluster via Terraform and then configure the Cloud Native deployment via Ansible.
+A Cloud Native Hybrid Reference Architecture is where select GitLab components are deployed in Kubernetes via Helm Charts or Operator. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
 
 ## 1. Install Kubernetes Tools
 
-For the Toolkit to be able to provision and configure Kubernetes clusters and Helm charts it requires some additional application to be installed on the runner machine as follows:
+For the Toolkit to be able to provision and configure Kubernetes clusters and Helm charts it requires additional applications to be installed and available on the PATH of the host machine as follows:
 
 - `kubectl` - [Install guide](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - `helm` - [Install guide](https://helm.sh/docs/intro/install/)
 - `gcloud` - [Install guide](https://cloud.google.com/sdk/install). (GCP only)
 - `aws cli` - [Install guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (AWS only)
 
-Latest info on version requirements for both tools can be found in the [GitLab Charts docs](https://docs.gitlab.com/charts/installation/tools.html). Also note that both of the above tools will need to be found on the PATH for them to be used by the Toolkit.
+Latest info on version requirements can be found in the [GitLab Charts docs](https://docs.gitlab.com/charts/installation/tools.html).
 
 ## 2. Provisioning the Kubernetes Cluster with Terraform
 
-Provisioning a Cloud Native Hybrid Reference Architecture has been designed to be very similar to a standard one, with native support added to the Toolkit's modules. As such, it only requires some minor config changes in your Environment's config file (`environment.tf`).
-
-Provisioning the required Kubernetes cluster with a cloud provider only requires a few tweaks to your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`) - Namely replacing the GitLab Rails and Sidekiq VMs with equivalent k8s Node Pools instead.
-
-By design, the `environment.tf` file is similar to the one used in a [standard environment](environment_provision.md#configure-module-settings-environmenttf) with the following differences:
-
-- `gitlab_rails_x` entries are replaced with `webservice_node_pool_x`. In the cloud native we run Puma and Workhorse in Webservice pods.
-- `sidekiq_x` entries are replaced with `sidekiq_node_pool_x`
-- `supporting_node_pool_x` entries are added for several additional supporting services needed when running components in Kubernetes, e.g. Registry.
-- `haproxy_external_x` entries are removed as the Cloud Native deployment handles external load balancing.
-
-Each node pool setting configures the following. To avoid repetition we'll describe each setting once:
-
-- `*_node_pool_max_count` / `*_node_pool_min_count` - The maximum and minimum node pool machines that will be provisioned via Cluster Autoscaling.
-  - `*_node_pool_count` - Static number of node pool machines to provision with no autoscaling. This should not be set if configuring `*_node_pool_max_count` / `*_node_pool_min_count`.
-- `*_node_pool_machine_type` - **GCP only** The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for each machine in the node pool.
-- `*_node_pool_instance_type` - **AWS only** The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) (size) for each machine in the node pool.
-- `*_node_pool_max_unavailable` - **AWS only** The [AWS Update Config `maxUnavailable`](https://docs.aws.amazon.com/eks/latest/APIReference/API_NodegroupUpdateConfig.html) machines in the node pool during an update. Optional, defaults to 1 if not set, matching AWS' default behaviour.
-
-Below are examples for a `environment.tf` file with all config for each cloud provider based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) with additional Cloud Specific guidances as required:
+The Toolkit supports provisioning a Kubernetes cluster using Google Kubernetes Engine (GKE) on GCP or Elastic Kubernetes Service (EKS) on AWS. Like a Linux Package (Omnibus) environment, the same [`environment.tf` file is used](environment_provision.md#configure-module-settings-environmenttf), with specific variables for each service. Refer to the sections below for each cloud provider respectively.
 
 ### Google Cloud Platform (GCP)
+
+For Google Kubernetes Engine (GKE), the following main settings are available to configure a Kubernetes cluster and its associated Node Pools:
+
+- `*_node_pool_max_count` / `*_node_pool_min_count` - The maximum and minimum amount of machines to be deployed in a node pool, managed via Cluster Autoscaling.
+- `*_node_pool_count` - Static number of node pool machines to provision with no autoscaling. This should not be set if configuring `*_node_pool_max_count` / `*_node_pool_min_count`.
+- `*_node_pool_machine_type` - The [GCP Machine Type](https://cloud.google.com/compute/docs/machine-types) (size) for each machine in the node pool.
+- `*_node_pool_disk_size` - Root disk size in GB (optional)
+- `*_node_pool_disk_kms_key` - KMS key for disk encryption (optional)
+
+Below is an example `environment.tf` configuration for a [10k Cloud Native Hybrid](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) Reference Architecture, using [Cloud Provider services for Postgres and Redis](environment_advanced_services.md) and [created network stack](environment_advanced_network.md#created-gcp):
 
 ```tf
 module "gitlab_ref_arch_gcp" {
@@ -78,6 +64,8 @@ module "gitlab_ref_arch_gcp" {
 
   prefix = var.prefix
   project = var.project
+
+  create_network = true
 
   # 10k Hybrid - k8s Node Pools
   webservice_node_pool_max_count    = 4
@@ -92,38 +80,29 @@ module "gitlab_ref_arch_gcp" {
   supporting_node_pool_min_count    = 1
   supporting_node_pool_machine_type = "n1-standard-4"
 
+  # Gitaly on Kubernetes (Toolkit Beta) - Uncomment to use instead of VMs
+  # gitaly_node_pool_count = 0
+  # gitaly_node_pool_machine_type = "n1-standard-16"
+
   # 10k Hybrid - Compute VMs
-  consul_node_count   = 3
-  consul_machine_type = "n1-highcpu-2"
-
-  opensearch_vm_node_count   = 3
-  opensearch_vm_machine_type = "n1-highcpu-16"
-
-  gitaly_node_count   = 3
+  gitaly_node_count = 3
   gitaly_machine_type = "n1-standard-16"
 
-  praefect_node_count   = 3
-  praefect_machine_type = "n1-highcpu-2"
+  # 10k Hybrid - Cloud SQL & Memorystore
+  cloud_sql_postgres_machine_tier = "custom-8-30720"
+  cloud_sql_postgres_root_password = <PASSWORD>
+  cloud_sql_postgres_version = "POSTGRES_16"
+  cloud_sql_postgres_params = {
+    "max_connections" = "3000"
+  }
 
-  praefect_postgres_node_count   = 1
-  praefect_postgres_machine_type = "n1-highcpu-2"
+  memorystore_redis_cache_memory_size_gb = 16
+  memorystore_redis_cache_node_count = 1
+  memorystore_redis_cache_version = "REDIS_7_0"
 
-  haproxy_internal_node_count   = 1
-  haproxy_internal_machine_type = "n1-highcpu-2"
-
-  monitor_node_count   = 1
-  monitor_machine_type = "n1-highcpu-4"
-
-  pgbouncer_node_count   = 3
-  pgbouncer_machine_type = "n1-highcpu-2"
-
-  postgres_node_count   = 3
-  postgres_machine_type = "n1-standard-8"
-
-  redis_cache_node_count        = 3
-  redis_cache_machine_type      = "n1-standard-4"
-  redis_persistent_node_count   = 3
-  redis_persistent_machine_type = "n1-standard-4"
+  memorystore_redis_persistent_memory_size_gb = 16
+  memorystore_redis_persistent_node_count = 1
+  memorystore_redis_persistent_version = "REDIS_7_0"
 }
 
 output "gitlab_ref_arch_gcp" {
@@ -132,13 +111,13 @@ output "gitlab_ref_arch_gcp" {
 ```
 
 > [!note]
-> With default settings, GKE will provision a Regional cluster that can't be changed after. Refer to [GKE Cluster Availability Type (Regional, Zonal and Autoscaling)](#gke-cluster-availability-type-regional-zonal-and-autoscaling) for more information.
+> With default settings, GKE will provision a Regional cluster that can't be changed after creation. Refer to [GKE Cluster Availability Type (Regional, Zonal and Autoscaling)](#gke-cluster-availability-type-regional-zonal-and-autoscaling) for more information.
 
-In addition to the above there are some optional settings that can configure the GKE setup as follows:
+In addition to the above, there are optional settings that can further configure the GKE setup:
 
-- `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels), how fast the cluster will be updated to new Kubernetes releases, `STABLE` by default.
+- `gke_release_channel` - Set the [GKE release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to control how fast the cluster updates to new Kubernetes releases. Default is `STABLE`.
 - `gke_deletion_protection` - Configures [deletion protection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#deletion_protection) in Terraform. Default is `false`.
-- `gke_datapath_provider` - Configures Dataplane type for the GKE cluster. Set to `ADVANCED_DATAPATH` to enable [Dataplane v2](https://cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2) on new GKE clusters. If left unset the GKE default legacy dataplane will be used. Optional, default is `null`.
+- `gke_datapath_provider` - Configures Dataplane type for the GKE cluster. Set to `ADVANCED_DATAPATH` to enable [Dataplane v2](https://cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2) on new GKE clusters. If left unset, the GKE default legacy dataplane will be used. Optional, default is `null`.
 
 #### GKE Cluster Availability Type (Regional, Zonal and Autoscaling)
 
@@ -256,6 +235,17 @@ This feature requires a [Cloud KMS key to be created separately](https://cloud.g
 
 ### Amazon Web Services (AWS)
 
+For AWS Elastic Kubernetes Service (EKS), the following main settings are available to configure a Kubernetes cluster and its associated Node Groups:
+
+- `*_node_pool_max_count` / `*_node_pool_min_count` - Maximum and minimum machines for cluster autoscaling
+  - `*_node_pool_count` - Static machine count with no autoscaling (alternative to min/max settings)
+- `*_node_pool_instance_type` - The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) for each machine
+- `*_node_pool_disk_size` - Root disk size in GB (optional)
+- `*_node_pool_disk_kms_key_arn` - KMS key for disk encryption (optional)
+- `*_node_pool_max_unavailable` - Maximum machines [unavailable](https://docs.aws.amazon.com/eks/latest/APIReference/API_NodegroupUpdateConfig.html) during updates (optional, defaults to 1)
+
+Below is an example `environment.tf` configuration for a [10k Cloud Native Hybrid](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) Reference Architecture, using [Cloud Provider services for Postgres and Redis](environment_advanced_services.md) and [created network stack](environment_advanced_network.md#created-aws):
+
 ```tf
 module "gitlab_ref_arch_aws" {
   source = "../../modules/gitlab_ref_arch_aws"
@@ -266,50 +256,40 @@ module "gitlab_ref_arch_aws" {
   create_network = true
 
   # 10k Hybrid - k8s Node Pools
-  webservice_node_pool_max_count     = 4
-  webservice_node_pool_min_count     = 1
+  webservice_node_pool_max_count = 4
+  webservice_node_pool_min_count = 1
   webservice_node_pool_instance_type = "c5.9xlarge"
 
-  sidekiq_node_pool_max_count     = 4
-  sidekiq_node_pool_min_count     = 0
+  sidekiq_node_pool_max_count = 4
+  sidekiq_node_pool_min_count = 0
   sidekiq_node_pool_instance_type = "m5.xlarge"
 
-  supporting_node_pool_max_count     = 3
-  supporting_node_pool_min_count     = 1
+  supporting_node_pool_max_count = 3
+  supporting_node_pool_min_count = 1
   supporting_node_pool_instance_type = "m5.xlarge"
 
+  # Gitaly on Kubernetes (Toolkit Beta) - Uncomment to use instead of VMs
+  # gitaly_node_pool_count = 0
+  # gitaly_node_pool_instance_type = "m5.4xlarge"
+
   # 10k Hybrid - Compute VMs
-  consul_node_count    = 3
-  consul_instance_type = "c5.large"
-
-  opensearch_vm_node_count    = 3
-  opensearch_vm_instance_type = "c5.4xlarge"
-
-  gitaly_node_count    = 3
+  gitaly_node_count = 3
   gitaly_instance_type = "m5.4xlarge"
 
-  praefect_node_count    = 3
-  praefect_instance_type = "c5.large"
+  # 10k Hybrid - AWS RDS & ElastiCache
+  rds_postgres_instance_type = "m5.2xlarge"
+  rds_postgres_password = <PASSWORD>
+  rds_postgres_version = "16"
 
-  praefect_postgres_node_count    = 1
-  praefect_postgres_instance_type = "c5.large"
+  elasticache_redis_cache_node_count = 1
+  elasticache_redis_cache_instance_type = "m5.xlarge"
+  elasticache_redis_cache_password = <PASSWORD>
+  elasticache_redis_cache_engine_version = "7.0"
 
-  haproxy_internal_node_count    = 1
-  haproxy_internal_instance_type = "c5.large"
-
-  monitor_node_count    = 1
-  monitor_instance_type = "c5.xlarge"
-
-  pgbouncer_node_count    = 3
-  pgbouncer_instance_type = "c5.large"
-
-  postgres_node_count    = 3
-  postgres_instance_type = "m5.2xlarge"
-
-  redis_cache_node_count         = 3
-  redis_cache_instance_type      = "m5.xlarge"
-  redis_persistent_node_count    = 3
-  redis_persistent_instance_type = "m5.xlarge"
+  elasticache_redis_persistent_node_count = 1
+  elasticache_redis_persistent_instance_type = "m5.xlarge"
+  elasticache_redis_persistent_password = <PASSWORD>
+  elasticache_redis_persistent_engine_version = "7.0"
 }
 
 output "gitlab_ref_arch_aws" {
@@ -343,6 +323,34 @@ The default on AWS EKS is Extended. The Toolkit allows for you to change this as
 
 > [!tip]
 > It's recommended in either case to manage upgrades yourself before this behaviour is triggered to avoid any unexpected clashes with the Terraform state.
+
+#### EKS Node Group Cluster Autoscaling
+
+The provisioned EKS cluster and node groups are configured to support Cluster Autoscaling when setting node counts via the single (`*_node_pool_count`) or max / min values (`*_node_pool_max_count` / `*_node_pool_min_count`).
+
+However, [Cluster Autoscaling won't actually be enabled until the component is deployed](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html). This either needs to be done manually or can be done with the Toolkit via an additional setting in Ansible - `cloud_native_hybrid_cluster_autoscaler_setup`. Refer to [Advanced Configuration](#advanced-configuration) for more details.
+
+##### Stateful Workloads and Known Limitations
+
+[Due to a fundamental limitation with AWS EKS and Cluster Autoscaler](https://github.com/kubernetes/autoscaler/issues/6000), StatefulSet pods with EBS-backed PersistentVolumes may fail to deploy when their volumes are in different Availability Zones than available nodes. This occurs because Cluster Autoscaler cannot create nodes in specific zones to match volume locations.
+
+**Recommended Configuration for Storage-Based Workloads**
+
+To avoid this issue, any node pools supporting workloads with persistent storage should use static node counts:
+
+```tf
+# Recommended: Static count prevents zone mismatch issues
+gitaly_node_pool_count = 3
+
+# Avoid: Can cause PVC/AZ scheduling conflicts
+# gitaly_node_pool_max_count = 3
+# gitaly_node_pool_min_count = 0
+```
+
+Cluster Autoscaler will ignore static node pools, and when AWS EKS performs operations directly it [guarantees zone replacements](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html).
+
+> [!note]
+> This limitation applies to any workload using persistent storage. If this issue occurs, see [Troubleshooting - Pods not deploying due to Cluster Autoscaler and EBS Persistent Volume zone mismatch](environment_troubleshooting.md#pods-not-deploying-due-to-cluster-autoscaler-and-ebs-persistent-volume-zone-mismatch) for resolution steps.
 
 #### EKS Node Group AMI Type and Versions
 
@@ -450,12 +458,6 @@ all:
     [...]
 ```
 
-#### EKS Cluster Autoscaling
-
-The provisioned EKS cluster is always _prepared_ for Cluster Autoscaling when setting node counts via the single (`*_node_pool_count`) or max / min values (`*_node_pool_max_count` / `*_node_pool_min_count`).
-
-However, [Cluster Autoscaling won't actually be enabled until the component is deployed](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html). This either needs to be done manually or can be done with the Toolkit via an additional setting in Ansible - `cloud_native_hybrid_cluster_autoscaler_setup`. Refer to the [Additional Config Settings](#additional-config-settings) for more detail.
-
 #### EKS Endpoint Setup
 
 [EKS Clusters have an endpoint](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html) that is used in several ways including internode communication as well as giving access to tools such as the Toolkit and `kubectl`. This endpoint can be configured to be Public, Private or both.
@@ -492,7 +494,7 @@ This can be configured in Terraform via the [module's environment config file](e
 
 - `eks_default_disk_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws). If not set AWS provided keys will be used instead. Optional, default is `null`.
   - `*_node_pool_disk_kms_key_arn` - The AWS KMS key ARN to be used for specific EKS Node Group VM disks. Will override `eks_default_disk_kms_key_arn` if specified. Default is `null`.
-    - Available component options: `webservice`, `sidekiq`, `supporting`.
+    - Available component options: `webservice`, `sidekiq`, `supporting` and `gitaly` ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)).
 
 ##### EKS Secrets Envelope Encryption (CMEK)
 
@@ -545,42 +547,36 @@ As a convenience, the Toolkit can automatically run these commands for you in it
 
 ## 4. Configuring the Cloud Native deployment with Ansible
 
-Like Provisioning with Terraform, configuring the Helm deployment for the Kubernetes cluster only requires a few tweaks to your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) - Namely a few extra settings required for Helm.
+Configuring the Helm deployment requires additional settings in your [Environment config file](environment_configure.md#environment-config-varsyml) (`vars.yml`) for Kubernetes and Helm integration.
 
-By design, this file is similar to the one used in a [standard environment](environment_configure.md#environment-config-varsyml).
+### General Settings
 
-First let's detail the general settings that apply to any Cloud Provider:
+The following settings apply to any Cloud Provider:
 
-- `cloud_native_hybrid_environment` - Tells Ansible it's configuring a Cloud Native Hybrid Reference Architecture environment. **Required.**
-- `kubeconfig_setup` - When true, will attempt to automatically configure the `.kubeconfig` file entry for the provisioned Kubernetes cluster. **Recommended unless kubeconfig is to be setup separately.**
-- `external_url` - A URL for the environment (Note - Not just an IP). You will need to use a `A` type DNS entry (for example `http://gitlab.somecompany.com`). **Required.**
+- `cloud_native_hybrid_environment` - Enables Cloud Native Hybrid Reference Architecture configuration. **Required.**
+- `kubeconfig_setup` - Automatically configures `.kubeconfig` for the provisioned cluster. **Recommended.**
+- `external_url` - Environment URL with DNS A record (e.g., `http://gitlab.company.com`). **Required.**
   > [!note]
-  > On AWS this address should be resolving to _one_ of the Elastic IPs created in the [Create Static External IP - AWS Elastic IP Allocation](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) step.
-  - Services such as [`nip.io`](https://nip.io/) can provide hostnames without needing to configure DNS but note that this wouldn't be recommended for production environments.
-- `gitlab_operator` - Flag to use GitLab Operator for deployment instead of Charts. Only for new installations with GitLab version 17.6 and up. The Toolkit doesn't handle migration to Operator. Optional, default is `false`.
-  > [!note] Beta feature
-  > This feature is available in Toolkit under [Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) status. The GitLab Operator has [known limitations](https://docs.gitlab.com/operator/#known-issues) and is only suitable for specific scenarios in production use. Make sure to confirm that your use case is applicable before enabling.
-
-Next are sections covering various aspects for handling the charts from Install choices, Cloud Provider specifics as well as any other additional settings that can be considered.
+  > On AWS, this should resolve to one of the [Elastic IPs](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) created during preparation.
+- `gitlab_operator` - Use GitLab Operator instead of Charts (GitLab 17.6+ only). [Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support) with [known limitations](https://docs.gitlab.com/operator/#known-issues). Optional, default is `false`.
 
 ### Chart Install Options
 
-The Toolkit can install the Helm Charts via several different methods depending on your requirements or preferences as follows:
+The Toolkit supports two methods for installing GitLab Helm Charts. Configure the installation method using the following settings:
 
-- Helm Chart repository - Where the Charts are retrieved from a Helm Charts repository server, either via the official GitLab server (`charts.gitlab.io`) or a custom one.
-- Direct package - Where the Charts are installed directly via a package in the `.tgz` format.
+**Helm Repository (default):**
 
-The following settings are available in the Toolkit to configure the preferred installation method:
+Charts are retrieved and installed from a Helm repository server.
 
-Helm Chart repository:
+- `gitlab_charts_repo_url` - Chart repository URL. Default is `https://charts.gitlab.io/`
+- `gitlab_charts_repo_name` - Repository name for Helm. Default is `gitlab`
+- `gitlab_charts_gpg_key_file_path` - GPG key for [chart verification](https://docs.gitlab.com/charts/installation/chart-provenance.html)
 
-- `gitlab_charts_repo_url` - The URL of the Helm Chart repository server. Optional, defaults to `https://charts.gitlab.io/`
-- `gitlab_charts_repo_name` - The name of the GitLab Chart repository for Helm to use. Optional, defaults to `gitlab`.
-- `gitlab_charts_gpg_key_file_path` - The key to a generated and exported Gitlab public gpg key to validate the Chart repository. Instructions on how to create one can be found in the [GitLab Helm chart provenance](https://docs.gitlab.com/charts/installation/chart-provenance.html) documentation.
+**Direct Package:**
 
-Direct package:
+Charts are installed directly from a packaged `.tgz` file.
 
-- `gitlab_charts_ref` - The file path or URL to a GitLab Charts repository package file in the `.tgz` format, accessible to the Ansible control node. Optional, default is a generated value to be used for the default Helm Chart repository install method.
+- `gitlab_charts_ref` - File path/URL to GitLab Charts `.tgz` package, accessible to the Ansible control node
 
 ### Google Cloud Platform (GCP)
 
@@ -591,7 +587,7 @@ For environments using GKE the following additional settings are available:
 - `gcp_gke_workload_identity_setup` - Sets up deployments to use [GKE Workload Identity](#gke-workload-identity) for authentication via Service Account annotations. This must be set to `true` if the equivalent Terraform `gke_enable_workload_identity` setting has been enabled.
   - `gcp_service_account_prefix` - If `gcp_gke_workload_identity_setup` has been set to `true` and the [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) was changed in Terraform from the default of `gl` this needs to also be set in Ansible to ensure the correct setup.
 
-A full `vars.yml` file config example for GKE based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) is as follows:
+A full `vars.yml` file config example for GKE based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) is as follows:
 
 ```yml
 all:
@@ -612,6 +608,16 @@ all:
     gitlab_license_file: "<gitlab_license_file_path>"
     cloud_native_hybrid_environment: true
     kubeconfig_setup: true
+
+    # Gitaly on Kubernetes (Toolkit Beta)
+    # Webservice, Sidekiq and Gitaly pod sizings required in this setup
+    # gitlab_charts_webservice_max_replicas: 20
+    # gitlab_charts_sidekiq_max_replicas: 14
+    # gitlab_charts_gitaly_setup: true
+    # gitlab_charts_gitaly_requests_memory_gb: 51
+    # gitlab_charts_gitaly_requests_cpu: 15
+    # gitlab_charts_gitaly_storage_size: '300Gi'
+    # gitlab_charts_gitaly_storage_names: ['default', 'storage2', 'storage3']
 
     # Component Settings
     patroni_remove_data_directory_on_rewind_failure: false
@@ -639,7 +645,7 @@ For environments using EKS the following additional settings are available:
   - With AWS, you **must have an [Elastic IP](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) for each subnet being used**. For example using a VPC with 3 subnets will require the creation of 3 Elastic IPs and their individual allocation IDs will need to be stored in this list.
 - `cloud_native_hybrid_cluster_autoscaler_setup` - When `true` will deploy the [Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html) onto the AWS EKS Kubernetes cluster to enable node autoscaling. Set to `false` by default.
 
-A full `vars.yml` file config example for ELS based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) is as follows:
+A full `vars.yml` file config example for ELS based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) is as follows:
 
 ```yml
 all:
@@ -660,6 +666,16 @@ all:
     cloud_native_hybrid_environment: true
     kubeconfig_setup: true
 
+    # Gitaly on Kubernetes (Toolkit Beta)
+    # Webservice, Sidekiq and Gitaly pod sizings required in this setup
+    # gitlab_charts_webservice_max_replicas: 20
+    # gitlab_charts_sidekiq_max_replicas: 14
+    # gitlab_charts_gitaly_setup: true
+    # gitlab_charts_gitaly_requests_memory_gb: 51
+    # gitlab_charts_gitaly_requests_cpu: 15
+    # gitlab_charts_gitaly_storage_size: '300Gi'
+    # gitlab_charts_gitaly_storage_names: ['default', 'storage2', 'storage3']
+
     # Component Settings
     patroni_remove_data_directory_on_rewind_failure: false
     patroni_remove_data_directory_on_diverged_timelines: false
@@ -677,15 +693,15 @@ all:
     praefect_postgres_password: '<praefect_postgres_password>'
 ```
 
-### Additional Config Settings
+### Advanced Configuration
 
 The Toolkit provides several other settings that can customize a Cloud Native Hybrid setup further as follows:
 
-> [!note]
-> Adjusting the scalability and resource management values should only be done in advanced scenarios and may impact the performance of the environment.
-
 - `gitlab_version` - Sets the GitLab version to be installed. The Toolkit finds and selects the equivalent Helm Chart version if configured. This should be set to the full semantic version, e.g. `14.0.0`. If left unset the Toolkit will look to install the latest version. Optional, default is `''`.
 - `gitlab_cloud_native_release_namespace`: Kubernetes namespace the Helm chart will be deployed to. This should only be changed when the namespace is known to be different from the typical default of `default`. Set to `default` by default.
+
+**Webservice Configuration:**
+
 - `gitlab_charts_webservice_requests_memory_gb`: Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `5` by default.
 - `gitlab_charts_webservice_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Webservice pod in GB. Set to `7` by default.
 - `gitlab_charts_webservice_requests_cpu`: CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Webservice pods in cores. Changing this will affect the number of Puma workers by default unless `gitlab_charts_webservice_worker_processes` is specified and should only be done for specific reasons. Set to `4` by default.
@@ -695,6 +711,9 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 - `gitlab_charts_webservice_max_replicas`: Override for the number of max Webservice replicas instead of them being automatically calculated. Defaults to `''`.
 - `gitlab_charts_webservice_min_replicas`: Override for the number of min Webservice replicas instead of them being automatically calculated. Defaults to `''`.
 - `gitlab_charts_webservice_max_unavailable`: Override for the number of max Webservice replicas that can be unavailable at any time instead of being automatically calculated. Defaults to `''`.
+
+**Sidekiq Configuration:**
+
 - `gitlab_charts_sidekiq_requests_memory_gb`: Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Sidekiq pod in GB. Set to `2` by default.
 - `gitlab_charts_sidekiq_limits_memory_gb`: Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Sidekiq pod in GB. Set to `4` by default.
 - `gitlab_charts_sidekiq_requests_cpu`: CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Sidekiq pods in cores. Changing this will affect pod sizing and should only be done for specific reasons. Set to `1` by default.
@@ -704,7 +723,38 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 - `gitlab_charts_sidekiq_min_replicas`: Override for the number of min Sidekiq replicas instead of them being automatically calculated. Defaults to `''`.
 - `gitlab_charts_sidekiq_max_unavailable`: Override for the number of max Sidekiq replicas that can be unavailable at any time instead of being automatically calculated. Defaults to `''`.
 
+**Gitaly Configuration ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)):**
+
+- `gitlab_charts_gitaly_setup` - Enables running Gitaly in Kubernetes instead of VMs.
+- `gitlab_charts_gitaly_requests_memory_gb` - Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Gitaly pod in GB. Default is `''`.
+- `gitlab_charts_gitaly_limits_memory_gb` - Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Gitaly pod in GB. By default, this matches `gitlab_charts_gitaly_requests_memory_gb` to ensure Guaranteed QoS. Changing this should only be done in advanced scenarios.
+- `gitlab_charts_gitaly_requests_cpu` - CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Gitaly pods. Default is `''`.
+- `gitlab_charts_gitaly_limits_cpu` - CPU [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Gitaly pods. By default, this matches `gitlab_charts_gitaly_requests_cpu` to ensure Guaranteed QoS. Changing this should only be done in advanced scenarios.
+- `gitlab_charts_gitaly_storage_size` - The size of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for Gitaly data storage in [SI or Binary notation](https://kubernetes.io/docs/reference/glossary/?all=true#term-quantity), e.g. `300Gi`. Default is `50Gi`.
+- `gitlab_charts_gitaly_storage_class` - Custom [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) for Gitaly persistent volumes. If unset, the Toolkit creates an appropriate storage class. See [Persistent Volume Configuration](#persistent-volume-configuration-storageclass) for details. Default is `''`.
+- `gitlab_charts_gitaly_storage_names` - List of storage names to configure for Gitaly. Controls the number of pods deployed (one pod per storage). Default is `['default']`.
+
+> [!important]
+> When Gitaly in Kubernetes has been enabled, `gitlab_charts_webservice_max_replicas` and `gitlab_charts_sidekiq_max_replicas` must be explicitly set as automatic pod count calculations are not possible.
+
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
+
+#### Persistent Volume Configuration (StorageClass)
+
+Stateful workloads in Kubernetes require [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) backed by [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) to ensure data persists across pod restarts and cluster operations.
+
+The available Storage Classes will vary depending on the Kubernetes service being used. For that reason, the Toolkit can be configured to use custom Storage Classes or create its [own](../ansible/roles/gitlab_charts/templates/storage_classes) when none have been configured per component:
+
+- **AWS**: GP3-based storage class optimized for performance and cost
+- **GCP**: Balanced persistent disk storage class for general workloads
+
+To use custom Storage Classes that already exist in the cluster, set the following variables in the Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
+
+- `gitlab_charts_gitaly_storage_class` - Custom Storage Class for Gitaly persistent volumes
+- `kube_prometheus_stack_charts_storage_class` - Custom Storage Class for monitoring data (when monitoring is enabled)
+
+> [!note]
+> Storage Class configuration can only be set during initial deployment. Changes require manual persistent volume operations or environment recreation.
 
 ### Kubernetes Secrets
 

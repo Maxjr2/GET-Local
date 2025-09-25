@@ -60,8 +60,7 @@ module "gitlab_gke_supporting_service_account" {
   custom_service_account_email = lookup(var.custom_service_account_emails, "gke-supporting", null)
 }
 
-### Gitaly (Node ADC)
-### EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+### [Toolkit Beta] Gitaly on Kubernetes (Node ADC). Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 module "gitlab_gke_gitaly_service_account" {
   count  = var.gitaly_node_pool_count + var.gitaly_node_pool_max_count > 0 && !var.gke_enable_workload_identity ? 1 : 0
   source = "../gitlab_gcp_service_account"

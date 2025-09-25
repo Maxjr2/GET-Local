@@ -355,8 +355,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   }
 }
 
-# Gitaly
-# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 resource "google_container_node_pool" "gitlab_gitaly_pool" {
   count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
 

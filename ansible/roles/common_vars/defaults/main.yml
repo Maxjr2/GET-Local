@@ -319,8 +319,7 @@ gitlab_cloud_native_release_namespace: "{{ gitlab_charts_release_namespace }}"
 gitlab_charts_release_namespace: default
 kubectl_custom_context: ""
 
-# Operator Settings
-## BETA - Deploying Cloud Native Hybrid using Operator is a Beta feature. The GitLab Operator has known limitations and is only suitable for specific scenarios in production use.
+# [Toolkit Beta] Operator Settings - Known limitations, see https://docs.gitlab.com/operator/#known-issues 
 gitlab_operator: false
 
 # Geo

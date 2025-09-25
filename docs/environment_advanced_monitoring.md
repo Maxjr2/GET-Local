@@ -72,6 +72,7 @@ All of this is handled in Ansible via several settings in the [`vars.yml`](envir
 
 - `cloud_native_hybrid_monitoring_setup` - Enables the setup of the monitoring stack. Defaults to `false`.
 - `kube_prometheus_stack_charts_namespace` - The [Kubernetes Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for the `kube-prometheus-stack` chart. Defaults to `monitoring`.
+- `kube_prometheus_stack_charts_storage_class` - Custom [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) for Prometheus persistent volumes. If unset, the Toolkit creates an appropriate storage class. See [Persistent Volume Configuration](environment_advanced_hybrid.md#persistent-volume-configuration-storageclass) for details. Default is `''`.
 - `kube_prometheus_stack_charts_storage_size` - The size of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for Prometheus data storage. Must be given in the [SI or Binary notation](https://kubernetes.io/docs/reference/glossary/?all=true#term-quantity), for example a `100 GB` storage would be `100Gi`. Defaults to `100Gi`.
 - `kube_prometheus_stack_charts_app_version` - The application version of the `kube-prometheus-stack` chart to deploy. Defaults to `v0.63.0`.
   > [!note]
@@ -95,19 +96,6 @@ Once completed, Prometheus will be scraping various Kubernetes, Pod and GitLab m
 
 > [!important]
 > The Toolkit does not configure Grafana due to licensing restrictions and it should be set up separately. The `kube-prometheus-stack` chart does offer the ability to set up Grafana - [refer to its documentation for more information](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The Toolkit allows for customising the `kube-prometheus-stack` chart it deploys via [Custom Config - Cloud Native Hybrid](#custom-config) and [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
-
-### Persistent Volume (StorageClass)
-
-To ensure data persists, Prometheus is configured to request a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) from the Kubernetes service it's deployed. [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) set what disks can be used for such a request.
-
-The available Storage Classes will vary depending on the Kubernetes service being used. Due to this and to guard against any future changes the Toolkit will look to create a StorageClass by default for Prometheus with the following definitions for the two supported Cloud Providers:
-
-- AWS - [`kube_prometheus_stack_gp3.aws.yml.j2`](../ansible/roles/gitlab_charts/templates/storage_classes/kube_prometheus_stack_gp3.aws.yml.j2)
-- GCP - [`kube_prometheus_stack_balanced.gcp.yml.j2`](../ansible/roles/gitlab_charts/templates/storage_classes/kube_prometheus_stack_balanced.gcp.yml.j2)
-
-Additionally it's possible for you to use a separate StorageClass that's been added separately. In this set up the Toolkit will not create or manage any StorageClass definitions and will use the one configured as given. This can be set via the following variable in the Ansible [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
-
-- `kube_prometheus_stack_charts_storage_class` - The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) of the [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/). Only applicable for newly created environments. If left unset the Toolkit will create a StorageClass to use. Defaults to `''`.
 
 ## Custom Config
 
