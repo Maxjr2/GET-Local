@@ -1,16 +1,7 @@
-- name: Get Omnibus Postgres Primary
-  block:
-    - name: Get latest Postgres primary
-      command: gitlab-ctl get-postgresql-primary
-      register: postgres_leader_int_address
-      delegate_to: "{{ groups['postgres'][0] }}"
-      delegate_facts: true
-      become: true
-
-    - name: Update Postgres primary IP and Port
-      set_fact:
-        postgres_migrations_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
-        postgres_migrations_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
+- name: Set Omnibus PostgreSQL leader IP and Port for migrations
+  set_fact:
+    postgres_migrations_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
+    postgres_migrations_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
   when:
     - ('postgres' in groups and groups['postgres'] | length > 1)
     - not postgres_external
@@ -27,7 +18,7 @@
       command: gitlab-ctl reconfigure
 
     - name: Run post deployment migrations
-      command: gitlab-rake db:migrate
+      command: gitlab-rake gitlab:db:configure
 
     - name: Remove config for post deployment migrations
       file:

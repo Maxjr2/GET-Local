@@ -1,0 +1,45 @@
+---
+- name: Reconfigure PostgreSQL Node
+  command: gitlab-ctl reconfigure
+  register: result
+  retries: 3
+  until: result is success
+  tags: reconfigure
+
+- name: Restart PostgreSQL (Single Node PostgreSQL)
+  command: gitlab-ctl restart
+  register: result
+  retries: 2
+  until: result is success
+  when: groups['postgres'] | length == 1
+  tags: restart
+
+- name: Restart PostgreSQL (Multi Node PostgreSQL)
+  block:
+    - name: Restart PostgreSQL
+      command: gitlab-ctl restart-except consul
+      when: gitlab_version == '' or gitlab_version is version('17.2', '>=')
+
+    - name: Restart PostgreSQL (<17.2)
+      command: "gitlab-ctl restart {{ item }}"
+      loop:
+        - patroni
+        - node-exporter
+        - logrotate
+        - postgres-exporter
+        - pgbouncer
+        - pgbouncer-exporter
+      loop_control:
+        label: "{{ item }}"
+      register: result
+      retries: 2
+      until: result is success
+      when: gitlab_version != '' and gitlab_version is version('17.2', '<')
+
+    - name: Restart Consul
+      command: gitlab-ctl restart consul
+      register: result
+      retries: 2
+      until: result is success
+  when: groups['postgres'] | length > 1
+  tags: restart

@@ -29,7 +29,7 @@
     - geo_tracking_postgres_external_prep
     - not cloud_native_hybrid_geo
 
-- name: Configure Tracking database on externally managed Postgres (Omnibus)
+- name: Configure Tracking database on externally managed PostgreSQL (Omnibus)
   block:
     - name: Tracking Database - Create Geo tracking user
       community.postgresql.postgresql_user:
@@ -53,7 +53,7 @@
         encoding: UTF-8
         maintenance_db: "{{ geo_tracking_postgres_maintenance_database }}"
 
-    - name: Tracking Database - Enable required Postgres extensions
+    - name: Tracking Database - Enable required PostgreSQL extensions
       community.postgresql.postgresql_ext:
         login_host: "{{ geo_tracking_postgres_host }}"
         login_port: "{{ geo_tracking_postgres_port }}"
@@ -69,7 +69,7 @@
     - inventory_hostname == deploy_host
     - not cloud_native_hybrid_geo
 
-- name: Configure Tracking database on externally managed Postgres (Cloud Native)
+- name: Configure Tracking database on externally managed PostgreSQL (Cloud Native)
   block:
     - name: Tracking Database - Configure kubeconfig credentials for Geo primary site
       import_tasks: kubeconfig.yml
@@ -158,7 +158,7 @@
         - database_create_result.rc != 0
         - ("already exists" not in database_create_result.stderr)
 
-    - name: Tracking Database - Enable required Postgres extensions
+    - name: Tracking Database - Enable required PostgreSQL extensions
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql-geo-tracking"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"

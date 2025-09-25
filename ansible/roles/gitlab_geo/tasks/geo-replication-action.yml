@@ -24,10 +24,10 @@
         - "'postgres_secondary' not in groups"
         - "'postgres' in group_names"
 
-    - name: "{{ geo_replication_action | capitalize }} Geo Replication - Patroni Cluster (Standby Leader)"
+    - name: "{{ geo_replication_action | capitalize }} Geo Replication - Patroni Cluster (Standby leader)"
       block:
         # Non-standby leaders return 1, while the leader returns 0
-        - name: Get Patroni Standby Leader
+        - name: Get Patroni Standby leader
           command: gitlab-ctl patroni check-standby-leader
           register: patroni_leader_status
           failed_when:
