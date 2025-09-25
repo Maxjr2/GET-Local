@@ -1567,6 +1567,15 @@ variable "elasticache_redis_kms_key_arn" {
   type    = string
   default = null
 }
+variable "elasticache_redis_engine" {
+  type    = string
+  default = "redis"
+
+  validation {
+    condition     = contains(["redis", "valkey"], var.elasticache_redis_engine)
+    error_message = "Engine must be either 'redis' or 'valkey'."
+  }
+}
 variable "elasticache_redis_engine_version" {
   type    = string
   default = "7.0"
@@ -1629,6 +1638,15 @@ variable "elasticache_redis_cache_kms_key_arn" {
   type    = string
   default = null
 }
+variable "elasticache_redis_cache_engine" {
+  type    = string
+  default = "redis"
+
+  validation {
+    condition     = contains(["redis", "valkey"], var.elasticache_redis_cache_engine)
+    error_message = "Engine must be either 'redis' or 'valkey'."
+  }
+}
 variable "elasticache_redis_cache_engine_version" {
   type    = string
   default = null
@@ -1681,6 +1699,15 @@ variable "elasticache_redis_persistent_instance_type" {
 variable "elasticache_redis_persistent_kms_key_arn" {
   type    = string
   default = null
+}
+variable "elasticache_redis_persistent_engine" {
+  type    = string
+  default = "redis"
+
+  validation {
+    condition     = contains(["redis", "valkey"], var.elasticache_redis_persistent_engine)
+    error_message = "Engine must be either 'redis' or 'valkey'."
+  }
 }
 variable "elasticache_redis_persistent_engine_version" {
   type    = string

@@ -6,11 +6,17 @@ locals {
 resource "aws_elasticache_subnet_group" "gitlab_redis" {
   count = sum([var.elasticache_redis_node_count, var.elasticache_redis_cache_node_count, var.elasticache_redis_persistent_node_count]) > 0 ? 1 : 0
 
-  name       = "${var.prefix}-redis-subnet-group"
+  name       = "${var.prefix}-${var.elasticache_redis_engine}-subnet-group"
   subnet_ids = local.elasticache_redis_subnet_ids
 
   tags = {
-    Name = "${var.prefix}-redis-subnet-group"
+    Name = "${var.prefix}-${var.elasticache_redis_engine}-subnet-group"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      name
+    ]
   }
 }
 
@@ -22,9 +28,9 @@ locals {
 resource "aws_elasticache_parameter_group" "gitlab_redis" {
   count = var.elasticache_redis_node_count > 0 ? 1 : 0
 
-  name = "${var.prefix}-redis-parameter-group-${local.elasticache_redis_major_version}"
+  name = "${var.prefix}-${var.elasticache_redis_engine}-parameter-group-${local.elasticache_redis_major_version}"
   # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
-  family = "redis${var.elasticache_redis_engine_version == "6.x" ? var.elasticache_redis_engine_version : local.elasticache_redis_major_version}"
+  family = "${var.elasticache_redis_engine}${var.elasticache_redis_engine_version == "6.x" ? var.elasticache_redis_engine_version : local.elasticache_redis_major_version}"
 
   parameter {
     name  = "maxmemory-policy"
@@ -44,12 +50,13 @@ resource "aws_elasticache_parameter_group" "gitlab_redis" {
 resource "aws_elasticache_replication_group" "gitlab_redis" {
   count = var.elasticache_redis_node_count > 0 ? 1 : 0
 
-  replication_group_id = "${format("%.34s", var.prefix)}-redis" # Must be 40 characters or lower
-  description          = "${var.prefix}-redis"
+  replication_group_id = "${format("%.33s", var.prefix)}-${var.elasticache_redis_engine}" # Must be 40 characters or lower
+  description          = "${var.prefix}-${var.elasticache_redis_engine}"
   node_type            = "cache.${var.elasticache_redis_instance_type}"
   num_cache_clusters   = var.elasticache_redis_node_count
   parameter_group_name = aws_elasticache_parameter_group.gitlab_redis[0].name
 
+  engine                     = var.elasticache_redis_engine
   engine_version             = var.elasticache_redis_engine_version
   port                       = var.elasticache_redis_port
   multi_az_enabled           = var.elasticache_redis_node_count > 1 ? var.elasticache_redis_multi_az : false
@@ -78,6 +85,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
 
   lifecycle {
     ignore_changes = [
+      replication_group_id,
       at_rest_encryption_enabled,
       kms_key_id,
       snapshot_name
@@ -96,7 +104,8 @@ output "elasticache_redis_connection" {
 # Redis Separate Cache
 
 locals {
-  ## Use default values if specifics aren't specfied
+  ## Use default values if specifics aren't specified
+  elasticache_redis_cache_engine                   = coalesce(var.elasticache_redis_cache_engine, var.elasticache_redis_engine)
   elasticache_redis_cache_engine_version           = coalesce(var.elasticache_redis_cache_engine_version, var.elasticache_redis_engine_version)
   elasticache_redis_cache_password                 = var.elasticache_redis_cache_password != "" ? var.elasticache_redis_cache_password : var.elasticache_redis_password
   elasticache_redis_cache_port                     = coalesce(var.elasticache_redis_cache_port, var.elasticache_redis_port)
@@ -112,9 +121,9 @@ locals {
 resource "aws_elasticache_parameter_group" "gitlab_redis_cache" {
   count = var.elasticache_redis_cache_node_count > 0 ? 1 : 0
 
-  name = "${var.prefix}-redis-cache-parameter-group-${local.elasticache_redis_cache_major_version}"
+  name = "${var.prefix}-${local.elasticache_redis_cache_engine}-cache-parameter-group-${local.elasticache_redis_cache_major_version}"
   # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
-  family = "redis${local.elasticache_redis_cache_engine_version == "6.x" ? local.elasticache_redis_cache_engine_version : local.elasticache_redis_cache_major_version}"
+  family = "${local.elasticache_redis_cache_engine}${local.elasticache_redis_cache_engine_version == "6.x" ? local.elasticache_redis_cache_engine_version : local.elasticache_redis_cache_major_version}"
 
   parameter {
     name  = "maxmemory-policy"
@@ -139,12 +148,13 @@ resource "aws_elasticache_parameter_group" "gitlab_redis_cache" {
 resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
   count = var.elasticache_redis_cache_node_count > 0 ? 1 : 0
 
-  replication_group_id = "${format("%.28s", var.prefix)}-redis-cache" # Must be 40 characters or lower
-  description          = "${var.prefix}-redis-cache"
+  replication_group_id = "${format("%.27s", var.prefix)}-${local.elasticache_redis_cache_engine}-cache" # Must be 40 characters or lower
+  description          = "${var.prefix}-${local.elasticache_redis_cache_engine}-cache"
   node_type            = "cache.${var.elasticache_redis_cache_instance_type}"
   num_cache_clusters   = var.elasticache_redis_cache_node_count
   parameter_group_name = aws_elasticache_parameter_group.gitlab_redis_cache[0].name
 
+  engine                     = local.elasticache_redis_cache_engine
   engine_version             = local.elasticache_redis_cache_engine_version
   port                       = local.elasticache_redis_cache_port
   multi_az_enabled           = var.elasticache_redis_cache_node_count > 1 ? local.elasticache_redis_cache_multi_az : false
@@ -173,6 +183,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
 
   lifecycle {
     ignore_changes = [
+      replication_group_id,
       at_rest_encryption_enabled,
       kms_key_id,
       snapshot_name
@@ -191,9 +202,10 @@ output "elasticache_redis_cache_connection" {
 # Redis Separate Persistent
 
 locals {
-  ## Use default values if specifics aren't specfied
-  elasticache_redis_persistent_password                 = var.elasticache_redis_persistent_password != "" ? var.elasticache_redis_persistent_password : var.elasticache_redis_password
+  ## Use default values if specifics aren't specified
+  elasticache_redis_persistent_engine                   = coalesce(var.elasticache_redis_persistent_engine, var.elasticache_redis_engine)
   elasticache_redis_persistent_engine_version           = coalesce(var.elasticache_redis_persistent_engine_version, var.elasticache_redis_engine_version)
+  elasticache_redis_persistent_password                 = var.elasticache_redis_persistent_password != "" ? var.elasticache_redis_persistent_password : var.elasticache_redis_password
   elasticache_redis_persistent_port                     = coalesce(var.elasticache_redis_persistent_port, var.elasticache_redis_port)
   elasticache_redis_persistent_multi_az                 = coalesce(var.elasticache_redis_persistent_multi_az, var.elasticache_redis_multi_az)
   elasticache_redis_persistent_kms_key_arn              = var.elasticache_redis_persistent_kms_key_arn != null ? var.elasticache_redis_persistent_kms_key_arn : var.elasticache_redis_kms_key_arn
@@ -207,9 +219,9 @@ locals {
 resource "aws_elasticache_parameter_group" "gitlab_redis_persistent" {
   count = var.elasticache_redis_persistent_node_count > 0 ? 1 : 0
 
-  name = "${var.prefix}-redis-persistent-parameter-group-${local.elasticache_redis_persistent_major_version}"
+  name = "${var.prefix}-${local.elasticache_redis_persistent_engine}-persistent-parameter-group-${local.elasticache_redis_persistent_major_version}"
   # Family differs depending on version. For 6 it's 'redis6.x' but for 7 it's 'redis7'.
-  family = "redis${local.elasticache_redis_persistent_engine_version == "6.x" ? local.elasticache_redis_persistent_engine_version : local.elasticache_redis_persistent_major_version}"
+  family = "${local.elasticache_redis_persistent_engine}${local.elasticache_redis_persistent_engine_version == "6.x" ? local.elasticache_redis_persistent_engine_version : local.elasticache_redis_persistent_major_version}"
 
   parameter {
     name  = "maxmemory-policy"
@@ -229,12 +241,13 @@ resource "aws_elasticache_parameter_group" "gitlab_redis_persistent" {
 resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
   count = var.elasticache_redis_persistent_node_count > 0 ? 1 : 0
 
-  replication_group_id = "${format("%.23s", var.prefix)}-redis-persistent" # Must be 40 characteers or lower
-  description          = "${var.prefix}-redis-persistent"
+  replication_group_id = "${format("%.22s", var.prefix)}-${local.elasticache_redis_persistent_engine}-persistent" # Must be 40 characteers or lower
+  description          = "${var.prefix}-${local.elasticache_redis_persistent_engine}-persistent"
   node_type            = "cache.${var.elasticache_redis_persistent_instance_type}"
   num_cache_clusters   = var.elasticache_redis_persistent_node_count
   parameter_group_name = aws_elasticache_parameter_group.gitlab_redis_persistent[0].name
 
+  engine                     = local.elasticache_redis_persistent_engine
   engine_version             = local.elasticache_redis_persistent_engine_version
   port                       = local.elasticache_redis_persistent_port
   multi_az_enabled           = var.elasticache_redis_persistent_node_count > 1 ? local.elasticache_redis_persistent_multi_az : false
@@ -263,6 +276,7 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
 
   lifecycle {
     ignore_changes = [
+      replication_group_id,
       at_rest_encryption_enabled,
       kms_key_id,
       snapshot_name
