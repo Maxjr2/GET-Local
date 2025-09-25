@@ -250,25 +250,28 @@ Refer to the below for what each status means for a Toolkit feature and how they
 
 Beta features will be called out clearly in code and / or documentation and are subject to the following:
 
-- Not recommended for production use.
-- May or may not have documentation present.
+- May be suitable for production use with careful evaluation, but require additional consideration compared to generally available features.
+- May or may not have complete documentation present.
 - Are supported on a commercially-reasonable effort basis, but with the expectation that issues require extra time and assistance from development to troubleshoot.
-- Might be unstable.
-- Have configuration and dependencies that are unlikely to change.
-- Have features and functions that are unlikely to change. However, breaking changes can occur outside of major releases or with less notice than for generally available features.
+- Might be less stable than generally available features.
+- Have configuration and dependencies that are unlikely to change significantly.
+- Have features and functions that are unlikely to change substantially. However, breaking changes can occur outside of major releases or with less notice than for generally available features.
 - Have a low risk of data loss.
 - Have a user experience that is complete or near completion.
+- May have limitations in scale, scope, or platform support compared to generally available features.
 
 **Experimental**
 
-Experimental features will be called out clearly in code and are subject to the following:
+Experimental features will be called out clearly in code and / or documentation and are subject to the following:
 
-- Are not ready for production use.
-- Has no support available.
-- Could be removed at any time.
-- Might have a risk of data loss.
-- Will have no documentation.
-- Might not have a finalized user experience.
+- Not supported for production use.
+- May have limited or no documentation present.
+- Are likely to be unstable or have significant limitations.
+- May have configuration and dependencies that could change substantially.
+- May have features and functions that could change significantly or be removed. Breaking changes can occur at any time with minimal notice.
+- May have a higher risk of data loss or unexpected behavior.
+- May have an incomplete user experience or be accessible only through APIs or advanced configuration.
+- Are intended primarily for testing, development, and feedback collection purposes.
 
 #### Prefer Custom Config for GitLab variables
 

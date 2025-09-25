@@ -171,16 +171,25 @@ gitlab:
       serviceMonitor:
         enabled: true
 {% if gitlab_charts_gitaly_setup %}
-# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
   gitaly:
     nodeSelector:
       workload: "{{ gitlab_charts_gitaly_node_selector }}"
     resources:
       limits:
+        cpu: "{{ gitlab_charts_gitaly_limits_cpu }}"
         memory: "{{ gitlab_charts_gitaly_limits_memory_gb }}G"
       requests:
         cpu: "{{ gitlab_charts_gitaly_requests_cpu }}"
         memory: "{{ gitlab_charts_gitaly_requests_memory_gb }}G"
+    init:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 32Mi
+        limits:
+          cpu: 50m
+          memory: 32Mi
     persistence:
       storageClass: "{{ gitlab_charts_gitaly_storage_class }}"
       size: "{{ gitlab_charts_gitaly_storage_size }}"
@@ -323,8 +332,7 @@ global:
 {% endif %}
 {% endfor %}
 {% endif %}
-# Charts - Gitaly Sharded
-# EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 {% if gitlab_charts_gitaly_setup %}
     internal:
       names:

@@ -1066,8 +1066,7 @@ variable "supporting_node_pool_max_unavailable" {
   default = 0
 }
 
-## Gitaly
-## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 variable "gitaly_node_pool_count" {
   type    = number
   default = 0
@@ -2034,7 +2033,7 @@ variable "supporting_node_pool_custom_tags" {
   type    = map(string)
   default = {}
 }
-## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 variable "gitaly_node_pool_custom_tags" {
   type    = map(string)
   default = {}

@@ -227,10 +227,12 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-webservice-node-pool"
-
-    "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
-    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
+    },
+    local.webservice_node_pool_autoscaling ? {
+      "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
+      "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+    } : {},
+  var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
@@ -341,10 +343,12 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-sidekiq-node-pool"
-
-    "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
-    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
+    },
+    local.sidekiq_node_pool_autoscaling ? {
+      "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
+      "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+    } : {},
+  var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
@@ -455,10 +459,12 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-supporting-node-pool"
-
-    "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
-    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
+    },
+    local.supporting_node_pool_autoscaling ? {
+      "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
+      "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+    } : {},
+  var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [
@@ -477,8 +483,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   }
 }
 
-## Gitaly
-## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 resource "aws_launch_template" "gitlab_gitaly" {
   count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
 
@@ -570,10 +575,12 @@ resource "aws_eks_node_group" "gitlab_gitaly_pool" {
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-gitaly-node-pool"
-
-    "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
-    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
-  }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+    },
+    local.gitaly_node_pool_autoscaling ? {
+      "k8s.io/cluster-autoscaler/${aws_eks_cluster.gitlab_cluster[0].name}" = "owned"
+      "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+    } : {},
+  var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
 
   # Ensure that IAM Role policies, Addons and NAT Gateways are created beforehand as required by Node Pool
   depends_on = [

@@ -408,15 +408,13 @@ After running the above commands you should see Autoscaler correctly scaling dow
 
 #### Pods not deploying due to Cluster Autoscaler and EBS Persistent Volume zone mismatch
 
-[Due to a limitation with AWS EKS and Cluster Autoscaler](https://github.com/kubernetes/autoscaler/issues/4772), deployments across multiple availability zones may sometimes result in a pod deployment clash if it's attached to an EBS backed Persistent Volume (PV).
+[Due to a fundamental limitation with AWS EKS and Cluster Autoscaler](https://github.com/kubernetes/autoscaler/issues/6000), StatefulSet pods with EBS-backed PersistentVolumes may fail to deploy when their volumes are in different Availability Zones than available nodes.
 
-In AWS EKS, EBS backed Persistent Volumes are deployed in a specific zone. Due to this if the future nodes available for the pod are not in the specific zone given the pod will fail to deploy.
+The issue occurs because Cluster Autoscaler cannot create nodes in specific zones to match volume locations. When this happens, pods will be stuck in `Pending` state with "volume node affinity conflict" errors.
 
-It's worth noting the risk of this is low as Cluster Autoscaler itself shouldn't remove a node when this pod is deployed, but it can occur in other situations such as a manual Node Pool upgrade.
+The best method to avoid this issue is to use static node counts for stateful deployments. Cluster Autoscaler will ignore these pools and when AWS EKS performs its operations directly it [guarantees zone replacements](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html).
 
-When this occurs the easiest solution is to [scale up the node pool manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to the same number as zones (subnets) and then back down again. The pod will deploy on the new node in the correct zone in this scenario and then Cluster Autoscaler will correctly evict and remove the others.
-
-Another solution suggested is to deploy [Karpenter](https://karpenter.sh/) manually instead of Cluster Autoscaler as [it has more permissions to handle this solution directly](https://karpenter.sh/preview/concepts/scheduling/#persistent-volume-topology).
+If this issue does occur, the easiest solution is to [scale up the node group manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to match the number of zones, allow pods to schedule, then scale back down.
 
 #### Unable to adjust Node Pool sizes due to Minimum / Desired Size limitations after deployment
 
@@ -430,18 +428,13 @@ As Desired Size is likely to be adjusted outside of Terraform, either manually o
 
 As such, if this issue is occurring you would need to first [adjust the Desired Size manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to be equal to or greater than the target Minimum Size and then run Terraform again.
 
-#### `kube-prometheus-stack` not deploying its Prometheus pod due to no default StorageClass from EKS v1.30 and up
+#### Stateful workloads not deploying due to missing default StorageClass
 
-From AWS EKS `1.30` a default StorageClass is no longer set for new deployments. As such, [from GET `3.5.0` for new setups it configures a dedicated StorageClass](environment_advanced_monitoring.md#persistent-volume-storageclass) for each workload type that requires ones.
+From AWS EKS `1.30` and up, a default StorageClass is no longer set for new cluster deployments. This affects any stateful workloads that require persistent volumes, including monitoring components like `kube-prometheus-stack` and Gitaly when deployed in Kubernetes.
 
-On older versions of GET running against AWS EKS `1.30` with the optional [`kube-prometheus-stack`](environment_advanced_monitoring.md#cloud-native-hybrid-kube-prometheus-stack) enabled, the Prometheus pod will fail to deploy due to its PVC failing as a result of this upstream change.
+From GET `3.5.0`, the Toolkit can [automatically configure dedicated StorageClasses or allow for custom StorageClasses to be used](environment_advanced_hybrid.md#persistent-volume-configuration-storageclass) for workloads that require persistent storage. 
 
-There are several options available on how to mitigate this:
-
-- Set the `gp2` StorageClass to `default` if you're happy to continue using this class.
-- Undeploy the `kube-prometheus-stack` operator and either:
-  - Run again with GET `3.5.0`, which will create a new StorageClass to be used.
-  - Create a separate StorageClass and set this via the `kube_prometheus_stack_charts_storage_class`
+For older versions, manual intervention is required by separately creating a default StorageClass as desired.
 
 ## GitLab
 

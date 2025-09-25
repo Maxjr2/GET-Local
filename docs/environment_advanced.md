@@ -478,7 +478,7 @@ In particular, be aware of the following important callouts:
 - Terraform support is not available. VMs and services must be provisioned separately.
 - [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) config must be configured via [Custom Config](#custom-config) on any GitLab Rails or Sidekiq nodes as well as Helm Chart for Cloud Native Hybrid environments.
 - Data Disks configuration is not supported. These must be configured separately.
-- On Cloud Native Hybrid environments the Kubernetes cluster must be configured as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#cloud-native-hybrid-reference-architecture-with-helm-charts-alternative) and `kubeconfig` file created separately.
+- On Cloud Native Hybrid environments the Kubernetes cluster must be configured as per the [Reference Architectures](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) and `kubeconfig` file created separately.
 >>>
 
 To configure Custom Servers with Ansible the setup process involves the following:

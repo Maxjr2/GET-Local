@@ -77,13 +77,13 @@ sidekiq_default_replica_counts:
   '12': 8
   '4': 4
 
-## Gitaly
-## EXPERIMENTAL. Deploying Gitaly on Kubernetes is not supported in Production - https://gitlab.com/groups/gitlab-org/-/epics/6127
+## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 gitlab_charts_gitaly_setup: false
 
 gitlab_charts_gitaly_requests_memory_gb: ''
 gitlab_charts_gitaly_limits_memory_gb: "{{ gitlab_charts_gitaly_requests_memory_gb }}"
 gitlab_charts_gitaly_requests_cpu: ''
+gitlab_charts_gitaly_limits_cpu: "{{ gitlab_charts_gitaly_requests_cpu }}"
 gitlab_charts_gitaly_storage_size: '50Gi'
 gitlab_charts_gitaly_storage_class: ''
 gitlab_charts_gitaly_storage_names: ['default']
