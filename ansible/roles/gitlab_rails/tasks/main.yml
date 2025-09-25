@@ -36,16 +36,16 @@
   tags: reconfigure
   register: gitlab_rails_custom_config_file_path
 
-- name: Get Omnibus Postgres Primary
+- name: Get Omnibus PostgreSQL leader
   block:
-    - name: Get latest Postgres primary
+    - name: Get latest PostgreSQL leader
       command: gitlab-ctl get-postgresql-primary
       register: postgres_leader_int_address
       delegate_to: "{{ groups['postgres'][0] }}"
       delegate_facts: true
       become: true
 
-    - name: Update Postgres primary IP and Port
+    - name: Update PostgreSQL leader IP and Port
       set_fact:
         postgres_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
         postgres_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
@@ -56,7 +56,7 @@
     - reconfigure
     - db_migrate
 
-- name: Configure database on externally managed Postgres
+- name: Configure database on externally managed PostgreSQL
   block:
     - name: Create Database User
       community.postgresql.postgresql_user:
@@ -80,7 +80,7 @@
         encoding: UTF-8
         maintenance_db: "{{ postgres_maintenance_database }}"
 
-    - name: Enable required Postgres extensions
+    - name: Enable required PostgreSQL extensions
       community.postgresql.postgresql_ext:
         login_host: "{{ postgres_host }}"
         login_port: "{{ postgres_port }}"

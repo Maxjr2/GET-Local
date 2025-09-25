@@ -75,7 +75,7 @@
         encoding: UTF-8
         maintenance_db: "{{ praefect_postgres_maintenance_database }}"
 
-    - name: Enable required Postgres extensions
+    - name: Enable required PostgreSQL extensions
       community.postgresql.postgresql_ext:
         login_host: "{{ praefect_postgres_host }}"
         login_port: "{{ praefect_postgres_port }}"

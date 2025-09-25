@@ -61,7 +61,7 @@
     gitlab_values: "{{ gitlab_values | combine( {'global':{'geo':{'role': 'secondary' }}}, recursive=True ) }}"
   when: geo_recovery is defined and geo_recovery
 
-- name: Redeploy Secondary Cloud Native deployment - Set Geo Tracking Postgres host during recovery
+- name: Redeploy Secondary Cloud Native deployment - Set Geo Tracking PostgreSQL host during recovery
   become: false
   delegate_to: localhost
   run_once: true

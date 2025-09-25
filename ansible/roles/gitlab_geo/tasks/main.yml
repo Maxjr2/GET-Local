@@ -13,9 +13,9 @@
     - copy-secrets
     - secondary
 
-- name: Configure Postgres (Linux package)
+- name: Configure PostgreSQL (Linux package)
   block:
-    - name: Set up Postgres config temp folder on local
+    - name: Set up PostgreSQL config temp folder on local
       tempfile:
         state: directory
         prefix: "gitlab-environment-toolkit-"
@@ -59,7 +59,7 @@
           ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups)
         - (geo_secondary_site_group_name in group_names)
 
-    - name: Remove Postgres config temp folder
+    - name: Remove PostgreSQL config temp folder
       file:
         path: "{{ geo_psql_temp_folder.path }}"
         state: absent

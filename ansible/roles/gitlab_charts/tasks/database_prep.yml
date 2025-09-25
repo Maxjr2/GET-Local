@@ -1,14 +1,14 @@
 ---
-- name: Gather facts for Omnibus Postgres cluster
+- name: Gather facts for Omnibus PostgreSQL cluster
   block:
-    - name: Get latest Postgres Leader
+    - name: Get latest PostgreSQL leader
       command: gitlab-ctl get-postgresql-primary
       register: postgres_leader_int_address
       delegate_to: "{{ groups['postgres'][0] }}"
       delegate_facts: true
       become: true
 
-    - name: Set Postgres Leader IP and Port
+    - name: Set PostgreSQL leader IP and Port
       set_fact:
         postgres_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
         postgres_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
@@ -20,7 +20,7 @@
     - charts
     - charts_values
 
-- name: Configure database on externally managed Postgres
+- name: Configure database on externally managed PostgreSQL
   block:
     - name: Configure Database Preparation admin password secret
       kubernetes.core.k8s:
@@ -101,7 +101,7 @@
         - database_create_result.rc != 0
         - ("already exists" not in database_create_result.stderr)
 
-    - name: Enable required Postgres extensions
+    - name: Enable required PostgreSQL extensions
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"

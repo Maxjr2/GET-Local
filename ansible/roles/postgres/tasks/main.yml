@@ -51,63 +51,25 @@
     - secrets
     - gitlab-secrets
 
-- name: Reconfigure PostgreSQL
-  command: gitlab-ctl reconfigure
-  register: result
-  retries: 3
-  until: result is success
-  tags: reconfigure
+- name: Get latest Postgres Primary (Multi Node Postgres)
+  command: gitlab-ctl get-postgresql-primary
+  register: postgres_leader_int_address
+  run_once: true
+  when: groups['postgres'] | length > 1
 
-- name: Propagate Secrets if new or changed
-  include_role:
-    name: common
-    tasks_from: secrets
-  vars:
-    gitlab_secrets_post_reconfigure: true
-  when: gitlab_secrets_setup
-  tags:
-    - reconfigure
-    - secrets
-    - gitlab-secrets
-
-- name: Restart PostgreSQL (Single Node)
-  command: gitlab-ctl restart
-  register: result
-  retries: 2
-  until: result is success
-  when: groups['postgres'] | length == 1
+- name: Reconfigure and Restart PostgreSQL (Multi Node - Secondaries)
+  include_tasks: reconfigure.yml
+  when:
+    - groups['postgres'] | length > 1
+    - (ansible_default_ipv4.address != postgres_leader_int_address.stdout.split(':')[0])
   tags:
     - reconfigure
     - restart
 
-- name: Restart PostgreSQL (Multi Node) # Ensures failover occurs - Requires Consul to be active to trigger first
-  block:
-    - name: Restart PostgreSQL
-      command: gitlab-ctl restart-except consul
-      when: gitlab_version == '' or gitlab_version is version('17.2', '>=')
-
-    - name: Restart PostgreSQL (<17.2)
-      command: "gitlab-ctl restart {{ item }}"
-      loop:
-        - patroni
-        - node-exporter
-        - logrotate
-        - postgres-exporter
-        - pgbouncer
-        - pgbouncer-exporter
-      loop_control:
-        label: "{{ item }}"
-      register: result
-      retries: 2
-      until: result is success
-      when: gitlab_version != '' and gitlab_version is version('17.2', '<')
-
-    - name: Restart Consul
-      command: gitlab-ctl restart consul
-      register: result
-      retries: 2
-      until: result is success
-  when: groups['postgres'] | length > 1
+- name: Reconfigure and Restart PostgreSQL (Multi Node - Primary, Single Node)
+  include_tasks: reconfigure.yml
+  when: groups['postgres'] | length == 1 or
+        (ansible_default_ipv4.address == postgres_leader_int_address.stdout.split(':')[0])
   tags:
     - reconfigure
     - restart
@@ -127,6 +89,18 @@
   tags:
     - debug
     - reconfigure
+
+- name: Propagate Secrets if new or changed
+  include_role:
+    name: common
+    tasks_from: secrets
+  vars:
+    gitlab_secrets_post_reconfigure: true
+  when: gitlab_secrets_setup
+  tags:
+    - reconfigure
+    - secrets
+    - gitlab-secrets
 
 - name: Run Custom Tasks
   block:
