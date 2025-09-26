@@ -48,6 +48,11 @@ prometheusOperator:
 grafana:
   enabled: false
 
+crds:
+  upgradeJob:
+    enabled: true
+    forceConflicts: true
+
 {% if cloud_provider == 'gcp' %}
 coreDns:
   enabled: false

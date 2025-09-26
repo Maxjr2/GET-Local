@@ -1,6 +1,6 @@
 ---
 # For OpenSearch and GitLab version compatibility, refer to: https://docs.gitlab.com/integration/advanced_search/elasticsearch/#opensearch.
-opensearch_version: "{{ lookup('env', 'OPENSEARCH_VERSION') | default('2.17.1' if gitlab_version != '' and gitlab_version is version('17.6.2', '<=') else '2.19.1', true) }}"
+opensearch_version: "{{ lookup('env', 'OPENSEARCH_VERSION') | default('3.2.0' if gitlab_version == '' or gitlab_version is version('18.1.0', '>=') else ('2.19.3' if gitlab_version is version('17.6.3', '>=') else '2.17.1'), true) }}"
 
 opensearch_docker_image: "{{ lookup('env','OPENSEARCH_DOCKER_IMAGE') | default('opensearchproject/opensearch:' + opensearch_version, true) }}"
 opensearch_docker_prune: true

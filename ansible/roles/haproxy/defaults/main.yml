@@ -1,5 +1,5 @@
 ---
-haproxy_version: "{{ lookup('env','HAPROXY_VERSION') | default('3.0', true) }}"
+haproxy_version: "{{ lookup('env','HAPROXY_VERSION') | default('3.2', true) }}"
 haproxy_docker_image: "{{ lookup('env','HAPROXY_DOCKER_IMAGE') | default('haproxy:' + haproxy_version + '-alpine', true) }}"
 haproxy_docker_prune: true
 
