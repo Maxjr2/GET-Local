@@ -110,30 +110,6 @@
         kube_prometheus_stack_charts_existing_app_version: "{{ kube_prometheus_stack_charts_existing_info.status.app_version }}"
       when: kube_prometheus_stack_charts_existing_info.status is defined
 
-    - name: Update CRDs on existing kube-prometheus-stack deployment
-      command: "kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v{{ kube_prometheus_stack_charts_app_version | replace('v', '') }}/example/prometheus-operator-crd/monitoring.coreos.com_{{ item }}.yaml"
-      loop:
-        - alertmanagerconfigs
-        - alertmanagers
-        - podmonitors
-        - probes
-        - prometheusagents
-        - prometheuses
-        - prometheusrules
-        - scrapeconfigs
-        - servicemonitors
-        - thanosrulers
-      when:
-        - kube_prometheus_stack_charts_existing_app_version is defined
-        - kube_prometheus_stack_charts_app_version != kube_prometheus_stack_charts_existing_app_version
-
-    - name: Delete old deprecated Node Exporter daemonset (<0.59.1)
-      command: "kubectl delete daemonset -l app=prometheus-node-exporter --namespace {{ kube_prometheus_stack_charts_namespace }}"
-      when:
-        - kube_prometheus_stack_charts_existing_app_version is defined
-        - (kube_prometheus_stack_charts_existing_app_version | replace('v', '')) is version('0.59.1', '<')
-        - kube_prometheus_stack_charts_app_version != kube_prometheus_stack_charts_existing_app_version
-
     - name: Configure kube-prometheus-stack StorageClass for existing installs
       # Ensure same StorageClass is used if already bound to avoid config clashes
       # TODO: To be reviewed in 4.0.0 to be potentially removed as a breaking change
