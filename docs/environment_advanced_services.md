@@ -130,7 +130,16 @@ Like the main provisioning docs there are sections for each supported provider o
 
 #### AWS RDS
 
-The Toolkit supports provisioning an [AWS RDS PostgreSQL service](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
+The Toolkit supports provisioning [AWS RDS PostgreSQL service](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html) instances with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
+
+Two configuration approaches are available:
+
+- **Individual Database Configuration** - Uses separate prefixed variables (`rds_postgres_*`, `rds_praefect_postgres_*`, `rds_geo_tracking_postgres_*`) for each database type.
+- **Unified Database Configuration** ([Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)) - Uses a single `rds_databases` map to configure multiple databases dynamically.
+
+Both approaches can be used together for deployment flexibility. Refer to the sections below for more information.
+
+##### Individual Database Configuration
 
 The variables for this service start with the prefix `rds_postgres_*` and should replace any previous `postgres_*`, `pgbouncer_*` and `praefect_postgres_*` settings. The available variables are as follows:
 
@@ -138,8 +147,10 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - `rds_postgres_password` - The password for the instance. **Required**.
 - `rds_postgres_username` - The username for the instance. Optional, default is `gitlab`.
 - `rds_postgres_database_name` - The name of the main database in the instance for use by GitLab. Optional, default is `gitlabhq_production`.
-- `rds_postgres_port` - The password for the instance. Should only be changed if desired. Optional, default is `5432`.
+- `rds_postgres_version` - The version of the PostgreSQL instance to set up. Optional, default is `16`.
+- `rds_postgres_port` - The port for the instance. Should only be changed if desired. Optional, default is `5432`.
 - `rds_postgres_multi_az` - Specifies if the RDS instance is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
+- `rds_postgres_auto_minor_version_upgrade` - Whether automated upgrades to minor versions should occur during maintenance window. Optional, default is `false`.
 - `rds_postgres_allowed_ingress_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access RDS over HTTP/HTTPs internally. Note this only applies for access from internal resources, the instance will not be accessible publicly. Optional, defaults to selected VPC internal CIDR block.
 - `rds_postgres_default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
 - `rds_postgres_ca_cert_identifier` - The identifier of the SSL [Certificate Authority](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html#UsingWithRDS.SSL.RegionCertificateAuthorities) (CA) to use. It's recommended to only set this if you need to [rotate the certificate](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL-certificate-rotation.html) via Terraform (Note that rotation can also be done separately). If unset AWS will select the default certificate and will perform [automatic rotation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL-certificate-rotation.html#UsingWithRDS.SSL-certificate-rotation-server-cert-rotation). Optional, default is `null`.
@@ -159,11 +170,19 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - [`rds_postgres_tags`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#tags) - A map of tags to assign to RDS instance. Optional, default is `{}`.
 - `rds_postgres_performance_insights_enabled` - Enables [AWS RDS Performance Insights](https://aws.amazon.com/rds/performance-insights/). Optional, default is `null`.
 - `rds_postgres_performance_insights_retention_period` - Sets the retention period for AWS RDS Performance Insights. 7 days are included for free, refer to the [AWS Pricing page](https://aws.amazon.com/rds/performance-insights/pricing/) for costs beyond the included retention period. Optional, default `null`.
+- `rds_postgres_monitoring_interval` - The interval between Enhanced Monitoring metrics collection. Optional, default is `0`.
+- `rds_postgres_monitoring_role_arn` - An IAM Role used to publish RDS logs to Cloudwatch. Optional, default is `null`.
+- `rds_postgres_read_replica_count` - The number of read replicas to configure. Optional, default is `0`.
+- `rds_postgres_read_replica_port` - The port read replicas will run on. Optional, default is `5432`.
+- `rds_postgres_read_replica_multi_az` - Whether each replica should have a standby replica for HA. Optional, default is `false`.
+- `rds_postgres_read_replica_deletion_protection` - Deletion protection for read replicas. Optional, default is `false`.
+- `rds_postgres_create_timeout` - How long to wait for creation before timing out. Optional, default is `2h`.
+- `rds_postgres_read_replica_create_timeout` - How long to wait for read replica creation before timing out. Optional, default is `2h`.
+- `rds_postgres_params` - A map of parameters to configure in RDS. Takes precedence over defaults. Optional, default is `{}`.
+- `rds_postgres_tags` - A map of tags to assign to RDS instance. Optional, default is `{}`.
+- `rds_postgres_replication_database_arn` - ARN of source DB instance for cross-region replication. Optional, default is `null`.
 
-To set up a standard AWS RDS PostgreSQL service for a 10k environment with the required variables, it should look like the following in the [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
-
-> [!note]
-> For separated out databases, use the same parameters with different prefixes. Use `rds_praefect_postgres_*` for Praefect databases or `rds_geo_tracking_postgres_*` for Geo Tracking databases respectively.
+Below is an example of how to configure a Main database through individual config for a 10k environment in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
 
 ```tf
 module "gitlab_ref_arch_aws" {
@@ -176,92 +195,149 @@ module "gitlab_ref_arch_aws" {
 }
 ```
 
-Once the variables are set in your file you can proceed to provision the service as normal. Note that this can take several minutes on AWS's side.
+> [!note]
+> For supported separated out databases, use the same parameters with different prefixes. Use `rds_praefect_postgres_*` for Praefect databases or `rds_geo_tracking_postgres_*` for Geo Tracking databases respectively.
 
-Once provisioned you'll see several new outputs at the end of the process. Key from this is the `rds_host` output, which contains the address for the database instance that then needs to be passed to Ansible to configure. Take a note of this address for the next step.
+Once provisioned you'll see several new outputs including `rds_host`, which contains the address for the database instance that needs to be passed to Ansible. Note that provisioning can take several minutes on AWS's side.
 
-##### AWS RDS - Version
+##### Unified Database Configuration ([Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support))
 
->>> [!important]
-It's strongly recommended to explicitly set the version of Postgres as detailed in this section when deploying via the Toolkit to ensure you have full control when the database is upgraded.
+Configure multiple PostgreSQL databases using the `rds_databases` map variable in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`). This approach lets you easily add new databases as your GitLab deployment grows, with consistent configuration across all your database instances.
 
-Additionally when the database has been upgraded it's recommended to run the [`ANALYZE` operation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) on the database after to ensure optimum performance.
->>>
+**Main options:**
 
-AWS RDS has specific [version management policies](https://aws.amazon.com/rds/faqs/#Database_Engine_Versions) that can affect PostgreSQL deployments, including automatic removal of minor versions after one year and default enabling of minor upgrades. These automated behaviors can conflict with Terraform state management.
+- `instance_type` - The [AWS Instance Type](https://aws.amazon.com/rds/instance-types/) for the RDS service to use without the `db.` prefix. For example, to use a `db.m5.2xlarge` RDS instance type, the value should be `m5.2xlarge`. **Required**.
+- `username` - The username for the instance. Optional, default is `postgres`.
+- `password_wo` - The password for the instance write-only arguments (not stored in state). **Required**.
+- `password_wo_version` - Version number for password rotation. Increment to update the password. Optional, default is `1`.
+- `db_name` - The name of the database in the instance for use by the application. Optional, default is `null`.
+- `version` - The PostgreSQL version to use. Optional, default is `16`.
+- `port` - The port for the instance. Optional, default is `5432`.
 
-To prevent unexpected upgrades and Terraform state conflicts, the Toolkit manages PostgreSQL versions as follows:
+**Storage:**
 
-- Deploys the current GitLab-recommended PostgreSQL version available on AWS RDS
-- Disables automatic version upgrades
-- Updates to AWS's recommended version on subsequent Terraform runs if AWS changes their recommendation
+- `allocated_storage` - The initial disk size for the instance. Optional, default is `100`.
+- `max_allocated_storage` - The max disk size for the instance. Optional, default is `1000`.
+- `storage_type` - The type of storage to use. Optional, default is `gp3`.
+- `iops` - The amount of provisioned IOPS. Setting this requires a storage_type of `io1` or `gp3`. Optional, default is `null`.
 
-Configuring how RDS version is selected in the Toolkit is done via the following variables:
+**Networking & security:**
 
-- `rds_postgres_version` - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `16`.
-- [`rds_postgres_auto_minor_version_upgrade`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#auto_minor_version_upgrade) - Whether automated upgrades to AWS selected minor versions should occur during the maintenance window. This is disabled by default and is not recommended being enabled as it can lead to clashes with Terraform's state. Optional, default is `false`.
+- `subnet_ids` - List of existing subnet IDs in VPC to be used by RDS instance. Optional, default is `null`.
+- `default_subnet_count` - Specifies the number of default subnets to use when running on the default network. Optional, default is `2`.
+- `allowed_cidr_blocks` - A list of CIDR blocks that configures the IP ranges that will be able to access RDS internally. Optional, default is `[]`.
+- `kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws). Optional, default is `null`.
+- `ca_cert_identifier` - The identifier of the SSL [Certificate Authority](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html#UsingWithRDS.SSL.RegionCertificateAuthorities) to use. Only set for [certificate rotation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL-certificate-rotation.html) via Terraform; AWS handles default selection and [automatic rotation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL-certificate-rotation.html#UsingWithRDS.SSL-certificate-rotation-server-cert-rotation) otherwise. Optional, default is `null`.
+- `iam_database_authentication_enabled` - Specifies if the RDS has [IAM Authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) enabled. Optional, default is `null`.
 
-##### AWS RDS - Parameters
+**High availability & reliability:**
 
-The Toolkit allows configuration of [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html). By default, it sets the following [GitLab recommended](https://docs.gitlab.com/ee/administration/troubleshooting/postgresql.html#database-deadlocks) [parameters](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/terraform/modules/gitlab_ref_arch_aws/rds.tf#L9):
+- `multi_az` - Specifies if the RDS instance is multi-AZ. Optional, default is `null`.
+- `deletion_protection` - The database can't be deleted when this value is set to true. Optional, default is `null`.
 
-```yaml
-{
-  password_encryption = "scram-sha-256"
-  log_min_duration_statement = 1000
-  idle_in_transaction_session_timeout = 60000
-  statement_timeout = 15000
-  deadlock_timeout = 5000
+**Read replicas:**
+
+- `read_replica_count` - The number of [read replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) to configure. Can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for GitLab components that support it. Optional, default is `0`.
+- `read_replica_port` - The port read replicas will run on. Optional, default is `null` (inherits from primary).
+- `read_replica_multi_az` - Whether each replica should have a standby replica for HA. Optional, default is `null` (inherits from primary).
+- `read_replica_deletion_protection` - Deletion protection for read replicas. Optional, default is `null` (inherits from primary).
+
+**Backup & maintenance:**
+
+- `backup_retention_period` - The number of days to [retain backups for](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.BackupRetention.html). Must be between 0 and 35. Must be greater than 0 when Read Replicas are to be used (including Geo primary instances). Optional, default is `null`.
+- `backup_window` - The daily time range where backups will be taken, e.g. `09:46-10:16`. Must not overlap with `maintenance_window`. Optional, default is `null`.
+- `delete_automated_backups` - Whether automated backups will be deleted when the RDS instance is deleted. Optional, default is `null`.
+- `maintenance_window` - The window to perform maintenance in, e.g. `Mon:00:00-Mon:03:00`. Optional, default is `null`.
+- `auto_minor_version_upgrade` - Whether automated upgrades to minor versions should occur during maintenance window. Optional, default is `false`.
+
+**Monitoring & logging:**
+
+- `enabled_cloudwatch_logs_exports` - Log types to export to Cloudwatch. For Postgres, valid values are `postgresql` and `upgrade`. Optional, default is `[]`.
+- `monitoring_interval` - The interval between Enhanced Monitoring metrics collection. Optional, default is `0`.
+- `monitoring_role_arn` - An IAM Role used to publish RDS logs to Cloudwatch. Optional, default is `null`.
+- `performance_insights` - Enables AWS RDS Performance Insights. Optional, default is `false`.
+- `performance_insights_retention_period` - Sets the retention period for Performance Insights (7 or 731 days). Optional, default is `null`.
+
+**Advanced options:**
+
+- `lifecycle_support` - The [support lifecycle](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/extended-support-overview.html) type - Extended or Standard. Accepted values are `open-source-rds-extended-support` or `open-source-rds-extended-support-disabled`. Optional, default is `open-source-rds-extended-support-disabled`.
+- `snapshot_identifier` - Name of a snapshot from which to restore data for initial creation. Optional, default is `null`.
+- `replicate_source_arn` - ARN of source DB instance for cross-region replication. For Geo secondary sites, set this to the ARN of the primary site's RDS instance. Optional, default is `null`.
+- `create_timeout` - How long to wait for creation before timing out. Optional, default is `2h`.
+- `parameters` - A map of additional [RDS parameter group settings](#aws-rds---parameters). Takes precedence over GitLab recommended defaults. Parameters can be applied either immediately or on reboot using nested `apply_method` values. Optional, default is `{}`.
+- `custom_tags` - A map of tags to assign to RDS instance. Optional, default is `{}`.
+
+Below is an example of how to configure both a Main and Praefect database through unified config for a 10k environment in your [Environment config file](environment_provision.md#configure-module-settings-environmenttf) (`environment.tf`):
+
+```tf
+module "gitlab_ref_arch_aws" {
+  source = "../../modules/gitlab_ref_arch_aws"
+
+  rds_databases = {
+    main = {
+      instance_type = "m5.2xlarge"
+      password_wo   = "<postgres_password>"
+      db_name       = "gitlabhq_production"
+    }
+    
+    praefect = {
+      instance_type = "m5.large"
+      password_wo   = "<praefect_password>"
+      db_name       = "praefect_production"
+    }
+  }
 }
 ```
 
-You can configure any [available parameter](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html#Appendix.PostgreSQL.CommonDBATasks.Parameters.parameters-list) with:
+Once provisioned you'll see new outputs - `rds_databases` contains connection details for all databases that need to be passed to Ansible.
 
-- `rds_postgres_params` - A map of parameters to configure in RDS. Takes precedence over defaults. Optional, default is `{}`.
+##### AWS RDS - Version
 
-Parameters can be applied either [immediately or on reboot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group#problematic-plan-changes). For parameters requiring reboot, you can use nested `apply_method` map values:
+It's strongly recommended to explicitly set the PostgreSQL version to ensure full control over database upgrades. After upgrades, run the [`ANALYZE` operation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process) for optimum performance.
 
-```tf
-rds_postgres_params = { shared_preload_libraries = { value = "pg_stat_statements,pgaudit", apply_method = "pending-reboot" }, deadlock_timeout = 4000 }
-```
+Configure versions using:
+
+- Individual configuration: `rds_postgres_version` and `rds_postgres_auto_minor_version_upgrade`
+- Unified configuration: `version`
+
+##### AWS RDS - Parameters
+
+Configure [RDS Postgres parameters](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html) to customize database behavior.
+
+The Toolkit applies the following GitLab recommended defaults: `password_encryption = "scram-sha-256"`, `log_min_duration_statement = 1000`, `idle_in_transaction_session_timeout = 60000`, `statement_timeout = 15000`, and `deadlock_timeout = 5000`.
+
+Users can override any of these defaults or add additional parameters as required.
+
+Parameters can be applied immediately or on reboot. For reboot-required parameters, use nested `apply_method` values.
+
+Configure parameters using:
+
+- **Individual Database Configuration**: `rds_postgres_params`
+- **Unified Database Configuration**: `parameters` option in each database
 
 ##### AWS RDS - Read Replicas
 
-The standard setup above will deploy an [RDS instance with a standby replica](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html) in a different Availability Zone to provide HA in case of a failure. This replica is only used for HA though and can't be reached.
+RDS offers [Read Replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) that can serve read requests and enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for the main GitLab database.
 
-As an additional feature RDS also offers the ability to spin up separate [Read Replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) that can be reached and serve read requests. With GitLab this feature can be used to enable [Database Load Balancing](https://docs.gitlab.com/ee/administration/postgresql/database_load_balancing.html) for additional performance and stability - As such, the Toolkit supports provisioning 1 or more read replicas per database.
+Configure read replicas using:
 
-> [!note]
-> Read Replicas can only be configured for the main GitLab database, as Database Load Balancing is not supported for other databases like Praefect.
-
-Read Replicas, as implied, mimic their main database in most ways, so the number of options here is lower. Configuring Read Replicas is done via the following variables:
-
-- `rds_postgres_read_replica_count` - The number of read replicas to configure for the RDS database of the PostgreSQL instance to set up. Optional, default is `0`.
-- `rds_postgres_read_replica_port` - The port read replicas will run on. Optional, default is `5432`.
-- `rds_postgres_read_replica_multi_az` - Whether each replica should itself have a standby replica to provide HA. Optional, default is `false`.
+- Individual configuration: `rds_postgres_read_replica_count`, `rds_postgres_read_replica_port`, `rds_postgres_read_replica_multi_az`
+- Unified configuration: `read_replica_count`, `read_replica_port`, `read_replica_multi_az`
 
 > [!note]
-> To enable Read Replicas, AWS RDS requires the main database's Backup Retention Period (`rds_postgres_backup_retention_period`) to be set to 1 or higher.
-
-Once provisioned you'll see a new output added at the end of the Terraform process. Of note is the output from this is the `rds_read_replica_hosts` output (also `rds_praefect_read_replica_hosts` / `rds_geo_read_replica_hosts`), which contains the addresses of the read replicas that in turn can be used for [Database Load Balancing configuration later](#configuring-with-ansible-1).
+> To enable Read Replicas, set backup retention period to 1 or higher.
 
 ##### AWS RDS - Geo
 
-When setting up Geo with RDS you must specify some extra settings to enable replication from the primary RDS instance to the secondary.
+For Geo deployments with cross-region replication:
 
-- `rds_postgres_backup_retention_period` (**Primary site**) must have a value (in days) greater than 0 to enable it as a replication source.
-- `rds_postgres_replication_database_arn` (**Secondary site**) must be set to the ARN for the primary sites RDS instance. The ARN will be shown in the output of the primary sites Terraform run.
-- `rds_postgres_kms_key_arn` (**Secondary site**) should be set to the same KMS key ARN that was used to encrypt the primary sites RDS instance, the key will be shown in the output of the primary sites Terraform run.
+- **Primary site**: Set backup retention period to 1 or higher
+- **Secondary site**: Configure replication source ARN and region-appropriate KMS key
 
-When using RDS with Geo, the secondary site will require separate RDS instance(s) for Praefect Postgres and the Geo Tracking databases. The Tracking database and Praefect database can share a single separate instance or can be separated out into their own instances.
+Configure Geo replication using:
 
-To configure these you can copy all the same variables listed [above](#aws-rds) and replace `rds_postgres_*` with `rds_praefect_postgres_*` or `rds_geo_tracking_postgres_*` respectively with the following considerations:
-
-- If you want the 2 databases to share a single instance then you only need to specify `rds_praefect_postgres_*` settings, which will also be used for the Geo Tracking database.
-- If you're not using Gitaly Cluster (and therefore Praefect) then you must provide `rds_geo_tracking_postgres_*` settings, where the Geo tracking database will then be placed.
-- Similar to the main Postgres instance the only properties required to create an instance are `*_instance_type` and `*_password`.
-
-The primary site can use a single RDS instance to house both the main GitLab database and the Praefect database. With this configuration you can avoid having 2 RDS instances for the primary site to reduce costs. The Praefect database will be replicated over to the secondary site and ignored.
+- Individual configuration: `rds_postgres_replication_database_arn`, `rds_postgres_kms_key_arn`
+- Unified configuration: `replicate_source_arn`, `kms_key_arn`
 
 #### GCP Cloud SQL
 

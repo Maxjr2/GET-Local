@@ -1253,6 +1253,18 @@ variable "rds_postgres_read_replica_deletion_protection" {
   default = false
 }
 
+variable "rds_postgres_performance_insights_enabled" {
+  description = "Enables AWS RDS Performance Insights"
+  type        = bool
+  default     = null
+}
+variable "rds_postgres_performance_insights_retention_period" {
+  description = "Sets the retention period for AWS RDS Performance Insights"
+  type        = number
+  default     = null
+}
+
+
 ## Praefect PostgreSQL
 variable "rds_praefect_postgres_instance_type" {
   type    = string
@@ -1541,16 +1553,68 @@ variable "rds_geo_tracking_snapshot_identifier" {
   default     = null
 }
 
-## RDS Performance Insights
-variable "rds_postgres_performance_insights_enabled" {
-  description = "Enables AWS RDS Performance Insights"
-  type        = bool
-  default     = null
-}
-variable "rds_postgres_performance_insights_retention_period" {
-  description = "Sets the retention period for AWS RDS Performance Insights"
-  type        = number
-  default     = null
+## [Toolkit Beta] Unified RDS PostgreSQL
+variable "rds_databases" {
+  description = "Map of RDS PostgreSQL databases to create"
+  type = map(object({
+    # Main configuration
+    instance_type       = string
+    username            = optional(string, "postgres")
+    password_wo         = optional(string, null)
+    password_wo_version = optional(number, 1)
+    version             = optional(string, "16")
+    db_name             = optional(string, null)
+    port                = optional(number, 5432)
+
+    # Storage
+    allocated_storage     = optional(number, 100)
+    max_allocated_storage = optional(number, 1000)
+    storage_type          = optional(string, "gp3")
+    iops                  = optional(number, null)
+
+    # High availability & reliability
+    multi_az            = optional(bool, null)
+    deletion_protection = optional(bool, null)
+
+    # Networking
+    subnet_ids           = optional(list(string), null)
+    default_subnet_count = optional(number, 2)
+
+    # Security
+    allowed_cidr_blocks                 = optional(list(string), [])
+    kms_key_arn                         = optional(string, null)
+    ca_cert_identifier                  = optional(string, null)
+    iam_database_authentication_enabled = optional(bool, null)
+
+    # Backup & Maintenance settings
+    backup_retention_period    = optional(number, null)
+    backup_window              = optional(string, null)
+    delete_automated_backups   = optional(bool, null)
+    maintenance_window         = optional(string, null)
+    auto_minor_version_upgrade = optional(bool, false)
+
+    # Monitoring & logging
+    enabled_cloudwatch_logs_exports       = optional(list(string), [])
+    monitoring_interval                   = optional(number, null)
+    monitoring_role_arn                   = optional(string, null)
+    performance_insights                  = optional(bool, null)
+    performance_insights_retention_period = optional(number, null)
+
+    # Read replica configuration
+    read_replica_count               = optional(number, 0)
+    read_replica_port                = optional(number, null)
+    read_replica_multi_az            = optional(bool, null)
+    read_replica_deletion_protection = optional(bool, null)
+
+    # Advanced options
+    lifecycle_support    = optional(string, "open-source-rds-extended-support-disabled")
+    create_timeout       = optional(string, "2h")
+    snapshot_identifier  = optional(string, null)
+    replicate_source_arn = optional(string, null)
+    parameters           = optional(map(any), {})
+    custom_tags          = optional(map(string), {})
+  }))
+  default = {}
 }
 
 ## Redis
