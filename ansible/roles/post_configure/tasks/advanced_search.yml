@@ -7,7 +7,7 @@
           loop:
             - gitlab-rake gitlab:elastic:delete_index
             - gitlab-rake gitlab:elastic:clear_index_status
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
           delegate_facts: true
           become: true
           register: delete_result
@@ -27,7 +27,7 @@
                 ApplicationSetting.last.update(elasticsearch_password: '')
               end
             "
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
           delegate_facts: true
           become: true
 
@@ -56,7 +56,7 @@
 
               ApplicationSetting.last.update(advanced_search_settings)
             "
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
           delegate_facts: true
           become: true
           no_log: true
@@ -76,13 +76,13 @@
       block:
         - name: Index all GitLab data
           command: gitlab-rake gitlab:elastic:index
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
           delegate_facts: true
           become: true
 
         - name: Wait until indexing is complete
           command: gitlab-rake gitlab:elastic:index_projects_status
-          delegate_to: "{{ groups['gitlab_rails'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
           delegate_facts: true
           become: true
           register: index_status_result
@@ -95,7 +95,7 @@
 
     - name: Enable Advanced Search
       command: "gitlab-rails runner 'ApplicationSetting.last.update(elasticsearch_search: true)'"
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
       delegate_facts: true
       become: true
       when:

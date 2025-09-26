@@ -2,7 +2,7 @@
   block:
     - name: Disable Write to "authorized_keys" file setting via GitLab Rails
       command: "gitlab-rails runner 'ApplicationSetting.last.update(authorized_keys_enabled: false)'"
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
       delegate_facts: true
       become: true
       when: "'gitlab_rails' in groups"
@@ -34,7 +34,7 @@
     - name: Enable Incremental Logging (<17.11)
       command: "gitlab-rails runner 'Feature.enable(:ci_enable_live_trace)'"
       when: gitlab_version != '' and gitlab_version is version('17.11', '<')
-  delegate_to: "{{ groups['gitlab_rails'][0] }}"
+  delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
   delegate_facts: true
   become: true
   tags: reconfigure
@@ -47,7 +47,7 @@
   block:
     - name: Enable 'gitlab_environment_toolkit_instance' setting via GitLab Rails
       command: "gitlab-rails runner 'ApplicationSetting.last.update(gitlab_environment_toolkit_instance: true)'"
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
       delegate_facts: true
       become: true
       when: "'gitlab_rails' in groups"

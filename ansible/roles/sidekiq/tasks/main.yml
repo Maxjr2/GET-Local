@@ -106,7 +106,7 @@
       stat:
         path: "/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key"
       register: gitlab_registry_key_file_path
-      delegate_to: "{{ groups['gitlab_rails_primary'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails_primary'][0] | default(omit) }}"
       run_once: true
 
     - name: Process GitLab Registry Key if it exists
@@ -115,7 +115,7 @@
           slurp:
             path: "/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key"
           register: gitlab_registry_key_slurp
-          delegate_to: "{{ groups['gitlab_rails_primary'][0] }}"
+          delegate_to: "{{ groups['gitlab_rails_primary'][0] | default(omit) }}"
           no_log: true
           run_once: true
 

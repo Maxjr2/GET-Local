@@ -41,7 +41,7 @@
     - name: Get latest PostgreSQL leader
       command: gitlab-ctl get-postgresql-primary
       register: postgres_leader_int_address
-      delegate_to: "{{ groups['postgres'][0] }}"
+      delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
       delegate_facts: true
       become: true
 
