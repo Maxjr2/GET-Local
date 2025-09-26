@@ -198,7 +198,6 @@ locals {
   default_vpc_cidr_block = local.default_network ? aws_default_vpc.default[0].cidr_block : null
   default_subnet_ids     = local.default_network ? data.aws_subnets.defaults[0].ids : null
 
-
   vpc_id          = local.create_network ? aws_vpc.gitlab_vpc[0].id : var.vpc_id
   vpc_cidr_block  = local.create_network ? aws_vpc.gitlab_vpc[0].cidr_block : null
   subnet_pub_ids  = local.create_network ? aws_subnet.gitlab_vpc_sn_pub[*].id : var.subnet_pub_ids
