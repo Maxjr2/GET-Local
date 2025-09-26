@@ -12,7 +12,7 @@
         gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
       with_inventory_hostnames:
         - "{{ site_group_name }}_gitlab_rails_secondary"
-      delegate_to: "{{ node }}"
+      delegate_to: "{{ node | default(omit) }}"
       register: secondary_result
       loop_control:
         loop_var: node

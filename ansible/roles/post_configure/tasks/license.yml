@@ -17,7 +17,7 @@
 
           License.current&.plan != nil ? (print License.current&.plan) : exit(1)
         "
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
       delegate_facts: true
       become: true
       no_log: true

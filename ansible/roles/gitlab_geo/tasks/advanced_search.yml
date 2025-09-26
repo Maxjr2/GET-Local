@@ -38,7 +38,7 @@
           env_settings = ApplicationSetting.last.attributes.select {|k,v| !k.include?('encrypted') }
           print env_settings.to_json
         "
-      delegate_to: "{{ groups['gitlab_rails'][0] }}"
+      delegate_to: "{{ groups['gitlab_rails'][0] | default(omit) }}"
       delegate_facts: true
       become: true
       register: env_settings_response_rails
