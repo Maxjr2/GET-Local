@@ -24,8 +24,8 @@
             - name: Recovery Enable Sites - Set calculated Webservice / Sidekiq max replica counts
               set_fact:
                 # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
-                calculated_webservice_max_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, 'true') }}"
-                calculated_sidekiq_max_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), 'true') }}"
+                calculated_webservice_max_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, true) }}"
+                calculated_sidekiq_max_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), true) }}"
           when:
             - "'gitaly' in groups"
             - (gitlab_charts_webservice_max_replicas == '' or gitlab_charts_sidekiq_max_replicas == '')

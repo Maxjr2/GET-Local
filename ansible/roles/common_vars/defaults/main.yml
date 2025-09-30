@@ -296,7 +296,7 @@ opensearch_urls: "{{ (opensearch_int_addrs | map('regex_replace', '^(.*)$', 'htt
 
 advanced_search_hosts: "{{ opensearch_urls }}"
 advanced_search_external: "{{ 'opensearch' not in groups and advanced_search_hosts != [] }}"
-advanced_search_clean_install: "{{ lookup('env','ADVANCED_SEARCH_CLEAN_INSTALL') | default('false', true) }}" # Deprecated
+advanced_search_clean_install: "{{ lookup('env','ADVANCED_SEARCH_CLEAN_INSTALL') | default(false, true) }}" # Deprecated
 advanced_search_reconfigure: "{{ lookup('env','ADVANCED_SEARCH_RECONFIGURE') | default(advanced_search_clean_install, true) }}"
 advanced_search_enable: true
 advanced_search_username: ''
