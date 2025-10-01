@@ -212,7 +212,7 @@
       kubernetes.core.helm:
         name: gitlab
         chart_ref: "{{ gitlab_charts_ref }}"
-        chart_version: "{{ gitlab_charts_version | default(None) }}"
+        chart_version: "{{ gitlab_charts_version | default(omit) }}"
         release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
         values: "{{ gitlab_charts_values }}"
       when: not gitlab_operator

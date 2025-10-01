@@ -178,7 +178,7 @@
   kubernetes.core.helm:
     name: gitlab-operator
     chart_ref: "{{ gitlab_charts_repo_name }}/gitlab-operator"
-    chart_version: "{{ gitlab_operator_version | default('') }}"
+    chart_version: "{{ gitlab_operator_version | default(omit) }}"
     namespace: "{{ gitlab_cloud_native_release_namespace }}"
     values: "{{ gitlab_operator_values if gitlab_operator_values else omit }}"
   tags:

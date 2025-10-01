@@ -26,12 +26,12 @@ prometheus:
     additionalScrapeConfigs:
 {% if kube_prometheus_stack_charts_prometheus_scrape_config_setup %}
 {% if 'consul' in groups %}
-      {{ lookup('template', 'prometheus_scrape_configs/consul_omnibus.yml.j2') | default('') | indent(width=6) }}
+      {{ lookup('template', 'prometheus_scrape_configs/consul_omnibus.yml.j2') | default('', true) | indent(width=6) }}
 {% elif (groups | select('match', 'gitaly|postgres|redis.*') | length > 0) %}
-      {{ lookup('template', 'prometheus_scrape_configs/static_omnibus.yml.j2') | default('') | indent(width=6) }}
+      {{ lookup('template', 'prometheus_scrape_configs/static_omnibus.yml.j2') | default('', true) | indent(width=6) }}
 {% endif %}
-      {{ lookup('template', 'prometheus_scrape_configs/static_omnibus_non_discoverable.yml.j2') | default('') | indent(width=6) }}
-      {{ lookup('template', 'prometheus_scrape_configs/static_non_omnibus.yml.j2') | default('') | indent(width=6) }}
+      {{ lookup('template', 'prometheus_scrape_configs/static_omnibus_non_discoverable.yml.j2') | default('', true) | indent(width=6) }}
+      {{ lookup('template', 'prometheus_scrape_configs/static_non_omnibus.yml.j2') | default('', true) | indent(width=6) }}
 {% endif %}
 {% for custom in kube_prometheus_stack_charts_custom_scrape_config %}
       - {{ custom }}

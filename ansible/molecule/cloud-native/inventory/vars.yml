@@ -6,6 +6,7 @@ all:
 
     kubeconfig_setup: true
     cloud_native_hybrid_environment: true
+    cloud_native_hybrid_monitoring_setup: true
     gitlab_charts_show_values: true
 
     gitlab_charts_gitaly_node_selector: gitlab
