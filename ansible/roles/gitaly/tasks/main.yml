@@ -50,7 +50,7 @@
         - { content: "{{ gitaly_ssl_cert }}", dest_path: "/etc/gitlab/ssl/gitaly_cert.pem" }
         - { content: "{{ gitaly_ssl_key }}", dest_path: "/etc/gitlab/ssl/gitaly_key.pem" }
         - { content: "{{ gitaly_ssl_ca }}", dest_path: "/etc/gitlab/trusted-certs/gitaly_ca.pem" }
-      when: item.content | default('') | length > 0
+      when: item.content | default('', true) | length > 0
 
     - name: Copy Praefect Internal SSL CA file if configured
       copy:

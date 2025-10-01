@@ -13,10 +13,10 @@ prometheus['flags'] = {
 prometheus['scrape_configs'] = [
 {% if monitor_prometheus_scrape_config_setup %}
 {% if 'consul' not in groups %}
-  {{ lookup('template', 'prometheus_scrape_configs/static_omnibus.rb.j2') | default('') | indent(width=2) }}
+  {{ lookup('template', 'prometheus_scrape_configs/static_omnibus.rb.j2') | default('', true) | indent(width=2) }}
 {% endif %}
-  {{ lookup('template', 'prometheus_scrape_configs/static_omnibus_non_discoverable.rb.j2') | default('') | indent(width=2) }}
-  {{ lookup('template', 'prometheus_scrape_configs/static_non_omnibus.rb.j2') | default('') | indent(width=2) }}
+  {{ lookup('template', 'prometheus_scrape_configs/static_omnibus_non_discoverable.rb.j2') | default('', true) | indent(width=2) }}
+  {{ lookup('template', 'prometheus_scrape_configs/static_non_omnibus.rb.j2') | default('', true) | indent(width=2) }}
 {% endif %}
   {{ monitor_custom_prometheus_scrape_config }}
 ]

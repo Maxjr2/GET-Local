@@ -3,7 +3,7 @@
 kubeconfig_setup: false
 
 gcp_backups_service_account_key_file: ""
-gcp_backups_service_account_key_json: "{{ (lookup('file', gcp_backups_service_account_key_file) | string) if gcp_backups_service_account_key_file != '' }}"
+gcp_backups_service_account_key_json: "{{ (lookup('file', gcp_backups_service_account_key_file) | string) if gcp_backups_service_account_key_file != '' else '' }}"
 gcp_zone: ""
 gcp_gke_location: "{{ gcp_zone }}"
 gcp_gke_workload_identity_setup: false
