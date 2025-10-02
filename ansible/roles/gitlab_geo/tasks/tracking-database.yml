@@ -118,7 +118,7 @@
                   - name: PGHOST
                     value: "{{ geo_tracking_postgres_host }}"
                   - name: PGPORT
-                    value: "{{ geo_tracking_postgres_port }}"
+                    value: "{{ geo_tracking_postgres_port | string }}"
                   - name: PGDATABASE
                     value: "template1"
                   - name: GL_PGUSER

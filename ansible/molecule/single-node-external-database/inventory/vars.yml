@@ -1,0 +1,15 @@
+all:
+  vars:
+    external_url: "http://docker"
+    cloud_provider: none
+
+    gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
+
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
+
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+
+    postgres_host: "172.18.0.3"
+    postgres_username: "postgres"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"

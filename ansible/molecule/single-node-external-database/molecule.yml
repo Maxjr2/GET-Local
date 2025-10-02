@@ -1,0 +1,62 @@
+---
+driver:
+  name: docker
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      hosts: ./inventory
+  config_options:
+    defaults:
+      display_skipped_hosts: false
+      stdout_callback: yaml
+  env:
+    ANSIBLE_ROLES_PATH: ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:../../roles
+    ANSIBLE_COLLECTIONS_DUPLICATE_WARNINGS: false
+    MOLECULE_DISPLAY_MISSING_SCHEMA: false
+    ANSIBLE_GALAXY_DISPLAY_SKIPPED: false
+platforms:
+  - name: gitlab-rails-1
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2404}-ansible:latest"
+    pre_build_image: true
+    privileged: true
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
+    tmpfs:
+      - /run
+      - /tmp
+      - /run/lock
+    exposed_ports:
+      - 80/udp
+      - 80/tcp
+    published_ports:
+      - 0.0.0.0:80:80/udp
+      - 0.0.0.0:80:80/tcp
+  - name: aux-db
+    image: postgres:latest
+    command: ["docker-entrypoint.sh", "postgres"]
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
+    exposed_ports:
+      - 5432/tcp
+    published_ports:
+      - 0.0.0.0:5432:5432/tcp
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${MOLECULE_POSTGRES_ADMIN_PASSWORD}"
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

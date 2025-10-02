@@ -1,26 +1,5 @@
 ---
-- name: Gather facts for Omnibus PostgreSQL cluster
-  block:
-    - name: Get latest PostgreSQL leader
-      command: gitlab-ctl get-postgresql-primary
-      register: postgres_leader_int_address
-      delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
-      delegate_facts: true
-      become: true
-
-    - name: Set PostgreSQL leader IP and Port
-      set_fact:
-        postgres_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
-        postgres_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
-  when:
-    - "'postgres' in groups and groups['postgres'] | length > 1"
-    - not postgres_external
-  tags:
-    - reconfigure
-    - charts
-    - charts_values
-
-- name: Configure database on externally managed PostgreSQL
+- name: Configure externally managed PostgreSQL
   block:
     - name: Configure Database Preparation admin password secret
       kubernetes.core.k8s:
@@ -29,18 +8,17 @@
           kind: Secret
           type: Opaque
           metadata:
-            name: "gitlab-postgres-admin-password"
+            name: "{{ database_label }}-admin-password"
             namespace: "{{ gitlab_cloud_native_release_namespace }}"
           stringData:
-            password: "{{ postgres_admin_password }}"
-      when: postgres_admin_password != postgres_password
+            password: "{{ database_admin_password }}"
       no_log: true
       diff: false
 
     - name: Deploy psql pod
       kubernetes.core.k8s:
         kind: Pod
-        name: "gitlab-psql"
+        name: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         state: present
         definition:
@@ -52,36 +30,36 @@
                 args: ["-c", "while true; do sleep 30; done"]
                 env:
                   - name: PGUSER
-                    value: "{{ postgres_admin_username }}"
+                    value: "{{ database_admin_user }}"
                   - name: PGPASSWORD
                     valueFrom:
                       secretKeyRef:
-                        name: "{{ 'gitlab-postgres-admin-password' if postgres_admin_password != postgres_password else 'gitlab-postgres-password' }}"
+                        name: "{{ database_label }}-admin-password"
                         key: password
                   - name: PGHOST
-                    value: "{{ postgres_host }}"
+                    value: "{{ database_host }}"
                   - name: PGPORT
-                    value: "{{ postgres_port }}"
+                    value: "{{ database_port | string }}"
                   - name: PGDATABASE
                     value: "template1"
                   - name: GL_PGUSER
-                    value: "{{ postgres_username.split('@')[0] }}"
+                    value: "{{ database_user }}"
                   - name: GL_PGPASSWORD
                     valueFrom:
                       secretKeyRef:
-                        name: gitlab-postgres-password
+                        name: "{{ database_password_secret }}"
                         key: password
             nodeSelector:
-              workload: "support"
+              workload: "{{ gitlab_charts_supporting_node_selector }}"
       no_log: true
       diff: true
 
     - name: Check psql pod is ready
-      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql -n {{ gitlab_cloud_native_release_namespace }}"
+      command: "kubectl wait --for=condition=ready --timeout=360s pod/{{ database_label }} -n {{ gitlab_cloud_native_release_namespace }}"
 
-    - name: Create Database User if missing
+    - name: Create Database User for {{ database_label }}
       kubernetes.core.k8s_exec:
-        pod: "gitlab-psql"
+        pod: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           sh -c "psql -c \"CREATE USER $GL_PGUSER WITH PASSWORD '$GL_PGPASSWORD' CREATEDB;\""
@@ -90,12 +68,12 @@
         - database_user_create_result.rc != 0
         - ("already exists" not in database_user_create_result.stderr)
 
-    - name: Create Database if missing
+    - name: Create Database for {{ database_label }}
       kubernetes.core.k8s_exec:
-        pod: "gitlab-psql"
+        pod: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
-          sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ postgres_database_name }};"'
+          sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ database_name }};"'
       register: database_create_result
       failed_when:
         - database_create_result.rc != 0
@@ -103,18 +81,19 @@
 
     - name: Enable required PostgreSQL extensions
       kubernetes.core.k8s_exec:
-        pod: "gitlab-psql"
+        pod: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
-          psql -c "CREATE EXTENSION IF NOT EXISTS amcheck;
-          CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE EXTENSION IF NOT EXISTS btree_gist;
-          CREATE EXTENSION IF NOT EXISTS plpgsql;"
+          psql -c "CREATE EXTENSION IF NOT EXISTS {{ item }};"
+      loop: "{{ database_extensions }}"
+      loop_control:
+        loop_var: item
+      when: database_extensions is defined
   always:
     - name: Remove psql pod
       kubernetes.core.k8s:
         kind: Pod
-        name: "gitlab-psql"
+        name: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         state: absent
       no_log: true
@@ -123,17 +102,9 @@
     - name: Remove Database Preparation admin password secret
       kubernetes.core.k8s:
         kind: Secret
-        name: "gitlab-postgres-admin-password"
+        name: "{{ database_label }}-admin-password"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         state: absent
-      when: postgres_admin_password != postgres_password
       no_log: true
       diff: false
-  when:
-    - postgres_external
-    - postgres_external_prep
-    - cloud_native_hybrid_geo_role != 'secondary'
-  tags:
-    - reconfigure
-    - db_migrate
-    - postgres_external_prep
+

@@ -22,6 +22,7 @@
     FF_NETWORK_PER_BUILD: true
   interruptible: true
   before_script:
+    - apt-get update && apt-get install -y rsync
     - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
     - ./get-docker.sh
     - pip install molecule docker molecule-plugins[docker]
@@ -189,3 +190,15 @@ rockylinux9:os-verification:
 # - saas-linux-large-amd64
 # - saas-linux-xlarge-amd64
 # - saas-linux-2xlarge-amd64
+
+## Ad-hoc Jobs
+
+adhoc-molecule-scenario:
+  extends: .molecule
+  variables:
+    MOLECULE_SCENARIO: "single-node"
+  rules:
+    - !reference [.molecule-skip-jobs, rules]
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true

@@ -124,6 +124,22 @@ container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gc
 container_registry_external_url: "https://registry.{{ external_host }}"
 container_registry_external_host: "{{ container_registry_external_url | regex_replace('^https?:\/\/') }}"
 
+## [Toolkit Beta] Container Registry Metadata Database. Known limitations, see https://docs.gitlab.com/administration/packages/container_registry_metadata_database/#known-limitations
+container_registry_database_external: "{{ 'postgres' not in groups and container_registry_database_host != '' }}"
+
+container_registry_database_enabled: false
+container_registry_database_configure: false
+container_registry_database_host: "{{ postgres_host }}"
+container_registry_database_port: "{{ postgres_port }}"
+container_registry_database_name: "registry"
+container_registry_database_admin_username: "{{ container_registry_database_username if container_registry_database_host != postgres_host else postgres_admin_username }}"
+container_registry_database_admin_password: "{{ container_registry_database_password if container_registry_database_host != postgres_host else postgres_admin_password }}"
+container_registry_login_database: "{{ postgres_login_database }}"
+container_registry_maintenance_database: "{{ postgres_maintenance_database }}"
+container_registry_database_username: "registry"
+container_registry_database_password: ""
+container_registry_database_ssl_mode: "prefer"
+
 ################################################################################
 ## GitLab Component Settings (Omnibus)
 ################################################################################
@@ -319,7 +335,7 @@ gitlab_cloud_native_release_namespace: "{{ gitlab_charts_release_namespace }}"
 gitlab_charts_release_namespace: default
 kubectl_custom_context: ""
 
-# [Toolkit Beta] Operator Settings - Known limitations, see https://docs.gitlab.com/operator/#known-issues 
+# [Toolkit Beta] Operator Settings - Known limitations, see https://docs.gitlab.com/operator/#known-issues
 gitlab_operator: false
 
 # Geo

@@ -90,6 +90,18 @@ registry_external_url "{{ container_registry_external_url }}"
 
 registry['debug_addr'] = "0.0.0.0:5001" # https://docs.gitlab.com/administration/monitoring/prometheus/registry_exporter/
 
+{% if (gitlab_version == '' or gitlab_version is version('18.3', '>=')) and container_registry_database_configure %}
+registry['database'] = {
+  'enabled' => {{ container_registry_database_enabled | lower }},
+  'host' => "{{ container_registry_database_host }}",
+  'port' => {{ container_registry_database_port }},
+  'user' => "{{ container_registry_database_username }}",
+  'password' => "{{ container_registry_database_password }}",
+  'dbname' => "{{ container_registry_database_name }}",
+  'sslmode' => '{{ container_registry_database_ssl_mode }}'
+}
+{% endif %}
+
 # Registry NGINX SSL Config
 {% if gitlab_rails_nginx_external_ssl_user %}
 ## External NGINX SSL - Single Node (User Provided)
