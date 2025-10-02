@@ -752,3 +752,14 @@ output "kubernetes" {
     "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
   }
 }
+
+output "kubernetes_userdata_config" {
+  description = "EKS configuration for building custom AL2023 userdata templates"
+  value = {
+    cluster_endpoint = try(aws_eks_cluster.gitlab_cluster[0].endpoint, "")
+    cluster_ca_data  = try(aws_eks_cluster.gitlab_cluster[0].certificate_authority[0].data, "")
+    service_cidr     = try(aws_eks_cluster.gitlab_cluster[0].kubernetes_network_config[0].service_ipv4_cidr, "")
+  }
+  sensitive = true
+}
+
