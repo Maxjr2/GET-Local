@@ -8,10 +8,10 @@
   environment: "{{ remote_env }}"
   become: true
   roles:
-    - { role: gitlab_geo, when: "groups | select('match', 'gitaly|gitlab_rails') | length > 0" }
+    - { role: gitlab_geo, when: "groups | select('match', 'gitlab_rails|postgres|sidekiq') | length > 0" }
 
 # Cloud Native with no Omnibus backends
 - hosts: localhost
   gather_facts: false
   roles:
-    - { role: gitlab_geo, when: "groups | select('match', 'gitaly|gitlab_rails') | length == 0" }
+    - { role: gitlab_geo, when: "groups | select('match', 'gitlab_rails|postgres|sidekiq') | length == 0" }

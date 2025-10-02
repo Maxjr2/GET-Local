@@ -10,7 +10,7 @@
       import_role:
         name: gitlab_geo
         tasks_from: recovery
-      when: groups | select('match', 'gitaly|gitlab_rails') | length > 0
+      when: groups | select('match', 'gitlab_rails|postgres|sidekiq') | length > 0
 
 # Cloud Native with no Omnibus backends
 - hosts: localhost
@@ -21,4 +21,4 @@
       import_role:
         name: gitlab_geo
         tasks_from: recovery
-      when: groups | select('match', 'gitaly|gitlab_rails') | length == 0
+      when: groups | select('match', 'gitlab_rails|postgres|sidekiq') | length == 0
