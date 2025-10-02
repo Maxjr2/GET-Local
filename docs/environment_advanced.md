@@ -451,6 +451,36 @@ For all setups, the below settings configure how the service and dependents are 
 > [!note]
 > When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates), the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
 
+### Container Registry Metadata Database ([Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support))
+
+The Toolkit can be configured to deploy the [Container Registry Metadata Database](https://docs.gitlab.com/administration/packages/container_registry_metadata_database/).
+
+>>> [!warning] Container Registry Metadata Database limitations
+Take note of the following limitations when using the Container Registry Metadata Database:
+
+- The metadata database can only be deployed when using an externally managed database.
+- The database can be deployed alongside the main GitLab database, but for Geo deployments the database must be located separately.
+- The metadata database was introduced in 17.5, but due to changes in the process and config, the Toolkit only supports from 18.3 onwards.
+>>>
+
+The following settings are available to configure the metadata database:
+
+- `container_registry_database_configure` - Should the metadata database be configured by the Toolkit. Defaults to `false`.
+- `container_registry_database_enabled` - Should the database be enabled, this will default to `false` to allow for the import process to be completed. Can be set to `true` when being deployed to a new instance.
+- `container_registry_database_host` - Host for the metadata database. Will default to the main GitLab database instance.
+- `container_registry_database_port` - The port of the PostgreSQL instance. Should only be changed if the instance isn't running with the default port. Default is `5432`.
+- `container_registry_database_name` - Name of the database to be created and used for the metadata database. Defaults to `registry`.
+- `container_registry_database_admin_username` - The admin user to authenticate with the PostgreSQL instance. Required when using a different instance than the main GitLab database.
+- `container_registry_database_admin_password` - The admin users password for authentication with the PostgreSQL instance. Required when using a different instance than the main GitLab database.
+- `container_registry_login_database` - The initial database that GET connects to when creating the new user. Defaults to `template1`.
+- `container_registry_maintenance_database` - The initial database that GET connects to when creating the new database. Defaults to `postgres`.
+- `container_registry_database_username` - Username for the user to be created and used for authentication by GitLab with the metadata database. Defaults to `registry`.
+- `container_registry_database_password` - Password for the metadata database user being created for authentication by GitLab with the metadata database.
+- `container_registry_database_ssl_mode` - See the PostgreSQL documentation for additional information https://www.postgresql.org/docs/16/libpq-ssl.html. Defaults to `prefer`. If certificates need to be provided this should be done via [custom config](environment_advanced.md#custom-config).
+
+> [!note]
+> When deploying the metadata database for a new deployment the the database can be enabled straight away. For existing deployments, the database should be disabled initially so that the required import process can be followed, once complete the database can be enabled.
+
 ## GitLab Pages
 
 The Toolkit can configure [GitLab Pages](https://docs.gitlab.com/administration/pages/) with wildcard domains for both Linux Package (Omnibus) and Cloud Native environments. The settings to configure this are as follows:
@@ -469,7 +499,7 @@ For additional Pages settings such as access control, single-domain setup, or ot
 While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
 
 >>> [!important]
-[Support for this feature is limited](https://about.gitlab.com/support/statement-of-support/#git-lab-environment-toolkit) due to the vast potential number of permutations. 
+[Support for this feature is limited](https://about.gitlab.com/support/statement-of-support/#git-lab-environment-toolkit) due to the vast potential number of permutations.
 
 In particular, be aware of the following important callouts:
 

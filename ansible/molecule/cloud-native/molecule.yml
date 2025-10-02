@@ -16,19 +16,19 @@ provisioner:
     MOLECULE_DISPLAY_MISSING_SCHEMA: false
     ANSIBLE_GALAXY_DISPLAY_SKIPPED: false
 platforms:
-  - name: IGNORE-ME
-    image: "alpine:latest"
-    pre_build_image: true
-    command: ""
-    docker_networks:
-      - name: molecule_network
-        ipam_config:
-          - subnet: 192.168.49.0/24
-            gateway: 192.168.49.1
+  - name: aux-db
+    image: postgres:latest
+    command: ["docker-entrypoint.sh", "postgres"]
     network_mode: "molecule_network"
     networks:
       - name: molecule_network
-        ipv4_address: 192.168.49.50
+    exposed_ports:
+      - 5432/tcp
+    published_ports:
+      - 0.0.0.0:5432:5432/tcp
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${MOLECULE_POSTGRES_ADMIN_PASSWORD}"
 scenario:
   test_sequence:
     - dependency

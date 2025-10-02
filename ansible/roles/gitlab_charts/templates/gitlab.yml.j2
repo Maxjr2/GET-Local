@@ -565,6 +565,20 @@ certmanager-issuer:
 redis:
   install: false
 registry:
+{% if (gitlab_version == '' or gitlab_version is version('18.3', '>=')) and (container_registry_database_configure and container_registry_enable) %}
+  database:
+    enabled: {{ container_registry_database_enabled }}
+    host: {{ container_registry_database_host }}
+    port: {{ container_registry_database_port }}
+    name: {{ container_registry_database_name }}
+    user: {{ container_registry_database_username }}
+    password:
+      secret: gitlab-container-registry-db-password
+      key: password
+    migrations:
+      enabled: true
+    sslmode: "{{ container_registry_database_ssl_mode }}"
+{% endif %}
 {% if container_registry_enable %}
   storage:
     secret: gitlab-container-registry-object-storage-key

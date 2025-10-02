@@ -9,6 +9,10 @@ all:
     cloud_native_hybrid_monitoring_setup: true
     gitlab_charts_show_values: true
 
+    postgres_host: "172.18.0.2"
+    postgres_username: "postgres"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+
     gitlab_charts_gitaly_node_selector: gitlab
     gitlab_charts_sidekiq_node_selector: gitlab
     gitlab_charts_supporting_node_selector: gitlab
@@ -36,7 +40,6 @@ all:
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
     gitaly_token: "{{ lookup('env','MOLECULE_GITALY_TOKEN') }}"
-    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
     redis_password: "{{ lookup('env','MOLECULE_REDIS_PASSWORD') }}"
 
     minio_access_key: "{{ lookup('env','MOLECULE_MINIO_ACCESS_KEY') }}"

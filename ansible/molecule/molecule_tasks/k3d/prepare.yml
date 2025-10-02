@@ -8,7 +8,8 @@
       command: |
         k3d cluster create {{ molecule_cluster_name }} \
           --network molecule_network \
-          --port "80:80@loadbalancer"
+          --port "80:80@loadbalancer" \
+          --port "443:443@loadbalancer"
 
     - name: Add workload label
       command: kubectl label nodes k3d-{{ molecule_cluster_name }}-server-0 workload=gitlab
@@ -73,6 +74,29 @@
               aws_signature_version: "4"
               endpoint: "http://minio.default.svc.cluster.local:9000"
               path_style: "true"
+
+    - name: Configure MinIO secret - Container Registry
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          kind: Secret
+          type: Opaque
+          metadata:
+            name: "gitlab-container-registry-object-storage-key"
+            namespace: default
+          stringData:
+            config: |-
+              s3:
+                v4auth: true
+                regionendpoint: "http://minio.default.svc.cluster.local:9000"
+                pathstyle: true
+                region: eu-west-1
+                bucket: gitlab
+                accesskey: "{{ minio_access_key }}"
+                secretkey: "{{ minio_secret_key }}"
+      when:
+        - container_registry_enable is defined
+        - container_registry_enable
 
     - name: Configure MinIO secret - Backups
       kubernetes.core.k8s:

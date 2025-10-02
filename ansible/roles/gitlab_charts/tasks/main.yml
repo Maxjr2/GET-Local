@@ -69,13 +69,64 @@
     - charts
     - cloud_provider_prep
 
-- name: Run any database prep tasks
-  import_tasks: database_prep.yml
+- name: Gather facts for Omnibus PostgreSQL cluster
+  block:
+    - name: Get latest PostgreSQL leader for running Migrations
+      command: gitlab-ctl get-postgresql-primary
+      register: postgres_leader_int_address
+      delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
+      delegate_facts: true
+      become: true
+
+    - name: Set PostgreSQL leader IP and Port
+      set_fact:
+        postgres_migrations_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
+        postgres_migrations_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
+  when:
+    - "'postgres' in groups and groups['postgres'] | length > 1"
+    - not postgres_external
   tags:
     - reconfigure
     - charts
-    - secrets
-    - database_prep
+    - charts_values
+
+- name: Run external PostgreSQL database prep
+  import_tasks: external_database_prep.yml
+  vars:
+    database_label: gitlab-psql
+    database_host: "{{ postgres_host }}"
+    database_port: "{{ postgres_port }}"
+    database_admin_user: "{{ postgres_admin_username }}"
+    database_admin_password: "{{ postgres_admin_password }}"
+    database_user: "{{ postgres_username.split('@')[0] }}"
+    database_password_secret: gitlab-postgres-password
+    database_name: "{{ postgres_database_name }}"
+    database_extensions: ["amcheck", "pg_trgm", "btree_gist", "plpgsql"]
+  tags:
+    - reconfigure
+    - db_migrate
+    - postgres_external_prep
+  when:
+    - postgres_external
+    - postgres_external_prep
+    - cloud_native_hybrid_geo_role != 'secondary'
+
+- name: Run external Container Registry database prep
+  import_tasks: external_database_prep.yml
+  vars:
+    database_label: gitlab-container-registry-psql
+    database_host: "{{ container_registry_database_host }}"
+    database_port: "{{ container_registry_database_port }}"
+    database_admin_user: "{{ container_registry_database_admin_username }}"
+    database_admin_password: "{{ container_registry_database_admin_password }}"
+    database_user: "{{ container_registry_database_username }}"
+    database_password_secret: gitlab-container-registry-db-password
+    database_name: "{{ container_registry_database_name }}"
+  tags: container_registry
+  when:
+    - container_registry_enable
+    - container_registry_database_configure
+    - container_registry_database_external
 
 - name: Calculate Webservice / Sidekiq pod replica counts as required
   block:

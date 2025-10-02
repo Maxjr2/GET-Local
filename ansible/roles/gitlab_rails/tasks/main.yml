@@ -57,50 +57,47 @@
     - db_migrate
 
 - name: Configure database on externally managed PostgreSQL
-  block:
-    - name: Create Database User
-      community.postgresql.postgresql_user:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_admin_username }}"
-        login_password: "{{ postgres_admin_password }}"
-        login_db: "{{ postgres_login_database }}"
-        name: "{{ postgres_username.split('@')[0] }}"
-        password: "{{ postgres_password }}"
-        role_attr_flags: CREATEDB
-        expires: infinity
-
-    - name: Create Database
-      community.postgresql.postgresql_db:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_username }}"
-        login_password: "{{ postgres_password }}"
-        name: "{{ postgres_database_name }}"
-        encoding: UTF-8
-        maintenance_db: "{{ postgres_maintenance_database }}"
-
-    - name: Enable required PostgreSQL extensions
-      community.postgresql.postgresql_ext:
-        login_host: "{{ postgres_host }}"
-        login_port: "{{ postgres_port }}"
-        login_user: "{{ postgres_admin_username }}"
-        login_password: "{{ postgres_admin_password }}"
-        name: "{{ item }}"
-        login_db: "{{ postgres_database_name }}"
-      loop: [
-        'amcheck', 'pg_trgm', 'btree_gist',
-        'plpgsql', 'pg_stat_statements'
-      ]
+  import_tasks: external_database_prep.yml
+  vars:
+    database_label: gitlab
+    database_host: "{{ postgres_host }}"
+    database_port: "{{ postgres_port }}"
+    database_admin_user: "{{ postgres_admin_username }}"
+    database_admin_password: "{{ postgres_admin_password }}"
+    login_database_name: "{{ postgres_login_database }}"
+    maintenance_database_name: "{{ postgres_maintenance_database }}"
+    database_user: "{{ postgres_username }}"
+    database_password: "{{ postgres_password }}"
+    database_name: "{{ postgres_database_name }}"
+    database_extensions: ['amcheck', 'pg_trgm', 'btree_gist', 'plpgsql', 'pg_stat_statements']
+  tags:
+    - reconfigure
+    - db_migrate
+    - postgres_external_prep
   when:
     - postgres_external
     - postgres_external_prep
     - "'gitlab_rails_primary' in group_names"
     - geo_secondary_site_group_name not in groups
-  tags:
-    - reconfigure
-    - db_migrate
-    - postgres_external_prep
+
+- name: Configure Container Registry Database
+  import_tasks: external_database_prep.yml
+  vars:
+    database_label: registry
+    database_host: "{{ container_registry_database_host }}"
+    database_port: "{{ container_registry_database_port }}"
+    database_admin_user: "{{ container_registry_database_admin_username }}"
+    database_admin_password: "{{ container_registry_database_admin_password }}"
+    login_database_name: "{{ container_registry_login_database }}"
+    maintenance_database_name: "{{ container_registry_login_database }}"
+    database_user: "{{ container_registry_database_username }}"
+    database_password: "{{ container_registry_database_password }}"
+    database_name: "{{ container_registry_database_name }}"
+  tags: container_registry
+  when:
+    - container_registry_enable
+    - container_registry_database_configure
+    - container_registry_database_external
 
 - name: Run Database Migrations
   block:

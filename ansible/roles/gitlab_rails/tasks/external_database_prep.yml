@@ -1,0 +1,36 @@
+- name: Configure database on externally managed PostgreSQL
+  block:
+    - name: Create Database User for {{ database_label }}
+      community.postgresql.postgresql_user:
+        login_host: "{{ database_host }}"
+        login_port: "{{ database_port }}"
+        login_user: "{{ database_admin_user }}"
+        login_password: "{{ database_admin_password }}"
+        login_db: "{{ login_database_name }}"
+        name: "{{ database_user }}"
+        password: "{{ database_password }}"
+        role_attr_flags: CREATEDB
+        expires: infinity
+
+    - name: Create Database for {{ database_label }}
+      community.postgresql.postgresql_db:
+        login_host: "{{ database_host }}"
+        login_port: "{{ database_port }}"
+        login_user: "{{ database_user }}"
+        login_password: "{{ database_password }}"
+        name: "{{ database_name }}"
+        encoding: UTF-8
+        maintenance_db: "{{ maintenance_database_name }}"
+
+    - name: Enable PostgreSQL extensions
+      community.postgresql.postgresql_ext:
+        login_host: "{{ database_host }}"
+        login_port: "{{ database_port }}"
+        login_user: "{{ database_admin_user }}"
+        login_password: "{{ database_admin_password }}"
+        name: "{{ item }}"
+        login_db: "{{ database_name }}"
+      loop: "{{ database_extensions }}"
+      loop_control:
+        loop_var: item
+      when: database_extensions is defined

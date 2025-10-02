@@ -1,0 +1,30 @@
+all:
+  vars:
+    external_url: "https://docker"
+    cloud_provider: none
+
+    external_ssl_source: "user"
+    external_ssl_files_host_certificate_file: "{{ lookup('env', 'MOLECULE_HOST_CERTIFICATE') }}"
+    external_ssl_files_host_key_file: "{{ lookup('env', 'MOLECULE_HOST_KEY') }}"
+
+    gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
+
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
+
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+
+    postgres_host: "192.168.49.52"
+    postgres_username: "postgres"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+
+    container_registry_enable: true
+    container_registry_database_enabled: true
+    container_registry_database_configure: true
+    container_registry_database_host: "192.168.49.52"
+    container_registry_database_port: 5432
+    container_registry_database_admin_username: "postgres"
+    container_registry_database_admin_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+    container_registry_database_name: "registry"
+    container_registry_database_username: "registry"
+    container_registry_database_password: "{{ lookup('env','MOLECULE_CONTAINER_REGISTRY_DATABASE_PASSWORD') }}"
