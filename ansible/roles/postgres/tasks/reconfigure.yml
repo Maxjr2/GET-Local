@@ -1,5 +1,5 @@
 ---
-- name: Reconfigure PostgreSQL Node
+- name: Reconfigure PostgreSQL
   command: gitlab-ctl reconfigure
   register: result
   retries: 3
@@ -12,7 +12,9 @@
   retries: 2
   until: result is success
   when: groups['postgres'] | length == 1
-  tags: restart
+  tags:
+    - reconfigure
+    - restart
 
 - name: Restart PostgreSQL (Multi Node PostgreSQL)
   block:
@@ -42,4 +44,6 @@
       retries: 2
       until: result is success
   when: groups['postgres'] | length > 1
-  tags: restart
+  tags:
+    - reconfigure
+    - restart

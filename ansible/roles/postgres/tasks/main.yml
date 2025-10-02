@@ -1,9 +1,4 @@
 ---
-- name: Check if Patroni was setup previously
-  stat:
-    path: /var/log/gitlab/patroni/current
-  register: patroni_check
-
 - name: Setup GitLab config file
   template:
     src: templates/postgres.gitlab.rb.j2
@@ -51,25 +46,38 @@
     - secrets
     - gitlab-secrets
 
-- name: Get latest Postgres Primary (Multi Node Postgres)
-  command: gitlab-ctl get-postgresql-primary
-  register: postgres_leader_int_address
-  run_once: true
-  when: groups['postgres'] | length > 1
-
-- name: Reconfigure and Restart PostgreSQL (Multi Node - Secondaries)
-  include_tasks: reconfigure.yml
-  when:
-    - groups['postgres'] | length > 1
-    - (ansible_default_ipv4.address != postgres_leader_int_address.stdout.split(':')[0])
+- name: Check if GitLab Linux package json config file exists
+  stat:
+    path: "/opt/gitlab/embedded/nodes/{{ ansible_fqdn }}.json"
+  register: gitlab_json_config_file
   tags:
     - reconfigure
     - restart
 
-- name: Reconfigure and Restart PostgreSQL (Multi Node - Primary, Single Node)
+- name: Reconfigure and restart PostgreSQL (Single Node PostgreSQL and Fresh Installs)
   include_tasks: reconfigure.yml
-  when: groups['postgres'] | length == 1 or
-        (ansible_default_ipv4.address == postgres_leader_int_address.stdout.split(':')[0])
+  when: groups['postgres'] | length == 1 or not gitlab_json_config_file.stat.exists
+  tags:
+    - reconfigure
+    - restart
+
+- name: Upgrade Multi Node PostgreSQL ordered
+  block:
+    - name: Get PostgreSQL leader (Multi Node)
+      command: gitlab-ctl get-postgresql-primary
+      register: postgres_leader_int_address
+      run_once: true
+
+    - name: Reconfigure and restart PostgreSQL (Multi Node PostgreSQL - Secondaries)
+      include_tasks: reconfigure.yml
+      when: (ansible_default_ipv4.address != postgres_leader_int_address.stdout.split(':')[0])
+
+    - name: Reconfigure and restart PostgreSQL (Multi Node PostgreSQL - Leader)
+      include_tasks: reconfigure.yml
+      when: (ansible_default_ipv4.address == postgres_leader_int_address.stdout.split(':')[0])
+  when:
+    - groups['postgres'] | length > 1
+    - gitlab_json_config_file.stat.exists
   tags:
     - reconfigure
     - restart
