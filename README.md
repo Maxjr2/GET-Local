@@ -37,20 +37,21 @@ Review the Toolkit in full before any use, as it offers no guarantees on topics 
 
 The requirements for the Toolkit are as follows:
 
-Host machine:
+**Host machine:**
 
 - Terraform `1.12.0` and upwards
 - Ansible `12.0` and upwards (Ansible core `2.19`, Python `3.11`+)
+  - Ansible `11.0` (Ansible core `2.18`) also supported while maintained by Ansible
 
-Target machine(s):
+**Target machine(s):**
 
-- GitLab version: `16.0.0` and upwards.
+- GitLab version: `16.0.0` and upwards
 - OS: Ubuntu 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
-  - OS support is dependent on [Linux Package (Omnibus) availability](https://docs.gitlab.com/administration/package_information/supported_os/).
-  - The Toolkit supports clean OS installations.
-  - Admin access to the OS is also required by GET to install various dependencies.
-  - ARM based hardware is supported for Linux package (Omnibus) environments where packages are available.
-- Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service.
+  - OS support depends on [Linux Package (Omnibus) availability](https://docs.gitlab.com/administration/package_information/supported_os/)
+  - The Toolkit supports clean OS installations
+  - Admin access required to install dependencies
+  - ARM-based hardware supported where upstream packages are available
+- Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service
 
 ## Documentation
 

@@ -71,10 +71,10 @@ Hopefully with this overview its clearer how Ansible in the Toolkit works. Below
 
 ## 1. Install Ansible
 
-The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and aim to support the latest maintained version, in this case Ansible `12.0` or higher (`ansible-core 2.19`).
+The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and support all currently maintained versions. The installation defaults to Ansible `12.0` (`ansible-core 2.19`), but Ansible `11.0` (`ansible-core 2.18`) is also supported.
 
 > [!important]
-> Ansible 12.x (ansible-core 2.19) requires Python 3.11+ on the node it runs from. Target nodes can use the latest Python version available from their OS.
+> Both Ansible 11.x and 12.x require Python 3.11+ on the control node. Target nodes can use the latest Python version available from their OS.
 
 When choosing an [Ansible control node](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements), we recommend that it's in the same or near location as the environment being built to avoid network slowdown. Additionally, if you plan to use a cloud machine as a control node it is _not_ recommended to use [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can lead to inconsistent behaviour.
 
