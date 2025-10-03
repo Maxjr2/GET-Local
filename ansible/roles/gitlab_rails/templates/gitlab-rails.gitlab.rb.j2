@@ -14,11 +14,19 @@ gitlab_sshd['enable'] = true
 gitlab_sshd['listen_address'] ="[::]:{{ gitlab_shell_ssh_internal_port }}"
 {% endif %}
 
-# Ensure UIDs and GIDs match between servers for permissions
-user['uid'] = 9000
-user['gid'] = 9000
-web_server['uid'] = 9001
-web_server['gid'] = 9001
+# Ensure UIDs and GIDs match between servers for NFS
+{% if gitlab_user_uid != '' and gitlab_user_gid != '' -%}
+user['uid'] = {{ gitlab_user_uid }}
+user['gid'] = {{ gitlab_user_gid }}
+{% endif -%}
+{% if web_server_uid != '' and web_server_gid != '' -%}
+web_server['uid'] = {{ web_server_uid }}
+web_server['gid'] = {{ web_server_gid }}
+{% endif -%}
+{% if container_registry_enable and registry_uid is defined and registry_gid is defined -%}
+registry['uid'] = {{ registry_uid }}
+registry['gid'] = {{ registry_gid }}
+{% endif -%}
 
 # NGINX Config
 nginx['enable'] = true
