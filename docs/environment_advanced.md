@@ -1110,6 +1110,17 @@ Then in Ansible you need to configure the `gitlab_object_storage_type` variable 
 gitlab_object_storage_type: 'nfs'
 ```
 
+### NFS User and Group IDs
+
+When using NFS for shared storage in a Linux Package HA environment, consistent user UIDs/GIDs are required to ensure correct file permissions across nodes. The Toolkit configures this automatically for core accounts, with the following options available:
+
+- `gitlab_user_uid` / `gitlab_user_gid` - Main GitLab user (default: `9000`)
+- `web_server_uid` / `web_server_gid` - Web server group for NGINX and Pages (default: `9001`)
+- `registry_uid` / `registry_gid` - Container Registry user, only needed if Registry uses NFS storage instead of object storage (no default, must be explicitly set)
+
+> [!caution]
+> Changing these values on an existing environment requires [manual actions to propagate the changes](https://docs.gitlab.com/omnibus/settings/configuration/#specify-numeric-user-and-group-identifiers).
+
 ## Custom IAM options (AWS)
 
 The Toolkit provides several customization options for configuring AWS IAM.

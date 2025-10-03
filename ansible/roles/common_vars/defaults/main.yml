@@ -93,6 +93,12 @@ gitlab_shell_ssh_sync_keys: true
 gitlab_root_password: "{{ lookup('env','GITLAB_ROOT_PASSWORD') }}"
 gitlab_secrets_setup: true
 
+## User and Group ID Settings
+gitlab_user_uid: 9000
+gitlab_user_gid: 9000
+web_server_uid: 9001
+web_server_gid: 9001
+
 # Object Storage Settings
 gitlab_object_storage_type: "object_storage"  # object_storage or nfs
 
