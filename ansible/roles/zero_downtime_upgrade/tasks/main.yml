@@ -36,7 +36,9 @@
       loop: "{{ query('inventory_hostnames', 'postgres') | sort }}"
       loop_control:
         loop_var: hostname_result
-  when: zdu_update_order.index('postgres') >= zdu_update_order.index(zdu_start_point)
+  when:
+    - zdu_update_order.index('postgres') >= zdu_update_order.index(zdu_start_point)
+    - ('postgres' in group_names)
 
 - name: Update PgBouncer nodes
   include_role:
