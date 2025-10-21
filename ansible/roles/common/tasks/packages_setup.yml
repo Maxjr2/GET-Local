@@ -15,7 +15,7 @@
   block:
     - name: Setup EPEL GPG key (RHEL)
       rpm_key:
-        key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
+        key: "{{ epel_gpg_key_url }}"
         state: present
       register: result
       retries: 5
@@ -24,7 +24,7 @@
 
     - name: Setup EPEL Repo (RHEL)
       yum:
-        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
+        name: "{{ epel_rpm_url }}"
       register: result
       retries: 5
       delay: 5

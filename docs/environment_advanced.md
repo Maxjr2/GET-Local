@@ -1087,6 +1087,15 @@ The Toolkit can also optionally upgrade all packages and clean up unneeded packa
 - `system_packages_upgrade`: Configures the Toolkit to upgrade all packages on nodes. Default is `false`. Can also be set as via the environment variable `SYSTEM_PACKAGES_UPGRADE`.
 - `system_packages_autoremove`: Configures the Toolkit to autoremove any old or unneeded packages on nodes. Default is `false`. Can also be set as via the environment variable `SYSTEM_PACKAGES_AUTOREMOVE`.
 
+### Extra Packages for Enterprise Linux (EPEL)
+
+The toolkit installs packages that are hosted in EPEL for all distributions where the [Ansible `os_family` is RedHat](https://github.com/ansible/ansible/blob/devel/lib/ansible/module_utils/facts/system/distribution.py#L525). By default, the toolkit installs the EPEL GPG Key and enables/configures the EPEL repository from the public [Fedora Project release URL](https://docs.fedoraproject.org/en-US/epel/getting-started/#_release_package_permalinks) for the proper distribution major version.
+
+If you do not have direct access to the internet, the default settings may not work for you. You will need to update the `epel_*_url` variables to point to the proper URLs to install the EPEL GPG Key and the EPEL Repository. The following variables can be set in your Ansible environment config file (`vars.yml`):
+
+- `epel_gpg_key_url`: Configures the toolkit to install the EPEL GPG Key from the location you provide. Default is `https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}`.
+- `epel_rpm_url`: Configures the toolkit to install the EPEL Repository from the location you provide. Default is `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm`.
+
 ## NFS for Object Data
 
 You can optionally provision and configure a [NFS server if desired to handle Object Data](https://docs.gitlab.com/ee/administration/nfs.html). This is not recommended however with [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) instead preferable in all cases. To configure this some steps are required in Terraform and Ansible.
