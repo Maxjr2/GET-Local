@@ -411,6 +411,7 @@ Beyond version management, some EKS addons support custom configuration to meet 
 The following variables are available in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file for configuring select addons:
 
 - `eks_coredns_configuration_values` - Custom configuration map for the [CoreDNS addon](https://docs.aws.amazon.com/eks/latest/userguide/coredns-autoscaling.html). Defaults to `null`.
+- `eks_vpc_cni_configuration_values` - Custom configuration map for the [VPC CNI addon](https://docs.aws.amazon.com/eks/latest/userguide/pod-networking-use-cases.html). Defaults to `null`.
 
 #### EKS IAM Access Entries
 

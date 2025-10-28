@@ -949,6 +949,17 @@ variable "eks_vpc_cni_version" {
   default = null
 }
 
+variable "eks_vpc_cni_configuration_values" {
+  description = "Custom configuration values for vpc cni addon"
+  type        = any
+  default     = null
+
+  validation {
+    condition     = var.eks_vpc_cni_configuration_values == null || can(jsonencode(var.eks_vpc_cni_configuration_values))
+    error_message = "Configuration values must be encodable as JSON"
+  }
+}
+
 variable "eks_ebs_csi_driver_version" {
   type    = string
   default = null

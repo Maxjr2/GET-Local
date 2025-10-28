@@ -670,6 +670,8 @@ resource "aws_eks_addon" "vpc_cni" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
+  configuration_values = var.eks_vpc_cni_configuration_values != null ? jsonencode(var.eks_vpc_cni_configuration_values) : null
+
   # Ensure that Kube Proxy addon and OpenID provider are created beforehand as required by addon
   depends_on = [
     aws_eks_addon.kube_proxy,
