@@ -44,6 +44,7 @@
       delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
       delegate_facts: true
       become: true
+      run_once: true
 
     - name: Update PostgreSQL leader IP and Port
       set_fact:

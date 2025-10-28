@@ -13,9 +13,6 @@
     - name: Get PostgreSQL leader for ZDU ordering
       command: gitlab-ctl get-postgresql-primary
       register: postgres_leader_int_address
-      delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
-      become: true
-      run_once: true
 
     - name: Update PostgreSQL (Secondaries)
       include_role:
