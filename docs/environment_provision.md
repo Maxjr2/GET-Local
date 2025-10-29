@@ -342,7 +342,9 @@ For optimal performance, you should configure the location to a [region](https:/
 
 ###### Object Storage versioning (GCP)
 
-The Toolkit can enable [versioning in Google Cloud Storage buckets](https://cloud.google.com/storage/docs/object-versioning) within GCP by setting the `object_storage_versioning` flag to `true`. This will enable the storing of multiple variants of an object in the same bucket. As this can lead to increased storage costs it is recommended to set up an [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle) to remove older versions of stored objects.
+The Toolkit can enable [versioning in Google Cloud Storage buckets](https://cloud.google.com/storage/docs/object-versioning) within GCP by setting the `object_storage_versioning` flag to `true`. This will enable the storing of multiple variants of an object in the same bucket.
+
+As this can lead to increased storage costs it is recommended to set up an [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle) separately to remove older versions of stored objects.
 
 ##### Storage Encryption (GCP)
 
@@ -664,6 +666,12 @@ However, this can be changed via the `ami_id` setting in the [module's environme
 
 > [!note]
 > Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
+
+##### Object Storage versioning (AWS)
+
+The Toolkit can enable [versioning in S3 buckets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning#versioning_configuration) within AWS by configuring the `object_storage_versioning_status` setting to `"Enabled"`. This will enable the storing of multiple variants of an object in the same bucket.
+
+As this can lead to increased storage costs it is recommended to set up a [storage lifecycle configuration](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html) separately to remove older versions of stored objects.
 
 ##### Configure network setup (AWS)
 
