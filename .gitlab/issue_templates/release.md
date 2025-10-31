@@ -53,6 +53,8 @@ If there has been any specific changes in Terraform relating to optional feature
 
 ### Backport Process (if applicable)
 
+For patch releases that must avoid unreleased features on `main`, use a support branch to selectively backport fixes:
+
 - [ ] [Create](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/branches/new) `support/<GET_major_minor_x>` branch from GET tag
   - Example: For patch release `3.4.3`, create `support/3.4.x`
   - **Note:** Branch must follow this naming convention to be protected
