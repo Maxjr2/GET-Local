@@ -264,32 +264,6 @@ To fix, adjust the Redis password to not contain any URL forbidden characters an
 
 [This can occur for some people if Ansible is trying run multiple tasks at once](https://github.com/ansible/ansible/issues/12259). The safest way to resolve this is to lower the `forks` setting in your `ansible.cfg` file to `20`. The `ansible.cfg` file can be found at `./ansible/ansible.cfg` within your toolkit checkout.
 
-### "Update GitLab settings" task failure
-
-The following error can occur when GET is running the task `ApplicationSetting.last.update` in GitLab Rails. For example:
-
-```sh
-TASK [post_configure : Disable Write to "authorized_keys" file setting via GitLab Rails] ***
-fatal: [localhost -> gitlab-rails-1(1.2.3.4)]: FAILED! => changed=true
-  cmd:
-  - gitlab-rails
-  - runner
-  - 'ApplicationSetting.last.update(authorized_keys_enabled: false)'
-  msg: non-zero return code
-  rc: 1
-  stderr: |-
-    Please specify a valid ruby command or the path of a script to run.
-    Run 'rails runner -h' for help.
-
-    undefined method `diff_max_files' for #<ApplicationSetting:0x00007f99dff105d8>
-    Did you mean?  diff_max_patch_bytes
-```
-
-This error is usually caused by incomplete database migrations that happened during the GitLab upgrade. The issue is outside of the Toolkit and related to GitLab itself. To debug, the following steps can be done:
-
-1. Run the command manually in the [Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html) to get further error output
-1. Check the [status of database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations) - all migrations should be `up`. If some migrations have the `down` status, follow [Run incomplete database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#run-incomplete-database-migrations) guidance or contact the Support team for assistance. [Database migration logs](https://docs.gitlab.com/ee/administration/logs/#migrationslog) can be checked for the progress of migrations.
-
 ### Let's Encrypt `acme.sh` renewal failures on HAProxy Linux Package nodes
 
 A bug was introduced with [GitLab Environment Toolkit `3.1.0`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases/3.1.0) with the switch to `acme.sh` as the tool to generate Let's Encrypt SSL certificates on HAProxy Linux Package nodes that prevented automatic renewals from happening due to a permissions issue.
@@ -371,14 +345,6 @@ Depending on the Toolkit version you may see the following warning being thrown 
 
 For some background, GKE / EKS will set up VMs to be the Nodes in the Kubernetes cluster. These VMs show up in normal lists and can appear in Ansible Inventories as a result. Ansible can't configure these nodes directly that are instead managed by GKE / EKS, which Ansible configures later via Helm. As such, depending on cloud provider, Ansible is configured to ignore these machines directly and this can sometimes result in the above warning.
 
-### Data missing in environment after successful deploy
-
-After deployment if there appears to be data missing, such as missing Users, this is likely due to [Database Migrations](https://docs.gitlab.com/charts/charts/gitlab/migrations/) not completing successfully.
-
-In the Charts this is done via a specific Job named `migrations`. If it's failing it's likely due to it not being able to access the database correctly.
-
-[The debugging steps in this section of the Chart's documentation](https://docs.gitlab.com/charts/troubleshooting/#application-containers-constantly-initializing) can be followed to debug further.
-
 ### AWS EKS
 
 #### Load Balancer not deploying due to Elastic IP and Subnet counts mismatch
@@ -437,6 +403,37 @@ From GET `3.5.0`, the Toolkit can [automatically configure dedicated StorageClas
 For older versions, manual intervention is required by separately creating a default StorageClass as desired.
 
 ## GitLab
+
+## Database migration failures
+
+Database migrations can fail during initial setup or upgrades on any GitLab environment, resulting in incomplete or missing data. Common issues include missing users, `undefined method` errors, or features not working as expected.
+
+**First steps:**
+
+Check the [status of database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations). All migrations should show as `up`. If any have a `down` status, follow the [Run incomplete database migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#run-incomplete-database-migrations) guidance. [Database migration logs](https://docs.gitlab.com/ee/administration/logs/#migrationslog) can help identify what failed.
+
+For Cloud Native Hybrid environments, see the [Charts migrations documentation](https://docs.gitlab.com/charts/charts/gitlab/migrations/) for how migrations work in Kubernetes.
+
+If migrations complete successfully but issues persist, see the specific scenarios below.
+
+### `root` user missing after setup
+
+The root admin user may be missing when migrations fail during initial setup.
+
+After confirming all migrations have completed successfully, create the root user manually via Rails console. See [Create users through the Rails console](https://docs.gitlab.com/user/profile/account/create_accounts/#create-users-through-the-rails-console) for instructions (set `admin: true` to create the root admin user).
+
+Alternatively, rebuild the environment from a fresh installation.
+
+### `undefined method` errors
+
+Missing database data can cause `undefined method` errors during Ansible task execution:
+
+```sh
+undefined method `diff_max_files' for #<ApplicationSetting:0x00007f99dff105d8>
+Did you mean?  diff_max_patch_bytes
+```
+
+These errors typically indicate database schema or seed data issues. If migrations show as complete but these errors persist, contact GitLab Support for assistance.
 
 ### `422` Error on Login due to Redis misconfiguration
 
