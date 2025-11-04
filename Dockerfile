@@ -41,7 +41,7 @@ RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recomm
 
 # Install Mise
 RUN curl https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /usr/share/keyrings/mise-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list && \
+    echo "deb [signed-by=/usr/share/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list && \
     apt-get update && apt-get install -y --no-install-recommends mise && rm -rf /var/lib/apt/lists/*
 
 # Add Terraform plugin (via Mise)
