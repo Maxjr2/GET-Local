@@ -6,9 +6,9 @@
   stage: ansible_molecule_test
   image: registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:dev
   tags:
-    - saas-linux-medium-amd64
+    - saas-linux-large-amd64
   services:
-    - name: ${GITLAB_DEPENDENCY_PROXY}docker:dind
+    - name: docker:26-dind
       alias: docker
       entrypoint:
         [
@@ -22,7 +22,7 @@
     FF_NETWORK_PER_BUILD: true
   interruptible: true
   before_script:
-    - apt-get update && apt-get install -y rsync
+    - apt-get update && apt-get install -y rsync jq
     - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
     - ./get-docker.sh
     - pip install molecule docker molecule-plugins[docker]
@@ -184,6 +184,7 @@ rockylinux9:os-verification:
   variables:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: rockylinux9
+
 ## Runner tag sizes
 # - saas-linux-small-amd64
 # - saas-linux-medium-amd64

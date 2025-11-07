@@ -1,2 +1,3 @@
 ---
-- import_playbook: ../molecule_tasks/k3d/prepare.yml
+- import_playbook: ../molecule_tasks/k3d/prepare/main.yml
+- import_playbook: ../molecule_tasks/omnibus/prepare.yml

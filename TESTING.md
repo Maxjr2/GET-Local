@@ -43,7 +43,10 @@ Molecule is exclusively available through pip, Python's package installer. To in
 pip install molecule molecule-plugins 'molecule-plugins[docker]'
 ```
 
-If you're planning on running tests for Cloud Native GitLab, you will need to also install [k3d](https://k3d.io/stable/#releases).
+If you're planning on running tests for Cloud Native GitLab, you will also need to install:
+
+- [k3d](https://k3d.io/stable/#releases).
+- [jq](https://jqlang.org/)
 
 Once everything is installed, you'll be ready to execute Molecule testing scenarios for the Toolkit.
 
@@ -71,6 +74,7 @@ Depending on the scenario being run you may need to define some secrets to be us
 - `MOLECULE_GITLAB_ROOT_PASSWORD`
 - `MOLECULE_GITALY_TOKEN`
 - `MOLECULE_PGBOUNCER_PASSWORD`
+- `MOLECULE_POSTGRES_ADMIN_PASSWORD`
 - `MOLECULE_POSTGRES_PASSWORD`
 - `MOLECULE_PRAEFECT_EXTERNAL_TOKEN`
 - `MOLECULE_PRAEFECT_INTERNAL_TOKEN`

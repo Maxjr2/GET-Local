@@ -1,0 +1,9 @@
+---
+- name: Configure K8s
+  hosts: localhost
+  tasks:
+    - name: Configure K3D
+      import_tasks: k3d_setup.yml
+
+    - name: Configure Garage
+      import_tasks: garage_setup.yml

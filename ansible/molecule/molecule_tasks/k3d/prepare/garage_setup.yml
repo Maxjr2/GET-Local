@@ -1,0 +1,213 @@
+- name: Generate Garage RPC secret
+  set_fact:
+    garage_rpc_secret: "{{ lookup('password', '/dev/null length=64 chars=hexdigits') }}"
+
+- name: Create Garage ConfigMap
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: garage-config
+        namespace: default
+      data:
+        garage.toml: |
+          metadata_dir = "/data/meta"
+          data_dir = "/data/data"
+          db_engine = "sqlite"
+
+          replication_mode = "none"
+
+          rpc_bind_addr = "[::]:3901"
+          rpc_public_addr = "127.0.0.1:3901"
+          rpc_secret = "{{ garage_rpc_secret }}"
+
+          [s3_api]
+          s3_region = "us-east-1"
+          api_bind_addr = "[::]:3900"
+          root_domain = ".s3.garage.localhost"
+
+          [s3_web]
+          bind_addr = "[::]:3902"
+          root_domain = ".web.garage.localhost"
+
+          [admin]
+          api_bind_addr = "[::]:3903"
+
+- name: Deploy Garage StatefulSet
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: garage
+        namespace: default
+      spec:
+        serviceName: garage
+        replicas: 1
+        selector:
+          matchLabels:
+            app: garage
+        template:
+          metadata:
+            labels:
+              app: garage
+          spec:
+            containers:
+              - name: garage
+                image: dxflrs/garage:v1.0.1
+                ports:
+                  - containerPort: 3900
+                    name: s3-api
+                  - containerPort: 3901
+                    name: rpc
+                  - containerPort: 3902
+                    name: web
+                  - containerPort: 3903
+                    name: admin
+                volumeMounts:
+                  - name: config
+                    mountPath: /etc/garage.toml
+                    subPath: garage.toml
+                  - name: data
+                    mountPath: /data
+                resources:
+                  requests:
+                    memory: 256Mi
+                    cpu: 100m
+            volumes:
+              - name: config
+                configMap:
+                  name: garage-config
+        volumeClaimTemplates:
+          - metadata:
+              name: data
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 1Gi
+
+- name: Create Garage Service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: garage
+        namespace: default
+      spec:
+        selector:
+          app: garage
+        ports:
+          - name: s3-api
+            port: 3900
+            targetPort: 3900
+          - name: admin
+            port: 3903
+            targetPort: 3903
+        type: ClusterIP
+
+- name: Wait for Garage to be ready
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: default
+    label_selectors:
+      - app=garage
+    field_selectors:
+      - status.phase=Running
+  register: garage_pod
+  until: garage_pod.resources | length > 0
+  retries: 30
+  delay: 5
+
+- name: Get Garage node ID
+  shell: |
+    kubectl exec garage-0 -n default -- /garage node id -q
+  register: garage_node_id
+
+- name: Configure Garage node
+  shell: |
+    kubectl exec garage-0 -n default -- /garage layout assign -z dc1 -c 1GB {{ garage_node_id.stdout.split('@')[0] }}
+
+- name: Apply Garage layout
+  shell: |
+    kubectl exec garage-0 -n default -- /garage layout apply --version 1
+
+- name: Create Garage bucket
+  shell: |
+    kubectl exec garage-0 -n default -- /garage bucket create gitlab
+
+- name: Create Garage key
+  shell: |
+    kubectl exec garage-0 -n default -- /garage key create gitlab-key
+  register: garage_key_output
+
+- name: Extract Garage credentials from output
+  set_fact:
+    garage_access_key: "{{ garage_key_output.stdout | regex_search('Key ID: (GK[a-f0-9]+)', '\\1') | first }}"
+    garage_secret_key: "{{ garage_key_output.stdout | regex_search('Secret key: ([A-Za-z0-9+/=]+)', '\\1') | first }}"
+
+- name: Allow key to access bucket
+  shell: |
+    kubectl exec garage-0 -n default -- /garage bucket allow --read --write --owner gitlab --key gitlab-key
+
+- name: Configure Garage secret - Buckets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "gitlab-buckets-secret"
+        namespace: default
+      stringData:
+        key: |-
+          provider: "AWS"
+          region: "us-east-1"
+          aws_access_key_id: "{{ garage_access_key }}"
+          aws_secret_access_key: "{{ garage_secret_key }}"
+          host: "garage.default.svc.cluster.local"
+          aws_signature_version: "4"
+          endpoint: "http://garage.default.svc.cluster.local:3900"
+          path_style: "true"
+
+- name: Configure Garage secret - Container Registry
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "gitlab-container-registry-object-storage-key"
+        namespace: default
+      stringData:
+        config: |-
+          s3:
+            v4auth: true
+            regionendpoint: "http://garage.default.svc.cluster.local:3900"
+            pathstyle: "true"
+            region: "us-east-1"
+            bucket: gitlab
+            accesskey: "{{ garage_access_key }}"
+            secretkey: "{{ garage_secret_key }}"
+  when:
+    - container_registry_enable is defined
+    - container_registry_enable
+
+- name: Configure Garage secret - Backups
+  kubernetes.core.k8s:
+    name: gitlab-backup-bucket-secret
+    api_version: v1
+    kind: Secret
+    namespace: default
+    definition:
+      type: Opaque
+      data:
+        accesskey: "{{ garage_access_key | b64encode }}"
+        secretkey: "{{ garage_secret_key | b64encode }}"
+    state: present

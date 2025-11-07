@@ -1,0 +1,54 @@
+---
+- name: Health check and conditional debugging
+  block:
+    - name: Wait for GitLab to be available
+      uri:
+        url: "{{ external_url_sanitised }}/-/readiness"
+        validate_certs: false
+        timeout: 60
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 10
+      tags: healthcheck
+
+  rescue:
+    - name: Health check failed - starting debug collection
+      debug:
+        msg: "Health check failed. Collecting diagnostic information..."
+
+    - name: Get all pods in namespace
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: default  # Change to your namespace
+      register: pod_list
+
+    - name: Display pod status
+      debug:
+        msg: |
+          Pod: {{ item.metadata.name }}
+          Status: {{ item.status.phase }}
+          Ready: {{ item.status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | first | default('Unknown') }}
+      loop: "{{ pod_list.resources }}"
+
+    - name: Describe all pods
+      command: kubectl describe pods -n default
+      register: pod_descriptions
+      failed_when: false
+
+    - name: Show pod descriptions
+      debug:
+        var: pod_descriptions.stdout_lines
+
+    - name: Fetch Docker network stats
+      command: docker network inspect {{ molecule_network_name }}
+      register: docker_network
+      failed_when: false
+
+    - name: Show Docker network
+      debug:
+        var: docker_network.stdout_lines
+
+    - name: Fail playbook after debug collection
+      fail:
+        msg: "Health check failed. Debug information collected above."
