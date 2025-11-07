@@ -1,0 +1,107 @@
+- name: Create k3d Cluster
+  environment:
+    K3D_FIX_DNS: "0"
+  command: |
+    k3d cluster create {{ molecule_cluster_name }} \
+      --network {{ molecule_network_name }} \
+      --port "80:80@loadbalancer" \
+      --port "443:443@loadbalancer"
+
+- name: Add workload label
+  command: kubectl label nodes {{ gitlab_charts_custom_context }}-server-0 workload=gitlab
+
+- name: Check if postgres-external container exists
+  command: docker inspect postgres-external
+  register: postgres_exists
+  changed_when: false
+  failed_when: false
+
+- name: Check if redis-external container exists
+  command: docker inspect redis-external
+  register: redis_exists
+  changed_when: false
+  failed_when: false
+
+- name: Configure PostgreSQL external service
+  block:
+    - name: Get postgres-external IP address
+      shell: docker inspect postgres-external | jq -r '.[0].NetworkSettings.Networks.{{ molecule_network_name }}.IPAddress'
+      register: postgres_ip
+      changed_when: false
+
+    - name: Show PostgreSQL IP
+      debug:
+        msg: "PostgreSQL IP: {{ postgres_ip.stdout }}"
+
+    - name: Create PostgreSQL external service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: postgres-external
+            namespace: default
+          spec:
+            ports:
+              - port: 5432
+                targetPort: 5432
+            clusterIP: None
+
+    - name: Create PostgreSQL endpoints
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Endpoints
+          metadata:
+            name: postgres-external
+            namespace: default
+          subsets:
+            - addresses:
+                - ip: "{{ postgres_ip.stdout }}"
+              ports:
+                - port: 5432
+  when: postgres_exists.rc == 0
+
+- name: Configure Redis external service
+  block:
+    - name: Get redis-external IP address
+      shell: docker inspect redis-external | jq -r '.[0].NetworkSettings.Networks.{{ molecule_network_name }}.IPAddress'
+      register: redis_ip
+      changed_when: false
+
+    - name: Show Redis IP
+      debug:
+        msg: "Redis IP: {{ redis_ip.stdout }}"
+
+    - name: Create Redis external service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: redis-external
+            namespace: default
+          spec:
+            ports:
+              - port: 6379
+                targetPort: 6379
+            clusterIP: None
+
+    - name: Create Redis endpoints
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Endpoints
+          metadata:
+            name: redis-external
+            namespace: default
+          subsets:
+            - addresses:
+                - ip: "{{ redis_ip.stdout }}"
+              ports:
+                - port: 6379
+  when: redis_exists.rc == 0

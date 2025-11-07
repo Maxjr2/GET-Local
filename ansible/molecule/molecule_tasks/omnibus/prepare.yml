@@ -1,0 +1,12 @@
+---
+# Workaround for https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/9429
+- name: Prepare Omnibus tasks
+  hosts: all
+  tasks:
+    - name: Create symlink for gitlab_gitlab-ee-archive-keyring.gpg
+      ansible.builtin.file:
+        src: /etc/apt/keyrings/gitlab_gitlab-ee-archive-keyring.gpg
+        dest: /usr/share/keyrings/gitlab_gitlab-ee-archive-keyring.gpg
+        follow: false
+        state: link
+        force: yes

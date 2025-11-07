@@ -7,7 +7,7 @@ global:
     object_store:
       enabled: true
       connection:
-        secret: gitlab-minio-secret
+        secret: gitlab-buckets-secret
         key: key
     artifacts:
       enabled: true
@@ -30,6 +30,8 @@ global:
     class: traefik
   shell:
     port: 32022
+  registry:
+    bucket: gitlab
 installCertmanager: false
 nginx-ingress:
   enabled: false
@@ -42,7 +44,7 @@ gitlab:
     backups:
       backend: s3
       config:
-        secret: gitlab-minio-backup-secret
+        secret: gitlab-backup-bucket-secret
   gitaly:
     cgroups:
       enabled: false
@@ -50,3 +52,7 @@ prometheus:
   install: false
 gitlab-runner:
   install: false
+registry:
+  storage:
+    secret: gitlab-container-registry-object-storage-key
+    key: config

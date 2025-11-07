@@ -29,20 +29,11 @@ platforms:
       - /run
       - /tmp
       - /run/lock
-    docker_networks:
-      - name: molecule_network
-        ipam_config:
-          - subnet: 192.168.49.0/24
-            gateway: 192.168.49.1
-    network_mode: "molecule_network"
+    network_mode: molecule_cloud_native_hybrid_network
     networks:
-      - name: molecule_network
-        ipv4_address: 192.168.49.50
+      - name: molecule_cloud_native_hybrid_network
   - <<: *default_platform
     name: redis-1
-    networks:
-      - name: molecule_network
-        ipv4_address: 192.168.49.51
 scenario:
   test_sequence:
     - dependency
