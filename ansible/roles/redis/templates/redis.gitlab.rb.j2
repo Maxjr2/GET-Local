@@ -54,10 +54,13 @@ consul['monitoring_service_discovery'] = true
 
 node_exporter['listen_address'] = '0.0.0.0:9100'
 redis_exporter['listen_address'] = '0.0.0.0:9121'
+
+{% if gitlab_version != '' and gitlab_version is version('16.9', '<') %}
 redis_exporter['flags'] = {
   'redis.addr' => "redis://localhost:{{ redis_port }}",
   'redis.password' => '{{ redis_password }}'
 }
+{% endif %}
 
 custom_confs = Dir.glob(File.join("/etc/gitlab/", "gitlab.{{ '{' + redis_group_name }},common}.*.rb"))
 custom_confs.each { |conf|
