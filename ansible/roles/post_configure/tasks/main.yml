@@ -10,7 +10,7 @@
     timeout: 60
   register: result
   until: result.status == 200
-  retries: 30
+  retries: 60
   delay: 10
   tags: healthcheck
 
