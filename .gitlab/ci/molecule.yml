@@ -54,7 +54,7 @@
       changes:
         - ansible/roles/common/**/*
         - ansible/roles/haproxy/**/*
-        - ansible/molecule/os-verification/*
+        - ansible/molecule/os-verification/**/*
       when: manual
     - if: $CI_PIPELINE_SOURCE == "schedule" && $MOLECULE_SCHEDULE == "os"
     - !reference [.on_web_pipelines, rules]
@@ -76,6 +76,7 @@ ubuntu2404:single-node-with-haproxy:
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/haproxy/**/*
         - ansible/requirements/**/*
+        - ansible/molecule/single-node-with-haproxy/**/*
     - !reference [.on_web_pipelines, rules]
 
 ubuntu2404:single-node:
@@ -90,6 +91,7 @@ ubuntu2404:single-node:
         - ansible/playbooks/gitlab_rails.yml
         - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
+        - ansible/molecule/single-node/**/*
     - !reference [.on_web_pipelines, rules]
 
 ubuntu2404:single-node-geo:
@@ -108,6 +110,7 @@ ubuntu2404:single-node-geo:
         - ansible/roles/common/**/!(uninstall.yml)
         - ansible/roles/gitlab_rails/**/*
         - ansible/roles/gitlab_geo/**/*
+        - ansible/molecule/single-node-geo/**/*
     - !reference [.on_web_pipelines, rules]
 
 cloud-native-hybrid:
