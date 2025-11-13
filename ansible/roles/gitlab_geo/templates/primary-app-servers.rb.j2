@@ -8,9 +8,6 @@ registry['notifications'] = [
   {
     'name' => 'geo_event',
     'url' => '{{ external_url_sanitised }}/api/v4/container_registry_event/events',
-    'timeout' => '500ms',
-    'threshold' => 5,
-    'backoff' => '1s',
     'headers' => {
       'Authorization' => ['{{ geo_container_registry_notification_secret }}']
     }
