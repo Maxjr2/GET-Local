@@ -1,7 +1,7 @@
 ARG pkg_list="pexpect<=4.9.0 psycopg2<=3.2.1"
 
 # Target oldest support version
-FROM python:3.8-slim-bullseye as python_default
+FROM python:3.8-slim-bullseye AS python_default
 
 ARG pkg_list
 
@@ -13,7 +13,7 @@ RUN pip3 install pipdeptree
 RUN touch /root/py_list.txt && printf "Target - $(python3 --version)\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/==/<=/g' | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Ubuntu 20.04
-FROM ubuntu:20.04 as python_ubuntu20
+FROM ubuntu:20.04 AS python_ubuntu20
 
 ARG pkg_list
 
@@ -27,7 +27,7 @@ RUN pip3 install pipdeptree
 RUN printf "Ubuntu 20.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Ubuntu 22.04
-FROM ubuntu:22.04 as python_ubuntu22
+FROM ubuntu:22.04 AS python_ubuntu22
 
 ARG pkg_list
 
@@ -41,7 +41,7 @@ RUN pip3 install pipdeptree
 RUN printf "Ubuntu 22.04 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Ubuntu 24.04
-FROM ubuntu:24.04 as python_ubuntu24
+FROM ubuntu:24.04 AS python_ubuntu24
 
 ARG pkg_list
 
@@ -57,7 +57,7 @@ RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages pip-c
 RUN printf "Ubuntu 24.04 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Debian 11
-FROM debian:11 as python_debian11
+FROM debian:11 AS python_debian11
 
 ARG pkg_list
 
@@ -71,7 +71,7 @@ RUN pip3 install pipdeptree
 RUN printf "Debian 11 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Debian 12
-FROM debian:12 as python_debian12
+FROM debian:12 AS python_debian12
 
 ARG pkg_list
 
@@ -86,12 +86,28 @@ RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages pip-c
 
 RUN printf "Debian 12 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
-# RHEL 8
-FROM rockylinux:8 as python_rl8
+# Debian 13
+FROM debian:13 AS python_debian13
 
 ARG pkg_list
 
 COPY --from=python_debian12 /root/ /root/
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libpq-dev python3-pip python3-dev
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages $pkg_list
+RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages setuptools pip-chill
+
+RUN printf "Debian 13 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+
+# RHEL 8
+FROM rockylinux:8 AS python_rl8
+
+ARG pkg_list
+
+COPY --from=python_debian13 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel python3-libs gcc gcc-c++ libpq-devel
 
@@ -101,7 +117,7 @@ RUN pip3 install pip-chill
 RUN printf "RHEL 8 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 9
-FROM rockylinux:9 as python_rl9
+FROM rockylinux:9 AS python_rl9
 
 ARG pkg_list
 
@@ -115,7 +131,7 @@ RUN pip3 install pipdeptree
 RUN printf "RHEL 9 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Amazon Linux 2
-FROM amazonlinux:2 as python_al2
+FROM amazonlinux:2 AS python_al2
 
 ARG pkg_list
 
@@ -129,7 +145,7 @@ RUN pip3 install pip-chill
 RUN printf "Amazon Linux 2 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # Amazon Linux 2023
-FROM amazonlinux:2023 as python_al2023
+FROM amazonlinux:2023 AS python_al2023
 
 ARG pkg_list
 

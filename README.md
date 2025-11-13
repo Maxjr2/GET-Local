@@ -46,7 +46,7 @@ The requirements for the Toolkit are as follows:
 **Target machine(s):**
 
 - GitLab version: `16.0.0` and upwards
-- OS: Ubuntu 22.04 / 24.04, Debian 11 / 12, RHEL 9, Amazon Linux 2023
+- OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
   - OS support depends on [Linux Package (Omnibus) availability](https://docs.gitlab.com/administration/package_information/supported_os/)
   - The Toolkit supports clean OS installations
   - Admin access required to install dependencies
