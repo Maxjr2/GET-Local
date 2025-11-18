@@ -727,7 +727,7 @@ For environments with Geo, the static inventory will need to follow the below ex
 ```yml
 all:
   children:
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>:
       hosts:
         <PREFIX>-consul-1:
           ansible_host: <CONSUL-1-ADDRESS>
@@ -787,35 +787,35 @@ all:
           ansible_host: <SIDEKIQ-3-ADDRESS>
         <PREFIX>-sidekiq-4:
           ansible_host: <SIDEKIQ-4-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_gitlab_rails_primary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_gitlab_rails_primary:
       hosts:
         <PREFIX>-gitlab-rails-1:
           ansible_host: <GITLAB-RAILS-1-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_gitlab_rails_secondary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_gitlab_rails_secondary:
       hosts:
         <PREFIX>-gitlab-rails-2:
           ansible_host: <GITLAB-RAILS-2-ADDRESS>
         <PREFIX>-gitlab-rails-3:
           ansible_host: <GITLAB-RAILS-3-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_haproxy_internal_primary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_haproxy_internal_primary:
       hosts:
         <PREFIX>-haproxy-internal-1:
           ansible_host: <POSTGRES-1-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_postgres_primary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_postgres_primary:
       hosts:
         <PREFIX>-postgres-1:
           ansible_host: <POSTGRES-1-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_postgres_secondary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_postgres_secondary:
       hosts:
         <PREFIX>-postgres-2:
           ansible_host: <POSTGRES-2-ADDRESS>
         <PREFIX>-postgres-3:
           ansible_host: <POSTGRES-3-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_sidekiq_primary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_sidekiq_primary:
       hosts:
         <PREFIX>-sidekiq-1:
           ansible_host: <SIDEKIQ-1-ADDRESS>
-    <GEO_(PRIMARY/SECONDARY)_SITE_NAME>_sidekiq_secondary:
+    <GEO_(PRIMARY/SECONDARY)_SITE_GROUP_NAME>_sidekiq_secondary:
       hosts:
         <PREFIX>-sidekiq-2:
           ansible_host: <SIDEKIQ-2-ADDRESS>
