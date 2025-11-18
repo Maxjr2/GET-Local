@@ -84,6 +84,12 @@ kubectl get secrets gitlab-gitlab-tls -o jsonpath --template '{.data.tls\.crt}' 
 kubectl get secrets gitlab-gitlab-tls -o jsonpath --template '{.data.tls\.key}' | base64 --decode
 ```
 
+## Static Config
+
+When using a static inventory with Geo, node naming is critical. The Toolkit identifies whether a node belongs to the primary or secondary site based on the inventory names, which must follow the patterns shown in the [provided examples](../environment_advanced.md#inventory-examples).
+
+For more information and examples on static inventories, refer to the [Static Config](../environment_advanced.md#static-config) documentation.
+
 ## Failover and Recovery
 
 Before starting the failover or recovery process, the Toolkit will enable [Maintenance Mode](https://docs.gitlab.com/ee/administration/maintenance_mode/index.html). When enabling maintenance mode, a message can be set that will appear in a banner at the top of the site.
