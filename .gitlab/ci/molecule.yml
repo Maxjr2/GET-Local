@@ -175,6 +175,12 @@ debian12:os-verification:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: debian12
 
+debian13:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: debian13
+
 amazonlinux2023:os-verification:
   extends: .molecule-os
   variables:
