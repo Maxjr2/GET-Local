@@ -46,7 +46,7 @@ The Toolkit follows GitLab's [Version Support Policy](https://about.gitlab.com/s
 The following table shows the maximum GitLab versions supported by GET version:
 
 | GET Version | Max GitLab Version |
-|-------------|-------------------|
+| ----------- | ------------------ |
 | 2.8.x - 3.2.x | 16.11 |
 | 3.3.x - 3.5.x | 17.11 |
 | 3.6.x and up | Current |
