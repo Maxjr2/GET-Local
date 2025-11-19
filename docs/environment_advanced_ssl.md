@@ -200,8 +200,8 @@ For most components it's best to configure Internal SSL for each via [Custom Fil
 
 Some of the most common components to set up encryption for can be found in the below non-exhaustive table:
 
-|  | Client(s) | Documentation |
-|---|---|---|
+| | Client(s) | Documentation |
+| --- | --- | --- |
 | Postgres | PgBouncer or Rails / Sidekiq / Praefect | [Link](https://docs.gitlab.com/omnibus/settings/database.html#configuring-ssl) |
 | Patroni | Patroni | [Link](https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#enable-tls-support-for-the-patroni-api) |
 | PgBouncer | Rails / Sidekiq / Praefect | N/A |
