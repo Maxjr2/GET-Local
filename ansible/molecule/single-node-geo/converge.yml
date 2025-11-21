@@ -62,4 +62,4 @@
         msg: "Error: all.yml failed on one or more sites."
       when: site1_playbook_run.failed or site2_playbook_run.failed
 
-- ansible.builtin.import_playbook: ../../playbooks/gitlab_geo.yml
+- import_playbook: ../../playbooks/gitlab_geo.yml

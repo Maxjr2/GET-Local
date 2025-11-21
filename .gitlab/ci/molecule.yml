@@ -20,13 +20,24 @@
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
     FF_NETWORK_PER_BUILD: true
+    MOLECULE_HOST_CERTIFICATE: /tmp/certs/docker.pem
+    MOLECULE_HOST_KEY: /tmp/certs/docker-key.pem
   interruptible: true
   before_script:
-    - apt-get update && apt-get install -y rsync jq
+    - apt-get update && apt-get install -y rsync jq wget libnss3-tools
+    # Docker
     - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
     - ./get-docker.sh
+    # Molecule
     - pip install molecule docker molecule-plugins[docker]
+    # K3D
     - curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+    # MkCert
+    - curl -JLo mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+    - chmod +x mkcert
+    - ./mkcert -install
+    - mkdir -p /tmp/certs
+    - ./mkcert -cert-file $MOLECULE_HOST_CERTIFICATE -key-file $MOLECULE_HOST_KEY docker registry.docker
   script:
     - cd ansible
     - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"

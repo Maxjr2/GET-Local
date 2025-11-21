@@ -1,7 +1,11 @@
 all:
   vars:
-    external_url: "http://docker"
+    external_url: "https://docker"
     cloud_provider: none
+
+    external_ssl_source: "user"
+    external_ssl_files_host_certificate_file: "{{ lookup('env', 'MOLECULE_HOST_CERTIFICATE') }}"
+    external_ssl_files_host_key_file: "{{ lookup('env', 'MOLECULE_HOST_KEY') }}"
 
     gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
 
@@ -9,3 +13,7 @@ all:
     gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+
+    container_registry_enable: true
+    container_registry_database_enabled: true
+    container_registry_database_configure: true
