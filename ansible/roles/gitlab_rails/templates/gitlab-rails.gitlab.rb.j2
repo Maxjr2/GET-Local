@@ -101,12 +101,14 @@ registry['debug_addr'] = "0.0.0.0:5001" # https://docs.gitlab.com/administration
 {% if (gitlab_version == '' or gitlab_version is version('18.3', '>=')) and container_registry_database_configure %}
 registry['database'] = {
   'enabled' => {{ container_registry_database_enabled | lower }},
+{% if postgres_external %}
   'host' => "{{ container_registry_database_host }}",
   'port' => {{ container_registry_database_port }},
   'user' => "{{ container_registry_database_username }}",
   'password' => "{{ container_registry_database_password }}",
   'dbname' => "{{ container_registry_database_name }}",
   'sslmode' => '{{ container_registry_database_ssl_mode }}'
+{% endif %}
 }
 {% endif %}
 

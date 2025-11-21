@@ -458,15 +458,18 @@ The Toolkit can be configured to deploy the [Container Registry Metadata Databas
 >>> [!warning] Container Registry Metadata Database limitations
 Take note of the following limitations when using the Container Registry Metadata Database:
 
-- The metadata database can only be deployed when using an externally managed database.
+- The metadata database can only be deployed when deploying a single GitLab managed Postgres instance or when using an externally managed database.
 - The database can be deployed alongside the main GitLab database, but for Geo deployments the database must be located separately.
 - The metadata database was introduced in 17.5, but due to changes in the process and config, the Toolkit only supports from 18.3 onwards.
 >>>
 
-The following settings are available to configure the metadata database:
+The following settings are available to enable the metadata database:
 
 - `container_registry_database_configure` - Should the metadata database be configured by the Toolkit. Defaults to `false`.
 - `container_registry_database_enabled` - Should the database be enabled, this will default to `false` to allow for the import process to be completed. Can be set to `true` when being deployed to a new instance.
+
+The below settings are required when using an externally managed database:
+
 - `container_registry_database_host` - Host for the metadata database. Will default to the main GitLab database instance.
 - `container_registry_database_port` - The port of the PostgreSQL instance. Should only be changed if the instance isn't running with the default port. Default is `5432`.
 - `container_registry_database_name` - Name of the database to be created and used for the metadata database. Defaults to `registry`.
