@@ -8,7 +8,7 @@
   tags:
     - saas-linux-large-amd64
   services:
-    - name: docker:26-dind
+    - name: docker:29-dind
       alias: docker
       entrypoint:
         [
