@@ -23,6 +23,7 @@
       hostname:
         name: "{{ inventory_hostname }}"
       when:
+        - aws_set_hostnames
         - cloud_provider == 'aws'
         - ansible_hostname != inventory_hostname
       tags:

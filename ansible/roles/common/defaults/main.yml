@@ -105,3 +105,7 @@ monitor_data_disks: []
 haproxy_external_disks: []
 haproxy_internal_disks: []
 gitlab_nfs_disks: []
+
+# Cloud Provider settings
+
+aws_set_hostnames: true

@@ -361,6 +361,7 @@ Cloud settings are specific config relating to the cloud provider is running on.
 - `gcp_project` **_GCP only_** - ID of the GCP project. Note this must be the Project's unique ID and not just the name
 - `aws_region`  **_AWS only_** - AWS region the environment will run in.
 - `aws_s3_endpoint` **_AWS only_** - A specific service endpoint for S3 transactions. If not specified, AWS uses the default regional endpoint. See [AWS S3 endpoint documentation](https://docs.aws.amazon.com/general/latest/gr/rande.html) for more details.
+- `aws_set_hostnames` **_AWS only_** - When enabled, instance hostnames will be configured by Ansible to match their Inventory names for easier identification. Disable to keep original AWS give hostnames. Default is `true`.
 - `storage_account_name` **_Azure only_** - The name of the storage account previously created in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
 - `storage_access_key` **_Azure only_** - The access key of the storage account previously obtained in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
 
