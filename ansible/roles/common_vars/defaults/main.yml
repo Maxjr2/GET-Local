@@ -444,7 +444,7 @@ geo_secondary_site_name: "Secondary Site"
 
 geo_primary_site_postgres_group_name: "{% if geo_primary_site_group_name + '_postgres_primary' in groups %}{{ geo_primary_site_group_name }}_postgres_primary{% elif geo_primary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_primary_site_group_name }}_gitlab_rails_primary{% elif 'postgres_primary' in groups%}postgres_primary{% else %}gitlab_rails_primary{% endif %}"
 geo_primary_site_postgres_int_ip: "{{ (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
-geo_secondary_site_postgres_group_name: "{% if geo_secondary_site_group_name + '_postgres_primary' in groups %}{{ geo_secondary_site_group_name }}_postgres_primary{% elif geo_secondary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_secondary_site_group_name }}_gitlab_rails_primary{% else %}{% endif %}"
+geo_secondary_site_postgres_group_name: "{% if geo_secondary_site_group_name + '_postgres_primary' in groups %}{{ geo_secondary_site_group_name }}_postgres_primary{% elif geo_secondary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_secondary_site_group_name }}_gitlab_rails_primary{% else %}{{ '' }}{% endif %}"
 geo_secondary_site_postgres_int_ip: "{{ (groups[geo_secondary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if geo_secondary_site_postgres_group_name != '' else '' }}"
 
 geo_secondary_postgres_host: ""
