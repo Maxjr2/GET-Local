@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye as python-build
+FROM python:3.11-slim-bullseye AS python-build
 
 ARG install_python_latest_pkgs=false
 
