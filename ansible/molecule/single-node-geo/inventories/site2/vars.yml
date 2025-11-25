@@ -1,15 +1,20 @@
 all:
   vars:
-    external_url: "http://docker:81"
+    external_url: "https://site2.docker"
     cloud_provider: none
 
-    geo_secondary_external_url: "http://docker:81"
-    geo_secondary_internal_url: "http://docker:81"
-    geo_secondary_site_group_name: "site2"
-    geo_secondary_site_name: "Site 2"
+    gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
 
-    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/../gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/../gitlab_configs/gitlab_rails.rb.j2"
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
-    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+
+    container_registry_enable: true
+    gitlab_rails_nginx_external_ssl_user: false
+
+    geo_secondary_external_url: "https://site2.docker"
+    geo_secondary_internal_url: "http://site2-gitlab-rails-1"
+    geo_secondary_site_group_name: "site2"
+    geo_secondary_site_name: "Site 2"

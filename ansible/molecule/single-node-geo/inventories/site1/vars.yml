@@ -1,17 +1,21 @@
 all:
   vars:
-    external_url: "http://docker"
+    external_url: "https://site1.docker"
     cloud_provider: none
-
-    geo_primary_external_url: "http://docker"
-    geo_primary_internal_url: "http://docker"
-    geo_primary_site_group_name: "site1"
-    geo_primary_site_name: "Site 1"
 
     gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
 
-    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/../gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/../gitlab_configs/gitlab_rails.rb.j2"
+    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
-    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+    container_registry_token: 'aR5pzb8LhgVX6K83TDAws86SKBJPR5yw'
+
+    container_registry_enable: true
+    gitlab_rails_nginx_external_ssl_user: false
+
+    geo_primary_external_url: "https://site1.docker"
+    geo_primary_internal_url: "http://site1-gitlab-rails-1"
+    geo_primary_site_group_name: "site1"
+    geo_primary_site_name: "Site 1"

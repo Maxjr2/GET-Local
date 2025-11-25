@@ -32,14 +32,21 @@ platforms:
     network_mode: "molecule_network"
     networks:
       - name: molecule_network
-    published_ports:
-      - 0.0.0.0:80:80/udp
-      - 0.0.0.0:80:80/tcp
   - <<: *default_platform
     name: site2-gitlab-rails-1
+  - name: geo-lb
+    image: haproxy:latest
+    pre_build_image: true
+    command: ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
+    volumes:
+      - "${PWD}/molecule/single-node-geo/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"
+      - "${MOLECULE_COMBINED_CERTIFICATE}:/usr/local/etc/haproxy/ssl/docker-combined.pem:ro"
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
     published_ports:
-      - 0.0.0.0:81:80/udp
-      - 0.0.0.0:81:80/tcp
+      - 0.0.0.0:443:443/tcp
+      - 0.0.0.0:1936:1936/tcp
 scenario:
   test_sequence:
     - dependency
