@@ -1,12 +1,39 @@
-- name: Verify
-  hosts: localhost
+---
+- name: Verify GitLab installation
+  hosts: gitlab_rails
+  gather_facts: false
   tasks:
-    - name: Wait for GitLab to be available
-      uri:
-        url: "{{ external_url }}/-/readiness"
-        validate_certs: false
-        timeout: 60
-      register: result
-      until: result.status == 200
-      retries: 30
-      delay: 10
+    - name: Check if GitLab configuration files exist
+      stat:
+        path: "{{ item }}"
+      register: gitlab_config_files
+      failed_when: not gitlab_config_files.stat.exists
+      loop:
+        - /etc/gitlab/gitlab.rb
+        - /etc/gitlab/skip-auto-reconfigure
+        - /etc/gitlab/skip-fail-config-check
+
+    - name: Get GitLab component status
+      command: gitlab-ctl status
+      register: gitlab_status
+      changed_when: false
+
+    - name: Display GitLab service status
+      debug:
+        msg: "{{ gitlab_status.stdout_lines }}"
+
+    - name: Verify GitLab components are running
+      assert:
+        that:
+          - "'run:' in gitlab_status.stdout"
+          - "'down:' not in gitlab_status.stdout"
+        fail_msg: "Some GitLab components are not running"
+        success_msg: "All GitLab components are running"
+
+    - name: Check specific GitLab services are running
+      shell: |
+        gitlab-ctl status | grep -E "(geo-postgresql)" | grep -v "down:"
+      register: geo_service
+      changed_when: false
+      failed_when: geo_service.rc != 0
+      when: (geo_secondary_site_group_name in group_names)

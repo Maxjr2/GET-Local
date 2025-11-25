@@ -20,8 +20,11 @@
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
     FF_NETWORK_PER_BUILD: true
-    MOLECULE_HOST_CERTIFICATE: /tmp/certs/docker.pem
-    MOLECULE_HOST_KEY: /tmp/certs/docker-key.pem
+    MOLECULE_SSL_DIR: "${CI_PROJECT_DIR}/ansible/ssl"
+    MOLECULE_HOST_CERTIFICATE: "${MOLECULE_SSL_DIR}/docker.pem"
+    MOLECULE_HOST_KEY: "${MOLECULE_SSL_DIR}/docker-key.pem"
+    MOLECULE_COMBINED_CERTIFICATE: "${MOLECULE_SSL_DIR}/docker-combined.pem"
+    MOLECULE_DOMAINS: docker registry.docker site1.docker registry.site1.docker site2.docker registry.site2.docker
   interruptible: true
   before_script:
     - apt-get update && apt-get install -y rsync jq wget libnss3-tools
@@ -36,8 +39,11 @@
     - curl -JLo mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
     - chmod +x mkcert
     - ./mkcert -install
-    - mkdir -p /tmp/certs
-    - ./mkcert -cert-file $MOLECULE_HOST_CERTIFICATE -key-file $MOLECULE_HOST_KEY docker registry.docker
+    - mkdir -p $MOLECULE_SSL_DIR
+    - ./mkcert -cert-file $MOLECULE_HOST_CERTIFICATE -key-file $MOLECULE_HOST_KEY $MOLECULE_DOMAINS
+    - cat $MOLECULE_HOST_CERTIFICATE $MOLECULE_HOST_KEY > $MOLECULE_COMBINED_CERTIFICATE
+    # /etc/hosts
+    - echo "$(getent hosts docker | awk '{print $1}') ${MOLECULE_DOMAINS}" | tee -a /etc/hosts
   script:
     - cd ansible
     - echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
@@ -108,7 +114,7 @@ ubuntu2404:single-node:
 ubuntu2404:single-node-geo:
   extends: .molecule
   tags:
-    - saas-linux-xlarge-amd64
+    - saas-linux-2xlarge-amd64
   variables:
     MOLECULE_SCENARIO: single-node-geo
   rules:

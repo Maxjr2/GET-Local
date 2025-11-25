@@ -59,7 +59,8 @@
 
     - name: Fail if all.yml failed
       fail:
-        msg: "Error: all.yml failed on one or more sites."
-      when: site1_playbook_run.failed or site2_playbook_run.failed
+        msg: "Error: {{ item.cmd }}"
+      loop: "{{ job_result.results }}"
+      when: item.failed
 
 - import_playbook: ../../playbooks/gitlab_geo.yml
