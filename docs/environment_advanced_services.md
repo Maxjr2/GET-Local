@@ -329,6 +329,9 @@ Configure read replicas using:
 
 ##### AWS RDS - Geo
 
+> [!warning]
+> When configuring a standalone Geo Tracking database in AWS RDS with the Toolkit, the default port in Terraform is set as `5431`, whilst Ansible uses port `5432`. Users need to update Terraform (`rds_geo_tracking_postgres_port`) to use port `5432` for Ansible to correctly communicate with the database. This will be [addressed in a future release](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/1180).
+
 For Geo deployments with cross-region replication:
 
 - **Primary site**: Set backup retention period to 1 or higher
@@ -626,6 +629,9 @@ When setting up Geo with AWS RDS or GCP Cloud SQL you must specify some extra se
 - `geo_secondary_praefect_postgres_host` - If using Gitaly cluster this should point to the separate database instance being used for Praefect.
 - `geo_tracking_postgres_host` - By default this will use the same database used for Praefect. If Gitaly Cluster is not being used then this must be set to a separate database instance than the main GitLab instance.
 - `geo_tracking_postgres_port` - By default the Geo tracking database uses port `5431`, if the Geo tracking database is sharing a database instance with Praefect this needs to be set to the same value as `praefect_postgres_port` (`5432` by default).
+  
+> [!warning]
+> When configuring a standalone Geo Tracking database in AWS RDS with the Toolkit, the default port in Terraform is set as `5431`, whilst Ansible uses port `5432`. Users need to update Terraform (`rds_geo_tracking_postgres_port`) to use port `5432` for Ansible to correctly communicate with the database. This will be [addressed in a future release](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/1180).
 
 Depending on your Database instance setup some additional config may be required:
 
