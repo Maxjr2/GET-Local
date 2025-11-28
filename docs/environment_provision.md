@@ -322,7 +322,7 @@ By default, the Toolkit will configure machines using Ubuntu 24.04.
 However, this can be changed via the `machine_image` in the [module's environment config file](#configure-module-settings-environmenttf) to the [machine image name as given by GCP](https://cloud.google.com/compute/docs/images/os-details), e.g. `ubuntu-2204-lts` or `rhel-8`.
 
 > [!note]
-> Supported OS versions are listed [in the README](../README.md#requirements).
+> See [Target Node Operating System Support](environment_configure.md#target-node-operating-system-support) for details on supported Operating System targets with Ansible.
 
 > [!note]
 > Changing the `machine_image` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
@@ -662,7 +662,7 @@ By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AM
 However, this can be changed via the `ami_id` setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the AWS docs on how to find the specific AMI ID you require](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html).
 
 > [!note]
-> Supported OS versions are listed [in the README](../README.md#requirements).
+> See [Target Node Operating System Support](environment_configure.md#target-node-operating-system-support) for details on supported Operating System targets with Ansible.
 
 > [!note]
 > Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
@@ -946,7 +946,7 @@ However, this can be changed via the `source_image_reference` dictionary setting
 When the image has been selected the setting will need the `publisher`, `offer`, `sku` and `version` fields set. For example:
 
 > [!note]
-> Supported OS versions are listed [in the README](../README.md#requirements).
+> See [Target Node Operating System Support](environment_configure.md#target-node-operating-system-support) for details on supported Operating System targets with Ansible.
 
 > [!note]
 > Changing the `source_image_reference` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).

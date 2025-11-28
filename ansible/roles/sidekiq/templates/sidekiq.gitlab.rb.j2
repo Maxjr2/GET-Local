@@ -29,7 +29,7 @@ registry['gid'] = {{ registry_gid }}
 # Consul Agent (Monitoring Auto Discovery)
 consul['enable'] = true
 consul['configuration'] = {
-  bind_addr: '{{ ansible_default_ipv4.address }}',
+  bind_addr: "{{ ansible_facts['default_ipv4']['address'] }}",
   retry_join: %w({{ (consul_int_addrs | join(' ')) }})
 }
 consul['monitoring_service_discovery'] = true

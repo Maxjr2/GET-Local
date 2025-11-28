@@ -1,12 +1,15 @@
 # docker build --platform linux/amd64 --pull --no-cache -t get-pkgs:host -f Dockerfile.python_pkgs_host .
-FROM python:3.11-slim-bullseye 
-
-ARG ansible_version=12.0
+FROM python:3.12-slim-trixie 
 
 COPY ansible/requirements/ansible-python-packages.txt ansible-python-packages.txt
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libssl-dev uuid-dev cmake libcurl4-openssl-dev pkg-config git curl jq unzip && rm -rf /var/lib/apt/lists/*
-RUN pip3 install ansible~=$ansible_version
-RUN pip3 install -r ansible-python-packages.txt
 
-CMD ["pip3", "freeze"]
+# Install pip-tools
+RUN pip3 install pip-tools
+
+# Run pip-compile during build to generate requirements.txt
+RUN pip-compile --resolver=backtracking --output-file=/requirements.txt --strip-extras --no-annotate ansible-python-packages.txt
+
+# Output the file when container runs
+CMD ["cat", "/requirements.txt"]

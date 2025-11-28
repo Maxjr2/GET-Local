@@ -7,4 +7,9 @@ all:
     custom_tasks_folder: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks"
 
     # Workaround: https://github.com/docker/cli/issues/6646
-    docker_daemon_options: "{{ {'storage-driver': 'native'} if not (ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04') else {} }}"
+    docker_daemon_options: >-
+      {{
+        {} if (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '20.04') or
+              (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int == 8)
+        else {'storage-driver': 'native'}
+      }}

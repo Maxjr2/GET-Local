@@ -8,16 +8,16 @@
         name: curl-minimal
         state: absent
       when:
-        - ansible_distribution == "Rocky"
-        - ansible_distribution_major_version | int == 9
+        - ansible_facts['distribution'] == "Rocky"
+        - ansible_facts['distribution_major_version'] | int in [8, 9]
 
-    - name: Fix /etc/shadow permissions on Rocky Linux # https://github.com/geerlingguy/docker-rockylinux9-ansible/issues/6
+    - name: Fix /etc/shadow permissions on affected OSes # https://github.com/geerlingguy/docker-rockylinux9-ansible/issues/6
       ansible.builtin.file:
         path: /etc/shadow
         mode: '400'
       when:
-        - ansible_distribution == "Rocky"
-        - ansible_distribution_major_version | int >= 9
+        - (ansible_facts['distribution'] == "Rocky" and ansible_facts['distribution_major_version'] | int >= 8) or
+          (ansible_facts['distribution'] == "Amazon" and ansible_facts['distribution_major_version'] | int >= 2)
 
     - name: Install needed packages for Amazon Linux 2023
       ansible.builtin.package:

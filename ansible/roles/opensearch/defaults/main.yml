@@ -5,4 +5,4 @@ opensearch_version: "{{ lookup('env', 'OPENSEARCH_VERSION') | default('3.2.0' if
 opensearch_docker_image: "{{ lookup('env','OPENSEARCH_DOCKER_IMAGE') | default('opensearchproject/opensearch:' + opensearch_version, true) }}"
 opensearch_docker_prune: true
 
-opensearch_heap_size: "{{ (ansible_memtotal_mb * 0.5) | round | int }}"
+opensearch_heap_size: "{{ (ansible_facts['memtotal_mb'] * 0.5) | round | int }}"

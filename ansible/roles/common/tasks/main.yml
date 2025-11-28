@@ -111,7 +111,7 @@
 
     - name: Get GitLab json config file stats if it exists
       stat:
-        path: "/opt/gitlab/embedded/nodes/{{ ansible_fqdn }}.json"
+        path: "/opt/gitlab/embedded/nodes/{{ ansible_facts['fqdn'] }}.json"
       register: gitlab_json_config_file
       tags:
         - reconfigure
@@ -119,7 +119,7 @@
 
     - name: Delete GitLab json config file if malformed
       file:
-        path: "/opt/gitlab/embedded/nodes/{{ ansible_fqdn }}.json"
+        path: "/opt/gitlab/embedded/nodes/{{ ansible_facts['fqdn'] }}.json"
         state: absent
       when:
         - gitlab_json_config_file.stat.exists
