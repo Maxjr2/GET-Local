@@ -71,22 +71,60 @@ Hopefully with this overview its clearer how Ansible in the Toolkit works. Below
 
 ## 1. Install Ansible
 
-The Toolkit requires Ansible to be installed. We follow the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) and support all currently maintained versions. The installation defaults to Ansible `12.0` (`ansible-core 2.19`), but Ansible `11.0` (`ansible-core 2.18`) is also supported.
+The Toolkit requires Ansible to be installed and follows the [Ansible lifecycle](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs), officially supporting all currently maintained versions. It's recommended to use the latest supported version where possible.
 
 > [!important]
-> Both Ansible 11.x and 12.x require Python 3.11+ on the control node. Target nodes can use the latest Python version available from their OS.
+> Ansible has different requirements for **control nodes** (where Ansible runs) vs **target nodes** (machines being configured). See the sections below for details.
 
-When choosing an [Ansible control node](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements), we recommend that it's in the same or near location as the environment being built to avoid network slowdown. Additionally, if you plan to use a cloud machine as a control node it is _not_ recommended to use [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can lead to inconsistent behaviour.
+### Control Node Requirements
 
-It's [also strongly recommended that a recent version of `openssh` is installed on the machine](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html#controlpersist-and-paramiko) where Ansible is going to be run to ensure consistent connections.
+The Ansible control node is the machine where you run the Toolkit from. Requirements:
 
-You can either use a Python virtual environment or install Ansible globally. Additionally, you can avoid installing anything by using the Toolkit's Docker image. We recommend using the method you're most familiar with.
+- Ansible version: Latest supported version recommended (currently `13.0` / ansible-core `2.20`)
+  - All [currently maintained Ansible versions](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-community-changelogs) supported
+- Python: Latest version supported by your Ansible version (Ansible `13.x` requires Python `3.12`+)
+- Operating System: Any OS [supported by Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)
+- Location: Same or near region as your target environment to avoid network slowdown
+- Instance type: Avoid [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can cause inconsistent behavior
+-*SSH: Install a [recent version of `openssh`](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html#controlpersist-and-paramiko) for consistent connections
 
-### Using Ansible inside a Docker container
+### Target Node Operating System Support
+
+Target nodes are the machines being configured by the Toolkit. The Toolkit provides a collection of Ansible scripts and as such is dependent on the operating systems supported by both the [Linux Package (Omnibus)](https://docs.gitlab.com/administration/package_information/supported_os/) and [Ansible](https://docs.ansible.com/projects/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix) itself. When either upstream dependency drops support for an operating system, GET support is affected accordingly.
+
+Due to this dependency on third-party automation tools, OS support lifecycles may differ from the Linux Package (Omnibus).
+
+**Supported Target Operating Systems:**
+
+Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
+
+**Deprecated Target Operating Systems:**
+
+The following operating systems are **deprecated** and no longer officially supported. Best-effort compatibility is maintained with older Ansible versions where possible:
+
+| Target OS | Required Ansible Version | Notes |
+| --------- | ------------------------ | ----- |
+| Ubuntu 20.04 LTS | Ansible 12.x or earlier (ansible-core 2.19) | Deprecated - Python 3.8 required on target |
+| RHEL 8 | Ansible 9.x or earlier (ansible-core 2.16) | Deprecated - Python 3.6 required on target |
+| Amazon Linux 2 | Ansible 9.x or earlier (ansible-core 2.16) | Deprecated - `yum` package manager support removed in Ansible 2.17+ |
+
+When using deprecated operating systems:
+
+- These systems are deprecated - Users should plan migrations to supported versions
+- Best-effort support only, not guaranteed long-term
+- Install the corresponding older Ansible version on your **control node**
+- The Ansible ecosystem (collections, roles, modules) continues evolving independently and may introduce breaking changes
+- Older Ansible Galaxy collection versions may be required (e.g., `amazon.aws` <10.0.0 for Ansible 2.16) - check collection changelogs and install compatible versions accordingly
+
+### Installation Methods
+
+You can install Ansible using a Python virtual environment, install it globally, or use the Toolkit's Docker image. Choose the method you're most familiar with.
+
+#### Using Ansible inside a Docker container
 
 With Docker the only prerequisite is installation, the [Toolkit's image](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) contains everything else you'll need. The official [Docker installation instructions](https://docs.docker.com/engine/install/) should be followed to correctly install and run Docker.
 
-### Installing Ansible with a Virtual Environment
+#### Installing Ansible with a Virtual Environment
 
 If installing Ansible locally, we recommend using this approach as your local environment will be isolated from other python packages that you install on your machine. Additionally, your local environment will match the environment used for testing, validation, and building docker images, so there is less chance of package changes affecting the ansible environment you are running locally. The steps for all of this are as follows:
 
@@ -113,7 +151,7 @@ If installing Ansible locally, we recommend using this approach as your local en
 
 1. On macOS, the `gnu-tar` utility is required by some Ansible modules. It can be installed via package managers such as Homebrew - `brew install gnu-tar`
 
-### Bring-Your-Own Ansible
+#### Bring-Your-Own Ansible
 
 If you have installed Ansible inside a virtual environment, you can skip this step.
 

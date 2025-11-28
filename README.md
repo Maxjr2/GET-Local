@@ -37,18 +37,21 @@ Review the Toolkit in full before any use, as it offers no guarantees on topics 
 
 The requirements for the Toolkit are as follows:
 
-**Host machine:**
+**Control Node:**
 
-- Terraform `1.12.0` and upwards
-- Ansible `12.0` and upwards (Ansible core `2.19`, Python `3.11`+)
-  - Ansible `11.0` (Ansible core `2.18`) also supported while maintained by Ansible
+- Terraform `1.13.0` and upwards
+- Ansible `13.0` (ansible-core `2.20`, Python `3.12`+)
+  - All [currently maintained Ansible versions](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html) supported
+  - Older versions supported for deprecated target OS compatibility - see [Target Operating System Support](docs/environment_configure.md#target-node-operating-system-support)
 
-**Target machine(s):**
+**Target Nodes:**
 
 - GitLab version: `16.0.0` and upwards
-- OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
-  - OS support depends on [Linux Package (Omnibus) availability](https://docs.gitlab.com/administration/package_information/supported_os/)
-  - The Toolkit supports clean OS installations
+- Linux Package (Omnibus):
+  - OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
+  - Deprecated OS versions supported with older Ansible versions - see [Target Operating System Support](docs/environment_configure.md#target-node-operating-system-support)
+  - OS support depends on both [Linux Package (Omnibus)](https://docs.gitlab.com/administration/package_information/supported_os/) and Ansible compatibility
+  - Clean OS installations only
   - Admin access required to install dependencies
   - ARM-based hardware supported where upstream packages are available
 - Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service

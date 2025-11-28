@@ -162,12 +162,6 @@ cloud-native:
 
 ## OS Jobs
 
-ubuntu2004:os-verification:
-  extends: .molecule-os
-  variables:
-    MOLECULE_SCENARIO: os-verification
-    MOLECULE_DISTRO: ubuntu2004
-
 ubuntu2204:os-verification:
   extends: .molecule-os
   variables:
@@ -210,6 +204,29 @@ rockylinux9:os-verification:
   variables:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: rockylinux9
+
+# Deprecated OS targets
+ubuntu2004:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: ubuntu2004
+  before_script:
+    - apt-get update && apt-get install -y rsync
+    - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
+    - ./get-docker.sh
+    - pip install 'ansible>=12.0,<13.0' 'ansible-core>=2.19,<2.20' molecule docker molecule-plugins[docker]
+
+rockylinux8:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: rockylinux8
+  before_script:
+    - apt-get update && apt-get install -y rsync
+    - curl -fsSL https://get.docker.com -o get-docker.sh && chmod +x ./get-docker.sh
+    - ./get-docker.sh
+    - pip install 'ansible>=9.0,<10.0' 'ansible-core>=2.16,<2.17' molecule docker molecule-plugins[docker]
 
 ## Runner tag sizes
 # - saas-linux-small-amd64

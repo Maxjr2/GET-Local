@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye AS python-build
+FROM python:3.12-slim-trixie AS python-build
 
 ARG install_python_latest_pkgs=false
 
@@ -23,7 +23,7 @@ RUN ansible-galaxy install -r ansible/requirements/ansible-galaxy-requirements.y
 
 #####
 
-FROM python:3.11-slim-bullseye
+FROM python:3.12-slim-trixie
 
 COPY --from=python-build /root/ /root/
 COPY --from=python-build /gitlab-environment-toolkit /gitlab-environment-toolkit

@@ -280,9 +280,23 @@ If you're unable to upgrade or for some reason the certs still have not renewed,
 
 The following errors presented on systems where upstream deprecations has occurred:
 
-- Python error `module 'tarfile' has no attribute 'data_filter'` - This occurred on RHEL 8 systems due to a specific security update relating to the `python-libs` package that needed to be updated.
-- Ansible error `SyntaxError: future feature annotations is not defined` - This occurred on RHEL 8 systems when using Ansible versions `10.0` (Ansible Core `2.17`) or higher due to this [Ansible version removing support for this OS target's Python version](https://github.com/ansible-collections/news-for-maintainers/issues/54).
-- Ansible errors related to package manager such as `Module not found: rpm` - This occurred on Amazon Linux 2 systems when using Ansible versions `10.0` (Ansible Core `2.17`) or higher due to this [Ansible version removing support for the `yum` package manager](https://github.com/ansible/ansible/issues/83428#issuecomment-2161516707).
+- **Python error:** `module 'tarfile' has no attribute 'data_filter'`
+  - **Cause:** Occurs on RHEL 8 systems due to a specific security update in the `python-libs` package
+  - **Resolution:** Update the `python-libs` package on the target system
+
+- **Ansible error:** `SyntaxError: future feature annotations is not defined`
+  - **Cause:** Occurs on RHEL 8 systems when using Ansible 10.0+ (`ansible-core` 2.17+) due to [Ansible removing support for Python 3.6](https://github.com/ansible-collections/news-for-maintainers/issues/54)
+  - **Resolution:** Use Ansible 9.x or earlier (`ansible-core` 2.16 or earlier), or upgrade target OS to RHEL 9+
+
+- **Ansible error:** `Module not found: rpm` or related package manager errors
+  - **Cause:** Occurs on Amazon Linux 2 systems when using Ansible 10.0+ (`ansible-core` 2.17+) due to [Ansible removing support for the `yum` package manager](https://github.com/ansible/ansible/issues/83428#issuecomment-2161516707)
+  - **Resolution:** Use Ansible 9.x or earlier (`ansible-core` 2.16 or earlier), or upgrade target OS to Amazon Linux 2023+
+
+- **Ansible error:** `Ansible requires Python 3.9 or newer on the target`
+  - **Cause:** Occurs on Ubuntu 20.04 systems when using Ansible 13.0+ (`ansible-core` 2.20+) which requires Python 3.9+ and has dropped Python 3.8 support
+  - **Resolution:** Use Ansible 12.x or earlier (`ansible-core` 2.19 or earlier), or upgrade target OS to Ubuntu 22.04+
+
+For comprehensive information on target OS compatibility and required Ansible versions, see [Target Node Operating System Support](environment_configure.md#target-node-operating-system-support).
 
 ## Cloud Native Hybrid
 

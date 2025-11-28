@@ -6,12 +6,9 @@ provisioner:
   inventory:
     links:
       hosts: ./inventory
-  config_options:
-    defaults:
-      display_skipped_hosts: false
-      stdout_callback: yaml
   env:
     ANSIBLE_ROLES_PATH: ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:../../roles
+    ANSIBLE_CONFIG: ../../ansible.cfg
     ANSIBLE_COLLECTIONS_DUPLICATE_WARNINGS: false
     MOLECULE_DISPLAY_MISSING_SCHEMA: false
     ANSIBLE_GALAXY_DISPLAY_SKIPPED: false

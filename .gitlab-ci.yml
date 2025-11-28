@@ -1,8 +1,8 @@
 include:
-  - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
-  - template: Jobs/Secret-Detection.latest.gitlab-ci.yml
-  - template: Jobs/Container-Scanning.latest.gitlab-ci.yml
-  - template: Jobs/SAST-IaC.latest.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.v2.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
+  - template: Jobs/SAST-IaC.gitlab-ci.yml
   - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@2.1.0
   - local: .gitlab/ci/molecule.yml
   - local: .gitlab/ci/terraform_test.yml
@@ -43,14 +43,7 @@ stages:
 ##            SAST             ##
 #################################
 
-gemnasium-dependency_scanning:
-  rules:
-    - !reference [
-        .on_merge_request_and_merged_events_except_schedule_and_tag,
-        rules,
-      ]
-
-gemnasium-python-dependency_scanning:
+dependency-scanning:
   rules:
     - !reference [
         .on_merge_request_and_merged_events_except_schedule_and_tag,

@@ -48,7 +48,7 @@
 
 - name: Check if GitLab Linux package json config file exists
   stat:
-    path: "/opt/gitlab/embedded/nodes/{{ ansible_fqdn }}.json"
+    path: "/opt/gitlab/embedded/nodes/{{ ansible_facts['fqdn'] }}.json"
   register: gitlab_json_config_file
   tags:
     - reconfigure
@@ -70,11 +70,11 @@
 
     - name: Reconfigure and restart PostgreSQL (Multi Node PostgreSQL - Secondaries)
       include_tasks: reconfigure.yml
-      when: (ansible_default_ipv4.address != postgres_leader_int_address.stdout.split(':')[0])
+      when: (ansible_facts['default_ipv4']['address'] != postgres_leader_int_address.stdout.split(':')[0])
 
     - name: Reconfigure and restart PostgreSQL (Multi Node PostgreSQL - Leader)
       include_tasks: reconfigure.yml
-      when: (ansible_default_ipv4.address == postgres_leader_int_address.stdout.split(':')[0])
+      when: (ansible_facts['default_ipv4']['address'] == postgres_leader_int_address.stdout.split(':')[0])
   when:
     - groups['postgres'] | length > 1
     - gitlab_json_config_file.stat.exists

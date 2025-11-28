@@ -8,9 +8,21 @@
     GITLAB_OMNIBUS_CONFIG= /opt/gitlab/embedded/bin/runsvdir-start &
   when: omnibus_node
 
-- name: Install Requests
+- name: Install Requests via Pip (Debian 12+/Ubuntu 24.04+ - PEP668)
   pip:
     name: "requests"
     extra_args: "--upgrade-strategy only-if-needed"
-    break_system_packages: true
-  when: not omnibus_node
+    break_system_packages: "{{ ansible_version.full is version('2.17', '>=') | default(omit) }}"
+  when:
+    - not omnibus_node
+    - (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int >= 12) or
+      (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] is version('24.04', '>='))
+
+- name: Install Requests via Pip (other systems)
+  pip:
+    name: "requests"
+    extra_args: "--upgrade-strategy only-if-needed"
+  when:
+    - not omnibus_node
+    - not ((ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int >= 12) or
+           (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] is version('24.04', '>=')))
