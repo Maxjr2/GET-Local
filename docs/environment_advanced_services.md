@@ -347,7 +347,7 @@ Configure Geo replication using:
 The Toolkit supports provisioning a [GCP Cloud SQL PostgreSQL service](https://cloud.google.com/sql/docs/postgres) instance with everything GitLab requires or recommends such as built in HA support over AZs and encryption.
 
 > [!important]
-> Before proceeding, enable the [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and [Cloud SQL Admin](https://cloud.google.com/sql/docs/postgres/admin-api#enable_the_api) APIs in your GCP project. Your Terraform service account must have the `Cloud SQL Admin` and `Compute Network Admin` IAM roles also.
+> Before proceeding, enable the [Cloud Resource Manager](https://docs.cloud.google.com/resource-manager/reference/rest) and [Cloud SQL Admin](https://cloud.google.com/sql/docs/postgres/admin-api#enable_the_api) APIs in your GCP project. Your Terraform service account must have the `Cloud SQL Admin` and `Compute Network Admin` IAM roles also.
 
 The variables for this service start with the prefix `cloud_sql_*` and should replace any previous `postgres_*`, `pgbouncer_*` and `praefect_postgres_*` settings. The available variables are as follows:
 
