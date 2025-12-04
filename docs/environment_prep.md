@@ -95,7 +95,7 @@ With the above set create the Service Account as follows:
      - `Cloud SQL Admin`
      - `Compute Network Admin`
      > [!note]
-     > The [Cloud Resource Manager](https://cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://cloud.google.com/memorystore/docs/redis/reference/rest) APIs need to be enabled on the project to configure Cloud SQL.
+     > The [Cloud Resource Manager](https://docs.cloud.google.com/resource-manager/reference/rest) and the [Cloud SQL Admin](https://cloud.google.com/memorystore/docs/redis/reference/rest) APIs need to be enabled on the project to configure Cloud SQL.
    - [Cloud Memorystore](environment_advanced_services.md#gcp-memorystore)
      - `Cloud Memorystore Redis Admin`
      - `Cloud Memorystore Redis Editor`

@@ -514,11 +514,13 @@ global:
       password:
         secret: gitlab-geo-tracking-postgres-password
         key: password
-{% if container_registry_enable and cloud_native_hybrid_geo_role == 'secondary' and geo_primary_registry_url != '' %}
+{% if container_registry_enable %}
     registry:
       replication:
         enabled: true
+{% if cloud_native_hybrid_geo_role == 'secondary' and geo_primary_registry_url != '' %}
         primaryApiUrl: "{{ geo_primary_registry_url }}"
+{% endif %}
 {% endif %}
 {% endif %}
 
