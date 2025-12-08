@@ -1062,6 +1062,8 @@ all:
 
 </details>
 
+When using external or managed services, remove the corresponding node groups from your static inventory (PostgreSQL, PgBouncer, and Consul for external databases; Redis groups for external Redis).
+
 ## System Packages
 
 The Toolkit will install system packages on every node it requires for setting up GitLab.
