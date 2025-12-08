@@ -295,7 +295,7 @@ Next in the file are the various machine settings, separated the same as the Ref
 
 The following optional settings are available for configuring node and disk setup:
 
-- `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Supported OS versions are listed [in the README](../README.md#requirements). Defaults to `ubuntu-2404-lts-amd64`.
+- `machine_image` - The [GCP machine image name](https://cloud.google.com/compute/docs/images/os-details) to use for the VMs. Supported OS versions are listed [in the README](../README.md#requirements). Defaults to `ubuntu-2404-lts-amd64`. If using ARM-based machine types, you must set an ARM-compatible image.
 - `machine_secure_boot` - Controls whether [Secure Boot](https://cloud.google.com/security/shielded-cloud/shielded-vm#secure-boot) is enabled on the VMs. Can only be enabled for OS Images that support the `Shielded VM` feature. Defaults to `false`.
 - `default_disk_size` - The default root disk size to use for machines where a specific default has not been set. Defaults to `100` (GB).
 - `default_disk_type` - The default root disk type to use for machines where a specific default has not been set. Defaults to `pd-standard`.
@@ -658,6 +658,7 @@ The following optional settings are available for configuring Object Storage set
 ##### Configure Machine OS Image (AWS)
 
 By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AMI.
+If using ARM-based instance types, you must set an ARM-compatible image.
 
 However, this can be changed via the `ami_id` setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the AWS docs on how to find the specific AMI ID you require](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html).
 
@@ -665,7 +666,7 @@ However, this can be changed via the `ami_id` setting in the [module's environme
 > See [Target Node Operating System Support](environment_configure.md#target-node-operating-system-support) for details on supported Operating System targets with Ansible.
 
 > [!note]
-> Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via it's standard process, for more information refer to [this section](environment_upgrades.md#avoid-changing-machine-os-image).
+> Changing the `ami_id` setting after deployment typically would trigger every node to be rebuilt. For this reason, the Terraform modules in the Toolkit have been explicitly configured to ignore any changes once deployed. It's recommended to upgrade the OS via its standard process, for more information refer to the [Avoid Changing Machine OS Image](environment_upgrades.md#avoid-changing-machine-os-image) documentation.
 
 ##### Object Storage versioning (AWS)
 
@@ -934,12 +935,13 @@ The following optional settings are available for configuring Object Storage set
 > [!warning]
 > Changing the `object_storage_buckets` or `object_storage_prefix` settings on an existing environment can lead to buckets getting removed and data loss.
 
-- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted. 
+- `object_storage_buckets` - The list of buckets Terraform should create. By default, this will create every type of bucket GitLab uses. This list can be adjusted for advanced scenarios where only select buckets are wanted.
 - `object_storage_prefix` - An optional prefix to use for the bucket names instead of `prefix`. Can be used to ensure unique names for buckets.
 
 ##### Configure Machine OS Image (Azure)
 
 By default, the Toolkit will configure machines using the latest Ubuntu 24.04 AMI.
+If using ARM-based machine sizes, you must set an ARM-compatible image.
 
 However, this can be changed via the `source_image_reference` dictionary setting in the [module's environment config file](#configure-module-settings-environmenttf). [Refer to the Azure docs on how to find the specific source image details you require](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage).
 

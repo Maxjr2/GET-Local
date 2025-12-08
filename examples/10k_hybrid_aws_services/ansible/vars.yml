@@ -12,7 +12,6 @@ all:
     # General Settings
     prefix: "<environment_prefix>"
     external_url: "<external_url>"
-    external_ip: "<external_ip>"
     gitlab_license_file: "<gitlab_license_file_path>"
     cloud_native_hybrid_environment: true
     kubeconfig_setup: true

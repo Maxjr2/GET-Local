@@ -240,6 +240,8 @@ For AWS Elastic Kubernetes Service (EKS), the following main settings are availa
 - `*_node_pool_max_count` / `*_node_pool_min_count` - Maximum and minimum machines for cluster autoscaling
   - `*_node_pool_count` - Static machine count with no autoscaling (alternative to min/max settings)
 - `*_node_pool_instance_type` - The [AWS Instance Type](https://aws.amazon.com/ec2/instance-types/) for each machine
+  > [!tip]
+  > ARM-based instances require corresponding ARM AMI configuration, see [Optimized AMI Type](#optimized-ami-type-default).
 - `*_node_pool_disk_size` - Root disk size in GB (optional)
 - `*_node_pool_disk_kms_key_arn` - KMS key for disk encryption (optional)
 - `*_node_pool_max_unavailable` - Maximum machines [unavailable](https://docs.aws.amazon.com/eks/latest/APIReference/API_NodegroupUpdateConfig.html) during updates (optional, defaults to 1)
@@ -509,7 +511,7 @@ Note however there are several limitations to this feature, such as manually hav
 Enabling the feature is controlled via the following variables:
 
 - `eks_envelope_encryption` - Enables EKS Envelope Encryption. Optional, default is `false`.
-- `eks_envelope_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt Kubernetes secrets. Note that the key should have the correct policy to allow access for the cluster's IAM role, [refer to the AWS docs for more info](https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html#enable-kms). If not provided `default_kms_key_arm` or a Toolkit managed AWS KMS key will be used in that order. Optional, default is `null`.
+- `eks_envelope_kms_key_arn` - The ARN for an existing [AWS KMS Key](https://aws.amazon.com/kms/) to be used to encrypt Kubernetes secrets. Note that the key should have the correct policy to allow access for the cluster's IAM role, [refer to the AWS docs for more info](https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html#enable-kms). If not provided, `default_kms_key_arn` or a Toolkit managed AWS KMS key will be used in that order. Optional, default is `null`.
   - Due to limitations with this feature, it's strongly recommended that you use your own KMS key with the correct policies that align with your security requirements.
 
 #### Networking (AWS)
