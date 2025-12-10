@@ -84,6 +84,12 @@ gitlab_rails['shared_path'] = '{{ gitlab_nfs_path }}/shared'
 gitlab_ci['builds_directory'] = '{{ gitlab_nfs_path }}/builds'
 {% endif %}
 
+# Pages
+{% if pages_enable %}
+gitlab_pages['enable'] = true
+pages_external_url "{{ pages_external_url }}"
+{% endif %}
+
 # Components Config
 # Redis
 {% if redis_external %}
