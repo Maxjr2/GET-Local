@@ -136,6 +136,7 @@
         update_repo_cache: true
         release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
         values: "{{ gitlab_values }}"
+        wait: true
       when: not gitlab_operator
 
     - name: Failover Promote Secondary - Redeploy GitLab CR
