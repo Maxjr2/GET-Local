@@ -38,7 +38,7 @@
     - name: Copy custom psql certificate to local temp
       fetch:
         src: "{{ geo_primary_psql_crt_file }}"
-        dest: "{{ geo_psql_temp_folder.path }}/"
+        dest: "{{ geo_psql_temp_folder.path }}/server.crt"
         flat: true
       no_log: true
       delegate_to: localhost
