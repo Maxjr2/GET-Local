@@ -39,9 +39,11 @@
       run_once: true
       ignore_errors: "{{ maintenance_mode_state | lower }}" # noqa ignore-errors
       kubernetes.core.k8s_exec:
-        pod: "{{ toolbox_pod }}"
+        pod: "{{ query('kubernetes.core.k8s', kind='Pod', namespace=gitlab_cloud_native_release_namespace, label_selector='app=toolbox') | map(attribute='metadata.name') | first | default('') }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
+      retries: 30
+      delay: 10
   when:
     - cloud_native_hybrid_geo
