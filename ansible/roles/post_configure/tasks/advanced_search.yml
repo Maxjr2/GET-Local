@@ -88,7 +88,7 @@
           register: index_status_result
           retries: 20
           delay: 10
-          until: "(index_status_result.stdout | regex_search('[0-9]+\\.[0-9]+') | float > 90.0) or '(0/0 projects)' in index_status_result.stdout"
+          until: "(index_status_result.stdout | regex_search('[0-9]+\\.[0-9]+') | float > 90.0) or '(0/0 projects)' in index_status_result.stdout or 'not enabled' in index_status_result.stdout"
           when: advanced_search_enable | bool
       when: not gitlab_environment_settings.elasticsearch_indexing or
             advanced_search_reconfigure | bool
@@ -194,7 +194,7 @@
           register: index_status_result
           retries: 20
           delay: 10
-          until: "(index_status_result.stdout | regex_search('[0-9]+\\.[0-9]+') | float > 90.0) or '(0/0 projects)' in index_status_result.stdout"
+          until: "(index_status_result.stdout | regex_search('[0-9]+\\.[0-9]+') | float > 90.0) or '(0/0 projects)' in index_status_result.stdout or 'not enabled' in index_status_result.stdout"
           when: advanced_search_enable | bool
       when: not gitlab_environment_settings.elasticsearch_indexing or
             advanced_search_reconfigure | bool
