@@ -3,7 +3,7 @@
 system_packages_deb: [aptitude, curl, openssh-server, ca-certificates, tzdata, python3-pip, nfs-common, postfix, jq, libpq-dev]
 
 system_packages_rpm: ['curl', 'openssh-server', 'ca-certificates', 'tzdata', 'python3-pip', 'python3-devel', 'python3-libs', 'nfs-utils', 'postfix', 'jq', 'gcc', 'yum-plugin-versionlock']
-system_packages_rhel: "{{ system_packages_rpm + ['libpq-devel'] }}"
+system_packages_rhel: "{{ system_packages_rpm + ['libpq-devel', 'python3-setuptools'] }}"
 system_packages_amazon:
   '2': "{{ system_packages_rpm + ['postgresql-devel'] }}"
   '2023': "{{ (system_packages_rpm + ['libpq-devel']) | difference(['curl']) }}"

@@ -1074,8 +1074,8 @@ In addition to this it will configure automated security upgrades and can option
 
 The Toolkit will set up automatic security upgrades as a convenience on the target OS as follows:
 
-- Ubuntu / Debian - Unattended Upgrades
-- RHEL 9 / Amazon Linux 2023 - DNF Automatic
+- Ubuntu,  Debian - Unattended Upgrades
+- RHEL 9/10, Amazon Linux 2023 - DNF Automatic
 
 The role(s) configure the following:
 

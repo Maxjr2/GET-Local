@@ -35,7 +35,7 @@
     - system_packages_auto_security_upgrade
     - ansible_facts['os_family'] == "Debian"
 
-- name: Configure Automatic Security Upgrades (RHEL 9, Amazon Linux 2023)
+- name: Configure Automatic Security Upgrades (RHEL 9/10, Amazon Linux 2023)
   block:
     - name: Install dnf-automatic package
       package:
