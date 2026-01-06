@@ -19,7 +19,7 @@ ansible_facts_gathered: false
 cloud_provider: ''
 
 internal_addr_use_hostnames: false
-internal_ip_lookup: {gcp: ['networkInterfaces', 0, 'networkIP'], aws: ['private_ip_address'], azure: ['private_ipv4_addresses', 0], none: ['ansible_default_ipv4', 'address']}
+internal_ip_lookup: {gcp: ['networkInterfaces', 0, 'networkIP'], aws: ['private_ip_address'], azure: ['private_ipv4_addresses', 0], none: ['ansible_facts', 'default_ipv4', 'address']}
 internal_hostname_lookup: {gcp: ['ansible_facts', 'fqdn'], aws: ['private_dns_name'], azure: ['ansible_facts', 'fqdn'], none: ['ansible_facts', 'fqdn']}
 internal_addr_lookup: "{{ internal_hostname_lookup[cloud_provider] if internal_addr_use_hostnames else internal_ip_lookup[cloud_provider] }}"
 

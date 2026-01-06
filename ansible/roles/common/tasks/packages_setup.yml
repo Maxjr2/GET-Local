@@ -46,7 +46,7 @@
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution'] != 'Amazon'
 
-- name: Setup EPEL Repo (RHEL - Amazon Linux 2)
+- name: Setup EPEL Repo (Amazon Linux 2)
   command: amazon-linux-extras install epel -y
   when:
     - ansible_facts['distribution'] == 'Amazon'
@@ -54,7 +54,7 @@
     - not offline_setup
 
 # For more recent PG Client Libraries on Amazon Linux 2 only. Version doesn't need to match PG Server.
-- name: Enable PostgreSQL Client Repo (RHEL - Amazon Linux 2)
+- name: Enable PostgreSQL Client Repo (Amazon Linux 2)
   command: amazon-linux-extras enable postgresql13 -y
   when:
     - ansible_facts['distribution'] == 'Amazon'
@@ -76,17 +76,25 @@
     name: "{{ python_packages }}"
     extra_args: "--upgrade-strategy only-if-needed"
     break_system_packages: true
-  when:
-    - not (ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_major_version'] == '2')
-    - not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8')
-    - not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '9')
+  when: not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int >= 8)
 
-- name: Install python packages (RHEL)
+- name: Install Python packages (EL 9/10)
+  pip:
+    name: "{{ python_packages_rhel }}"
+    extra_args: "--upgrade-strategy only-if-needed"
+    break_system_packages: true
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] | int >= 9
+    - ansible_facts['distribution'] != 'Amazon'
+
+- name: Install Python packages (EL 8)
   pip:
     name: "{{ python_packages_rhel }}"
     extra_args: "--upgrade-strategy only-if-needed"
   when:
     - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] == '8'
     - ansible_facts['distribution'] != 'Amazon'
 
 - name: Install python packages (Amazon Linux 2)

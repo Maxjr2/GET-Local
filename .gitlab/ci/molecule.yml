@@ -198,12 +198,18 @@ amazonlinux2023:os-verification:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: amazonlinux2023
 
-# Substitute for RHEL 9
+# Substitute for RHEL
 rockylinux9:os-verification:
   extends: .molecule-os
   variables:
     MOLECULE_SCENARIO: os-verification
     MOLECULE_DISTRO: rockylinux9
+
+rockylinux10:os-verification:
+  extends: .molecule-os
+  variables:
+    MOLECULE_SCENARIO: os-verification
+    MOLECULE_DISTRO: rockylinux10
 
 # Deprecated OS targets
 ubuntu2004:os-verification:

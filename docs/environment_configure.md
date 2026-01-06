@@ -96,7 +96,7 @@ Due to this dependency on third-party automation tools, OS support lifecycles ma
 
 **Supported Target Operating Systems:**
 
-Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
+Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9/10, Amazon Linux 2023
 
 **Deprecated Target Operating Systems:**
 

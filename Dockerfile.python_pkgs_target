@@ -103,7 +103,7 @@ RUN pip3 install --upgrade-strategy only-if-needed --break-system-packages setup
 RUN printf "Debian 13 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 8
-FROM rockylinux:8 AS python_rl8
+FROM rockylinux/rockylinux:8 AS python_rl8
 
 ARG pkg_list
 
@@ -117,7 +117,7 @@ RUN pip3 install pip-chill
 RUN printf "RHEL 8 - $(python3 --version) - PASSED\n$(echo $(pip-chill --no-chill | grep -iE '^(pexpect|psycopg2).*') | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
 # RHEL 9
-FROM rockylinux:9 AS python_rl9
+FROM rockylinux/rockylinux:9 AS python_rl9
 
 ARG pkg_list
 
@@ -130,12 +130,26 @@ RUN pip3 install pipdeptree
 
 RUN printf "RHEL 9 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
 
+# RHEL 10
+FROM rockylinux/rockylinux:10 AS python_rl10
+
+ARG pkg_list
+
+COPY --from=python_rl9 /root/ /root/
+
+RUN yum install -y python3-pip python3-devel python3-libs gcc libpq-devel
+
+RUN pip3 install --upgrade-strategy only-if-needed $pkg_list && pip3 install --upgrade-strategy only-if-needed "requests<=2.32.3"
+RUN pip3 install pipdeptree
+
+RUN printf "RHEL 10 - $(python3 --version) - PASSED\n$(echo $(pipdeptree --freeze -d 0 -p pexpect,psycopg2) | sed -r 's/ /, /g')\n\n" >> /root/py_list.txt
+
 # Amazon Linux 2
 FROM amazonlinux:2 AS python_al2
 
 ARG pkg_list
 
-COPY --from=python_rl9 /root/ /root/
+COPY --from=python_rl10 /root/ /root/
 
 RUN yum install -y python3-pip python3-devel gcc postgresql-devel openssl
 

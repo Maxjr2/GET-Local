@@ -48,7 +48,7 @@ The requirements for the Toolkit are as follows:
 
 - GitLab version: `16.0.0` and upwards
 - Linux Package (Omnibus):
-  - OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9, Amazon Linux 2023
+  - OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9/10, Amazon Linux 2023
   - Deprecated OS versions supported with older Ansible versions - see [Target Operating System Support](docs/environment_configure.md#target-node-operating-system-support)
   - OS support depends on both [Linux Package (Omnibus)](https://docs.gitlab.com/administration/package_information/supported_os/) and Ansible compatibility
   - Clean OS installations only
