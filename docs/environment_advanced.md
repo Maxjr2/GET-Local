@@ -114,7 +114,7 @@ Setting up common tasks is done in the same manner for each hook as follows:
     - `post_configure_custom_tasks_file` - Full path for the Post Configure custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/post_configure.yml`.
     - `uninstall_custom_tasks_file` - Full path for the uninstallation custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/uninstall.yml`.
 
-Any task within the [Ansible library](https://docs.ansible.com/ansible/2.9/modules/list_of_all_modules.html) can be used for custom tasks, although it's worth noting the following general guidance when writing tasks:
+Any task within the [Ansible library](https://docs.ansible.com/projects/ansible/latest/collections/all_plugins.html) can be used for custom tasks, although it's worth noting the following general guidance when writing tasks:
 
 - Any Ansible tasks that aren't core, i.e. available within a standard Ansible install, will need their requirements installed manually before running.
 - If there's a requirement to only run Common tasks across all Linux package (Omnibus) VMs only you can do this by setting a `when` condition on the tasks to the Toolkit provided variable `omnibus_node`.
