@@ -49,6 +49,8 @@
   copy:
     src: "{{ item.src_path }}"
     dest: "{{ item.dest_path }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode if item.mode is defined else 'preserve' }}"
   loop: "{{ monitor_custom_files_paths }}"
   tags: reconfigure
