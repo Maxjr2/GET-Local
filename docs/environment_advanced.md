@@ -151,6 +151,8 @@ gitaly_custom_files_paths: [
     - If the path is a folder and ends with a `/` only the contents of the folder will be copied.
   - `dest_path` - The path on the target machine to copy the files to.
     - If the path doesn't exist it will be created when either the path ends with a `/` or `src_path` is a directory.
+  - `owner` - Sets the owner of the file or folder when copied. If not specified, the file will be owned by `root`.
+  - `group` - Sets the group of the file or folder when copied. If not specified, the file will be owned by the `root` group.
   - `mode` - Sets the permissions for the file or folder to have when copied. If not specified the permissions of the source files or folder are preserved.
 
 With the above done the files will be copied by the Toolkit.
