@@ -25,25 +25,42 @@
     - not cloud_native_hybrid_geo
     - (site_group_name in group_names)
 
-- name: Maintenance Mode - Set Maintenance mode to {{ maintenance_mode_state }} for Cloud Native Hybrid environments
+- name: Set Maintenance mode for Cloud Native Hybrid environments
+  become: false
+  delegate_to: localhost
+  run_once: true
   block:
     - name: Maintenance Mode - Configure kubeconfig credentials for Geo primary site
-      become: false
-      delegate_to: localhost
-      run_once: true
       import_tasks: kubeconfig.yml
 
     - name: Maintenance Mode - Set Maintenance Mode for Cloud Native Hybrid environments
-      become: false
-      delegate_to: localhost
-      run_once: true
-      ignore_errors: "{{ maintenance_mode_state | lower }}" # noqa ignore-errors
-      kubernetes.core.k8s_exec:
-        pod: "{{ query('kubernetes.core.k8s', kind='Pod', namespace=gitlab_cloud_native_release_namespace, label_selector='app=toolbox') | map(attribute='metadata.name') | first | default('') }}"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
-        command: |
-          gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
-      retries: 30
-      delay: 10
+      block:
+        - name: Maintenance Mode - Set Maintenance mode to {{ maintenance_mode_state }} for Cloud Native Hybrid environments
+          ignore_errors: "{{ maintenance_mode_state | lower }}" # noqa ignore-errors
+          kubernetes.core.k8s_exec:
+            pod: "{{ toolbox_pod }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            command: |
+              gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
+      rescue:
+        - name: Maintenance Mode - Wait for new toolbox pod to be available
+          kubernetes.core.k8s_info:
+            kind: Pod
+            label_selectors:
+              - app=toolbox
+            field_selectors:
+              - status.phase=Running
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+          register: new_toolbox_pod
+          until: new_toolbox_pod.resources | length > 0
+          retries: 30 # 5 minute wait max
+          delay: 10
+
+        - name: Maintenance Mode - Retry with new toolbox pod
+          kubernetes.core.k8s_exec:
+            pod: "{{ new_toolbox_pod.resources[0].metadata.name }}"
+            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            command: |
+              gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
   when:
     - cloud_native_hybrid_geo
