@@ -56,5 +56,6 @@
     - "/opt/haproxy/{{ external_host }}.pem"
     - "/opt/haproxy/{{ external_host }}.pem.key"
 
-- name: Reload HAProxy External Docker
-  command: docker kill -s HUP haproxy
+- name: Restart HAProxy
+  command: docker restart haproxy
+  
