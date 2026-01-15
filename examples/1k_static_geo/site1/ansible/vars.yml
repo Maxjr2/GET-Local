@@ -1,0 +1,16 @@
+all:
+  vars:
+    # Cloud Settings - need to be "none" on non-cloud providers
+    cloud_provider: "none"
+
+    # General Settings
+    external_url: "<external_url>"
+    gitlab_license_file: "<gitlab_license_file_path>"
+
+    # Geo Settings
+    geo_primary_external_url: "<external_url>"
+    geo_primary_site_group_name: "site1" # Should match the prefix used in Inventory
+    geo_primary_site_name: "<site_name>" # A name that appears in the UI.
+
+    # Passwords / Secrets
+    gitlab_root_password: '<gitlab_root_password>'
