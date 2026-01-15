@@ -80,7 +80,7 @@ mount_opts: "discard,defaults"
 mount_state: mounted
 
 # Data Disks detection
-group_data_disks_name: "{{ lookup('vars', ('labels' if cloud_provider == 'gcp' else 'tags'), default = {}).gitlab_node_type | default('') }}"
+group_data_disks_name: "{{ lookup('vars', ('labels' if cloud_provider == 'gcp' else 'tags'), default = {}).gitlab_node_type | default('') | replace('-', '_') }}"
 group_data_disks: "{{ lookup('vars', group_data_disks_name + '_data_disks', default=[]) if group_data_disks_name != '' else [] }}"
 
 ## Each entry should be an array of hashes in the below format specifying the
