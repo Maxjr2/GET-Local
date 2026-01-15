@@ -6,6 +6,7 @@ In this section you'll find a selection of config examples of some of the more c
 
 - [1k - GCP](1k_gcp) - A 1k Reference Architecture on GCP. Standalone without load balancer frontend.
 - [1k - AWS](1k_aws) - A 1k Reference Architecture on AWS. Standalone with load balancer frontend.
+- [1k Geo - Static](1k_static_geo) - A 1k Reference Architecture on [Custom Servers](../docs/environment_advanced.md#custom-servers-on-prem) (On Prem) with Geo configured. An environment on Custom Servers that Ansible is used to configure.
 - [2k - Azure](2k_azure) - A 2k Reference Architecture on Azure. Standalone with separated backend components.
 - [3k - GCP](3k_gcp) - A 3k Reference Architecture on GCP. HA with combined Redis queues.
 - [5k - Static](5k_static) - A 5k Reference Architecture on [Custom Servers](../docs/environment_advanced.md#custom-servers-on-prem) (On Prem). An environment on Custom Servers that Ansible is used to configure.
