@@ -144,7 +144,7 @@ check:markdown-external-link-check:
     name: ghcr.io/tcort/markdown-link-check
     entrypoint: [""]
   script:
-    - /src/markdown-link-check *.md docs/*.md
+    - /src/markdown-link-check --quiet --config .markdown-link-check.json *.md docs/*.md
   rules:
     - !reference [
         .on_merge_request_and_merged_events_except_schedule_and_tag,

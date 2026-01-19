@@ -504,7 +504,7 @@ For additional Pages settings such as access control, single-domain setup, or ot
 While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
 
 >>> [!important]
-[Support for this feature is limited](https://about.gitlab.com/support/statement-of-support/#git-lab-environment-toolkit) due to the vast potential number of permutations.
+[Support for this feature is limited](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit) due to the vast potential number of permutations.
 
 In particular, be aware of the following important callouts:
 
