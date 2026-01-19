@@ -42,7 +42,7 @@ The following upgrade paths are supported for the Toolkit.
 - Upgrades to a new major version **require an upgrade stop of the latest release of the previous major version**. For example to upgrade to GitLab Environment Toolkit `3.0.x` requires an upgrade first to the last `2.x` version (`2.8.6`).
   - Upgrades to the latest patch release of a new major version are also supported, for example `2.8.6` to `3.0.2`.
 
-The Toolkit follows GitLab's [Version Support Policy](https://about.gitlab.com/support/statement-of-support/#version-support), which supports the current major version and previous two major versions.
+The Toolkit follows GitLab's [Version Support Policy](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#version-support), which supports the current major version and previous two major versions.
 The following table shows the maximum GitLab versions supported by GET version:
 
 | GET Version | Max GitLab Version |
@@ -71,7 +71,7 @@ Perform Terraform dry runs whenever you have updated the Toolkit to ensure no si
 
 This is done simply by running `terraform plan`.
 
-Once completed, the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, check these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect you can reach out via the standard [support channels](https://about.gitlab.com/support/) or by creating an [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues).
+Once completed, the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, check these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect you can reach out via the standard [support channels](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support) or by creating an [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues).
 
 This is recommended as certain infrastructure changes can trigger large destroy actions that in turn can lead to the loss of the environment and data. While this is behaviour from the cloud providers, every effort is made with the Toolkit to ensure this is avoided but since the consequences can be significant it's always best to do the dry run as described above out an abundance of caution.
 
@@ -177,7 +177,7 @@ In advanced cases where the playbook fails for any reason but you're confident t
 > Attempting to downgrade without ensuring all prerequisites are met has a significant risk of breaking your environment and can result in downtime or data loss.
 
 > [!note]
-> It's generally recommended you contact the [GitLab Support](https://about.gitlab.com/support/) team when doing a downgrade for additional support and guidance. This is especially so if the process has failed in any way.
+> It's generally recommended you contact the [GitLab Support](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support) team when doing a downgrade for additional support and guidance. This is especially so if the process has failed in any way.
 
 For this reason the Toolkit cannot manage the full downgrade process. It is however possible to configure the Toolkit to perform the action of installing the older version package only as part of a downgrade at your own risk.
 

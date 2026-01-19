@@ -185,9 +185,9 @@ Please refer to our [Troubleshooting guide](docs/environment_troubleshooting.md)
 
 ## Support
 
-Technical support is only available for the current Toolkit major version and requests should be raised via the [Support team](https://about.gitlab.com/support/).
+Technical support is only available for the current Toolkit major version and requests should be raised via the [Support team](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support).
 
-For detailed information about what is supported, please refer to the [Statement of Support](https://about.gitlab.com/support/statement-of-support/#git-lab-environment-toolkit).
+For detailed information about what is supported, please refer to the [Statement of Support](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit).
 
 Issues specific to the Toolkit code can also be raised in our tracker.
 

@@ -25,7 +25,7 @@ This template covers all of the steps required to do a release of the GitLab Env
     - [ ] `geerlingguy.node_exporter`
     - [ ] `geerlingguy.docker`
 - [ ] Update minimum supported GitLab version (only applicable for preparations to GitLab major releases)
-  - Update minimum supported GitLab version to align with [GitLab's policy](https://about.gitlab.com/support/statement-of-support/#version-support) of supporting the current major version plus the previous two major versions at [`README.md`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/README.md?plain=1#L45)
+  - Update minimum supported GitLab version to align with [GitLab's policy](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#version-support) of supporting the current major version plus the previous two major versions at [`README.md`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/README.md?plain=1#L45)
   - Update GET version to GitLab version compatibility table at [`docs/environment_upgrades.md`](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_upgrades.md#toolkit-upgrade-paths-and-stops)
 
 ### Third-Party Component Updates (**Optional**)
