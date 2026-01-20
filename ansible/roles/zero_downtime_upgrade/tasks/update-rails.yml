@@ -1,11 +1,33 @@
 ---
-# Rails tends to serve incomplete pages incorrectly when going through update that health checks don't protect against (As the server is up but not serving all elements)
-# Stopping the node outright avoids this and ensures a better experience
-- name: Stop Rails node
-  command: gitlab-ctl stop
-  register: result
-  retries: 2
-  until: result is success
+# Gracefully drain Rails node by draining NGINX connections before upgrade
+# This allows existing requests to complete before the upgrade begins
+# https://docs.gitlab.com/update/zero_downtime/#upgrade-gitlab-application-rails-nodes
+- name: Get NGINX PID
+  command: cat /var/opt/gitlab/nginx/nginx.pid
+  register: nginx_pid_result
+  changed_when: false
+
+- name: Gracefully drain NGINX
+  block:
+    - name: Send QUIT signal to NGINX master process
+      command: "kill -QUIT {{ nginx_pid_result.stdout }}"
+      register: kill_result
+      changed_when: kill_result.rc == 0
+
+    - name: Wait for NGINX to gracefully shutdown
+      shell: "kill -0 {{ nginx_pid_result.stdout }} 2>/dev/null"
+      register: nginx_check
+      until: nginx_check.rc != 0
+      retries: 60
+      delay: 3
+      changed_when: false
+      failed_when: false
+
+    - name: Stop NGINX service to prevent automatic restarts
+      command: gitlab-ctl stop nginx
+      register: result
+      retries: 2
+      until: result is success
 
 - name: Run gitlab_rails role
   include_role:
