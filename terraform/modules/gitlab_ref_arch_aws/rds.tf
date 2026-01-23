@@ -18,9 +18,7 @@ resource "aws_db_subnet_group" "gitlab" {
   name       = "${var.prefix}-rds-subnet-group"
   subnet_ids = local.rds_postgres_subnet_ids
 
-  tags = {
-    Name = "${var.prefix}-rds-subnet-group"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-subnet-group" } : {}
 }
 
 # aws_db_instance doesn't look to follow standard null design for kms_key_id - will ignore changes

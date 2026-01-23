@@ -9,9 +9,7 @@ resource "aws_elasticache_subnet_group" "gitlab_redis" {
   name       = "${var.prefix}-${var.elasticache_redis_engine}-subnet-group"
   subnet_ids = local.elasticache_redis_subnet_ids
 
-  tags = {
-    Name = "${var.prefix}-${var.elasticache_redis_engine}-subnet-group"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-${var.elasticache_redis_engine}-subnet-group" } : {}
 
   lifecycle {
     ignore_changes = [

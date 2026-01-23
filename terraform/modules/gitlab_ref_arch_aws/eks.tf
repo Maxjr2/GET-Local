@@ -172,20 +172,32 @@ resource "aws_launch_template" "gitlab_webservice" {
     resource_type = "instance"
 
     ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name               = "${var.prefix}-webservice-node-pool"
-      gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "gitlab-webservice-node-pool"
-    }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
+    tags = merge(
+      var.default_set_name_tags ? { Name = "${var.prefix}-webservice-node-pool" } : {},
+      {
+        gitlab_node_prefix = var.prefix
+        gitlab_node_type   = "gitlab-webservice-node-pool"
+      },
+      var.additional_tags,
+      var.custom_tags,
+      var.webservice_node_pool_custom_tags
+    )
   }
 
-  tag_specifications {
-    resource_type = "volume"
+  dynamic "tag_specifications" {
+    for_each = length(merge(var.default_set_name_tags ? { Name = "${var.prefix}-webservice-pool-root" } : {}, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)) > 0 ? [1] : []
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name = "${var.prefix}-webservice-pool-root"
-    }, var.additional_tags, var.custom_tags, var.webservice_node_pool_custom_tags)
+    content {
+      resource_type = "volume"
+
+      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      tags = merge(
+        var.default_set_name_tags ? { Name = "${var.prefix}-webservice-pool-root" } : {},
+        var.additional_tags,
+        var.custom_tags,
+        var.webservice_node_pool_custom_tags
+      )
+    }
   }
 
   update_default_version = true
@@ -288,20 +300,32 @@ resource "aws_launch_template" "gitlab_sidekiq" {
     resource_type = "instance"
 
     ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name               = "${var.prefix}-sidekiq-node-pool"
-      gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "gitlab-sidekiq-node-pool"
-    }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
+    tags = merge(
+      var.default_set_name_tags ? { Name = "${var.prefix}-sidekiq-node-pool" } : {},
+      {
+        gitlab_node_prefix = var.prefix
+        gitlab_node_type   = "gitlab-sidekiq-node-pool"
+      },
+      var.additional_tags,
+      var.custom_tags,
+      var.sidekiq_node_pool_custom_tags
+    )
   }
 
-  tag_specifications {
-    resource_type = "volume"
+  dynamic "tag_specifications" {
+    for_each = length(merge(var.default_set_name_tags ? { Name = "${var.prefix}-sidekiq-pool-root" } : {}, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)) > 0 ? [1] : []
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name = "${var.prefix}-sidekiq-pool-root"
-    }, var.additional_tags, var.custom_tags, var.sidekiq_node_pool_custom_tags)
+    content {
+      resource_type = "volume"
+
+      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      tags = merge(
+        var.default_set_name_tags ? { Name = "${var.prefix}-sidekiq-pool-root" } : {},
+        var.additional_tags,
+        var.custom_tags,
+        var.sidekiq_node_pool_custom_tags
+      )
+    }
   }
 
   update_default_version = true
@@ -404,20 +428,32 @@ resource "aws_launch_template" "gitlab_supporting" {
     resource_type = "instance"
 
     ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name               = "${var.prefix}-supporting-node-pool"
-      gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "gitlab-supporting-node-pool"
-    }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
+    tags = merge(
+      var.default_set_name_tags ? { Name = "${var.prefix}-supporting-node-pool" } : {},
+      {
+        gitlab_node_prefix = var.prefix
+        gitlab_node_type   = "gitlab-supporting-node-pool"
+      },
+      var.additional_tags,
+      var.custom_tags,
+      var.supporting_node_pool_custom_tags
+    )
   }
 
-  tag_specifications {
-    resource_type = "volume"
+  dynamic "tag_specifications" {
+    for_each = length(merge(var.default_set_name_tags ? { Name = "${var.prefix}-supporting-pool-root" } : {}, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)) > 0 ? [1] : []
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name = "${var.prefix}-supporting-pool-root"
-    }, var.additional_tags, var.custom_tags, var.supporting_node_pool_custom_tags)
+    content {
+      resource_type = "volume"
+
+      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      tags = merge(
+        var.default_set_name_tags ? { Name = "${var.prefix}-supporting-pool-root" } : {},
+        var.additional_tags,
+        var.custom_tags,
+        var.supporting_node_pool_custom_tags
+      )
+    }
   }
 
   update_default_version = true
@@ -520,20 +556,32 @@ resource "aws_launch_template" "gitlab_gitaly" {
     resource_type = "instance"
 
     ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name               = "${var.prefix}-gitaly-node-pool"
-      gitlab_node_prefix = var.prefix
-      gitlab_node_type   = "gitlab-gitaly-node-pool"
-    }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+    tags = merge(
+      var.default_set_name_tags ? { Name = "${var.prefix}-gitaly-node-pool" } : {},
+      {
+        gitlab_node_prefix = var.prefix
+        gitlab_node_type   = "gitlab-gitaly-node-pool"
+      },
+      var.additional_tags,
+      var.custom_tags,
+      var.gitaly_node_pool_custom_tags
+    )
   }
 
-  tag_specifications {
-    resource_type = "volume"
+  dynamic "tag_specifications" {
+    for_each = length(merge(var.default_set_name_tags ? { Name = "${var.prefix}-gitaly-pool-root" } : {}, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)) > 0 ? [1] : []
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name = "${var.prefix}-gitaly-pool-root"
-    }, var.additional_tags, var.custom_tags, var.gitaly_node_pool_custom_tags)
+    content {
+      resource_type = "volume"
+
+      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      tags = merge(
+        var.default_set_name_tags ? { Name = "${var.prefix}-gitaly-pool-root" } : {},
+        var.additional_tags,
+        var.custom_tags,
+        var.gitaly_node_pool_custom_tags
+      )
+    }
   }
 
   update_default_version = true

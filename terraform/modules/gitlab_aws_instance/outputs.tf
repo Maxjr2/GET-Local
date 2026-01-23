@@ -6,6 +6,16 @@ output "instance_types" {
   value = aws_instance.gitlab[*].instance_type
 }
 
+output "instance_tags" {
+  description = "Tags applied to EC2 instances"
+  value       = aws_instance.gitlab[*].tags
+}
+
+output "instance_root_block_device_tags" {
+  description = "Tags applied to root block devices"
+  value       = aws_instance.gitlab[*].root_block_device[*].tags
+}
+
 output "external_addresses" {
   value = aws_instance.gitlab[*].public_ip
 }

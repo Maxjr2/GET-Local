@@ -271,7 +271,7 @@ keyed_groups:
     separator: ''
 hostnames:
   # List host by name instead of the default public ip
-  - tag:Name
+  - tag:gitlab_node_name
 compose:
   # Set to 'public_ip_address' to make Ansible SSH via the public IP address of the hosts.
   # Set to 'private_ip_address' to make Ansible SSH via the private (non-internet routable) IP addresses of the hosts.

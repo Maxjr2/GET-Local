@@ -43,9 +43,7 @@ resource "aws_db_subnet_group" "gitlab_rds_database" {
     local.default_network ? slice(tolist(local.default_subnet_ids), 0, each.value.default_subnet_count) : null
   )
 
-  tags = {
-    Name = "${var.prefix}-rds-${each.key}-subnet-group"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-${each.key}-subnet-group" } : {}
 }
 
 # Parameter groups
@@ -77,9 +75,7 @@ resource "aws_security_group" "gitlab_rds_database" {
   description = "RDS Security Group for internal access to RDS"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-rds-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-${each.key}" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -98,9 +94,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_database_internal_net
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-rds-${each.key}-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-${each.key}-internal-networking" } : {}
 }
 ## CIDR block access rules
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_database_cidr" {
@@ -115,9 +109,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_database_cidr" {
 
   cidr_ipv4 = each.value.cidr
 
-  tags = {
-    Name = "${var.prefix}-${each.value.source_db}-rds-cidr-${each.value.cidr}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-${each.value.source_db}-rds-cidr-${each.value.cidr}" } : {}
 }
 
 # Default KMS Key

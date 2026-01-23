@@ -342,7 +342,7 @@ keyed_groups:
     separator: ''
 hostnames:
   # List host by name instead of the default public ip
-  - tag:Name
+  - tag:gitlab_node_name
 compose:
   # Use the public IP address to connect to the host
   # (note: this does not modify inventory_hostname, which is set via I(hostnames))

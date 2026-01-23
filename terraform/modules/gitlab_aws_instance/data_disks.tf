@@ -38,10 +38,14 @@ resource "aws_ebs_volume" "gitlab" {
   snapshot_id = each.value.snapshot_id
 
   ## TODO: additional_tags is deprecated and will be removed in 4.x
-  tags = merge({
-    Name                       = each.key
-    gitlab_node_data_disk_role = "${var.prefix}-${var.node_type}-${each.value.name}"
-  }, var.additional_tags, var.custom_tags)
+  tags = merge(
+    var.set_name_tags ? { Name = each.key } : {},
+    {
+      gitlab_node_data_disk_role = "${var.prefix}-${var.node_type}-${each.value.name}"
+    },
+    var.additional_tags,
+    var.custom_tags
+  )
 
   lifecycle {
     ignore_changes = [
@@ -184,7 +188,5 @@ resource "aws_dlm_lifecycle_policy" "gitlab_dlm" {
     }
   }
 
-  tags = {
-    Name = "${each.key}-snapshot-policy"
-  }
+  tags = var.set_name_tags ? { Name = "${each.key}-snapshot-policy" } : {}
 }

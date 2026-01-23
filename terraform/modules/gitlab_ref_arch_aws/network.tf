@@ -14,9 +14,7 @@ locals {
 # Default Network
 resource "aws_default_vpc" "default" {
   count = local.default_network ? 1 : 0
-  tags = {
-    Name = "Default VPC"
-  }
+  tags  = var.default_set_name_tags ? { Name = "Default VPC" } : {}
 }
 
 data "aws_subnets" "defaults" {
@@ -44,9 +42,7 @@ resource "aws_vpc" "gitlab_vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = {
-    Name = "${var.prefix}-vpc"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-vpc" } : {}
 }
 
 ## Public Subnet(s)
@@ -61,19 +57,19 @@ resource "aws_subnet" "gitlab_vpc_sn_pub" {
   timeouts {
     delete = "30m"
   }
-  tags = {
-    Name                     = "${var.prefix}-sub-pub-${count.index + 1}"
-    "kubernetes.io/role/elb" = 1
-  }
+  tags = merge(
+    var.default_set_name_tags ? { Name = "${var.prefix}-sub-pub-${count.index + 1}" } : {},
+    {
+      "kubernetes.io/role/elb" = 1
+    }
+  )
 }
 
 resource "aws_internet_gateway" "gitlab_vpc_gw" {
   count  = local.create_network ? min(var.subnet_pub_count, 1) : 0
   vpc_id = aws_vpc.gitlab_vpc[0].id
 
-  tags = {
-    Name = "${var.prefix}-igw"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-igw" } : {}
 }
 
 resource "aws_route_table" "gitlab_vpc_route_table_pub" {
@@ -81,9 +77,7 @@ resource "aws_route_table" "gitlab_vpc_route_table_pub" {
 
   vpc_id = aws_vpc.gitlab_vpc[0].id
 
-  tags = {
-    Name = "${var.prefix}-pub-rt"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-pub-rt" } : {}
 }
 
 # The default internet route via Internet Gateway
@@ -113,10 +107,12 @@ resource "aws_subnet" "gitlab_vpc_sn_priv" {
   timeouts {
     delete = "30m"
   }
-  tags = {
-    Name                              = "${var.prefix}-sub-priv-${count.index + 1}"
-    "kubernetes.io/role/internal-elb" = 1
-  }
+  tags = merge(
+    var.default_set_name_tags ? { Name = "${var.prefix}-sub-priv-${count.index + 1}" } : {},
+    {
+      "kubernetes.io/role/internal-elb" = 1
+    }
+  )
 }
 
 ### Nat Gateway and IP for Private Subnet(s)
@@ -132,9 +128,7 @@ resource "aws_nat_gateway" "gitlab_vpc_sn_priv_ng" {
   allocation_id = aws_eip.gitlab_vpc_sn_priv_ng_ip[count.index].id
   subnet_id     = aws_subnet.gitlab_vpc_sn_pub[count.index].id
 
-  tags = {
-    Name = "${var.prefix}-sub-priv-nat-${count.index}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-sub-priv-nat-${count.index}" } : {}
 }
 
 resource "aws_route_table" "gitlab_vpc_route_table_priv" {
@@ -142,9 +136,7 @@ resource "aws_route_table" "gitlab_vpc_route_table_priv" {
 
   vpc_id = aws_vpc.gitlab_vpc[0].id
 
-  tags = {
-    Name = "${var.prefix}-sub-priv-rt-${count.index}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-sub-priv-rt-${count.index}" } : {}
 }
 
 # The default internet route via NAT Gateway

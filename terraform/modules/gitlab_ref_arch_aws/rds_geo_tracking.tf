@@ -23,9 +23,7 @@ resource "aws_db_subnet_group" "gitlab_geo" {
   name       = "${var.prefix}-geo-rds-subnet-group"
   subnet_ids = local.rds_geo_tracking_postgres_subnet_ids
 
-  tags = {
-    Name = "${var.prefix}-geo-rds-subnet-group"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-geo-rds-subnet-group" } : {}
 }
 
 resource "aws_db_parameter_group" "gitlab_geo_tracking" {
