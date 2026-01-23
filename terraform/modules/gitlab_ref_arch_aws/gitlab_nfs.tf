@@ -5,6 +5,7 @@ module "gitlab_nfs" {
   node_type       = "gitlab-nfs"
   node_count      = var.gitlab_nfs_node_count
   additional_tags = var.additional_tags
+  set_name_tags   = var.default_set_name_tags
 
   instance_type              = var.gitlab_nfs_instance_type
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id

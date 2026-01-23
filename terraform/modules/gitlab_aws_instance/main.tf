@@ -37,9 +37,11 @@ resource "aws_instance" "gitlab" {
     delete_on_termination = var.disk_delete_on_termination
 
     ## TODO: additional_tags is deprecated and will be removed in 4.x
-    tags = merge({
-      Name = "${var.prefix}-${var.node_type}-${count.index + 1}-root"
-    }, var.additional_tags, var.custom_tags)
+    tags = merge(
+      var.set_name_tags ? { Name = "${var.prefix}-${var.node_type}-${count.index + 1}-root" } : {},
+      var.additional_tags,
+      var.custom_tags
+    )
   }
 
   # Enforce IMDSv2 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
@@ -51,15 +53,20 @@ resource "aws_instance" "gitlab" {
   }
 
   ## TODO: additional_tags is deprecated and will be removed in 4.x
-  tags = merge({
-    Name                  = local.instance_names[count.index]
-    gitlab_node_prefix    = var.prefix
-    gitlab_node_type      = var.node_type
-    gitlab_node_level     = var.label_secondaries == true ? (count.index == 0 ? "${var.node_type}-primary" : "${var.node_type}-secondary") : null
-    gitlab_geo_site       = var.geo_site
-    gitlab_geo_deployment = var.geo_deployment
-    gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
-  }, var.additional_tags, var.custom_tags)
+  tags = merge(
+    var.set_name_tags ? { Name = local.instance_names[count.index] } : {},
+    {
+      gitlab_node_name      = local.instance_names[count.index]
+      gitlab_node_prefix    = var.prefix
+      gitlab_node_type      = var.node_type
+      gitlab_node_level     = var.label_secondaries == true ? (count.index == 0 ? "${var.node_type}-primary" : "${var.node_type}-secondary") : null
+      gitlab_geo_site       = var.geo_site
+      gitlab_geo_deployment = var.geo_deployment
+      gitlab_geo_full_role  = var.geo_site == null ? null : (count.index == 0 ? "${var.geo_site}-${var.node_type}-primary" : "${var.geo_site}-${var.node_type}-secondary")
+    },
+    var.additional_tags,
+    var.custom_tags
+  )
 
   lifecycle {
     ignore_changes = [

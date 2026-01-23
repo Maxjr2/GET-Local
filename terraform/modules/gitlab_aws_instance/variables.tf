@@ -119,6 +119,12 @@ variable "custom_tags" {
   default = {}
 }
 
+variable "set_name_tags" {
+  type        = bool
+  default     = true
+  description = "Whether to set the 'Name' tag on resources. If false, ensure dynamic inventory uses 'tag:gitlab_node_name' instead of 'tag:Name'"
+}
+
 ## TODO: additional_tags is deprecated and will be removed in 4.x
 variable "additional_tags" {
   description = "Deprecated. Replaced by custom_tags."

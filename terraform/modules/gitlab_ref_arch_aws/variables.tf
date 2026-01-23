@@ -118,6 +118,12 @@ variable "object_storage_block_public_access" {
   default = true
 }
 
+variable "default_set_name_tags" {
+  type        = bool
+  default     = true
+  description = "Whether to set the 'Name' tag on resources. If false, ensure dynamic inventory uses 'tag:gitlab_node_name' instead of 'tag:Name'"
+}
+
 # Machines
 variable "consul_node_count" {
   type    = number

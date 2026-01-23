@@ -24,9 +24,7 @@ resource "aws_security_group" "gitlab_internal_networking" {
 
   description = "${var.prefix} - Internal Networking Security Group"
 
-  tags = {
-    Name = "${var.prefix}-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-internal-networking" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -41,9 +39,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking" {
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_security_groups" {
@@ -56,9 +52,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_secur
 
   referenced_security_group_id = each.key
 
-  tags = {
-    Name = "${var.prefix}-internal-networking-security-groups-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-internal-networking-security-groups-${each.key}" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_peer" {
@@ -71,9 +65,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_internal_networking_peer"
 
   cidr_ipv4 = var.peer_vpc_cidr
 
-  tags = {
-    Name = "${var.prefix}-internal-networking-peer"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-internal-networking-peer" } : {}
 }
 
 resource "aws_vpc_security_group_egress_rule" "gitlab_internal_networking_internet" {
@@ -84,9 +76,7 @@ resource "aws_vpc_security_group_egress_rule" "gitlab_internal_networking_intern
 
   cidr_ipv4 = "0.0.0.0/0"
 
-  tags = {
-    Name = "${var.prefix}-internal-networking-internet"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-internal-networking-internet" } : {}
 }
 
 # External
@@ -99,9 +89,7 @@ resource "aws_security_group" "gitlab_vm_ssh_access" {
 
   description = "${var.prefix} - VM SSH Access Security Group"
 
-  tags = {
-    Name = "${var.prefix}-vm-ssh-access"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-vm-ssh-access" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -120,9 +108,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_vm_ssh_access" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-vm-ssh-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-vm-ssh-${each.key}" } : {}
 }
 
 ## Git SSH
@@ -134,9 +120,7 @@ resource "aws_security_group" "gitlab_git_ssh_access" {
 
   description = "GitLab ${var.prefix} - Git SSH Access Security Group"
 
-  tags = {
-    Name = "${var.prefix}-git-ssh-access"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-git-ssh-access" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -155,9 +139,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_git_ssh_access" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-git-ssh-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-git-ssh-${each.key}" } : {}
 }
 
 ## HTTP / HTTPS
@@ -169,9 +151,7 @@ resource "aws_security_group" "gitlab_http_https_access" {
   name_prefix = "${var.prefix}-http-https-access"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-http-https-access"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-http-https-access" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -190,9 +170,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_http_access" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-external-http-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-external-http-${each.key}" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_https_access" {
@@ -207,9 +185,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_https_access" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-external-https-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-external-https-${each.key}" } : {}
 }
 
 # Services Security Groups
@@ -222,9 +198,7 @@ resource "aws_security_group" "gitlab_rds" {
   description = "RDS Security Group for internal access to RDS"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-rds"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -243,9 +217,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_internal_networking" 
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-rds-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_cidr" {
@@ -260,9 +232,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_cidr" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-rds-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-cidr-${each.key}" } : {}
 }
 
 ### Praefect
@@ -272,9 +242,7 @@ resource "aws_security_group" "gitlab_rds_praefect" {
   name_prefix = "${var.prefix}-rds-praefect-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-rds-praefect"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-praefect" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -293,9 +261,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_internal_net
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-rds-praefect-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-praefect-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_cidr" {
@@ -310,9 +276,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_praefect_cidr" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-rds-praefect-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-praefect-cidr-${each.key}" } : {}
 }
 
 ### Geo Tracking
@@ -322,9 +286,7 @@ resource "aws_security_group" "gitlab_rds_geo_tracking" {
   name_prefix = "${var.prefix}-rds-geo-tracking-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-rds-geo-tracking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-geo-tracking" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -343,9 +305,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_internal
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-rds-geo-tracking-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-geo-tracking-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_cidr" {
@@ -360,9 +320,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_rds_geo_tracking_cidr" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-rds-geo-tracking-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-rds-geo-tracking-cidr-${each.key}" } : {}
 }
 
 ## AWS Elasticache
@@ -373,9 +331,7 @@ resource "aws_security_group" "gitlab_elasticache_redis" {
   name_prefix = "${var.prefix}-elasticache-redis-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -394,9 +350,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_interna
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cidr" {
@@ -411,9 +365,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cidr" {
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-cidr-${each.key}" } : {}
 }
 
 ### Redis Cache
@@ -427,9 +379,7 @@ resource "aws_security_group" "gitlab_elasticache_redis_cache" {
   name_prefix = "${var.prefix}-elasticache-redis-cache-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-cache"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-cache" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -448,9 +398,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_i
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-cache-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-cache-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_cidr" {
@@ -465,9 +413,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_cache_c
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-cache-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-cache-cidr-${each.key}" } : {}
 }
 
 ### Redis Persistent
@@ -481,9 +427,7 @@ resource "aws_security_group" "gitlab_elasticache_redis_persistent" {
   name_prefix = "${var.prefix}-elasticache-redis-persistent-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-persistent"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-persistent" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -502,9 +446,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persist
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-persistent-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-persistent-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persistent_cidr" {
@@ -519,9 +461,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_elasticache_redis_persist
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-elasticache-redis-persistent-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-elasticache-redis-persistent-cidr-${each.key}" } : {}
 }
 
 ## AWS OpenSearch
@@ -531,9 +471,7 @@ resource "aws_security_group" "gitlab_opensearch_service" {
   name_prefix = "${var.prefix}-opensearch-service-"
   vpc_id      = data.aws_vpc.selected.id
 
-  tags = {
-    Name = "${var.prefix}-opensearch-service"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-opensearch-service" } : {}
 
   lifecycle {
     create_before_destroy = true
@@ -552,9 +490,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_intern
 
   referenced_security_group_id = aws_security_group.gitlab_internal_networking.id
 
-  tags = {
-    Name = "${var.prefix}-opensearch-service-internal-networking"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-opensearch-service-internal-networking" } : {}
 }
 
 resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" {
@@ -569,9 +505,7 @@ resource "aws_vpc_security_group_ingress_rule" "gitlab_opensearch_service_cidr" 
 
   cidr_ipv4 = each.key
 
-  tags = {
-    Name = "${var.prefix}-opensearch-service-cidr-${each.key}"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-opensearch-service-cidr-${each.key}" } : {}
 }
 
 output "security" {

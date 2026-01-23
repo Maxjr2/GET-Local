@@ -1182,11 +1182,13 @@ To configure custom Path add the following variable in the Terraform [Environmen
 
 The Toolkit will then apply the path on the next `terraform apply` run.
 
-## Custom Tags/Labels
+## Tags/Labels
 
-Resources on Cloud Providers such as instances, clusters, cloud services, data disks or buckets can be tagged (or labelled in the case of GCP) for automation or identification purposes. The Toolkit adds multiple tags accordingly for automation purposes.
+Tags and labels are key-value pairs used to organize, identify, and manage cloud resources. The Toolkit automatically applies operational tags for internal automation and allows you to add custom tags for your organization's needs.
 
-It's also possible to add additional tags as desired with Custom Tags. The following settings can be set to configure the tags for each component. Note that each setting expects a map of key value pairs as shown below:
+### Custom Tags/Labels
+
+You can add custom tags to resources using the following variables. Each expects a map of key-value pairs:
 
 - `custom_(tags/labels)`: These tags/labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
 - `object_storage_custom_(tags/labels)`: Will be applied to all object storage buckets. **AWS and GCP only**.
@@ -1195,75 +1197,117 @@ It's also possible to add additional tags as desired with Custom Tags. The follo
 - `(cloud service)_custom_(tags/labels)`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
 
 ```tf
-custom_(tags/labels)                = { <key-name> : <value> }
+# Global tags applied to all resources
+custom_tags = { Owner = "platform-team", CostCenter = "engineering" }
 
-object_storage_custom_(tags/labels) = { <key-name> : <value> }
-object_storage_buckets_custom_(tags/labels) = {
-  "artifacts"        = { <key-name> : <value> },
-  "backups"          = { <key-name> : <value> },
-  "dependency-proxy" = { <key-name> : <value> },
-  "lfs"              = { <key-name> : <value> },
-  "mr-diffs"         = { <key-name> : <value> },
-  "packages"         = { <key-name> : <value> },
-  "terraform-state"  = { <key-name> : <value> },
-  "uploads"          = { <key-name> : <value> },
-  "registry"         = { <key-name> : <value> },
-  "ci-secure-files"  = { <key-name> : <value> },
-  "pages"            = { <key-name> : <value> },
+# Omnibus instance types
+consul_custom_tags            = { <key-name> : <value> }
+gitaly_custom_tags            = { <key-name> : <value> }
+gitlab_rails_custom_tags      = { <key-name> : <value> }
+haproxy_external_custom_tags  = { <key-name> : <value> }
+haproxy_internal_custom_tags  = { <key-name> : <value> }
+monitor_custom_tags           = { <key-name> : <value> }
+opensearch_custom_tags        = { <key-name> : <value> }
+pgbouncer_custom_tags         = { <key-name> : <value> }
+postgres_custom_tags          = { <key-name> : <value> }
+praefect_custom_tags          = { <key-name> : <value> }
+praefect_postgres_custom_tags = { <key-name> : <value> }
+redis_cache_custom_tags       = { <key-name> : <value> }
+redis_custom_tags             = { <key-name> : <value> }
+redis_persistent_custom_tags  = { <key-name> : <value> }
+sidekiq_custom_tags           = { <key-name> : <value> }
+
+# AWS managed services
+eks_custom_tags                           = { <key-name> : <value> }
+webservice_node_pool_custom_tags          = { <key-name> : <value> }
+sidekiq_node_pool_custom_tags             = { <key-name> : <value> }
+supporting_node_pool_custom_tags          = { <key-name> : <value> }
+rds_postgres_custom_tags                  = { <key-name> : <value> }
+rds_praefect_postgres_custom_tags         = { <key-name> : <value> }
+rds_geo_tracking_postgres_custom_tags     = { <key-name> : <value> }
+elasticache_redis_custom_tags             = { <key-name> : <value> }
+elasticache_redis_cache_custom_tags       = { <key-name> : <value> }
+elasticache_redis_persistent_custom_tags  = { <key-name> : <value> }
+opensearch_vm_custom_tags                 = { <key-name> : <value> }
+opensearch_service_custom_tags            = { <key-name> : <value> }
+elb_internal_custom_tags                  = { <key-name> : <value> }
+
+# GCP managed services (use _labels suffix)
+gke_custom_labels                                 = { <key-name> : <value> }
+webservice_node_pool_custom_labels                = { <key-name> : <value> }
+sidekiq_node_pool_custom_labels                   = { <key-name> : <value> }
+supporting_node_pool_custom_labels                = { <key-name> : <value> }
+cloud_sql_postgres_custom_labels                  = { <key-name> : <value> }
+cloud_sql_praefect_postgres_custom_labels         = { <key-name> : <value> }
+cloud_sql_geo_tracking_postgres_custom_labels     = { <key-name> : <value> }
+memorystore_redis_custom_labels                   = { <key-name> : <value> }
+memorystore_redis_cache_custom_labels             = { <key-name> : <value> }
+memorystore_redis_persistent_custom_labels        = { <key-name> : <value> }
+
+# Object storage buckets (AWS and GCP)
+object_storage_custom_tags = { <key-name> : <value> }
+object_storage_buckets_custom_tags = {
+  "artifacts"        = { <key-name> : <value> }
+  "backups"          = { <key-name> : <value> }
+  "dependency-proxy" = { <key-name> : <value> }
+  "lfs"              = { <key-name> : <value> }
+  "mr-diffs"         = { <key-name> : <value> }
+  "packages"         = { <key-name> : <value> }
+  "terraform-state"  = { <key-name> : <value> }
+  "uploads"          = { <key-name> : <value> }
+  "registry"         = { <key-name> : <value> }
+  "ci-secure-files"  = { <key-name> : <value> }
+  "pages"            = { <key-name> : <value> }
 }
-
-consul_custom_(tags/labels)            = { <key-name> : <value> }
-gitaly_custom_(tags/labels)            = { <key-name> : <value> }
-gitlab_rails_custom_(tags/labels)      = { <key-name> : <value> }
-haproxy_external_custom_(tags/labels)  = { <key-name> : <value> }
-haproxy_internal_custom_(tags/labels)  = { <key-name> : <value> }
-monitor_custom_(tags/labels)           = { <key-name> : <value> }
-opensearch_custom_(tags/labels)        = { <key-name> : <value> }
-pgbouncer_custom_(tags/labels)         = { <key-name> : <value> }
-postgres_custom_(tags/labels)          = { <key-name> : <value> }
-praefect_custom_(tags/labels)          = { <key-name> : <value> }
-praefect_postgres_custom_(tags/labels) = { <key-name> : <value> }
-redis_cache_custom_(tags/labels)       = { <key-name> : <value> }
-redis_custom_(tags/labels)             = { <key-name> : <value> }
-redis_persistent_custom_(tags/labels)  = { <key-name> : <value> }
-sidekiq_custom_(tags/labels)           = { <key-name> : <value> }
 ```
 
-### GCP Services
+### AWS Tag Management
+
+AWS has specific tag management behaviors that differ from other cloud providers. The Toolkit provides options to control the `Name` tag and supports the [Terraform AWS Provider's tag handling functionality](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging).
+
+#### Name Tag
+
+The AWS [`Name` tag](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html) is displayed in the AWS Console for resource identification. By default, the Toolkit sets this tag on all AWS resources (instances, volumes, network resources, security groups and more).
+
+To configure the `Name` tag behavior, set the following variable in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf):
+
+- `default_set_name_tags` - Controls whether the Toolkit sets the `Name` tag on AWS resources. Defaults to `true`.
 
 ```tf
-gke_custom_labels                  = { <key-name> : <value> }
-webservice_node_pool_custom_labels = { <key-name> : <value> }
-sidekiq_node_pool_custom_labels    = { <key-name> : <value> }
-supporting_node_pool_custom_labels = { <key-name> : <value> }
-
-cloud_sql_postgres_custom_labels              = { <key-name> : <value> }
-cloud_sql_praefect_postgres_custom_labels     = { <key-name> : <value> }
-cloud_sql_geo_tracking_postgres_custom_labels = { <key-name> : <value> }
-
-memorystore_redis_custom_labels            = { <key-name> : <value> }
-memorystore_redis_cache_custom_labels      = { <key-name> : <value> }
-memorystore_redis_persistent_custom_labels = { <key-name> : <value> }
+default_set_name_tags = false
 ```
 
-### AWS Services
+> [!note]
+> If disabling Name tags, update Ansible inventory to use `tag:gitlab_node_name` instead of `tag:Name` ([configuration guide](environment_configure.md#amazon-web-services-aws)).
 
-```tf
-eks_custom_tags                  = { <key-name> : <value> }
-webservice_node_pool_custom_tags = { <key-name> : <value> }
-sidekiq_node_pool_custom_tags    = { <key-name> : <value> }
-supporting_node_pool_custom_tags = { <key-name> : <value> }
+#### Provider-Level Tag Configuration
 
-rds_postgres_custom_tags              = { <key-name> : <value> }
-rds_praefect_postgres_custom_tags     = { <key-name> : <value> }
-rds_geo_tracking_postgres_custom_tags = { <key-name> : <value> }
+The AWS provider supports [default_tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags-1) to apply tags globally and [ignore_tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging#ignoring-changes-in-all-resources) to prevent Terraform from removing externally-managed tags.
 
-elasticache_redis_custom_tags            = { <key-name> : <value> }
-elasticache_redis_cache_custom_tags      = { <key-name> : <value> }
-elasticache_redis_persistent_custom_tags = { <key-name> : <value> }
+**Apply tags to all resources:**
 
-opensearch_vm_custom_tags      = { <key-name> : <value> }
-opensearch_service_custom_tags = { <key-name> : <value> }
-
-elb_internal_custom_tags = { <key-name> : <value> }
+```hcl
+provider "aws" {
+  default_tags {
+    tags = {
+      Environment = "Production"
+      ManagedBy   = "Terraform"
+    }
+  }
+}
 ```
+
+**Prevent removal of external tags:**
+
+By Terraform's design, `terraform apply` removes tags applied outside of Terraform. Use `ignore_tags` to prevent this:
+
+```hcl
+provider "aws" {
+  ignore_tags {
+    keys         = ["cost_center", "billing_owner"]
+    key_prefixes = ["patch-", "compliance-"]
+  }
+}
+```
+
+Use `key_prefixes` for tags with dynamic suffixes, for example `"patch-"` would match `patch-1-2-3`.

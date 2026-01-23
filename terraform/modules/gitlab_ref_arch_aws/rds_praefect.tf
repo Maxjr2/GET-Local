@@ -23,9 +23,7 @@ resource "aws_db_subnet_group" "gitlab_praefect" {
   name       = "${var.prefix}-praefect-rds-subnet-group"
   subnet_ids = local.rds_praefect_postgres_subnet_ids
 
-  tags = {
-    Name = "${var.prefix}-praefect-rds-subnet-group"
-  }
+  tags = var.default_set_name_tags ? { Name = "${var.prefix}-praefect-rds-subnet-group" } : {}
 }
 
 resource "aws_db_parameter_group" "gitlab_praefect" {

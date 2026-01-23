@@ -16,7 +16,7 @@ keyed_groups:
     separator: ''
 hostnames:
   # List host by name instead of the default public ip
-  - tag:Name
+  - tag:gitlab_node_name
 compose:
   # Return the public IP address of the box for connection
   ansible_host: public_ip_address

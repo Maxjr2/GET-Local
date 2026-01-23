@@ -6,7 +6,8 @@ module "sidekiq" {
   node_count = var.sidekiq_node_count
 
   # TODO: var.additional_tags is deprecated and will be removed in 4.x
-  custom_tags = merge(var.additional_tags, var.custom_tags, var.sidekiq_custom_tags)
+  custom_tags   = merge(var.additional_tags, var.custom_tags, var.sidekiq_custom_tags)
+  set_name_tags = var.default_set_name_tags
 
   instance_type              = var.sidekiq_instance_type
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id
