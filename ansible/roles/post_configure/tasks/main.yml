@@ -55,7 +55,7 @@
       command: |
         gitlab-rails runner "
           env_settings = ApplicationSetting.last.attributes.select {|k,v| !k.include?('encrypted') }
-          env_settings['current_license_plan'] = License.current&.plan
+          env_settings['current_license_plan'] = defined?(License) ? License.current&.plan : nil
 
           print env_settings.to_json
         "
