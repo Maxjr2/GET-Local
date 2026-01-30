@@ -65,7 +65,7 @@
         chart_ref: autoscaler/cluster-autoscaler
         chart_version: ^9
         update_repo_cache: true
-        release_namespace: "kube-system"
+        release_namespace: "{{ cluster_autoscaler_charts_namespace }}"
         values:
           fullnameOverride: "gitlab-cluster-autoscaler"
           image:

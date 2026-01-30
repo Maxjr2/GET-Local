@@ -93,8 +93,9 @@ gitlab_charts_gitaly_storage_names: ['default']
 gitlab_charts_gitaly_cgroups_memory_scaler: 0.9
 gitlab_charts_gitaly_cgroups_memory_bytes: "{{ ((([gitlab_charts_gitaly_limits_memory_gb * gitlab_charts_gitaly_cgroups_memory_scaler, gitlab_charts_gitaly_limits_memory_gb - 6] | max) * 1000 * 1000 * 1000) | round | int) if gitlab_charts_gitaly_limits_memory_gb != '' else '' }}"
 
-## Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
-cluster_autoscaler_image_tag:
+# Cluster Autoscaler (AWS)
+cluster_autoscaler_charts_namespace: "kube-system"
+cluster_autoscaler_image_tag: # Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
   '1.26': 'v1.26.2'
 
 ## Kube Prometheus Stack
