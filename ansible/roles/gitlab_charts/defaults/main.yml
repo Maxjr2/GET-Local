@@ -18,7 +18,7 @@ aws_eks_metrics_server_version: ""
 aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics-server/releases/{{ 'latest/download' if aws_eks_metrics_server_version == '' else 'download/' + aws_eks_metrics_server_version }}/components.yaml"
 
 # Operator settings
-gitlab_operator_cert_manager_version: "{{ lookup('env','CERT_MANAGER_VERSION') | default('v1.16.2', true) }}" # https://cert-manager.io/docs/installation/
+gitlab_operator_cert_manager_version: "{{ lookup('env','CERT_MANAGER_VERSION') | default('v1.19.2', true) }}" # https://cert-manager.io/docs/installation/
 gitlab_operator_cert_manager_manifest_url: "https://github.com/cert-manager/cert-manager/releases/download/{{ gitlab_operator_cert_manager_version }}/cert-manager.yaml"
 
 # Charts Settings
@@ -99,7 +99,7 @@ cluster_autoscaler_image_tag:
 
 ## Kube Prometheus Stack
 kube_prometheus_stack_charts_namespace: monitoring
-kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.85.0', true) }}"
+kube_prometheus_stack_charts_app_version: "{{ lookup('env','KUBE_PROMETHEUS_STACK_CHARTS_APP_VERSION') | default('v0.88.1', true) }}"
 
 kube_prometheus_stack_charts_storage_size: 100Gi
 kube_prometheus_stack_charts_storage_class: ""
@@ -108,4 +108,4 @@ kube_prometheus_stack_charts_prometheus_scrape_config_setup: true
 kube_prometheus_stack_charts_custom_scrape_config: []
 
 consul_charts_namespace: consul
-consul_charts_app_version: "{{ lookup('env','CONSUL_CHARTS_APP_VERSION') | default('1.18.2', true) }}"
+consul_charts_app_version: "{{ lookup('env','CONSUL_CHARTS_APP_VERSION') | default('1.21.4', true) }}"
