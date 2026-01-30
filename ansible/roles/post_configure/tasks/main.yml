@@ -35,7 +35,12 @@
         kind: Pod
         label_selectors:
           - app=toolbox
+        field_selectors:
+          - status.phase=Running
       register: toolbox_pod_list
+      until: toolbox_pod_list.resources | length > 0
+      retries: 30
+      delay: 10
 
     - name: Save Toolbox pod name
       set_fact:
