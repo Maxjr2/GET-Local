@@ -647,7 +647,7 @@ For environments using EKS the following additional settings are available:
 - `aws_allocation_ids` - A comma separated list of Elastic IP allocation IDs, that will be assigned to the AWS load balancer. **Required.**
   - With AWS, you **must have an [Elastic IP](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation) for each subnet being used**. For example using a VPC with 3 subnets will require the creation of 3 Elastic IPs and their individual allocation IDs will need to be stored in this list.
 - `cloud_native_hybrid_cluster_autoscaler_setup` - When `true` will deploy the [Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html) onto the AWS EKS Kubernetes cluster to enable node autoscaling. Set to `false` by default.
-- `cluster_autoscaler_charts_namespace` - Kubernetes namespace where the Cluster Autoscaler will be deployed. Set to `kube-system` by default.
+- `cluster_autoscaler_charts_namespace` - Kubernetes namespace where the Cluster Autoscaler will be deployed. Since the Toolkit uses IRSA, Terraform also needs to be aware of the namespace to set up the accounts to match correctly via the `cluster_autoscaler_charts_namespace` variable. Set to `kube-system` by default.
 
 A full `vars.yml` file config example for ELS based on a [10k Cloud Native Hybrid Reference Architecture](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) is as follows:
 
