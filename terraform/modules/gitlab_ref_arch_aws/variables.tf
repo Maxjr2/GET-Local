@@ -977,6 +977,11 @@ variable "eks_gitlab_cloud_native_namespace" {
   default = "default"
 }
 
+variable "cluster_autoscaler_charts_namespace" {
+  type    = string
+  default = "kube-system"
+}
+
 ## Secrets Envelope Encryption (Optional)
 variable "eks_envelope_encryption" {
   type    = bool

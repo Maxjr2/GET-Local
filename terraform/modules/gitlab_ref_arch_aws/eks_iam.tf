@@ -255,7 +255,7 @@ resource "aws_iam_role" "gitlab_eks_cluster_autoscaler_role" {
         Condition = {
           "StringEquals" = {
             "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:aud" = "sts.amazonaws.com",
-            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:kube-system:gitlab-cluster-autoscaler"
+            "${replace(aws_iam_openid_connect_provider.gitlab_cluster_openid[count.index].url, "https://", "")}:sub" = "system:serviceaccount:${var.cluster_autoscaler_charts_namespace}:gitlab-cluster-autoscaler"
           }
         }
       },
