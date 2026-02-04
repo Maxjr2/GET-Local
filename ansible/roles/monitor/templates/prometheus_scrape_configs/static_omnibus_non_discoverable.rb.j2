@@ -1,4 +1,4 @@
-{% if 'pgbouncer' in groups %}
+{% if 'pgbouncer' in groups and gitlab_version != '' and gitlab_version is version('18.9', '<') %}
 # PgBouncer
 {
   'job_name': 'pgbouncer',
