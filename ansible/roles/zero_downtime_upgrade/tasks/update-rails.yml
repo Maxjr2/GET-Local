@@ -29,6 +29,13 @@
       retries: 2
       until: result is success
 
+- name: Stop Geo Log Cursor on secondary site
+  command: gitlab-ctl stop geo-logcursor
+  when: geo_secondary_site_group_name in groups
+  register: result
+  retries: 2
+  until: result is success
+
 - name: Run gitlab_rails role
   include_role:
     name: gitlab_rails
