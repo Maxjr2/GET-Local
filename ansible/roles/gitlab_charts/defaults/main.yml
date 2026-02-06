@@ -96,7 +96,14 @@ gitlab_charts_gitaly_cgroups_memory_bytes: "{{ ((([gitlab_charts_gitaly_limits_m
 # Cluster Autoscaler (AWS)
 cluster_autoscaler_charts_namespace: "kube-system"
 cluster_autoscaler_image_tag: # Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
-  '1.26': 'v1.26.2'
+
+## OpenBao
+gitlab_charts_openbao_requests_memory: ''
+gitlab_charts_openbao_limits_memory: "{{ gitlab_charts_openbao_requests_memory }}"
+gitlab_charts_openbao_requests_cpu: ''
+gitlab_charts_openbao_limits_cpu: "{{ gitlab_charts_openbao_requests_cpu }}"
+gitlab_charts_openbao_min_replicas: ''
+gitlab_charts_openbao_max_replicas: ''
 
 ## Kube Prometheus Stack
 kube_prometheus_stack_charts_namespace: monitoring

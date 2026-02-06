@@ -146,6 +146,34 @@ container_registry_database_username: "registry"
 container_registry_database_password: ""
 container_registry_database_ssl_mode: "prefer"
 
+# OpenBao Settings
+openbao_enable: "{{ openbao_external_url != '' }}"
+openbao_external_url: ""
+openbao_host: "{{ openbao_external_url | regex_replace('^https?:\/\/') }}"
+
+## OpenBao SSL
+openbao_ssl_enable: "{{ 'https' in openbao_external_url }}"
+openbao_ssl_cert: "{{ lookup('file', openbao_ssl_cert_file) if openbao_ssl_cert_file != '' else '' }}"
+openbao_ssl_cert_file: ""
+openbao_ssl_key: "{{ lookup('file', openbao_ssl_key_file) if openbao_ssl_key_file != '' else '' }}"
+openbao_ssl_key_file: ""
+
+## OpenBao Unseal key
+openbao_unseal_key: "{{ lookup('file', openbao_unseal_key_file) if openbao_unseal_key_file != '' else '' }}"
+openbao_unseal_key_file: ""
+openbao_unseal_key_current_id: "static-unseal-0"
+
+## OpenBao Database
+openbao_database_host: "{{ postgres_host }}"
+openbao_database_port: "{{ postgres_port }}"
+openbao_database_name: "openbao"
+openbao_database_admin_username: "{{ openbao_database_username if openbao_database_host != postgres_host else postgres_admin_username }}"
+openbao_database_admin_password: "{{ openbao_database_password if openbao_database_host != postgres_host else postgres_admin_password }}"
+openbao_login_database: "{{ postgres_login_database }}"
+openbao_maintenance_database: "{{ postgres_maintenance_database }}"
+openbao_database_username: "openbao"
+openbao_database_password: ""
+
 ################################################################################
 ## GitLab Component Settings (Omnibus)
 ################################################################################

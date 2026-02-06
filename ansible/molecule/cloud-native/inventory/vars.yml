@@ -45,3 +45,13 @@ all:
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
     gitaly_token: "{{ lookup('env','MOLECULE_GITALY_TOKEN') }}"
     redis_password: "{{ lookup('env','MOLECULE_REDIS_PASSWORD') }}"
+
+    # OpenBao configs
+    openbao_external_url: "http://openbao.docker"
+    openbao_database_password: "open8aot3st"
+    gitlab_charts_openbao_requests_memory: '128Mi'
+    gitlab_charts_openbao_limits_memory: "128Mi"
+    gitlab_charts_openbao_requests_cpu: '100m'
+    gitlab_charts_openbao_limits_cpu: "100m"
+    gitlab_charts_openbao_min_replicas: 2
+    gitlab_charts_openbao_max_replicas: 4
