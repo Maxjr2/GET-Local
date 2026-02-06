@@ -2,6 +2,9 @@
   "ignorePatterns": [
     {
       "pattern": "^https://support\\.gitlab\\.com"
+    },
+    {
+      "pattern": "^https://developer\\.hashicorp\\.com"
     }
   ]
 }

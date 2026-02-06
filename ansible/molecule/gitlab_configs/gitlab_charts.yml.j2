@@ -56,3 +56,11 @@ registry:
   storage:
     secret: gitlab-container-registry-object-storage-key
     key: config
+
+{% if openbao_enable %}
+openbao:
+  config:
+    audit:
+      http:
+        enabled: false
+{% endif %}

@@ -128,6 +128,24 @@
     - container_registry_database_configure
     - container_registry_database_external
 
+- name: Run external OpenBao database prep
+  import_tasks: external_database_prep.yml
+  vars:
+    database_label: gitlab-openbao-psql
+    database_host: "{{ openbao_database_host }}"
+    database_port: "{{ openbao_database_port }}"
+    database_admin_user: "{{ openbao_database_admin_username }}"
+    database_admin_password: "{{ openbao_database_admin_password }}"
+    database_user: "{{ openbao_database_username }}"
+    database_password_secret: gitlab-openbao-db-password
+    database_name: "{{ openbao_database_name }}"
+  tags: openbao
+  when:
+    - openbao_enable
+    - postgres_external
+    - postgres_external_prep
+    - cloud_native_hybrid_geo_role != 'secondary'
+
 - name: Calculate Webservice / Sidekiq pod replica counts as required
   block:
     - name: Calculate Webservice / Sidekiq max replica counts based on Linux Package (Omnibus) Gitaly deployment size if not configured

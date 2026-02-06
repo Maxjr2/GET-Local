@@ -378,6 +378,12 @@ global:
 {% endif %}
   minio:
     enabled: false
+{% if openbao_enable %}
+  openbao:
+    enabled: true
+    host: "{{ openbao_host }}"
+    https: {{ openbao_ssl_enable | lower }}
+{% endif %}
 {% if pages_enable %}
   pages:
     enabled: true
@@ -561,6 +567,58 @@ installCertmanager: {{ (external_url_ssl and external_ssl_source == 'letsencrypt
 {% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
 certmanager-issuer:
   email: "{{ external_ssl_letsencrypt_issuer_email }}"
+{% endif %}
+
+{% if openbao_enable %}
+openbao:
+  install: true
+  ingress:
+    enabled: true
+    hostname: "{{ openbao_host }}"
+    configureCertmanager: {{ (openbao_ssl_enable | lower) and openbao_ssl_cert == '' }}
+    tls:
+{% if openbao_ssl_enable %}
+      enabled: true
+{% if openbao_ssl_cert != '' and openbao_ssl_key != '' %}
+      secretName: gitlab-openbao-tls
+{% endif %}
+{% else %}
+      enabled: false
+{% endif %}
+  config:
+    storage:
+      postgresql:
+        connection:
+          host: "{{ openbao_database_host }}"
+          port: {{ openbao_database_port }}
+          database: "{{ openbao_database_name }}"
+          username: "{{ openbao_database_username }}"
+          password:
+            secret: gitlab-openbao-db-password
+            key: password
+{% if openbao_unseal_key != '' %}
+    unseal:
+      static:
+        currentKeyId: "{{ openbao_unseal_key_current_id }}"
+{% endif %}
+{% if openbao_unseal_key != '' %}
+  staticUnsealSecret:
+    generate: false
+{% endif %}
+  podMonitor:
+    enable: true
+  resources:
+    limits:
+      cpu: "{{ gitlab_charts_openbao_limits_cpu }}"
+      memory: "{{ gitlab_charts_openbao_limits_memory }}"
+    requests:
+      cpu: "{{ gitlab_charts_openbao_requests_cpu }}"
+      memory: "{{ gitlab_charts_openbao_requests_memory }}"
+  autoscaling:
+    minReplicas: {{ gitlab_charts_openbao_min_replicas }}
+    maxReplicas: {{ gitlab_charts_openbao_max_replicas }}
+  nodeSelector:
+    workload: "{{ gitlab_charts_supporting_node_selector }}"
 {% endif %}
 
 # Run outside of cluster
