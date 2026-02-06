@@ -117,25 +117,6 @@ run "all_resources_name_tags_disabled" {
     elasticache_redis_password      = "testpassword123456"
   }
 
-  # EC2 instances - Verify NO Name tag but gitlab_node_name exists
-  assert {
-    condition = alltrue([
-      !contains(keys(module.consul.instance_tags[0]), "Name"),
-      !contains(keys(module.gitaly.instance_tags[0]), "Name"),
-      !contains(keys(module.gitlab_rails.instance_tags[0]), "Name"),
-      contains(keys(module.consul.instance_tags[0]), "gitlab_node_name"),
-      contains(keys(module.gitaly.instance_tags[0]), "gitlab_node_name"),
-      contains(keys(module.gitlab_rails.instance_tags[0]), "gitlab_node_name")
-    ])
-    error_message = "EC2 instances should not have Name tag but must have gitlab_node_name tag"
-  }
-
-  # EC2 root volumes - Verify NO Name tag (no alternative tag needed)
-  assert {
-    condition     = !contains(keys(module.gitlab_rails.instance_root_block_device_tags[0][0]), "Name")
-    error_message = "Root volumes should not have Name tag when disabled"
-  }
-
   # Data disks - Verify volumes are created and have gitlab_node_data_disk_role
   assert {
     condition     = length(module.gitaly.data_disk_volume_ids) > 0
@@ -259,32 +240,6 @@ run "all_resources_name_tags_enabled" {
     rds_postgres_password      = "testpassword123456"
   }
 
-  # EC2 instances - Verify Name tag AND gitlab_node_name both exist
-  assert {
-    condition = alltrue([
-      contains(keys(module.consul.instance_tags[0]), "Name"),
-      contains(keys(module.consul.instance_tags[0]), "gitlab_node_name"),
-      contains(keys(module.gitlab_rails.instance_tags[0]), "Name"),
-      contains(keys(module.gitlab_rails.instance_tags[0]), "gitlab_node_name")
-    ])
-    error_message = "EC2 instances should have both Name and gitlab_node_name tags when enabled"
-  }
-
-  # EC2 instances - Verify Name and gitlab_node_name have same value
-  assert {
-    condition = alltrue([
-      module.consul.instance_tags[0]["Name"] == module.consul.instance_tags[0]["gitlab_node_name"],
-      module.gitlab_rails.instance_tags[0]["Name"] == module.gitlab_rails.instance_tags[0]["gitlab_node_name"]
-    ])
-    error_message = "Name and gitlab_node_name tags should have the same value"
-  }
-
-  # EC2 root volumes - Verify Name tag exists
-  assert {
-    condition     = contains(keys(module.gitlab_rails.instance_root_block_device_tags[0][0]), "Name")
-    error_message = "Root volumes should have Name tag when enabled (default)"
-  }
-
   # EKS launch templates - Verify volume tag_specifications blocks exist when Name tag enabled
   assert {
     condition     = length(aws_launch_template.gitlab_webservice[0].tag_specifications) == 2
@@ -320,5 +275,73 @@ run "all_resources_name_tags_enabled" {
   assert {
     condition     = contains(keys(aws_db_subnet_group.gitlab[0].tags), "Name")
     error_message = "RDS subnet group should have Name tag when enabled (default)"
+  }
+}
+
+# Section 2: Instance Module Direct Tests
+# Testing set_name_tags behavior on EC2 instances and root volumes
+
+run "instance_module_name_tags_disabled" {
+  command = plan
+
+  module {
+    source = "../../../gitlab_aws_instance"
+  }
+
+  variables {
+    prefix        = "test-tags"
+    node_type     = "gitlab-rails"
+    node_count    = 1
+    set_name_tags = false
+    ami_id        = "ami-test123"
+    instance_type = "t3.micro"
+  }
+
+  assert {
+    condition = alltrue([
+      !contains(keys(aws_instance.gitlab[0].tags), "Name"),
+      contains(keys(aws_instance.gitlab[0].tags), "gitlab_node_name")
+    ])
+    error_message = "EC2 instance should not have Name tag but must have gitlab_node_name tag"
+  }
+
+  assert {
+    condition     = !contains(keys(aws_instance.gitlab[0].root_block_device[0].tags), "Name")
+    error_message = "Root volume should not have Name tag when disabled"
+  }
+}
+
+run "instance_module_name_tags_enabled" {
+  command = plan
+
+  module {
+    source = "../../../gitlab_aws_instance"
+  }
+
+  variables {
+    prefix        = "test-tags"
+    node_type     = "gitlab-rails"
+    node_count    = 1
+    ami_id        = "ami-test123"
+    instance_type = "t3.micro"
+    # set_name_tags defaults to true
+  }
+
+  assert {
+    condition = alltrue([
+      contains(keys(aws_instance.gitlab[0].tags), "Name"),
+      contains(keys(aws_instance.gitlab[0].tags), "gitlab_node_name")
+    ])
+    error_message = "EC2 instance should have both Name and gitlab_node_name tags when enabled"
+  }
+
+  assert {
+    condition     = aws_instance.gitlab[0].tags["Name"] == aws_instance.gitlab[0].tags["gitlab_node_name"]
+    error_message = "Name and gitlab_node_name should have the same value"
+  }
+
+  assert {
+    condition     = contains(keys(aws_instance.gitlab[0].root_block_device[0].tags), "Name")
+    error_message = "Root volume should have Name tag when enabled (default)"
   }
 }
