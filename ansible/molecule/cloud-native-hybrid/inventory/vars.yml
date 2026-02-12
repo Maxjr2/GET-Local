@@ -31,8 +31,8 @@ all:
     molecule_cluster_name: "molecule-{{ molecule_scenario }}"
     gitlab_charts_custom_context: k3d-"{{ molecule_cluster_name }}"
 
-    custom_config_folder: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs"
-    custom_tasks_folder: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks"
+    custom_config_folder: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_configs"
+    custom_tasks_folder: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_tasks"
     gitlab_charts_custom_config_file: "{{ custom_config_folder }}/gitlab_charts.yml.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"

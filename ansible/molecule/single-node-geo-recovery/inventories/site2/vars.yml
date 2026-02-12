@@ -8,7 +8,7 @@ all:
     geo_secondary_site_group_name: "site2"
     geo_secondary_site_name: "Site 2"
 
-    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/../gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/../gitlab_configs/gitlab_rails.rb.j2"
+    common_custom_tasks_file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/../gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/../gitlab_configs/gitlab_rails.rb.j2"
 
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
