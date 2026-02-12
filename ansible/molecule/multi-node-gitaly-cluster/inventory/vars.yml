@@ -5,8 +5,8 @@ all:
 
     gitlab_license_text: "{{ lookup('env', 'EE_LICENSE') }}"
 
-    common_custom_tasks_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_tasks/common.yml"
-    gitlab_rails_custom_config_file: "{{ lookup('env', 'PWD') }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
+    common_custom_tasks_file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_tasks/common.yml"
+    gitlab_rails_custom_config_file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_configs/gitlab_rails.rb.j2"
 
     consul_password: "{{ lookup('env','MOLECULE_CONSUL_PASSWORD') }}"
     gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
