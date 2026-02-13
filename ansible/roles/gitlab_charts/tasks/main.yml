@@ -152,7 +152,7 @@
       block:
         - name: Get Gitaly CPU count
           set_fact:
-            gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_processor_vcpus']) | list | sum }}"
+            gitaly_cpus: "{{ groups['gitaly'] | sort | map('extract', hostvars, ['ansible_facts', 'processor_vcpus']) | list | sum }}"
 
         - name: Set calculated Webservice / Sidekiq max replica counts
           set_fact:
