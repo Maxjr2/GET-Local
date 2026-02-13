@@ -306,7 +306,7 @@ sidekiq['listen_address'] = '0.0.0.0'
 {% if 'gitaly' in groups %}
 ### Sidekiq - Scale up workers dynamically to 1/4 of CPUS unless single node
 sidekiq['queue_groups'] = [
-{% for cpu in range([(ansible_processor_vcpus / 4) | int, 1] | max) %}
+{% for cpu in range([(ansible_facts['processor_vcpus'] / 4) | int, 1] | max) %}
   "*",
 {% endfor %}
 ]

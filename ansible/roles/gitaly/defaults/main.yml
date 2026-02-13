@@ -1,5 +1,5 @@
 gitaly_number: "{{ inventory_hostname | regex_search('gitaly-(\\d+)', '\\1') | first }}"
-gitaly_ruby_num_workers: "{{ [(ansible_processor_vcpus * 0.2) | round | int, 2] | max }}"
+gitaly_ruby_num_workers: "{{ [(ansible_facts['processor_vcpus'] * 0.2) | round | int, 2] | max }}"
 
 gitaly_pack_objects_cache: true
 gitaly_node: "gitaly-{{ gitaly_number }}"
