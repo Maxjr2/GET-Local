@@ -386,27 +386,30 @@ kubectl annotate pod -n kube-system -l app.kubernetes.io/component=ebs-csi-contr
 
 After running the above commands you should see Autoscaler correctly scaling down nodes soon after.
 
-#### Pods not deploying due to Cluster Autoscaler and EBS Persistent Volume zone mismatch
+#### Pods not deploying due to EBS Persistent Volume zone mismatch
 
-[Due to a fundamental limitation with AWS EKS and Cluster Autoscaler](https://github.com/kubernetes/autoscaler/issues/6000), StatefulSet pods with EBS-backed PersistentVolumes may fail to deploy when their volumes are in different Availability Zones than available nodes.
+StatefulSet pods with EBS-backed PersistentVolumes may fail to deploy when their volumes are in different Availability Zones than available nodes. Pods will be stuck in `Pending` state with "volume node affinity conflict" errors.
 
-The issue occurs because Cluster Autoscaler cannot create nodes in specific zones to match volume locations. When this happens, pods will be stuck in `Pending` state with "volume node affinity conflict" errors.
+This can happen for two reasons:
 
-The best method to avoid this issue is to use static node counts for stateful deployments. Cluster Autoscaler will ignore these pools and when AWS EKS performs its operations directly it [guarantees zone replacements](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html).
+- **EKS managed node group updates** - During updates, [EKS temporarily scales up and then randomly terminates old nodes](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html#managed-node-update-scale-up), which can leave zones without nodes where PersistentVolumes are located.
+- **Cluster Autoscaler zone targeting** - [Cluster Autoscaler cannot create nodes in specific zones](https://github.com/kubernetes/autoscaler/issues/6000) to match PersistentVolume locations.
 
-If this issue does occur, the easiest solution is to [scale up the node group manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to match the number of zones, allow pods to schedule, then scale back down.
+If this issue occurs, the easiest solution is to [scale up the node group manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to match the number of zones, allow pods to schedule, then scale back down.
 
-#### Unable to adjust Node Pool sizes due to Minimum / Desired Size limitations after deployment
+To prevent this issue, use the [per-AZ node group distribution feature](environment_advanced_hybrid.md#stateful-workloads-and-multi-az-limitations) which creates one node group per availability zone to ensure stable zone placement.
 
-[Due to limitations with AWS EKS](https://github.com/hashicorp/terraform-provider-aws/issues/31613) there are times when attempting to adjust Node Pool sizes may fail due to limitations with Desired Size. Specifically if the adjustment has the Minimum Size higher than the current Desired Size it will fail as follows:
+#### Unable to adjust node group sizes due to Minimum / Desired Size limitations after deployment
 
-```tf
-Error: error updating EKS Node Group (<REDACTED>:gitlab_supporting_pool_20220721011642956500000011) config: InvalidParameterException: Minimum capacity 3 can't be greater than desired size 2
+Adjusting node group sizes may fail when the change would violate AWS's `min_size <= desired_size <= max_size` constraint:
+
+```sh
+InvalidParameterException: Minimum capacity 3 can't be greater than desired size 2
 ```
 
-As Desired Size is likely to be adjusted outside of Terraform, either manually or via autoscaling, there's no solution that can be done automatically to address this.
+This affects per-AZ node groups (any size change), multi-AZ static node groups, and multi-AZ autoscaled node groups (when crossing the current desired size boundary).
 
-As such, if this issue is occurring you would need to first [adjust the Desired Size manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to be equal to or greater than the target Minimum Size and then run Terraform again.
+To resolve, [adjust the desired size manually](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) to a value within your new min/max range, then run Terraform again. See [Node Group Size Change Considerations](environment_advanced_hybrid.md#node-group-size-change-considerations) for full details.
 
 #### Stateful workloads not deploying due to missing default StorageClass
 

@@ -173,7 +173,7 @@ The following options have default values set in the AWS Terraform module (defau
 ##### Other notes
 
 - Deploying AWS Elasticache instances with a node count of 1 disables any standby replicas - This is sufficient for testing.
-- Enabling [Cluster Autoscaler for AWS EKS clusters](docs/environment_advanced_hybrid.md#eks-node-group-cluster-autoscaling) can lead to savings if testing is expected to last a while.
+- Enabling [Cluster Autoscaler for AWS EKS clusters](docs/environment_advanced_hybrid.md#eks-node-group-scaling) can lead to savings if testing is expected to last a while.
 - When deploying EKS clusters with provisioned volume claims (PVCs) it should be noted that destroying the cluster via Terraform does not in turn delete any PVCs (as they were created by the Kubernetes service and not under Terraform's purview). When spinning down an environment you will need to clean up these disks manually. Note this only applies to PVCs, any other disks are cleared up accordingly via a Terraform Destroy.
 
 ##### Example config (AWS)
@@ -255,7 +255,7 @@ Note that [Disk IOPS is calculated by VM CPU count and disk size](https://cloud.
 
 - Deploying Google Memorystore instances with a node count of 1 disables any standby replicas - This is sufficient for testing.
 - Availability type for GCP Cloud SQL is `ZONAL` by default on GCP's end - This is the cheapest option.
-- Cluster Autoscaler is enabled by default for all GKE clusters so setting a min count can lead to savings. Enabling [Cluster Autoscaler for AWS EKS clusters](docs/environment_advanced_hybrid.md#eks-node-group-cluster-autoscaling) can lead to savings if testing is expected to last a while.
+- Cluster Autoscaler is enabled by default for all GKE clusters so setting a min count can lead to savings. Enabling [Cluster Autoscaler for AWS EKS clusters](docs/environment_advanced_hybrid.md#eks-node-group-scaling) can lead to savings if testing is expected to last a while.
 - GKE clusters default to regional in the GCP provider. With Cluster Autoscaler this is fine as it will adjust the node pools accordingly to meet the total node count across zones. However it is technically a little cheaper to deploy a cluster in it's zonal form to reduce networking costs, which can be done by setting `gke_location` to a specific zone.
 - When deploying GKE clusters with provisioned volume claims (PVCs) it should be noted that destroying the cluster via Terraform does not in turn delete any PVCs (as they were created by the Kubernetes service and not under Terraform's purview). When spinning down an environment you will need to clean up these disks manually. Note this only applies to PVCs, any other disks are cleared up accordingly via a Terraform Destroy.
 

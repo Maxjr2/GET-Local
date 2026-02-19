@@ -271,8 +271,9 @@ module "gitlab_ref_arch_aws" {
   supporting_node_pool_instance_type = "m5.xlarge"
 
   # Gitaly on Kubernetes (Toolkit Beta) - Uncomment to use instead of VMs
-  # gitaly_node_pool_count = 0
+  # gitaly_node_pool_count = 3
   # gitaly_node_pool_instance_type = "m5.4xlarge"
+  # gitaly_node_pool_az_distribution = "per-az"  # Recommended for stateful workloads
 
   # 10k Hybrid - Compute VMs
   gitaly_node_count = 3
@@ -326,33 +327,73 @@ The default on AWS EKS is Extended. The Toolkit allows for you to change this as
 > [!tip]
 > It's recommended in either case to manage upgrades yourself before this behaviour is triggered to avoid any unexpected clashes with the Terraform state.
 
-#### EKS Node Group Cluster Autoscaling
+#### EKS Node Group Scaling
+
+This section covers scaling considerations for EKS node groups including Cluster Autoscaler setup, stateful workload limitations in multi-AZ deployments, and Terraform limitations when adjusting node group sizes.
+
+##### Cluster Autoscaling Setup
 
 The provisioned EKS cluster and node groups are configured to support Cluster Autoscaling when setting node counts via the single (`*_node_pool_count`) or max / min values (`*_node_pool_max_count` / `*_node_pool_min_count`).
 
 However, [Cluster Autoscaling won't actually be enabled until the component is deployed](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html). This either needs to be done manually or can be done with the Toolkit via an additional setting in Ansible - `cloud_native_hybrid_cluster_autoscaler_setup`. Refer to [Advanced Configuration](#advanced-configuration) for more details.
 
-##### Stateful Workloads and Known Limitations
+##### Node Group Size Change Considerations
 
-[Due to a fundamental limitation with AWS EKS and Cluster Autoscaler](https://github.com/kubernetes/autoscaler/issues/6000), StatefulSet pods with EBS-backed PersistentVolumes may fail to deploy when their volumes are in different Availability Zones than available nodes. This occurs because Cluster Autoscaler cannot create nodes in specific zones to match volume locations.
+The Toolkit ignores `desired_size` in Terraform state [as recommended by AWS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group#ignoring-changes-to-desired-size) to prevent conflicts with Cluster Autoscaler. This allows `desired_size` to drift from Terraform's tracked values, which means some size changes require [manually updating it in AWS](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) first.
 
-**Recommended Configuration for Storage-Based Workloads**
+Increasing only `*_node_pool_max_count` when the current desired size is already above the minimum does not require any manual steps.
 
-To avoid this issue, any node pools supporting workloads with persistent storage should use static node counts:
+The following changes require updating `desired_size` in AWS beforehand:
 
-```tf
-# Recommended: Static count prevents zone mismatch issues
-gitaly_node_pool_count = 3
+- **Per-AZ node groups** - Any size change (always static)
+- **Multi-AZ static node groups** - Any size change
+- **Multi-AZ autoscaled node groups** - When increasing `*_node_pool_min_count` or decreasing `*_node_pool_max_count` past the current desired size
 
-# Avoid: Can cause PVC/AZ scheduling conflicts
-# gitaly_node_pool_max_count = 3
-# gitaly_node_pool_min_count = 0
+Update the desired size via the [AWS Console](https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html#mng-edit) or the AWS CLI:
+
+```sh
+aws eks update-nodegroup-config \
+  --cluster-name <prefix> \
+  --nodegroup-name <node-group-name> \
+  --scaling-config minSize=<current-min>,maxSize=<current-max>,desiredSize=<new-target>
+
+aws eks wait nodegroup-active \
+  --cluster-name <prefix> \
+  --nodegroup-name <node-group-name>
 ```
 
-Cluster Autoscaler will ignore static node pools, and when AWS EKS performs operations directly it [guarantees zone replacements](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html).
+Then run `terraform apply` as normal. For per-AZ node groups, repeat for each node group (one per availability zone).
 
 > [!note]
-> This limitation applies to any workload using persistent storage. If this issue occurs, see [Troubleshooting - Pods not deploying due to Cluster Autoscaler and EBS Persistent Volume zone mismatch](environment_troubleshooting.md#pods-not-deploying-due-to-cluster-autoscaler-and-ebs-persistent-volume-zone-mismatch) for resolution steps.
+> If you encounter `InvalidParameterException: Minimum capacity X can't be greater than desired size Y`, this indicates the desired size needs updating before Terraform can proceed. See [Troubleshooting](environment_troubleshooting.md#unable-to-adjust-node-group-sizes-due-to-minimum--desired-size-limitations-after-deployment) for more info.
+
+##### Stateful Workloads and Multi-AZ Limitations
+
+StatefulSet pods with EBS-backed PersistentVolumes can fail to deploy in multi-AZ EKS node groups due to two distinct issues:
+
+- **EKS Managed Node Group Updates**: During [managed node group updates](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html) (AMI upgrades, version changes), EKS temporarily scales up to [twice the number of Availability Zones](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-update-behavior.html#managed-node-update-scale-up) and then randomly terminates old nodes. This can leave stateful pods unable to schedule if their PersistentVolume is in a zone that no longer has nodes after the update completes.
+- **Cluster Autoscaler Zone Targeting**: [Cluster Autoscaler cannot create nodes in specific zones](https://github.com/kubernetes/autoscaler/issues/6000) to match PersistentVolume locations. When scaling up, it may add nodes to zones that don't contain the required volumes, leaving pods stuck in `Pending` state with "volume node affinity conflict" errors.
+
+As a solution to this, [AWS recommends per-AZ node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html#managed-node-group-concepts) with static node counts to guarantee zone placement. The Toolkit supports this for **Gitaly and Supporting node groups only** (autoscaling is not supported with per-AZ distribution):
+
+```tf
+# Required: Per-AZ distribution with static sizing
+gitaly_node_pool_count           = 3
+gitaly_node_pool_az_distribution = "per-az"
+
+supporting_node_pool_count           = 5
+supporting_node_pool_az_distribution = "per-az"
+
+# Do not set max_count - per-AZ requires static sizing
+# Changing sizes may require a manual step, see "Node Group Size Change Considerations" above.
+```
+
+The Toolkit creates one node group per availability zone and distributes the total node count evenly (e.g. 5 nodes across 3 AZs → 2-2-1 distribution). This ensures stable zone placement during managed node group updates.
+
+If this issue occurs on an existing deployment, see [Troubleshooting - Pods not deploying due to EBS Persistent Volume zone mismatch](environment_troubleshooting.md#pods-not-deploying-due-to-ebs-persistent-volume-zone-mismatch) for immediate resolution steps.
+
+> [!warning]
+> Switching to per-AZ distribution after initial deployment causes node group replacement. The Toolkit destroys the existing multi-AZ node group and creates new per-AZ node groups, triggering pod rescheduling. For stateful workloads like Gitaly, ensure backups are current and plan for downtime. Configure per-AZ distribution during initial deployment when possible.
 
 #### EKS Node Group AMI Type and Versions
 
