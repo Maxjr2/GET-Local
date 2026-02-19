@@ -71,12 +71,12 @@ azure-mgmt-web==7.3.1
 azure-nspkg==3.0.2
 azure-servicebus==7.14.2
 azure-storage-blob==12.23.0b1
-boto3==1.42.38
-botocore==1.42.38
+boto3==1.42.52
+botocore==1.42.52
 certifi==2026.1.4
 cffi==2.0.0
 charset-normalizer==3.4.4
-cryptography==46.0.4
+cryptography==46.0.5
 distro==1.9.0
 durationpy==0.10
 frozenlist==1.8.0
@@ -125,7 +125,7 @@ pyasn1==0.6.2
 pyasn1-modules==0.4.2
 pycparser==3.0
 pygments==2.19.2
-pyjwt==2.10.1
+pyjwt==2.11.0
 pyopenssl==25.3.0
 pysocks==1.7.1
 python-dateutil==2.9.0.post0
@@ -141,6 +141,6 @@ tabulate==0.9.0
 typing-extensions==4.15.0
 urllib3==2.6.3
 websocket-client==1.9.0
-xmltodict==1.0.2
+xmltodict==1.0.3
 yarl==1.22.0
 zipp==3.23.0
