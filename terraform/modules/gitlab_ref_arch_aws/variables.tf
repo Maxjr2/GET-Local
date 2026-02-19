@@ -1087,6 +1087,16 @@ variable "supporting_node_pool_max_unavailable" {
   type    = number
   default = 0
 }
+variable "supporting_node_pool_az_distribution" {
+  description = "Node group AZ distribution strategy. 'multi-az' creates one node group spanning all AZs (default). 'per-az' creates one node group per AZ with static node counts only (recommended for stateful workloads)."
+  type        = string
+  default     = "multi-az"
+
+  validation {
+    condition     = contains(["multi-az", "per-az"], var.supporting_node_pool_az_distribution)
+    error_message = "Must be 'multi-az' or 'per-az'."
+  }
+}
 
 ## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
 variable "gitaly_node_pool_count" {
@@ -1118,6 +1128,16 @@ variable "gitaly_node_pool_min_count" {
 variable "gitaly_node_pool_max_unavailable" {
   type    = number
   default = 0
+}
+variable "gitaly_node_pool_az_distribution" {
+  description = "Node group AZ distribution strategy. 'multi-az' creates one node group spanning all AZs (default). 'per-az' creates one node group per AZ with static node counts only (recommended for stateful workloads)."
+  type        = string
+  default     = "multi-az"
+
+  validation {
+    condition     = contains(["multi-az", "per-az"], var.gitaly_node_pool_az_distribution)
+    error_message = "Must be 'multi-az' or 'per-az'."
+  }
 }
 
 # PaaS Services

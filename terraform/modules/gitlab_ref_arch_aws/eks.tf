@@ -11,6 +11,15 @@ locals {
   supporting_node_pool_autoscaling = var.supporting_node_pool_max_count > 0
   gitaly_node_pool_autoscaling     = var.gitaly_node_pool_max_count > 0
 
+  # Per-AZ node group distribution
+  supporting_node_group_count = var.supporting_node_pool_az_distribution == "per-az" ? length(local.eks_node_group_subnet_ids) : 1
+  supporting_nodes_per_az     = floor(var.supporting_node_pool_count / local.supporting_node_group_count)
+  supporting_remainder        = var.supporting_node_pool_count % local.supporting_node_group_count
+
+  gitaly_node_group_count = var.gitaly_node_pool_az_distribution == "per-az" ? length(local.eks_node_group_subnet_ids) : 1
+  gitaly_nodes_per_az     = floor(var.gitaly_node_pool_count / local.gitaly_node_group_count)
+  gitaly_remainder        = var.gitaly_node_pool_count % local.gitaly_node_group_count
+
   # Subnet selection
   eks_default_subnet_ids    = local.default_network ? slice(tolist(local.default_subnet_ids), 0, var.eks_default_subnet_count) : null
   eks_cluster_subnet_ids    = coalesce(var.eks_subnet_ids, local.all_subnet_ids, local.eks_default_subnet_ids)
@@ -462,11 +471,11 @@ resource "aws_launch_template" "gitlab_supporting" {
 }
 
 resource "aws_eks_node_group" "gitlab_supporting_pool" {
-  count = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, 1)
+  count = min(var.supporting_node_pool_count + var.supporting_node_pool_max_count, local.supporting_node_group_count)
 
-  node_group_name_prefix = "${format("%.25s", var.prefix)}-supporting-" # Create a unique name to allow nodepool replacements
+  node_group_name_prefix = var.supporting_node_pool_az_distribution == "per-az" ? "${format("%.21s", var.prefix)}-supporting-az${count.index + 1}-" : "${format("%.25s", var.prefix)}-supporting-"
   cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
-  subnet_ids             = local.eks_node_group_subnet_ids
+  subnet_ids             = var.supporting_node_pool_az_distribution == "per-az" ? [element(local.eks_node_group_subnet_ids, count.index)] : local.eks_node_group_subnet_ids
   node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
 
   launch_template {
@@ -477,10 +486,12 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   release_version      = local.eks_node_group_ami_release_version
   force_update_version = var.eks_node_group_ami_force_update_version
 
+  # Per-AZ: Distribute evenly with remainder to first N groups (e.g., 5 nodes / 3 AZs = [2, 2, 1])
+  # Multi-AZ: Use autoscaling if enabled, otherwise static count
   scaling_config {
-    desired_size = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
-    min_size     = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count
-    max_size     = local.supporting_node_pool_autoscaling ? var.supporting_node_pool_max_count : var.supporting_node_pool_count
+    desired_size = var.supporting_node_pool_az_distribution == "per-az" ? local.supporting_nodes_per_az + (count.index < local.supporting_remainder ? 1 : 0) : (local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count)
+    min_size     = var.supporting_node_pool_az_distribution == "per-az" ? local.supporting_nodes_per_az + (count.index < local.supporting_remainder ? 1 : 0) : (local.supporting_node_pool_autoscaling ? var.supporting_node_pool_min_count : var.supporting_node_pool_count)
+    max_size     = var.supporting_node_pool_az_distribution == "per-az" ? local.supporting_nodes_per_az + (count.index < local.supporting_remainder ? 1 : 0) : (local.supporting_node_pool_autoscaling ? var.supporting_node_pool_max_count : var.supporting_node_pool_count)
   }
 
   update_config {
@@ -512,6 +523,12 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   ]
 
   lifecycle {
+    precondition {
+      # Allow deployment when: NOT per-az (multi-az is fine) OR max_count == 0 (static sizing)
+      condition     = var.supporting_node_pool_az_distribution != "per-az" || var.supporting_node_pool_max_count == 0
+      error_message = "Per-AZ node groups (az_distribution='per-az') require static node counts. Do not set supporting_node_pool_max_count when using per-az distribution."
+    }
+
     create_before_destroy = true
     ignore_changes = [
       scaling_config[0].desired_size,
@@ -590,11 +607,11 @@ resource "aws_launch_template" "gitlab_gitaly" {
 }
 
 resource "aws_eks_node_group" "gitlab_gitaly_pool" {
-  count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
+  count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, local.gitaly_node_group_count)
 
-  node_group_name_prefix = "${format("%.28s", var.prefix)}-gitaly-" # Create a unique name to allow nodepool replacements
+  node_group_name_prefix = var.gitaly_node_pool_az_distribution == "per-az" ? "${format("%.24s", var.prefix)}-gitaly-az${count.index + 1}-" : "${format("%.28s", var.prefix)}-gitaly-"
   cluster_name           = aws_eks_cluster.gitlab_cluster[0].name
-  subnet_ids             = local.eks_node_group_subnet_ids
+  subnet_ids             = var.gitaly_node_pool_az_distribution == "per-az" ? [element(local.eks_node_group_subnet_ids, count.index)] : local.eks_node_group_subnet_ids
   node_role_arn          = aws_iam_role.gitlab_eks_node_role[0].arn
 
   launch_template {
@@ -605,10 +622,12 @@ resource "aws_eks_node_group" "gitlab_gitaly_pool" {
   release_version      = local.eks_node_group_ami_release_version
   force_update_version = var.eks_node_group_ami_force_update_version
 
+  # Per-AZ: Distribute evenly with remainder to first N groups (e.g., 5 nodes / 3 AZs = [2, 2, 1])
+  # Multi-AZ: Use autoscaling if enabled, otherwise static count
   scaling_config {
-    desired_size = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
-    min_size     = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count
-    max_size     = local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_max_count : var.gitaly_node_pool_count
+    desired_size = var.gitaly_node_pool_az_distribution == "per-az" ? local.gitaly_nodes_per_az + (count.index < local.gitaly_remainder ? 1 : 0) : (local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count)
+    min_size     = var.gitaly_node_pool_az_distribution == "per-az" ? local.gitaly_nodes_per_az + (count.index < local.gitaly_remainder ? 1 : 0) : (local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_min_count : var.gitaly_node_pool_count)
+    max_size     = var.gitaly_node_pool_az_distribution == "per-az" ? local.gitaly_nodes_per_az + (count.index < local.gitaly_remainder ? 1 : 0) : (local.gitaly_node_pool_autoscaling ? var.gitaly_node_pool_max_count : var.gitaly_node_pool_count)
   }
 
   update_config {
@@ -640,6 +659,12 @@ resource "aws_eks_node_group" "gitlab_gitaly_pool" {
   ]
 
   lifecycle {
+    precondition {
+      # Allow deployment when: NOT per-az (multi-az is fine) OR max_count == 0 (static sizing)
+      condition     = var.gitaly_node_pool_az_distribution != "per-az" || var.gitaly_node_pool_max_count == 0
+      error_message = "Per-AZ node groups (az_distribution='per-az') require static node counts. Do not set gitaly_node_pool_max_count when using per-az distribution."
+    }
+
     create_before_destroy = true
     ignore_changes = [
       scaling_config[0].desired_size,
