@@ -42,7 +42,7 @@ For the Linux package and Cloud Native Hybrid environments the inventory for eac
 - `geo_primary_internal_url`/`geo_secondary_internal_url` - An internal URL or IP address for the main load balancer. Optional, will default to the Geo external URL.
 - `geo_primary_site_group_name`/`geo_secondary_site_group_name` - These should match the `geo_site` that was set in Terraform for the site you want to use as a primary/secondary, any `-` should be replaced with `_` as the names are altered when pulled from the cloud provider.
 - `geo_primary_site_name`/`geo_secondary_site_name` - A name plain text name for each site, this will be displayed in the main Geo settings page.
-- `geo_primary_registry_url` - The URL for the container registry. Optional, will default to `https://registry.{{ Geo primary URL }}`
+- `geo_primary_registry_url` - The URL for the container registry (only to be set in the secondary inventory). Optional, will default to `https://registry.{{ Geo primary URL }}`
 - `geo_secondary_force_initialize_patroni_cluster` - When running the GitLab Geo playbook, you can set this to `true` if you want to force the Toolkit to reinitialize the Patroni Cluster on the secondary site. This will removal all PostgreSQL data from the secondary and restarts replication. Defaults to `false`.
 - `geo_secondary_site_count` - The number of secondary sites that will be replicating from the primary site. Defaults to 1.
 
