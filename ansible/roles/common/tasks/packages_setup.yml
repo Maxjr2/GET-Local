@@ -78,6 +78,15 @@
     break_system_packages: true
   when: not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int >= 8)
 
+- name: Install python packages (Amazon Linux 2023)
+  pip:
+    name: "{{ python_packages }}"
+    extra_args: "--upgrade-strategy only-if-needed"
+    break_system_packages: true
+  when:
+    - ansible_facts['distribution'] == 'Amazon'
+    - ansible_facts['distribution_major_version'] == '2023'
+
 - name: Install Python packages (EL 9/10)
   pip:
     name: "{{ python_packages_rhel }}"
