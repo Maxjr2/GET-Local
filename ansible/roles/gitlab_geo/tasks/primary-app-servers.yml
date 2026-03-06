@@ -38,6 +38,7 @@
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
         geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
+        geo_site_release_namespace: "{{ geo_primary_cloud_native_release_namespace }}"
 
     - name: Primary App Servers - Set Primary site
       become: false
@@ -46,7 +47,7 @@
       register: result
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_primary_cloud_native_release_namespace }}"
         command: gitlab-rake geo:set_primary_node
       failed_when:
         - result.rc == 1
@@ -58,7 +59,7 @@
       run_once: true
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_primary_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "GeoNode.find_by(name: '{{ geo_primary_site_name }}').update(url: '{{ geo_primary_external_url }}', internal_url: '{{ geo_primary_internal_url }}')"
   when: cloud_native_hybrid_geo

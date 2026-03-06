@@ -39,7 +39,7 @@
           ignore_errors: "{{ maintenance_mode_state | lower }}" # noqa ignore-errors
           kubernetes.core.k8s_exec:
             pod: "{{ toolbox_pod }}"
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_site_release_namespace if geo_site_release_namespace else gitlab_cloud_native_release_namespace }}"
             command: |
               gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
       rescue:
@@ -50,7 +50,7 @@
               - app=toolbox
             field_selectors:
               - status.phase=Running
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_site_release_namespace if geo_site_release_namespace else gitlab_cloud_native_release_namespace }}"
           register: new_toolbox_pod
           until: new_toolbox_pod.resources | length > 0
           retries: 30 # 5 minute wait max
@@ -59,7 +59,7 @@
         - name: Maintenance Mode - Retry with new toolbox pod
           kubernetes.core.k8s_exec:
             pod: "{{ new_toolbox_pod.resources[0].metadata.name }}"
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_site_release_namespace if geo_site_release_namespace else gitlab_cloud_native_release_namespace }}"
             command: |
               gitlab-rails runner "::Gitlab::CurrentSettings.update!(maintenance_mode: {{ maintenance_mode_state | lower }}, maintenance_mode_message: \"{{ maintenance_mode_message }}\")"
   when:

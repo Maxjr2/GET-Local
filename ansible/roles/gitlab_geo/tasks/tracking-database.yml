@@ -71,7 +71,7 @@
 
 - name: Configure Tracking database on externally managed PostgreSQL (Cloud Native)
   block:
-    - name: Tracking Database - Configure kubeconfig credentials for Geo primary site
+    - name: Tracking Database - Configure kubeconfig credentials for Geo secondary site
       import_tasks: kubeconfig.yml
       vars:
         geo_site_prefix: "{{ geo_secondary_site_prefix }}"
@@ -79,6 +79,7 @@
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
         geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
+        geo_site_release_namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
 
     - name: Tracking Database - Create tracking database admin password secret
       kubernetes.core.k8s:
@@ -88,7 +89,7 @@
           type: Opaque
           metadata:
             name: "gitlab-geo-tracking-postgres-admin-password"
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
           stringData:
             password: "{{ geo_tracking_postgres_admin_password }}"
       when: geo_tracking_postgres_admin_password != geo_tracking_postgres_password
@@ -99,7 +100,7 @@
       kubernetes.core.k8s:
         kind: Pod
         name: "gitlab-psql-geo-tracking"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         state: present
         definition:
           spec:
@@ -135,12 +136,12 @@
       diff: true
 
     - name: Tracking Database - Check psql pod is ready
-      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql-geo-tracking -n {{ gitlab_cloud_native_release_namespace }}"
+      command: "kubectl wait --for=condition=ready --timeout=360s pod/gitlab-psql-geo-tracking -n {{ geo_secondary_cloud_native_release_namespace }}"
 
     - name: Tracking Database - Create Database User if missing
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql-geo-tracking"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         command: |
           sh -c "psql -c \"CREATE USER $GL_PGUSER WITH PASSWORD '$GL_PGPASSWORD' CREATEDB;\""
       register: database_user_create_result
@@ -151,7 +152,7 @@
     - name: Tracking Database - Create Database if missing
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql-geo-tracking"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         command: |
           sh -c 'PGUSER=$GL_PGUSER PGPASSWORD=$GL_PGPASSWORD psql -c "CREATE DATABASE {{ geo_tracking_postgres_database }};"'
       register: database_create_result
@@ -162,7 +163,7 @@
     - name: Tracking Database - Enable required PostgreSQL extensions
       kubernetes.core.k8s_exec:
         pod: "gitlab-psql-geo-tracking"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         command: |
           psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql;"
   always:
@@ -170,7 +171,7 @@
       kubernetes.core.k8s:
         kind: Pod
         name: "gitlab-psql-geo-tracking"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         state: absent
       no_log: true
       diff: true
@@ -179,7 +180,7 @@
       kubernetes.core.k8s:
         kind: Secret
         name: "gitlab-geo-tracking-postgres-admin-password"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         state: absent
       when: geo_tracking_postgres_admin_password != geo_tracking_postgres_password
       no_log: true
