@@ -276,6 +276,7 @@ The below settings are only required when migrating to a Linux Package installat
 
 The below settings are only required when migrating to a Cloud Native Hybrid installation:
 
+- `geo_primary_secrets_file` or `geo_primary_secrets_json` - As Cloud Native Hybrid environments use Omnibus for stateful components (e.g. Gitaly), these variables are also required here to supply the primary site's `gitlab-secrets.json`. The Toolkit uses this to configure the `gitlab-rails-secrets` Kubernetes secret on the secondary. See the general settings above for details.
 - `geo_primary_ssh_host_keys` - A dictionary of SSH host keys and values to be used as the Chart's SSH Host Keys secret.
 - `geo_primary_registry_keys` - A dictionary of the registry `.crt` and `.pem` files to be used as the Chart's Registry authentication certificate, only required if using the Container Registry.
 
