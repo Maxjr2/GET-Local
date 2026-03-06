@@ -41,7 +41,14 @@ When configured with specific IP addresses, HAProxy will reject TCP connections 
 
 ## Custom Servers with Geo (On Prem)
 
-On Prem servers are supported by the toolkit, details on how to work with On Prem servers can be found in our [Custom Servers (On Prem)](../environment_advanced.md#custom-servers-on-prem) documentation.
+On Prem servers are supported by the Toolkit, details on how to work with On Prem servers can be found in our [Custom Servers (On Prem)](../environment_advanced.md#custom-servers-on-prem) documentation.
+
+When using a Kubernetes cluster that has not been provisioned by the Toolkit, you will need to ensure that the machine running the Toolkit has valid kubeconfig entries for both the primary and secondary clusters before running the Geo playbooks. You can verify this by running `kubectl config get-contexts`.
+
+The following settings can then be configured in your environment's group vars to allow the Toolkit to switch context between the two clusters as required:
+
+- `geo_primary_site_custom_kubectl_context`: The name of the kubeconfig context used for the primary site.
+- `geo_secondary_site_custom_kubectl_context`: The name of the kubeconfig context used for the secondary site.
 
 ## Unified URLs
 

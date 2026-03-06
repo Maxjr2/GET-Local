@@ -9,6 +9,7 @@
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
 
     - name: Recovery - Try to Enable Maintenance Mode on Secondary Site
       import_tasks: maintenance-mode.yml
@@ -19,6 +20,7 @@
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
   tags:
     - maintenance-mode-enable
     - re-enable-primary
@@ -33,6 +35,7 @@
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
 
     - name: Recovery - Re-enable Geo Secondary Site
       import_tasks: recovery-reenable-sites.yml
@@ -42,6 +45,7 @@
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
   tags: re-enable-primary
 
 - name: Delete Geo config
@@ -95,4 +99,5 @@
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
   tags: maintenance-mode-disable

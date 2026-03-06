@@ -1,6 +1,18 @@
 ---
-- name: Cleanup k3d cluster
+- name: Cleanup K3D cluster
   hosts: localhost
   tasks:
-    - name: Delete k3d Cluster
+    - name: Delete K3D Cluster
       command: k3d cluster delete {{ molecule_cluster_name }}
+      when: (cloud_native_hybrid_geo is not defined or not cloud_native_hybrid_geo)
+
+    - name: Delete K3D for Geo Deployments
+      block:
+        - name: Delete K3D Cluster for site1
+          command: k3d cluster delete {{ site1_molecule_cluster_name }}
+
+        - name: Delete K3D Cluster for site2
+          command: k3d cluster delete {{ site2_molecule_cluster_name }}
+      when:
+        - cloud_native_hybrid_geo is defined
+        - cloud_native_hybrid_geo

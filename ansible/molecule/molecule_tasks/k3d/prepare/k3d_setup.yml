@@ -2,30 +2,29 @@
   environment:
     K3D_FIX_DNS: "0"
   command: |
-    k3d cluster create {{ molecule_cluster_name }} \
-      --network {{ molecule_network_name }} \
-      --port "80:80@loadbalancer" \
-      --port "443:443@loadbalancer"
+    k3d cluster create {{ cluster_name }} \
+      --network {{ network_name }} \
+      {{ cluster_options }}
 
 - name: Add workload label
-  command: kubectl label nodes {{ gitlab_charts_custom_context }}-server-0 workload=gitlab
+  command: kubectl label nodes {{ custom_context }}-server-0 workload=gitlab
 
-- name: Check if postgres-external container exists
-  command: docker inspect postgres-external
+- name: Check if {{ postgres_name }} container exists
+  command: docker inspect {{ postgres_name }}
   register: postgres_exists
   changed_when: false
   failed_when: false
 
-- name: Check if redis-external container exists
-  command: docker inspect redis-external
+- name: Check if {{ redis_name }} container exists
+  command: docker inspect {{ redis_name }}
   register: redis_exists
   changed_when: false
   failed_when: false
 
 - name: Configure PostgreSQL external service
   block:
-    - name: Get postgres-external IP address
-      shell: docker inspect postgres-external | jq -r '.[0].NetworkSettings.Networks.{{ molecule_network_name }}.IPAddress'
+    - name: Get {{ postgres_name }} IP address
+      shell: docker inspect {{ postgres_name }} | jq -r '.[0].NetworkSettings.Networks.{{ network_name }}.IPAddress'
       register: postgres_ip
       changed_when: false
 
@@ -40,7 +39,7 @@
           apiVersion: v1
           kind: Service
           metadata:
-            name: postgres-external
+            name: "{{ postgres_name }}"
             namespace: default
           spec:
             ports:
@@ -55,7 +54,7 @@
           apiVersion: v1
           kind: Endpoints
           metadata:
-            name: postgres-external
+            name: "{{ postgres_name }}"
             namespace: default
           subsets:
             - addresses:
@@ -66,8 +65,8 @@
 
 - name: Configure Redis external service
   block:
-    - name: Get redis-external IP address
-      shell: docker inspect redis-external | jq -r '.[0].NetworkSettings.Networks.{{ molecule_network_name }}.IPAddress'
+    - name: Get {{ redis_name }} IP address
+      shell: docker inspect {{ redis_name }} | jq -r '.[0].NetworkSettings.Networks.{{ network_name }}.IPAddress'
       register: redis_ip
       changed_when: false
 
@@ -82,7 +81,7 @@
           apiVersion: v1
           kind: Service
           metadata:
-            name: redis-external
+            name: "{{ redis_name }}"
             namespace: default
           spec:
             ports:
@@ -97,7 +96,7 @@
           apiVersion: v1
           kind: Endpoints
           metadata:
-            name: redis-external
+            name: "{{ redis_name }}"
             namespace: default
           subsets:
             - addresses:

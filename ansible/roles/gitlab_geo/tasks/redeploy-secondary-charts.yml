@@ -8,6 +8,7 @@
     geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
     geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
     geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+    geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
 
 - name: Redeploy Secondary Charts - Prepare values
   block:
@@ -197,11 +198,23 @@
     - gitlab-shell
     - toolbox
 
+- name: Check if NGINX daemonset exists
+  become: false
+  delegate_to: localhost
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: DaemonSet
+    name: gitlab-nginx-ingress-controller
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+  register: nginx_daemonset_check
+
 - name: Restart NGINX daemonset to pick up latest secrets
   become: false
   delegate_to: localhost
   run_once: true
   command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ gitlab_cloud_native_release_namespace }}"
+  when: nginx_daemonset_check.resources | length > 0
 
 - name: Restart GitLab Registry deployment if present to pick up latest secrets
   become: false
