@@ -18,6 +18,7 @@
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
         geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
+        geo_site_release_namespace: "{{ geo_primary_cloud_native_release_namespace }}"
 
     - name: Add Site Name - Add Geo secondary site to tracking db for Cloud Native Hybrid environments
       become: false
@@ -25,7 +26,7 @@
       run_once: true
       kubernetes.core.k8s_exec:
         pod: "{{ toolbox_pod }}"
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_primary_cloud_native_release_namespace }}"
         command: |
           gitlab-rails runner "n = GeoNode.find_or_initialize_by(name: '{{ geo_secondary_site_name }}'); n.assign_attributes(url: '{{geo_secondary_external_url }}', internal_url: '{{ geo_secondary_internal_url }}'); n.save!"
   when:

@@ -8,6 +8,7 @@
     geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
     geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
     geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
+    geo_site_release_namespace: "{{ geo_primary_cloud_native_release_namespace }}"
   tags: maintenance-mode-enable
 
 - name: Failover Disable Primary - Disable Primary Site Omnibus nodes
@@ -36,6 +37,7 @@
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
         geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
+        geo_site_release_namespace: "{{ geo_primary_cloud_native_release_namespace }}"
 
     - name: Failover Disable Primary - Disable Webservice pods
       become: false
@@ -46,7 +48,7 @@
           - app = webservice
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_primary_cloud_native_release_namespace }}"
         replicas: 0
 
     - name: Failover Disable Primary - Disable Sidekiq pods
@@ -58,6 +60,6 @@
           - app = sidekiq
           - release = gitlab
         kind: Deployment
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_primary_cloud_native_release_namespace }}"
         replicas: 0
   when: cloud_native_hybrid_geo

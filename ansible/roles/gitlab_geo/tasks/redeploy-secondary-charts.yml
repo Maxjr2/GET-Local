@@ -9,6 +9,7 @@
     geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
     geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
     geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
+    geo_site_release_namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
 
 - name: Redeploy Secondary Charts - Prepare values
   block:
@@ -18,7 +19,7 @@
       run_once: true
       kubernetes.core.helm_info:
         name: gitlab
-        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        release_namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
       register: gitlab_info
 
     - name: Redeploy Secondary Charts - Set gitlab_values
@@ -40,7 +41,7 @@
       kubernetes.core.k8s_info:
         kind: GitLab
         name: gitlab
-        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         api_version: apps.gitlab.com/v1beta1
       register: gitlab_cr_info
 
@@ -128,7 +129,7 @@
         name: gitlab
         chart_ref: "{{ gitlab_charts_ref }}"
         chart_version: "{{ gitlab_charts_version | default(omit) }}"
-        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        release_namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         values: "{{ gitlab_values }}"
       register: helm_install_result
       failed_when:
@@ -155,7 +156,7 @@
           kind: GitLab
           metadata:
             name: gitlab
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
           spec:
             chart:
               version: "{{ gitlab_charts_version }}"
@@ -172,7 +173,7 @@
             api_version: apps.gitlab.com/v1beta1
             kind: GitLab
             name: gitlab
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
+            namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
           register: gitlab_resource
           until:
             - gitlab_resource.resources is defined
@@ -191,7 +192,7 @@
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart deployment -n {{ gitlab_cloud_native_release_namespace }} -l release=gitlab -l app={{ item }}"
+  command: "kubectl rollout restart deployment -n {{ geo_secondary_cloud_native_release_namespace }} -l release=gitlab -l app={{ item }}"
   loop:
     - webservice
     - sidekiq
@@ -213,12 +214,12 @@
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ gitlab_cloud_native_release_namespace }}"
+  command: "kubectl rollout restart daemonset gitlab-nginx-ingress-controller -n {{ geo_secondary_cloud_native_release_namespace }}"
   when: nginx_daemonset_check.resources | length > 0
 
 - name: Restart GitLab Registry deployment if present to pick up latest secrets
   become: false
   delegate_to: localhost
   run_once: true
-  command: "kubectl rollout restart deployment/gitlab-registry -n {{ gitlab_cloud_native_release_namespace }}"
+  command: "kubectl rollout restart deployment/gitlab-registry -n {{ geo_secondary_cloud_native_release_namespace }}"
   when: container_registry_enable
