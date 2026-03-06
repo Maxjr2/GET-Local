@@ -198,6 +198,14 @@ Examples of this include the GitLab repo not having packages for the specific OS
 
 To fix this the "bad" repository should be removed as per the OS instructions and then the correct one configured via Ansible in a subsequent run.
 
+### GitLab GPG key not updated after key rotation
+
+After a GitLab GPG key rotation or expiry extension, you may see GPG check errors when running package operations on RHEL or legacy Debian-based systems.
+
+This is due to previous versions of the Toolkit relying on Ansible's `rpm_key` and `apt_key` modules which, by design, only check for the presence of a key by ID — they do not compare key contents. This means that if a key is rotated or its expiry extended (keeping the same key ID), the modules consider the key already present and skip re-import.
+
+For manual remediation steps by OS, see the [Linux package signatures documentation](https://docs.gitlab.com/omnibus/update/package_signatures/).
+
 ### Postgres Upgrade Error: `PostgreSQL did not respond before service checks were exhausted`
 
 The following error can show when running the Toolkit on PostgreSQL nodes:
