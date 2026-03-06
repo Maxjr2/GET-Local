@@ -1,9 +1,50 @@
 ---
-- name: Configure K8s
+- name: Configure K3D
   hosts: localhost
   tasks:
-    - name: Configure K3D
-      import_tasks: k3d_setup.yml
+    - name: Configure K3D cluster
+      block:
+        - name: Configure K3D
+          include_tasks: k3d_setup.yml
+          vars:
+            cluster_name: "{{ molecule_cluster_name }}"
+            cluster_options: "--port '80:80@loadbalancer' --port '443:443@loadbalancer'"
+            network_name: "{{ molecule_network_name }}"
+            custom_context: "{{ gitlab_charts_custom_context }}"
+            postgres_name: "postgres-external"
+            redis_name: "redis-external"
 
-    - name: Configure Garage
-      import_tasks: garage_setup.yml
+        - name: Configure Garage
+          import_tasks: garage_setup.yml
+      when: (cloud_native_hybrid_geo is not defined or not cloud_native_hybrid_geo)
+
+    - name: Configure K3D cluster for Geo Deployments
+      block:
+        - name: Configure K3D for Site1
+          include_tasks: k3d_setup.yml
+          vars:
+            cluster_name: "{{ site1_molecule_cluster_name }}"
+            cluster_options: "--port '8080:80@loadbalancer' --port '8443:443@loadbalancer'"
+            network_name: "{{ molecule_network_name }}"
+            custom_context: "{{ site1_custom_context }}"
+            postgres_name: "site1-postgres-external"
+            redis_name: "site1-redis-external"
+
+        - name: Configure Garage for Site1
+          include_tasks: garage_setup.yml
+
+        - name: Configure K3D for Site2
+          include_tasks: k3d_setup.yml
+          vars:
+            cluster_name: "{{ site2_molecule_cluster_name }}"
+            cluster_options: "--port '9080:80@loadbalancer' --port '9443:443@loadbalancer'"
+            network_name: "{{ molecule_network_name }}"
+            custom_context: "{{ site2_custom_context }}"
+            postgres_name: "site2-postgres-external"
+            redis_name: "site2-redis-external"
+
+        - name: Configure Garage for Site2
+          include_tasks: garage_setup.yml
+      when:
+        - cloud_native_hybrid_geo is defined
+        - cloud_native_hybrid_geo

@@ -78,6 +78,7 @@
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
 
     - name: Tracking Database - Create tracking database admin password secret
       kubernetes.core.k8s:
@@ -129,7 +130,7 @@
                         name: gitlab-geo-tracking-postgres-password
                         key: password
             nodeSelector:
-              workload: "support"
+              workload: "{{ gitlab_charts_supporting_node_selector }}"
       no_log: true
       diff: true
 

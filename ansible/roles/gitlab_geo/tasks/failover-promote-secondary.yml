@@ -22,6 +22,7 @@
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
 
     - name: Failover Promote Secondary - Promote to Primary Site
       become: false
@@ -248,4 +249,5 @@
         geo_site_gcp_project: "{{ geo_secondary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_secondary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_secondary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_secondary_site_custom_kubectl_context }}"
   tags: maintenance-mode-disable

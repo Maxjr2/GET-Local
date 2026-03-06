@@ -37,6 +37,7 @@
         geo_site_gcp_project: "{{ geo_primary_site_gcp_project }}"
         geo_site_gcp_gke_location: "{{ geo_primary_site_gcp_gke_location }}"
         geo_site_aws_region: "{{ geo_primary_site_aws_region }}"
+        geo_site_custom_context: "{{ geo_primary_site_custom_kubectl_context }}"
 
     - name: Primary App Servers - Set Primary site
       become: false

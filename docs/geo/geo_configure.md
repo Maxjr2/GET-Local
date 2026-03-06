@@ -124,4 +124,4 @@ To perform upgrades of each environment of a Geo setup you would follow the same
 1. `cd` to the `ansible/` directory if not already there.
 1. Run the Ansible `all.yml` playbook against the primary site.
 1. Run the Ansible `all.yml` playbook against all secondary sites.
-2. Run the `gitlab-geo.yml` playbook.
+1. Run the `gitlab-geo.yml` playbook.
