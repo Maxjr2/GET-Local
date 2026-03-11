@@ -485,6 +485,10 @@ geo_secondary_postgres_host: ""
 geo_secondary_praefect_postgres_host: ""
 
 geo_disable_secondary_proxying: false
+
+geo_primary_site_workhorse_trusted_cidrs: []
+geo_secondary_site_workhorse_trusted_cidrs: []
+
 geo_enable_object_storage_replication: true
 
 geo_sql_replication_password: "{{ postgres_password }}"

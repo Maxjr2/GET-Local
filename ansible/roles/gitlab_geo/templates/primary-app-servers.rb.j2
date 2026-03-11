@@ -18,3 +18,9 @@ registry['notifications'] = [
 {% if geo_container_registry_notification_secret != '' %}
 registry['notification_secret'] = "{{ geo_container_registry_notification_secret }}"
 {% endif %}
+
+{% if geo_secondary_site_workhorse_trusted_cidrs | length > 0 %}
+gitlab_workhorse['propagate_correlation_id'] = true
+gitlab_workhorse['trusted_cidrs_for_propagation'] = {{ geo_secondary_site_workhorse_trusted_cidrs | to_json }}
+gitlab_workhorse['trusted_cidrs_for_x_forwarded_for'] = {{ geo_secondary_site_workhorse_trusted_cidrs | to_json }}
+{% endif %}

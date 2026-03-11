@@ -39,6 +39,24 @@ haproxy_internal_patroni_leader_allowed_ips: "0.0.0.0/0"
 
 When configured with specific IP addresses, HAProxy will reject TCP connections that don't originate from the allowed sources, helping prevent unauthorized access to your database replication traffic.
 
+## Workhorse Correlation ID Propagation
+
+The Toolkit can configure [Workhorse correlation ID propagation](https://docs.gitlab.com/development/workhorse/configuration/#propagate-correlation-ids) across Geo sites, enabling end-to-end request tracing using a single correlation ID when the secondary site proxies requests to the primary.
+
+To enable this, set the trusted CIDRs for each site. Each variable holds the IP addresses **of** that site (i.e., the IPs that the other site should trust):
+
+- `geo_primary_site_workhorse_trusted_cidrs` - List of CIDR blocks for the primary site's external-facing IPs.
+- `geo_secondary_site_workhorse_trusted_cidrs` - List of CIDR blocks for the secondary site's external-facing IPs.
+
+These should typically be the IPs of the load balancer or HAProxy external nodes for each site. For single-node setups, use the node's IP. Both variables should be set in each site's inventory so that both sites are aware of the other's IPs:
+
+```yaml
+geo_primary_site_workhorse_trusted_cidrs: ["10.0.1.10/32"]
+geo_secondary_site_workhorse_trusted_cidrs: ["10.0.2.10/32"]
+```
+
+Both variables default to `[]` (disabled). When set, the Toolkit configures `propagate_correlation_id`, `trusted_cidrs_for_propagation`, and `trusted_cidrs_for_x_forwarded_for` accordingly.
+
 ## Custom Servers with Geo (On Prem)
 
 On Prem servers are supported by the Toolkit, details on how to work with On Prem servers can be found in our [Custom Servers (On Prem)](../environment_advanced.md#custom-servers-on-prem) documentation.
