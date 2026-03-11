@@ -51,6 +51,18 @@ gitlab:
         enabled: true
         serviceMonitor:
           enabled: true
+{% set _workhorse_trusted_cidrs = geo_secondary_site_workhorse_trusted_cidrs if cloud_native_hybrid_geo_role == 'primary' else geo_primary_site_workhorse_trusted_cidrs %}
+{% if cloud_native_hybrid_geo and _workhorse_trusted_cidrs | length > 0 %}
+      extraArgs: "-propagateCorrelationID"
+      trustedCIDRsForPropagation:
+{% for cidr in _workhorse_trusted_cidrs %}
+        - "{{ cidr }}"
+{% endfor %}
+      trustedCIDRsForXForwardedFor:
+{% for cidr in _workhorse_trusted_cidrs %}
+        - "{{ cidr }}"
+{% endfor %}
+{% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
