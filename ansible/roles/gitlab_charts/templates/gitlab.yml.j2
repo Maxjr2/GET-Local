@@ -197,10 +197,10 @@ gitlab:
     init:
       resources:
         requests:
-          cpu: 50m
+          cpu: 1000m
           memory: 32Mi
         limits:
-          cpu: 50m
+          cpu: 1000m
           memory: 32Mi
     persistence:
       storageClass: "{{ gitlab_charts_gitaly_storage_class }}"
