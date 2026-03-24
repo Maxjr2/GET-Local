@@ -35,7 +35,9 @@ module "haproxy_external" {
     aws_security_group.gitlab_internal_networking.id,
     local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
     local.gitlab_git_ssh_access_security_group_create ? [aws_security_group.gitlab_git_ssh_access[0].id] : [],
-    local.gitlab_http_https_access_security_group_create ? [aws_security_group.gitlab_http_https_access[0].id] : []
+    local.gitlab_http_https_access_security_group_create ? [aws_security_group.gitlab_http_https_access[0].id] : [],
+    var.custom_security_group_ids,
+    var.haproxy_external_custom_security_group_ids
   ])
 
   geo_site       = var.geo_site
@@ -78,7 +80,9 @@ module "haproxy_internal" {
   ssh_key_name = try(aws_key_pair.ssh_key[0].key_name, null)
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
-    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : []
+    local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
+    var.custom_security_group_ids,
+    var.haproxy_internal_custom_security_group_ids
   ])
 
   geo_site       = var.geo_site

@@ -303,11 +303,6 @@ variable "gitlab_rails_iam_instance_policy_arns" {
   type    = list(string)
   default = []
 }
-variable "gitlab_rails_security_group_ids" {
-  description = "List of additional Security Group IDs to apply to GitLab Rails nodes"
-  type        = list(string)
-  default     = []
-}
 variable "gitlab_rails_elastic_ip_allocation_ids" {
   description = "List of Elastic IP Allocation IDs to apply to GitLab Rails node"
   type        = list(string)
@@ -448,11 +443,6 @@ variable "monitor_data_disks" {
 variable "monitor_iam_instance_policy_arns" {
   type    = list(string)
   default = []
-}
-variable "monitor_security_group_ids" {
-  description = "List of additional Security Group IDs to apply to Monitor nodes"
-  type        = list(string)
-  default     = []
 }
 variable "monitor_user_data_base64" {
   type        = string
@@ -2070,6 +2060,76 @@ variable "elb_internal_praefect_port" {
   default = 2305
 }
 
+# Security Groups
+variable "custom_security_group_ids" {
+  description = "List of additional Security Group IDs to apply to all nodes"
+  type        = list(string)
+  default     = []
+}
+variable "consul_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "gitaly_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "gitlab_nfs_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "gitlab_rails_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "haproxy_external_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "haproxy_internal_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "monitor_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "opensearch_vm_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "pgbouncer_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "postgres_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "praefect_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "praefect_postgres_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "redis_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "redis_cache_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "redis_persistent_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
+variable "sidekiq_custom_security_group_ids" {
+  type    = list(string)
+  default = []
+}
 
 # Tags
 variable "custom_tags" {
@@ -2275,4 +2335,15 @@ variable "object_storage_versioning" {
   description = "Deprecated. Replaced by object_storage_versioning_status"
   type        = bool
   default     = null
+}
+
+variable "gitlab_rails_security_group_ids" {
+  description = "Deprecated. Replaced by gitlab_rails_custom_security_group_ids."
+  type        = list(string)
+  default     = []
+}
+variable "monitor_security_group_ids" {
+  description = "Deprecated. Replaced by monitor_custom_security_group_ids."
+  type        = list(string)
+  default     = []
 }

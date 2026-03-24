@@ -31,7 +31,9 @@ module "monitor" {
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
     local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
-    var.monitor_security_group_ids
+    var.custom_security_group_ids,
+    # TODO: var.monitor_security_group_ids is deprecated and will be removed in 4.x
+    length(var.monitor_custom_security_group_ids) > 0 ? var.monitor_custom_security_group_ids : var.monitor_security_group_ids
   ])
 
   geo_site       = var.geo_site

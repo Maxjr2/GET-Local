@@ -36,7 +36,9 @@ module "gitlab_rails" {
   security_group_ids = flatten([
     aws_security_group.gitlab_internal_networking.id,
     local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
-    var.gitlab_rails_security_group_ids,
+    var.custom_security_group_ids,
+    # TODO: var.gitlab_rails_security_group_ids is deprecated and will be removed in 4.x
+    length(var.gitlab_rails_custom_security_group_ids) > 0 ? var.gitlab_rails_custom_security_group_ids : var.gitlab_rails_security_group_ids,
     length(var.gitlab_rails_elastic_ip_allocation_ids) > 0 && var.haproxy_external_node_count == 0 ? [
       local.gitlab_git_ssh_access_security_group_create ? [aws_security_group.gitlab_git_ssh_access[0].id] : [],
       local.gitlab_http_https_access_security_group_create ? [aws_security_group.gitlab_http_https_access[0].id] : []

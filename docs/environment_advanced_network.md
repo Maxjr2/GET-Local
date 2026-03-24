@@ -297,8 +297,8 @@ For these scenarios the Toolkit supports customisation of node Security groups a
 > [!caution]
 > It's recommended that these settings be used with caution as misconfigurations may result in exposed access to the selected machines unintentionally.
 
-- `gitlab_rails_security_group_ids` - A list of additional Security Groups IDs for the GitLab Rails nodes. Optional, default is `[]`.
-- `monitor_security_group_ids` - A list of additional Security Groups IDs for the Monitor node(s). Optional, default is `[]`.
+- `custom_security_group_ids` - A list of additional Security Group IDs to apply to all nodes, for example `["sg-1234567890abcdef0"]`. Defaults to `[]`.
+- `*_custom_security_group_ids` - A list of additional Security Group IDs to apply to a specific component's nodes. For example, `gitaly_custom_security_group_ids` would apply only to Gitaly nodes. Defaults to `[]`.
 
 ### Internal Security Group Access (Default / Existing networks)
 
