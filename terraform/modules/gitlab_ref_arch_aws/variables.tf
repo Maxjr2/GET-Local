@@ -124,6 +124,17 @@ variable "default_set_name_tags" {
   description = "Whether to set the 'Name' tag on resources. If false, ensure dynamic inventory uses 'tag:gitlab_node_name' instead of 'tag:Name'"
 }
 
+variable "default_instance_metadata_options" {
+  description = "EC2 instance metadata options"
+  type = object({
+    http_endpoint               = optional(string, "enabled")
+    http_put_response_hop_limit = optional(number, 1)
+    instance_metadata_tags      = optional(string, "enabled")
+    http_protocol_ipv6          = optional(string, "disabled")
+  })
+  default = {}
+}
+
 # Machines
 variable "consul_node_count" {
   type    = number

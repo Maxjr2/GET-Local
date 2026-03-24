@@ -19,6 +19,7 @@ module "sidekiq" {
   data_disks                 = var.sidekiq_data_disks
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.sidekiq_user_data_base64
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     local.gitlab_s3_policy_create ? [aws_iam_policy.gitlab_s3_policy[0].arn] : [],

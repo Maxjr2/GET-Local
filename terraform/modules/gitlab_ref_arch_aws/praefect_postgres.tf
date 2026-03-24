@@ -19,6 +19,7 @@ module "praefect_postgres" {
   data_disks                 = var.praefect_postgres_data_disks
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.praefect_postgres_user_data_base64
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
