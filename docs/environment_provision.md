@@ -631,6 +631,11 @@ Next in the file are the various machine settings, separated the same as the Ref
 - `*_disk_delete_on_termination` - (Optional) Whether the root volume should be destroyed on instance termination. Defaults to `true`.
 - `haproxy_external_elastic_ip_allocation_ids` - Set the external HAProxy load balancer to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID.
 - `gitlab_rails_elastic_ip_allocation_ids` - Only for Single Node environments without a load balancer - Set the GitLab Rails node to assume the external IP allocation ID set in `variables.tf`. Note that this is an array setting as the advanced underlying functionality needs to account for the specific setting of IPs for potentially multiple machines. In this case though it should always only be one IP allocation ID. This setting should be used when deploying single Rails node without external load balancer.
+- `default_instance_metadata_options` - The [EC2 instance metadata service (IMDS)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html) options applied to all EC2 instances. Note that IMDSv2 is always enforced (`http_tokens = "required"`) and cannot be overridden.
+  - `http_endpoint` - Availability of metadata service. Defaults to `enabled`
+  - `http_put_response_hop_limit` - Desired HTTP PUT response hop limit. Defaults to `1`
+  - `instance_metadata_tags` - Availability of access to instance tags in metadata service. Defaults to `enabled`
+  - `http_protocol_ipv6` - Availability of IPv6 endpoint for the instance metadata service. Defaults to `disabled`
 
 > [!note]
 > Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.

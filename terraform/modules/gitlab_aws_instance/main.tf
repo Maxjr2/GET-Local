@@ -46,10 +46,11 @@ resource "aws_instance" "gitlab" {
 
   # Enforce IMDSv2 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
   metadata_options {
-    http_endpoint               = "enabled"
+    http_endpoint               = var.metadata_options.http_endpoint
     http_tokens                 = "required"
-    http_put_response_hop_limit = 1
-    instance_metadata_tags      = "enabled"
+    http_put_response_hop_limit = var.metadata_options.http_put_response_hop_limit
+    instance_metadata_tags      = var.metadata_options.instance_metadata_tags
+    http_protocol_ipv6          = var.metadata_options.http_protocol_ipv6
   }
 
   ## TODO: additional_tags is deprecated and will be removed in 4.x

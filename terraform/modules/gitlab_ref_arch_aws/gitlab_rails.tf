@@ -20,6 +20,7 @@ module "gitlab_rails" {
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.gitlab_rails_user_data_base64
   elastic_ip_allocation_ids  = var.gitlab_rails_elastic_ip_allocation_ids
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     local.gitlab_s3_policy_create ? [aws_iam_policy.gitlab_s3_policy[0].arn] : [],

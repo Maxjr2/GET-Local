@@ -19,6 +19,7 @@ module "redis" {
   data_disks                 = var.redis_data_disks
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.redis_user_data_base64
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
@@ -66,6 +67,7 @@ module "redis_cache" {
   data_disks                 = var.redis_cache_data_disks
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.redis_cache_user_data_base64
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
@@ -111,6 +113,7 @@ module "redis_persistent" {
   data_disks                 = var.redis_persistent_data_disks
   subnet_ids                 = local.backend_subnet_ids
   user_data_base64           = var.redis_persistent_user_data_base64
+  metadata_options           = var.default_instance_metadata_options
 
   iam_instance_policy_arns = flatten([
     var.default_iam_instance_policy_arns,
