@@ -12,14 +12,18 @@
   block:
     - name: Get PostgreSQL leader for ZDU ordering
       command: gitlab-ctl get-postgresql-primary
-      register: postgres_leader_int_address
+      register: zdu_postgres_leader_result
+
+    - name: Set ZDU PostgreSQL leader facts
+      set_fact:
+        zdu_postgres_leader_address: "{{ zdu_postgres_leader_result.stdout.split(':')[0] }}"
 
     - name: Update PostgreSQL (Secondaries)
       include_role:
         name: postgres
       when:
         - inventory_hostname == hostname_result
-        - hostvars[hostname_result]['ansible_default_ipv4']['address'] != postgres_leader_int_address.stdout.split(':')[0]
+        - hostvars[hostname_result]['ansible_default_ipv4']['address'] != zdu_postgres_leader_address
       loop: "{{ query('inventory_hostnames', 'postgres') | sort }}"
       loop_control:
         loop_var: hostname_result
@@ -29,7 +33,7 @@
         name: postgres
       when:
         - inventory_hostname == hostname_result
-        - hostvars[hostname_result]['ansible_default_ipv4']['address'] == postgres_leader_int_address.stdout.split(':')[0]
+        - hostvars[hostname_result]['ansible_default_ipv4']['address'] == zdu_postgres_leader_address
       loop: "{{ query('inventory_hostnames', 'postgres') | sort }}"
       loop_control:
         loop_var: hostname_result

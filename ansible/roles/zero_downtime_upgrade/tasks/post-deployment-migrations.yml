@@ -1,7 +1,16 @@
-- name: Set Omnibus PostgreSQL leader IP and Port for migrations
-  set_fact:
-    postgres_migrations_host: "{{ postgres_leader_int_address.stdout.split(':')[0] }}"
-    postgres_migrations_port: "{{ postgres_leader_int_address.stdout.split(':')[1] }}"
+- name: Get Omnibus PostgreSQL leader for post-deployment migrations
+  block:
+    - name: Get latest PostgreSQL leader
+      command: gitlab-ctl get-postgresql-primary
+      register: zdu_postgres_migrations_leader_result
+      delegate_to: "{{ groups['postgres'][0] }}"
+      become: true
+      run_once: true
+
+    - name: Set PostgreSQL leader IP and Port for migrations
+      set_fact:
+        postgres_migrations_host: "{{ zdu_postgres_migrations_leader_result.stdout.split(':')[0] }}"
+        postgres_migrations_port: "{{ zdu_postgres_migrations_leader_result.stdout.split(':')[1] }}"
   when:
     - ('postgres' in groups and groups['postgres'] | length > 1)
     - not postgres_external
