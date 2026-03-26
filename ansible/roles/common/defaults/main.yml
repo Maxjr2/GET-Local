@@ -65,7 +65,7 @@ gitlab_secrets_post_reconfigure: false
 gitlab_custom_secrets_json: ""
 
 # GPG
-gitlab_gpg_key_url: https://packages.gitlab.com/gpg.key
+gitlab_gpg_key_url: https://packages.gitlab.com/gpgkey/gpg.key
 
 # Data Disks
 ## GCP gives an ID that can be used as an alias to the device name
