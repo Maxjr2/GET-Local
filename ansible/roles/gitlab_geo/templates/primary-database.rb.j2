@@ -9,7 +9,7 @@ patroni['replication_slots'] = {
 {% if geo_secondary_postgres_is_ha %}
 # Configure Primary and Secondary Patroni access (via load balancer) for replication calls
 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
-{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+{# Deprecated: postgres_trust_auth_cidr_blocks. #}
 postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (geo_primary_site_postgres_int_ips | map('regex_replace', '$', '/32')) + [internal_lb_host + '/32']  + (postgres_trust_auth_cidr_blocks | default([])) }}
 {% endif %}
 
@@ -41,7 +41,7 @@ postgresql['md5_auth_cidr_addresses'] = {{ postgres_md5_auth_cidr_blocks }}
 {% if geo_secondary_postgres_is_ha %}
 # Configure Secondary Patroni access for replication calls
 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
-{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+{# Deprecated: postgres_trust_auth_cidr_blocks. #}
 postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (geo_secondary_site_postgres_int_ips | map('regex_replace', '$', '/32')) + (postgres_trust_auth_cidr_blocks | default([])) }}
 {% endif %}
 

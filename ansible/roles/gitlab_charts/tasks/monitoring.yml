@@ -112,7 +112,6 @@
 
     - name: Configure kube-prometheus-stack StorageClass for existing installs
       # Ensure same StorageClass is used if already bound to avoid config clashes
-      # TODO: To be reviewed in 4.0.0 to be potentially removed as a breaking change
       block:
         - name: Get kube-prometheus-stack existing PVC information
           k8s_info:
@@ -136,7 +135,6 @@
 
     - name: Configure kube-prometheus-stack StorageClass for new installs if required (AWS EKS)
       # Set up new StorageClass if this is a new install and none has been configured
-      # TODO: To be reviewed in 4.0.0 as the default for all installs as a breaking change
       block:
         - name: Configure kube-prometheus-stack StorageClass (AWS EKS)
           kubernetes.core.k8s:
@@ -153,7 +151,6 @@
 
     - name: Configure default kube-prometheus-stack StorageClass for new installs if required (GCP GKE)
       # Set up new StorageClass if this is a new install and none has been configured
-      # TODO: To be reviewed in 4.0.0 as the default for all installs as a breaking change
       block:
         - name: Configure default kube-prometheus-stack StorageClass (GCP GKE)
           kubernetes.core.k8s:

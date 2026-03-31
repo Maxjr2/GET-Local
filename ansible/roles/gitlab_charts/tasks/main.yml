@@ -70,6 +70,8 @@
     - cloud_provider_prep
 
 - name: Gather facts for Omnibus PostgreSQL cluster
+  # Only needed for HA Omnibus postgres (>1 node, non-external). The Helm chart must target the current
+  # leader node for DB migrations, so we resolve it here before building chart values.
   block:
     - name: Get latest PostgreSQL leader for running Migrations
       command: gitlab-ctl get-postgresql-primary
@@ -109,7 +111,7 @@
   when:
     - postgres_external
     - postgres_external_prep
-    - cloud_native_hybrid_geo_role != 'secondary'
+    - cloud_native_hybrid_geo_role != 'secondary'  # Secondary's DB is a replica of the primary's; not provisioned independently
 
 - name: Run external Container Registry database prep
   import_tasks: external_database_prep.yml
@@ -144,7 +146,7 @@
     - openbao_enable
     - postgres_external
     - postgres_external_prep
-    - cloud_native_hybrid_geo_role != 'secondary'
+    - cloud_native_hybrid_geo_role != 'secondary'  # Same as above: secondary inherits from primary
 
 - name: Calculate Webservice / Sidekiq pod replica counts as required
   block:
@@ -156,7 +158,8 @@
 
         - name: Set calculated Webservice / Sidekiq max replica counts
           set_fact:
-            # Calculate maximum pod count by matching Gitaly CPU count to RA sizes or best effort if no matches
+            # Webservice: looks up Gitaly vCPU total in webservice_default_replica_counts (defaults/main.yml);
+            # falls back to gitaly_cpus / 2.4 if no RA size match. Sidekiq: >=48 vCPUs → 14, >=12 → 8, else 2.
             calculated_webservice_max_replicas: "{{ webservice_default_replica_counts[gitaly_cpus] | default((gitaly_cpus | int / 2.4) | round | int, true) }}"
             calculated_sidekiq_max_replicas: "{{ sidekiq_default_replica_counts[gitaly_cpus] | default(14 if gitaly_cpus | int >= 48 else (8 if gitaly_cpus | int >= 12 else 2), true) }}"
       when:
@@ -178,11 +181,13 @@
         sidekiq_max_replicas: "{{ gitlab_charts_sidekiq_max_replicas if gitlab_charts_sidekiq_max_replicas != '' else calculated_sidekiq_max_replicas }}"
 
     - name: Set Webservice / Sidekiq min replica counts
+      # min_replicas = max_replicas * scaler (default scalers defined in defaults/main.yml)
       set_fact:
         webservice_min_replicas: "{{ gitlab_charts_webservice_min_replicas if gitlab_charts_webservice_min_replicas != '' else (webservice_max_replicas | int * gitlab_charts_webservice_min_replicas_scaler) | round | int }}"
         sidekiq_min_replicas: "{{ gitlab_charts_sidekiq_min_replicas if gitlab_charts_sidekiq_min_replicas != '' else (sidekiq_max_replicas | int * gitlab_charts_sidekiq_min_replicas_scaler) | round | int }}"
 
     - name: Set Webservice / Sidekiq max unavailable counts
+      # max_unavailable = max(max_replicas * scaler, 1) — floored at 1 to always allow rolling updates
       set_fact:
         webservice_max_unavailable: "{{ gitlab_charts_webservice_max_unavailable if gitlab_charts_webservice_max_unavailable != '' else [(webservice_max_replicas | int * gitlab_charts_webservice_max_unavailable_scaler) | round | int, 1] | max }}"
         sidekiq_max_unavailable: "{{ gitlab_charts_sidekiq_max_unavailable if gitlab_charts_sidekiq_max_unavailable != '' else [(sidekiq_max_replicas | int * gitlab_charts_sidekiq_max_unavailable_scaler) | round | int, 1] | max }}"
@@ -209,7 +214,8 @@
     - charts
 
 - name: Get GitLab Charts version if App version specified
-  # Helm doesn't allow installs by app_version - https://github.com/helm/helm/issues/8194
+  # Helm can't install by app_version (https://github.com/helm/helm/issues/8194), so we fetch all chart
+  # versions and select the one matching gitlab_version.
   block:
     - name: Get all GitLab Charts versions
       command: "helm search repo {{ gitlab_charts_ref }} -l -o json"
@@ -275,6 +281,7 @@
     - kube-prometheus-stack
 
 - name: Install GitLab Charts
+  # Mutually exclusive with Install GitLab Operator below — only one install path runs per execution.
   import_tasks: 'gitlab_charts.yml'
   when: not gitlab_operator
   tags:

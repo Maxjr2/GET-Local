@@ -63,6 +63,6 @@ sidekiq_default_replica_counts:
 gitlab_charts_webservice_max_replicas: ""
 gitlab_charts_sidekiq_max_replicas: ""
 
-# Deprecated - TODO Remove in 4.x
+# Deprecated: geo_max_replication_slots and geo_replication_slot_modifier.
 geo_max_replication_slots: 1
 geo_replication_slot_modifier: 2

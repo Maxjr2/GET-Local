@@ -42,6 +42,8 @@
     env:
       OPENSEARCH_JAVA_OPTS: "-Xms{{ opensearch_heap_size }}m -Xmx{{ opensearch_heap_size }}m"
       bootstrap.memory_lock: 'true'
+      # When using hostnames, OpenSearch expects short node names; derive them by taking the first
+      # label of each address (e.g. '10.0.1.5' → '10', or 'node-1.internal' → 'node-1').
       cluster.initial_cluster_manager_nodes: "{{ ((opensearch_int_addrs | map('split', '.') | map('first') | list) if internal_addr_use_hostnames else opensearch_int_addrs) | join(',') }}"
       discovery.seed_hosts: "{{ opensearch_int_addrs | join(',') }}"
       DISABLE_INSTALL_DEMO_CONFIG: 'true'

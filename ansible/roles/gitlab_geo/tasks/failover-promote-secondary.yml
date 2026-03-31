@@ -88,7 +88,7 @@
           delegate_to: localhost
           run_once: true
           set_fact:
-            # The 'values' key conflicts with the dict.values() method, so we need to extract it explicitly
+            # 'values' conflicts with Jinja2's dict.values() method; extract it via dict2items to access the key by name.
             gitlab_values: "{{ gitlab_cr_info.resources[0].spec.chart | dict2items | selectattr('key', 'eq', 'values') | map(attribute='value') | first }}"
             gitlab_charts_version: "{{ gitlab_cr_info.resources[0].spec.chart.version }}"
       when: gitlab_operator
@@ -221,6 +221,8 @@
     - name: Failover Promote Secondary - Reconfigure GitLab
       command: gitlab-ctl reconfigure
       retries: 3
+  # Same single-node/multi-node detection as main.yml: run on postgres_primary, or on gitlab_rails
+  # when there's no dedicated postgres group (single-node) and postgres isn't external.
   when:
     - ('postgres_primary' in group_names) or
       ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups and not postgres_external)

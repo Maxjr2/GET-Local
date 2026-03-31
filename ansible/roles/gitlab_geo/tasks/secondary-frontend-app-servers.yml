@@ -15,6 +15,8 @@
   until: result is success
 
 - name: Secondary Frontend App Servers - Run migrations for Geo tracking database
+  # With HA postgres, db:migrate:geo must run after Patroni is bootstrapped on the secondary —
+  # that happens during app server reconfigure here, not in the database task.
   command: gitlab-rake db:migrate:geo
   when:
     - ('gitlab_rails_primary' in group_names)

@@ -6,6 +6,8 @@
   tags: reconfigure
 
 - name: Configure Custom Config
+  # redis_group_name is set to the current Redis group (redis/redis_cache/redis_persistent), so
+  # lookup('vars', redis_group_name + '_custom_config_file') resolves the correct per-group variable at runtime.
   block:
     - name: Check if Custom Config exists
       stat:
