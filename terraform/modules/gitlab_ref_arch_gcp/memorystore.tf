@@ -20,7 +20,7 @@ resource "google_redis_instance" "gitlab_redis" {
     timeout          = "120"
   }
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   labels = merge(var.additional_labels, var.custom_labels, var.memorystore_redis_custom_labels)
 
   dynamic "maintenance_policy" {
@@ -94,7 +94,7 @@ resource "google_redis_instance" "gitlab_redis_cache" {
     timeout          = "120"
   }
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   labels = merge(var.additional_labels, var.custom_labels, var.memorystore_redis_cache_custom_labels)
 
   dynamic "maintenance_policy" {
@@ -167,7 +167,7 @@ resource "google_redis_instance" "gitlab_redis_persistent" {
     timeout          = "120"
   }
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   labels = merge(var.additional_labels, var.custom_labels, var.memorystore_redis_persistent_custom_labels)
 
   dynamic "maintenance_policy" {

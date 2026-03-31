@@ -97,7 +97,7 @@ variable "custom_tags" {
   default = {}
 }
 
-# TODO: additional_tags is deprecated and will be removed in 4.x
+# Deprecated: var.additional_tags is superseded by var.custom_tags.
 variable "additional_tags" {
   description = "Deprecated. Replaced by custom_tags."
   type        = map(any)

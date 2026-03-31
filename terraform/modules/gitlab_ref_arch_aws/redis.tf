@@ -5,7 +5,7 @@ module "redis" {
   node_type  = "redis"
   node_count = var.redis_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.redis_custom_tags)
   set_name_tags = var.default_set_name_tags
 
@@ -55,7 +55,7 @@ module "redis_cache" {
   node_type  = "redis-cache"
   node_count = var.redis_cache_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.redis_cache_custom_tags)
   set_name_tags = var.default_set_name_tags
 
@@ -103,7 +103,7 @@ module "redis_persistent" {
   node_type  = "redis-persistent"
   node_count = var.redis_persistent_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.redis_persistent_custom_tags)
   set_name_tags = var.default_set_name_tags
 

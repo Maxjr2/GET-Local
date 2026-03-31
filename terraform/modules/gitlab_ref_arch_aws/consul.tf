@@ -5,7 +5,7 @@ module "consul" {
   node_type  = "consul"
   node_count = var.consul_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.consul_custom_tags)
   set_name_tags = var.default_set_name_tags
 

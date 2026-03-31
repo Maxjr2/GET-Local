@@ -104,14 +104,14 @@ resource "aws_db_instance" "gitlab_praefect" {
     create = var.rds_praefect_postgres_create_timeout
   }
 
-  ## TODO: var.rds_praefect_postgres_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.rds_praefect_postgres_tags is superseded by var.rds_praefect_postgres_custom_tags.
   tags = merge(var.rds_praefect_postgres_tags, var.custom_tags, var.rds_praefect_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      storage_encrypted,
-      kms_key_id,
-      snapshot_identifier
+      storage_encrypted,  # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,         # Can only be set at creation; ignored on subsequent plans
+      snapshot_identifier # Used only to restore from snapshot on first create
     ]
   }
 }
@@ -162,12 +162,12 @@ resource "aws_db_instance" "gitlab_praefect_read_replica" {
     create = var.rds_praefect_postgres_read_replica_create_timeout
   }
 
-  ## TODO: var.rds_praefect_postgres_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.rds_praefect_postgres_tags is superseded by var.rds_praefect_postgres_custom_tags.
   tags = merge(var.rds_praefect_postgres_tags, var.custom_tags, var.rds_praefect_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      storage_encrypted,
+      storage_encrypted, # Can only be set at creation; ignored on subsequent plans
       kms_key_id
     ]
   }

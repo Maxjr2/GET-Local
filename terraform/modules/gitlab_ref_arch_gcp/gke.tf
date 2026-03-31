@@ -93,7 +93,7 @@ resource "google_container_cluster" "gitlab_cluster" {
     }
   }
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   resource_labels = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
@@ -170,7 +170,7 @@ resource "google_container_node_pool" "gitlab_webservice_pool" {
       workload = "webservice"
     }
 
-    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_labels is superseded by var.custom_labels.
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-webservice-node-pool"
@@ -252,7 +252,7 @@ resource "google_container_node_pool" "gitlab_sidekiq_pool" {
       workload = "sidekiq"
     }
 
-    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_labels is superseded by var.custom_labels.
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-sidekiq-node-pool"
@@ -334,7 +334,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
       workload = "support"
     }
 
-    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_labels is superseded by var.custom_labels.
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-supporting-node-pool"
@@ -416,7 +416,7 @@ resource "google_container_node_pool" "gitlab_gitaly_pool" {
       workload = "gitaly"
     }
 
-    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_labels is superseded by var.custom_labels.
     resource_labels = merge({
       gitlab_node_prefix = var.prefix
       gitlab_node_type   = "gitlab-gitaly-node-pool"

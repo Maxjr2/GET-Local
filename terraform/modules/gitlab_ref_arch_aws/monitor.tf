@@ -5,7 +5,7 @@ module "monitor" {
   node_type  = "monitor"
   node_count = var.monitor_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.monitor_custom_tags)
   set_name_tags = var.default_set_name_tags
 
@@ -33,7 +33,7 @@ module "monitor" {
     aws_security_group.gitlab_internal_networking.id,
     local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
     var.custom_security_group_ids,
-    # TODO: var.monitor_security_group_ids is deprecated and will be removed in 4.x
+    # Deprecated: var.monitor_security_group_ids is superseded by var.monitor_security_group_custom_ids.
     length(var.monitor_custom_security_group_ids) > 0 ? var.monitor_custom_security_group_ids : var.monitor_security_group_ids
   ])
 

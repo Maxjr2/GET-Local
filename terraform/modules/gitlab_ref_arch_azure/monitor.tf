@@ -5,7 +5,7 @@ module "monitor" {
   node_type  = "monitor"
   node_count = var.monitor_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags = merge(var.additional_tags, var.custom_tags, var.monitor_custom_tags)
 
   size                   = var.monitor_size

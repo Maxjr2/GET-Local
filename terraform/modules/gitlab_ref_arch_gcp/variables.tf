@@ -1317,13 +1317,13 @@ variable "memorystore_redis_persistent_custom_labels" {
   default = {}
 }
 
-## TODO: additional_labels is deprecated and will be removed in 4.x
+# Deprecated: var.additional_labels is superseded by var.custom_labels.
 variable "additional_labels" {
   description = "Deprecated. Replaced by custom_labels."
   type        = map(any)
   default     = {}
 }
-## TODO: object_storage_labels is deprecated and will be removed in 4.x
+# Deprecated: var.object_storage_labels is superseded by var.object_storage_custom_labels.
 variable "object_storage_labels" {
   description = "Deprecated. Replaced by object_storage_custom_labels"
   type        = map(string)

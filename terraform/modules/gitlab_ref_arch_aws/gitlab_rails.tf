@@ -5,7 +5,7 @@ module "gitlab_rails" {
   node_type  = "gitlab-rails"
   node_count = var.gitlab_rails_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags   = merge(var.additional_tags, var.custom_tags, var.gitlab_rails_custom_tags)
   set_name_tags = var.default_set_name_tags
 
@@ -38,7 +38,7 @@ module "gitlab_rails" {
     aws_security_group.gitlab_internal_networking.id,
     local.gitlab_vm_ssh_access_security_group_create ? [aws_security_group.gitlab_vm_ssh_access[0].id] : [],
     var.custom_security_group_ids,
-    # TODO: var.gitlab_rails_security_group_ids is deprecated and will be removed in 4.x
+    # Deprecated: var.gitlab_rails_security_group_ids is superseded by var.gitlab_rails_security_group_custom_ids.
     length(var.gitlab_rails_custom_security_group_ids) > 0 ? var.gitlab_rails_custom_security_group_ids : var.gitlab_rails_security_group_ids,
     length(var.gitlab_rails_elastic_ip_allocation_ids) > 0 && var.haproxy_external_node_count == 0 ? [
       local.gitlab_git_ssh_access_security_group_create ? [aws_security_group.gitlab_git_ssh_access[0].id] : [],

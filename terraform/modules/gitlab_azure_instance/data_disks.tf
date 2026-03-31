@@ -34,7 +34,7 @@ resource "azurerm_managed_disk" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      create_option
+      create_option # Immutable after creation; Terraform would otherwise detect drift from the initial value
     ]
   }
 }

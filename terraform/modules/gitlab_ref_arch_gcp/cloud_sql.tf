@@ -84,7 +84,7 @@ resource "google_sql_database_instance" "gitlab" {
       }
     }
 
-    # TODO: var.additional_labels is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_labels is superseded by var.custom_labels.
     user_labels = merge(var.additional_labels, var.custom_labels, var.cloud_sql_postgres_custom_labels)
   }
 

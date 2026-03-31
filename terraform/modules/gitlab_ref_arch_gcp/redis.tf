@@ -4,7 +4,7 @@ module "redis" {
   prefix     = var.prefix
   node_type  = "redis"
   node_count = var.redis_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.redis_custom_metadata)
 
@@ -48,7 +48,7 @@ module "redis_cache" {
   prefix     = var.prefix
   node_type  = "redis-cache"
   node_count = var.redis_cache_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_cache_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.redis_cache_custom_metadata)
 
@@ -90,7 +90,7 @@ module "redis_persistent" {
   prefix     = var.prefix
   node_type  = "redis-persistent"
   node_count = var.redis_persistent_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.redis_persistent_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.redis_persistent_custom_metadata)
 

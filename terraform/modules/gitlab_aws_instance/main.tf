@@ -36,7 +36,7 @@ resource "aws_instance" "gitlab" {
 
     delete_on_termination = var.disk_delete_on_termination
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_tags is superseded by var.custom_tags.
     tags = merge(
       var.set_name_tags ? { Name = "${var.prefix}-${var.node_type}-${count.index + 1}-root" } : {},
       var.additional_tags,
@@ -53,7 +53,7 @@ resource "aws_instance" "gitlab" {
     http_protocol_ipv6          = var.metadata_options.http_protocol_ipv6
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   tags = merge(
     var.set_name_tags ? { Name = local.instance_names[count.index] } : {},
     {
@@ -71,9 +71,9 @@ resource "aws_instance" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      ami,
-      root_block_device[0].encrypted,
-      root_block_device[0].kms_key_id
+      ami,                            # Prevents forced replacement when a newer AMI is published; AMI updates are handled via instance refresh
+      root_block_device[0].encrypted, # Can only be set at creation; ignored on subsequent plans
+      root_block_device[0].kms_key_id # Can only be set at creation; ignored on subsequent plans
     ]
   }
 }

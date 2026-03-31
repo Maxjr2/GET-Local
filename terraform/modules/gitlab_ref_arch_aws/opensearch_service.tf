@@ -70,7 +70,7 @@ resource "aws_opensearch_domain" "gitlab" {
     enabled = true
   }
 
-  ## TODO: var.opensearch_service_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.opensearch_service_tags is superseded by var.opensearch_service_custom_tags.
   tags = merge({
     Domain = var.prefix
   }, var.opensearch_service_tags, var.custom_tags, var.opensearch_service_custom_tags)
@@ -79,7 +79,7 @@ resource "aws_opensearch_domain" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      domain_name,
+      domain_name, # Immutable after creation; changing causes replacement
     ]
   }
 }
