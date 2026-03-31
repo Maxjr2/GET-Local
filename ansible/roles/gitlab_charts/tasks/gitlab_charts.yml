@@ -28,3 +28,11 @@
   tags:
     - reconfigure
     - charts
+  when: not gitlab_charts_zero_downtime_update
+
+- name: Zero downtime update GitLab Charts
+  import_tasks: zero_downtime_update.yml
+  tags:
+    - reconfigure
+    - charts
+  when: gitlab_charts_zero_downtime_update

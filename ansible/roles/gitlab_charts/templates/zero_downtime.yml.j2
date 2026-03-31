@@ -1,0 +1,48 @@
+global:
+  extraEnv:
+    BYPASS_SCHEMA_VERSION: true
+nginx-ingress:
+  controller:
+    deployment:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: "{{ gitlab_charts_zero_downtime_maxSurge }}"
+          maxUnavailable: {{ gitlab_charts_zero_downtime_maxUnavailable }}
+    terminationGracePeriodSeconds: {{ gitlab_charts_zero_downtime_terminationGracePeriodSeconds }}
+    minReadySeconds: {{ gitlab_charts_zero_downtime_nginx_minReadySeconds }}
+gitlab:
+  webservice:
+    deployment:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: "{{ gitlab_charts_zero_downtime_maxSurge }}"
+          maxUnavailable: {{ gitlab_charts_zero_downtime_maxUnavailable }}
+    terminationGracePeriodSeconds: {{ gitlab_charts_zero_downtime_terminationGracePeriodSeconds }}
+  sidekiq:
+    deployment:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: "{{ gitlab_charts_zero_downtime_maxSurge }}"
+          maxUnavailable: {{ gitlab_charts_zero_downtime_maxUnavailable }}
+    terminationGracePeriodSeconds: {{ gitlab_charts_zero_downtime_terminationGracePeriodSeconds }}
+  gitlab-shell:
+    deployment:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: "{{ gitlab_charts_zero_downtime_maxSurge }}"
+          maxUnavailable: {{ gitlab_charts_zero_downtime_maxUnavailable }}
+    terminationGracePeriodSeconds: {{ gitlab_charts_zero_downtime_terminationGracePeriodSeconds }}
+{% if container_registry_enable %}
+  registry:
+    deployment:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: "{{ gitlab_charts_zero_downtime_maxSurge }}"
+          maxUnavailable: {{ gitlab_charts_zero_downtime_maxUnavailable }}
+    terminationGracePeriodSeconds: {{ gitlab_charts_zero_downtime_terminationGracePeriodSeconds }}
+{% endif %}
