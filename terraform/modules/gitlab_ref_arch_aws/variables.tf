@@ -1597,6 +1597,8 @@ variable "rds_geo_tracking_snapshot_identifier" {
 }
 
 ## [Toolkit Beta] Unified RDS PostgreSQL
+# Flexible interface for provisioning additional RDS instances (e.g. OpenBao). Coexists with the dedicated
+# rds_postgres_*, rds_praefect_postgres_*, and rds_geo_tracking_postgres_* variables for core GitLab databases.
 variable "rds_databases" {
   description = "Map of RDS PostgreSQL databases to create"
   type = map(object({
@@ -2274,7 +2276,7 @@ variable "rds_praefect_postgres_custom_tags" {
   default = {}
 }
 
-# Deprecated - To be removed in 4.x
+# Deprecated.
 variable "additional_tags" {
   description = "Deprecated. Replaced by custom_tags."
   type        = map(any)

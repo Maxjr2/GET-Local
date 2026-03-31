@@ -22,7 +22,7 @@ resource "google_compute_instance" "gitlab" {
     enable_secure_boot = var.machine_secure_boot
   }
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   boot_disk {
     initialize_params {
       image  = var.machine_image
@@ -37,7 +37,7 @@ resource "google_compute_instance" "gitlab" {
     enable-oslogin = "TRUE"
   }, var.custom_metadata)
 
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   labels = merge({
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
@@ -75,8 +75,8 @@ resource "google_compute_instance" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      min_cpu_platform,
-      boot_disk,
+      min_cpu_platform, # GCP may change the CPU platform on live migration; ignore to avoid unexpected diffs
+      boot_disk,        # Prevents forced replacement when a newer image version is published
     ]
   }
 }
@@ -120,7 +120,7 @@ module "google_service_account" {
 }
 
 ## Data Disks
-## TODO: var.additional_labels is deprecated and will be removed in 4.x
+# Deprecated: var.additional_labels is superseded by var.custom_labels.
 resource "google_compute_disk" "gitlab" {
   for_each = { for d in local.node_data_disks : "${d.device_name}-${d.node_num}" => d }
 
@@ -150,9 +150,9 @@ resource "google_compute_disk" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      disk_encryption_key[0].kms_key_self_link,
-      snapshot,
-      source_snapshot_encryption_key[0].kms_key_self_link
+      disk_encryption_key[0].kms_key_self_link,           # Can only be set at creation; ignored on subsequent plans
+      snapshot,                                           # Used only to restore from snapshot on first create
+      source_snapshot_encryption_key[0].kms_key_self_link # Can only be set at creation; ignored on subsequent plans
     ]
   }
 }

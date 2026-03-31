@@ -13,7 +13,7 @@ resource "aws_elasticache_subnet_group" "gitlab_redis" {
 
   lifecycle {
     ignore_changes = [
-      name
+      name # AWS does not allow renaming subnet groups in-place; must be replaced
     ]
   }
 }
@@ -78,15 +78,15 @@ resource "aws_elasticache_replication_group" "gitlab_redis" {
     aws_security_group.gitlab_elasticache_redis[0].id
   ]
 
-  ## TODO: var.elasticache_redis_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.elasticache_redis_tags is superseded by var.elasticache_redis_custom_tags.
   tags = merge(var.elasticache_redis_tags, var.custom_tags, var.elasticache_redis_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      replication_group_id,
-      at_rest_encryption_enabled,
-      kms_key_id,
-      snapshot_name
+      replication_group_id,       # Immutable after creation; changing causes replacement
+      at_rest_encryption_enabled, # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,                 # Can only be set at creation; ignored on subsequent plans
+      snapshot_name               # Used only to restore from snapshot on first create
     ]
   }
 }
@@ -176,15 +176,15 @@ resource "aws_elasticache_replication_group" "gitlab_redis_cache" {
     aws_security_group.gitlab_elasticache_redis_cache[0].id
   ]
 
-  ## TODO: var.elasticache_redis_cache_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.elasticache_redis_cache_tags is superseded by var.elasticache_redis_cache_custom_tags.
   tags = merge(var.elasticache_redis_cache_tags, var.custom_tags, var.elasticache_redis_cache_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      replication_group_id,
-      at_rest_encryption_enabled,
-      kms_key_id,
-      snapshot_name
+      replication_group_id,       # Immutable after creation; changing causes replacement
+      at_rest_encryption_enabled, # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,                 # Can only be set at creation; ignored on subsequent plans
+      snapshot_name               # Used only to restore from snapshot on first create
     ]
   }
 }
@@ -269,15 +269,15 @@ resource "aws_elasticache_replication_group" "gitlab_redis_persistent" {
     aws_security_group.gitlab_elasticache_redis_persistent[0].id
   ]
 
-  ## TODO: var.elasticache_redis_persistent_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.elasticache_redis_persistent_tags is superseded by var.elasticache_redis_persistent_custom_tags.
   tags = merge(var.elasticache_redis_persistent_tags, var.custom_tags, var.elasticache_redis_persistent_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      replication_group_id,
-      at_rest_encryption_enabled,
-      kms_key_id,
-      snapshot_name
+      replication_group_id,       # Immutable after creation; changing causes replacement
+      at_rest_encryption_enabled, # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,                 # Can only be set at creation; ignored on subsequent plans
+      snapshot_name               # Used only to restore from snapshot on first create
     ]
   }
 }

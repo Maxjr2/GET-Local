@@ -1,8 +1,14 @@
 locals {
+  # Three mutually exclusive network modes:
+  # - existing_network: bring your own VPC and subnets (pass vpc_id + subnet_pub/priv_ids). Typical for
+  #                     environments where networking is managed centrally outside of GET.
+  # - create_network:   GET provisions the full VPC, subnets, internet gateway and NAT gateways.
+  # - default_network:  use the AWS account's default VPC and subnets. Intended for development/testing only.
   existing_network = var.vpc_id != null && (var.subnet_pub_ids != null || var.subnet_priv_ids != null)
   create_network   = var.create_network && !local.existing_network
   default_network  = !local.create_network && !local.existing_network
 
+  # create_network_routes controls whether route tables are created with the VPC. Disable if routing is managed externally.
   create_network_routes = local.create_network && var.create_network_routes
 
   create_peering = local.create_network && var.peer_vpc_id != null

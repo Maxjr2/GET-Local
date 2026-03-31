@@ -5,7 +5,7 @@ module "praefect_postgres" {
   node_type  = "praefect-postgres"
   node_count = var.praefect_postgres_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags = merge(var.additional_tags, var.custom_tags, var.praefect_postgres_custom_tags)
 
   size                   = var.praefect_postgres_size

@@ -6,6 +6,9 @@ locals {
 
   rds_postgres_major_version = floor(var.rds_postgres_version)
 
+  # is_primary: false when acting as a read replica (replication_database_arn set); engine/credentials are
+  # inherited from the source so those fields are omitted.
+  # is_snapshot: false when restoring from a snapshot; allocated_storage is omitted and snapshot_identifier is set.
   rds_postgres_is_primary  = var.rds_postgres_replication_database_arn == null
   rds_postgres_is_snapshot = var.rds_snapshot_identifier == null
 
@@ -113,14 +116,14 @@ resource "aws_db_instance" "gitlab" {
     create = var.rds_postgres_create_timeout
   }
 
-  ## TODO: var.rds_postgres_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.rds_postgres_tags is superseded by var.rds_postgres_custom_tags.
   tags = merge(var.rds_postgres_tags, var.custom_tags, var.rds_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      storage_encrypted,
-      kms_key_id,
-      snapshot_identifier
+      storage_encrypted,  # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,         # Can only be set at creation; ignored on subsequent plans
+      snapshot_identifier # Used only to restore from snapshot on first create
     ]
   }
 }
@@ -173,12 +176,12 @@ resource "aws_db_instance" "gitlab_read_replica" {
     create = var.rds_postgres_read_replica_create_timeout
   }
 
-  ## TODO: var.rds_postgres_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.rds_postgres_tags is superseded by var.rds_postgres_custom_tags.
   tags = merge(var.rds_postgres_tags, var.custom_tags, var.rds_postgres_custom_tags)
 
   lifecycle {
     ignore_changes = [
-      storage_encrypted,
+      storage_encrypted, # Can only be set at creation; ignored on subsequent plans
       kms_key_id
     ]
   }

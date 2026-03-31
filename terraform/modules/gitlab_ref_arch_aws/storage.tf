@@ -5,11 +5,11 @@ resource "aws_s3_bucket" "gitlab_object_storage_buckets" {
 
   lifecycle {
     ignore_changes = [
-      replication_configuration
+      replication_configuration # Managed externally (e.g. by Geo object storage replication); changes here would override it
     ]
   }
 
-  ## TODO: var.object_storage_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.object_storage_tags is superseded by var.object_storage_custom_tags.
   tags = merge(var.object_storage_tags, var.custom_tags, var.object_storage_custom_tags, try(var.object_storage_buckets_custom_tags[each.value], null))
 }
 

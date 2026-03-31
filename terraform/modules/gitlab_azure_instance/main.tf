@@ -94,7 +94,7 @@ resource "azurerm_linux_virtual_machine" "gitlab" {
     version   = var.source_image_reference["version"]
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   tags = merge({
     gitlab_node_prefix    = var.prefix
     gitlab_node_type      = var.node_type
@@ -106,7 +106,7 @@ resource "azurerm_linux_virtual_machine" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      source_image_reference
+      source_image_reference # Prevents forced replacement when a newer image version is published; image updates are handled separately
     ]
   }
 }

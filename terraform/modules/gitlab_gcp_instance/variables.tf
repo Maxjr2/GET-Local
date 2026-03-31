@@ -130,7 +130,7 @@ variable "custom_metadata" {
   default = {}
 }
 
-## TODO: additional_labels is deprecated and will be removed in 4.x
+# Deprecated: var.additional_labels is superseded by var.custom_labels.
 variable "additional_labels" {
   description = "Deprecated. Replaced by custom_labels."
   type        = map(any)

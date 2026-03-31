@@ -37,7 +37,7 @@ resource "aws_ebs_volume" "gitlab" {
 
   snapshot_id = each.value.snapshot_id
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   tags = merge(
     var.set_name_tags ? { Name = each.key } : {},
     {
@@ -49,10 +49,10 @@ resource "aws_ebs_volume" "gitlab" {
 
   lifecycle {
     ignore_changes = [
-      availability_zone,
-      encrypted,
-      kms_key_id,
-      snapshot_id
+      availability_zone, # Immutable after creation; changing would require replacement
+      encrypted,         # Can only be set at creation; ignored on subsequent plans
+      kms_key_id,        # Can only be set at creation; ignored on subsequent plans
+      snapshot_id        # Used only to restore from snapshot on first create
     ]
   }
 }

@@ -4,7 +4,7 @@ module "postgres" {
   prefix     = var.prefix
   node_type  = "postgres"
   node_count = var.postgres_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.postgres_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.postgres_custom_metadata)
 

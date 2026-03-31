@@ -5,7 +5,7 @@ module "pgbouncer" {
   node_type  = "pgbouncer"
   node_count = var.pgbouncer_node_count
 
-  # TODO: var.additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags = merge(var.additional_tags, var.custom_tags, var.pgbouncer_custom_tags)
 
   size                   = var.pgbouncer_size

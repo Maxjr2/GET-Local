@@ -4,7 +4,7 @@ module "opensearch_vm" {
   prefix     = var.prefix
   node_type  = "opensearch"
   node_count = var.opensearch_vm_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.opensearch_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.opensearch_custom_metadata)
 

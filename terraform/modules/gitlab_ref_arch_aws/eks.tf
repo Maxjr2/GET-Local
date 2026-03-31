@@ -30,6 +30,8 @@ locals {
   eks_node_group_default_ami_type = local.total_node_pool_count > 0 ? (strcontains(aws_eks_cluster.gitlab_cluster[0].version, "1.2") ? "AL2_x86_64" : "AL2023_x86_64_STANDARD") : null
   eks_node_group_ami_type         = local.eks_node_group_custom_ami_id != null ? "CUSTOM" : (var.eks_node_group_ami_type != null ? var.eks_node_group_ami_type : local.eks_node_group_default_ami_type)
 
+  # When "latest", the AMI type is mapped to an AWS SSM path to resolve the recommended release version
+  # for the current EKS cluster version, ensuring all node groups use the same AMI release.
   ## Standard AMI version selection
   eks_node_group_ami_ssm_search_params_list = var.eks_node_group_ami_release_version == "latest" ? {
     "AL2_x86_64"             = "amazon-linux-2",
@@ -92,7 +94,7 @@ resource "aws_eks_cluster" "gitlab_cluster" {
     }
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags and var.eks_custom_tags.
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-cluster"
@@ -180,7 +182,7 @@ resource "aws_launch_template" "gitlab_webservice" {
   tag_specifications {
     resource_type = "instance"
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
     tags = merge(
       var.default_set_name_tags ? { Name = "${var.prefix}-webservice-node-pool" } : {},
       {
@@ -199,7 +201,7 @@ resource "aws_launch_template" "gitlab_webservice" {
     content {
       resource_type = "volume"
 
-      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
       tags = merge(
         var.default_set_name_tags ? { Name = "${var.prefix}-webservice-pool-root" } : {},
         var.additional_tags,
@@ -244,7 +246,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
     workload = "webservice"
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-webservice-node-pool"
@@ -267,7 +269,7 @@ resource "aws_eks_node_group" "gitlab_webservice_pool" {
   lifecycle {
     create_before_destroy = true
     ignore_changes = [
-      scaling_config[0].desired_size,
+      scaling_config[0].desired_size, # Managed by the cluster autoscaler after creation; Terraform should not override it
     ]
   }
 }
@@ -308,7 +310,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
   tag_specifications {
     resource_type = "instance"
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
     tags = merge(
       var.default_set_name_tags ? { Name = "${var.prefix}-sidekiq-node-pool" } : {},
       {
@@ -327,7 +329,7 @@ resource "aws_launch_template" "gitlab_sidekiq" {
     content {
       resource_type = "volume"
 
-      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
       tags = merge(
         var.default_set_name_tags ? { Name = "${var.prefix}-sidekiq-pool-root" } : {},
         var.additional_tags,
@@ -372,7 +374,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
     workload = "sidekiq"
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-sidekiq-node-pool"
@@ -395,7 +397,7 @@ resource "aws_eks_node_group" "gitlab_sidekiq_pool" {
   lifecycle {
     create_before_destroy = true
     ignore_changes = [
-      scaling_config[0].desired_size,
+      scaling_config[0].desired_size, # Managed by the cluster autoscaler after creation; Terraform should not override it
     ]
   }
 }
@@ -436,7 +438,7 @@ resource "aws_launch_template" "gitlab_supporting" {
   tag_specifications {
     resource_type = "instance"
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
     tags = merge(
       var.default_set_name_tags ? { Name = "${var.prefix}-supporting-node-pool" } : {},
       {
@@ -455,7 +457,7 @@ resource "aws_launch_template" "gitlab_supporting" {
     content {
       resource_type = "volume"
 
-      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
       tags = merge(
         var.default_set_name_tags ? { Name = "${var.prefix}-supporting-pool-root" } : {},
         var.additional_tags,
@@ -502,7 +504,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
     workload = "support"
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-supporting-node-pool"
@@ -531,7 +533,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
 
     create_before_destroy = true
     ignore_changes = [
-      scaling_config[0].desired_size,
+      scaling_config[0].desired_size, # Managed by the cluster autoscaler after creation; Terraform should not override it
     ]
   }
 }
@@ -572,7 +574,7 @@ resource "aws_launch_template" "gitlab_gitaly" {
   tag_specifications {
     resource_type = "instance"
 
-    ## TODO: additional_tags is deprecated and will be removed in 4.x
+    # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
     tags = merge(
       var.default_set_name_tags ? { Name = "${var.prefix}-gitaly-node-pool" } : {},
       {
@@ -591,7 +593,7 @@ resource "aws_launch_template" "gitlab_gitaly" {
     content {
       resource_type = "volume"
 
-      ## TODO: additional_tags is deprecated and will be removed in 4.x
+      # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
       tags = merge(
         var.default_set_name_tags ? { Name = "${var.prefix}-gitaly-pool-root" } : {},
         var.additional_tags,
@@ -638,7 +640,7 @@ resource "aws_eks_node_group" "gitlab_gitaly_pool" {
     workload = "gitaly"
   }
 
-  ## TODO: additional_tags is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags and the relevant resource custom_tags variable.
   tags = merge({
     gitlab_node_prefix = var.prefix
     gitlab_node_type   = "gitlab-gitaly-node-pool"
@@ -667,7 +669,7 @@ resource "aws_eks_node_group" "gitlab_gitaly_pool" {
 
     create_before_destroy = true
     ignore_changes = [
-      scaling_config[0].desired_size,
+      scaling_config[0].desired_size, # Managed by the cluster autoscaler after creation; Terraform should not override it
     ]
   }
 }
@@ -822,7 +824,7 @@ output "kubernetes" {
     "kubernetes_supporting_node_group_security_group_ids" = try(flatten(aws_launch_template.gitlab_supporting[0].vpc_security_group_ids), "")
     "kubernetes_gitaly_node_group_security_group_ids"     = try(flatten(aws_launch_template.gitlab_gitaly[0].vpc_security_group_ids), "")
 
-    # Deprecated - To be removed in 4.x
+    # Deprecated: these output keys are superseded by kubernetes_cluster_security_group_ids above.
     "cluster_security_group_id"     = try(aws_eks_cluster.gitlab_cluster[0].vpc_config[0].cluster_security_group_id, "")
     "gitlab_internal_networking_id" = try(aws_security_group.gitlab_internal_networking.id, "")
   }

@@ -4,7 +4,7 @@ module "gitaly" {
   prefix     = var.prefix
   node_type  = "gitaly"
   node_count = var.gitaly_node_count
-  # TODO: var.additional_labels is deprecated and will be removed in 4.x
+  # Deprecated: var.additional_labels is superseded by var.custom_labels.
   custom_labels   = merge(var.additional_labels, var.custom_labels, var.gitaly_custom_labels)
   custom_metadata = merge(var.custom_metadata, var.gitaly_custom_metadata)
 

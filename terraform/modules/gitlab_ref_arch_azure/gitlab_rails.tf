@@ -5,7 +5,7 @@ module "gitlab_rails" {
   node_type  = "gitlab-rails"
   node_count = var.gitlab_rails_node_count
 
-  # TODO: var.additional_tags deprecated and will be removed in 4.x
+  # Deprecated: var.additional_tags is superseded by var.custom_tags.
   custom_tags = merge(var.additional_tags, var.custom_tags, var.gitlab_rails_custom_tags)
 
   size                   = var.gitlab_rails_size

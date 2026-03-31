@@ -675,7 +675,7 @@ variable "sidekiq_custom_tags" {
   default = {}
 }
 
-## Deprecated - To be removed in 4.x
+# Deprecated.
 variable "additional_tags" {
   description = "Deprecated. Replaced by custom_tags."
   type        = map(any)
