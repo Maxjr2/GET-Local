@@ -31,6 +31,8 @@
         - primary-database
         - primary
       when:
+        # Matches the postgres node in multi-node setups, or a gitlab_rails node in single-node setups
+        # (detected by the absence of the expected <site>_postgres_primary group in inventory).
         - ('postgres' in group_names) or
           ('gitlab_rails' in group_names and geo_primary_site_group_name + '_postgres_primary' not in groups)
         - (geo_primary_site_group_name in group_names)
@@ -54,6 +56,7 @@
       tags:
         - secondary-database
         - secondary
+      # Same logic as primary: matches the postgres node, or a gitlab_rails node on a single-node secondary.
       when:
         - ('postgres' in group_names) or
           ('gitlab_rails' in group_names and geo_secondary_site_group_name + '_postgres_primary' not in groups)
@@ -67,6 +70,7 @@
       become: false
       run_once: true
       tags: always
+  # Skipped entirely when using an external PostgreSQL provider (e.g. RDS).
   when: not postgres_external
 
 - name: Configure the main read-only replica PostgreSQL database on the secondary site
@@ -74,6 +78,8 @@
   tags:
     - read-only-replica
     - secondary
+  # Runs on: the postgres_primary node in standard setups, or gitlab_rails/sidekiq nodes when postgres is external
+  # (in that case there's no dedicated postgres group, so the app nodes own the replica config).
   when:
     - ('postgres_primary' in group_names) or ('gitlab_rails' in group_names and postgres_external) or ('sidekiq' in group_names and postgres_external)
     - (geo_secondary_site_group_name in group_names)
@@ -83,6 +89,8 @@
   tags:
     - tracking-database
     - secondary
+  # The Geo tracking database records replication state on the secondary. Configured when the secondary
+  # is multi-node (it gets its own postgres node) or when using an external tracking postgres instance.
   when:
     - (geo_secondary_is_multi_node) or geo_tracking_postgres_external
 

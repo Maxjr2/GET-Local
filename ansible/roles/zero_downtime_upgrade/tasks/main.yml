@@ -1,3 +1,5 @@
+# Components are upgraded in dependency order defined by zdu_update_order (see defaults/main.yml).
+# Each task skips components earlier than zdu_start_point, allowing mid-sequence resumption after a failure.
 - name: Update Consul nodes
   include_role:
     name: consul

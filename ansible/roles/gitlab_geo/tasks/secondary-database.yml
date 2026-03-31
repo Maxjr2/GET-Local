@@ -44,6 +44,8 @@
 # Required when non-HA database without Patroni is being used on secondary environment
 - name: Secondary Database - Replicate geo database
   expect:
+    # PostgreSQL replication slot names cannot contain hyphens; non-HA setups derive the slot name
+    # from the hostname with hyphens replaced. HA setups use a pre-configured slot name.
     command: |
       gitlab-ctl replicate-geo-database \
         --slot-name={{ geo_primary_slot_name if geo_primary_postgres_is_ha else inventory_hostname | regex_replace("-", "_") }} \

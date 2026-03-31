@@ -358,7 +358,7 @@ gitlab_rails['db_load_balancing'] = { 'hosts' => {{ postgres_int_addrs }} }
 
 postgresql['enable'] = true
 
-{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+{# Deprecated: postgres_trust_auth_cidr_blocks. #}
 postgresql['trust_auth_cidr_addresses'] = {{ ['127.0.0.1/32'] + (postgres_trust_auth_cidr_blocks | default([])) }}
 
 postgres_exporter['listen_address'] = '0.0.0.0:9187'

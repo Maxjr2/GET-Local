@@ -44,6 +44,8 @@
     - name: Remove Patroni Cluster - Start Patroni on secondary site
       command: |
         gitlab-ctl start patroni
+  # The sentinel file prevents re-running destructive cluster removal on subsequent playbook runs.
+  # geo_secondary_force_initialize_patroni_cluster overrides this safeguard when explicitly set.
   when: not removal_completed_file.stat.exists or geo_secondary_force_initialize_patroni_cluster
 
 - name: Remove Patroni Cluster - Create skip cluster removal file

@@ -42,7 +42,7 @@ postgresql['pgbouncer_user_password'] = "{{ (pgbouncer_password + 'pgbouncer') |
 {% endif %}
 
 postgresql['md5_auth_cidr_addresses'] = {{ postgres_md5_auth_cidr_blocks }}
-{# TODO: Remove postgres_trust_auth_cidr_blocks in 4.x as variable is deprecated #}
+{# Deprecated: postgres_trust_auth_cidr_blocks. #}
 {% if groups['postgres'] | length > 1 %}
 # Configure trust auth for Patroni local socket and other members as required
 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594

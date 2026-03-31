@@ -98,7 +98,9 @@
         modification_time: preserve
       loop:
         - { name: "skip-auto-reconfigure" }
+        # skip-fail-config-check: flag introduced in 18.2; don't create on older versions where it doesn't exist.
         - { name: "skip-fail-config-check", condition: "{{ gitlab_version == '' or gitlab_version is version('18.2', '>=') }}" }
+        # skip-unmigrated-data-check: only required on versions < 16.5 where the check was mandatory.
         - { name: "skip-unmigrated-data-check", condition: "{{ gitlab_version != '' and gitlab_version is version('16.5', '<') }}" }
       loop_control:
         label: "{{ item.name }}"
@@ -118,6 +120,8 @@
         - common_prep
 
     - name: Delete GitLab json config file if malformed
+      # A truncated node JSON config causes reconfigure to fail. Size < 500 bytes is a reliable
+      # proxy for corruption — a minimal valid file is several kilobytes.
       file:
         path: "/opt/gitlab/embedded/nodes/{{ ansible_facts['fqdn'] }}.json"
         state: absent
@@ -157,6 +161,13 @@
         - omnibus_node
         - gitlab_edition in ansible_facts.packages
 
+    # GitLab package install — three mutually exclusive paths, only one runs per execution:
+    # 1. Repo (default): gitlab_repo_package is set and no direct file paths/URLs are provided.
+    #    Downloads and runs the repo setup script, then installs via apt/yum.
+    # 2. Deb file: gitlab_deb_download_url or gitlab_deb_host_path is set (Debian/Ubuntu only).
+    #    Used for offline installs or pinning a specific build not available via the repo.
+    # 3. RPM file: gitlab_rpm_download_url or gitlab_rpm_host_path is set (RHEL/CentOS only).
+    #    Used for offline installs or pinning a specific build not available via the repo.
     - name: Install GitLab package via repo if configured
       block:
         # Removes the official release repo if it's present as we typically want to stick with Nightly

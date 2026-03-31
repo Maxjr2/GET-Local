@@ -50,7 +50,7 @@
       delegate_to: localhost
       run_once: true
       set_fact:
-        # The 'values' key conflicts with the dict.values() method, so we need to extract it explicitly
+        # 'values' conflicts with Jinja2's dict.values() method; extract it via dict2items to access the key by name.
         gitlab_values: "{{ gitlab_cr_info.resources[0].spec.chart | dict2items | selectattr('key', 'eq', 'values') | map(attribute='value') | first }}"
         gitlab_charts_version: "{{ gitlab_cr_info.resources[0].spec.chart.version }}"
   when: gitlab_operator
