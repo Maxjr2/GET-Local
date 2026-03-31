@@ -122,18 +122,13 @@ To perform an upgrade with downtime:
 
 ### Zero Downtime Upgrades
 
-For Zero Downtime Upgrades, the Toolkit translates the [documented manual process](https://docs.gitlab.com/ee/update/zero_downtime.html) to achieve the same effect as much as possible.
-
-> [!note]
-> Zero Downtime Upgrades are **not available** for Cloud Native Hybrid environments as they aren't supported in the [GitLab Charts](https://docs.gitlab.com/charts/installation/upgrade.html).
+For Zero Downtime Upgrades, the Toolkit translates the documented manual processes for the [Linux Package](https://docs.gitlab.com/ee/update/zero_downtime.html) and [Helm Chart](https://docs.gitlab.com/charts/installation/upgrade/#upgrade-with-zero-downtime) to achieve the same effect as much as possible.
 
 It should be noted that achieving true Zero Downtime during an upgrade is difficult and involving. There are various ways to approach this, all with pros and cons, and typically in most cases there will always be at least very small moments of downtime depending on that approach.
 
 The Toolkit, being an automative solution, can't perform all the same actions a manual process can do such as removing nodes from load balancers as custom load balancers are supported. It therefore takes the approach of depending on existing automatic mechanisms in the environment setup such as load balancing and failovers to achieve the same effect in practice. In rigorous testing, it's been found this approach has minimal downtime while being faster to achieve.
 
 At a high level the Toolkit aims to run the exact same actions for each component node it does normally but in sequential order. This ensures all supporting actions needed for components, such as OS package handling, are performed as well. It will also avoid components, depending on the environment, that aren't HA by default such as HAProxy, NFS, or Praefect PostgreSQL ([which is only supported in a single node setup with Omnibus at this time](https://docs.gitlab.com/ee/administration/reference_architectures/10k_users.html#praefect-postgresql)) as this would cause downtime - These need to be upgraded separately in a maintenance period.
-
-For Geo environments, the zero downtime upgrade process must be completed on the primary site first, and then repeated on each secondary site.
 
 Running the zero downtime upgrade process with the Toolkit is done in the same way as building the initial environment but with a different playbook instead:
 
@@ -166,8 +161,37 @@ In advanced cases where the playbook fails for any reason but you're confident t
 - `zdu_start_point` - The starting point for the Zero Downtime Upgrade process. Defaults to the first component, which is `consul`.
   - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migration`
 
+If you only need to run the zero downtime upgrade process for just the Helm Charts you can run the GitLab charts playbook with the environment var `gitlab_charts_zero_downtime_update` set to `true`.
+
+```sh
+ansible-playbook -i <Inventory Path> playbooks/gitlab_charts.yml -e '{"gitlab_charts_zero_downtime_update": true}'
+```
+
+When running a zero downtime update for the GitLab Helm Chart, the following settings are available to configure the update:
+
+- `gitlab_charts_zero_downtime_maxSurge`: The maximum amount of new pods that can be created during the update alonside the existing pods. Increasing this will require extra resources to accomidate the new pods. Defaults to `10%`. 
+- `gitlab_charts_zero_downtime_maxUnavailable`: The maximum amount of pods that can be unavailable during the update. Allowing pods to be unavailable will impact the performance during an upgrade as there will be less pods available to handle requests. Defaults to `0`.
+- `gitlab_charts_zero_downtime_terminationGracePeriodSeconds`: The amount of time, in seconds, the update will wait before killing a pod that is currently busy. This should be configured to handle the longest running job that a pod may handle. After the timeout this will kiil any jobs still running and can lead to downtime. Defaults to `600`.
+- `gitlab_charts_zero_downtime_nginx_minReadySeconds`: The amount of time to wait, in seconds, before Nginx is set to ready after an update. Increasing this adds a buffer to ensure the new pod is ready to handle requests. Defaults to `10`.
+
 > [!note]
 > If the upgrade process fails and you need assistance troubleshooting the issue, contact GitLab Support for guidance.
+
+#### Geo
+
+For Geo environments, the zero downtime upgrade process largely remains the same, the initial upgrade must be completed on the primary site first, and then repeated on each secondary site. When the process is initially run on the primary site, the post deployment migrations will not be run, these can only be run after the secondary sites have been updated. Once all secondary sites have been upgraded you can then rerun the upgrade on the primary site using the following commands to run only the post deployment migrations:
+
+Linux Package:
+
+```sh
+ansible-playbook -i <Primary Site Inventory Path> playbooks/zero_downtime_update.yml -e '{"zdu_start_point": "post_migrations", "gitlab_charts_zero_downtime_geo_post_deployment_migrations": true}'
+```
+
+Helm Chart:
+
+```sh
+ansible-playbook -i <Primary Site Inventory Path> playbooks/gitlab_charts.yml -e '{"gitlab_charts_zero_downtime_update": true, "gitlab_charts_zero_downtime_geo_post_deployment_migrations": true}'
+```
 
 ### Environment Downgrades
 

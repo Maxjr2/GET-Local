@@ -170,7 +170,7 @@
 - name: Merge in custom GitLab Operator values if provided
   set_fact:
     gitlab_operator_values: "{{ gitlab_operator_values | combine(lookup('template', custom_operator_config_file) | from_yaml, recursive=True) }}"
-  when: custom_config_file.stat.exists
+  when: custom_operator_config_file.stat.exists
   tags:
     - reconfigure
 

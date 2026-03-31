@@ -1,0 +1,204 @@
+---
+- name: Fetch Webservice deployment name
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    label_selectors:
+      - app=webservice
+  register: webservice_deployment
+
+- name: Fetch Sidekiq deployment name
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    label_selectors:
+      - app=sidekiq
+  register: sidekiq_deployment
+
+- name: Set deployment names
+  ansible.builtin.set_fact:
+    webservice_deployments: "{{ webservice_deployment.resources }}"
+    sidekiq_deployments: "{{ sidekiq_deployment.resources }}"
+
+- name: Pause Webservice deployment
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    definition:
+      spec:
+        paused: true
+  loop: "{{ webservice_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Pause Sidekiq deployment
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    definition:
+      spec:
+        paused: true
+  loop: "{{ sidekiq_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Set values with pre-migrations
+  ansible.builtin.set_fact:
+    gitlab_pre_migration_values: >-
+      {{ gitlab_charts_values | combine(
+           {'gitlab': {'migrations': {'extraEnv': {'SKIP_POST_DEPLOYMENT_MIGRATIONS': 'true'}}}},
+           recursive=True
+         ) }}
+
+- name: Upgrade GitLab with pre-migrations
+  kubernetes.core.helm:
+    name: gitlab
+    chart_ref: "{{ gitlab_charts_ref }}"
+    chart_version: "{{ gitlab_charts_version }}"
+    release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    values: "{{ gitlab_pre_migration_values }}"
+
+- name: Get pre-migration jobs
+  kubernetes.core.k8s_info:
+    kind: Job
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    label_selectors:
+      - "chart=migrations-{{ gitlab_charts_version }}"
+  register: pre_migration_jobs
+  retries: 10
+  delay: 10
+  until: pre_migration_jobs.resources | length > 0
+
+- name: Wait for pre-migration jobs to complete
+  kubernetes.core.k8s_info:
+    kind: Job
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+  register: job_status
+  until: >
+    job_status.resources[0].status.conditions is defined and
+    (job_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Complete') | list | length > 0)
+  retries: 60
+  delay: 10
+  loop: "{{ pre_migration_jobs.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Wait for chart to be ready after pre-migrations
+  command: |
+    kubectl wait --for=condition=ready pod
+      -l release=gitlab
+      -l app!=webservice
+      -l app!=sidekiq
+      -l app!=migrations
+      -n {{ gitlab_cloud_native_release_namespace }}
+      --timeout=1m
+  changed_when: false
+  retries: 30
+  delay: 5
+
+- name: Resume sidekiq deployment
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    definition:
+      spec:
+        paused: false
+  loop: "{{ sidekiq_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Wait for sidekiq deployment rollout
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+  register: sidekiq_status
+  until: >
+    sidekiq_status.resources[0].status.updatedReplicas is defined and
+    sidekiq_status.resources[0].status.replicas is defined and
+    sidekiq_status.resources[0].status.updatedReplicas == sidekiq_status.resources[0].status.replicas and
+    sidekiq_status.resources[0].status.availableReplicas is defined and
+    sidekiq_status.resources[0].status.availableReplicas == sidekiq_status.resources[0].status.replicas
+  retries: 60
+  delay: 15
+  loop: "{{ sidekiq_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Resume webservice deployment
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: "{{ item.metadata.name}}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+    definition:
+      spec:
+        paused: false
+  loop: "{{ webservice_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Wait for webservice deployment rollout
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ gitlab_cloud_native_release_namespace }}"
+  register: webservice_status
+  until: >
+    webservice_status.resources[0].status.updatedReplicas is defined and
+    webservice_status.resources[0].status.replicas is defined and
+    webservice_status.resources[0].status.updatedReplicas == webservice_status.resources[0].status.replicas and
+    webservice_status.resources[0].status.availableReplicas is defined and
+    webservice_status.resources[0].status.availableReplicas == webservice_status.resources[0].status.replicas
+  retries: 60
+  delay: 15
+  loop: "{{ webservice_deployments }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Run post-deployment migrations
+  block:
+    - name: Run post-deployment migrations
+      kubernetes.core.helm:
+        name: gitlab
+        chart_ref: "{{ gitlab_charts_ref }}"
+        chart_version: "{{ gitlab_charts_version }}"
+        release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        values: "{{ gitlab_charts_values }}"
+
+    - name: Get post-migration jobs
+      kubernetes.core.k8s_info:
+        kind: Job
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+        label_selectors:
+          - "chart=migrations-{{ gitlab_charts_version }}"
+      register: post_migration_jobs
+      retries: 60
+      delay: 10
+      until: post_migration_jobs.resources | length > 0
+
+    - name: Wait for post-migration jobs to complete
+      kubernetes.core.k8s_info:
+        kind: Job
+        name: "{{ item.metadata.name }}"
+        namespace: "{{ gitlab_cloud_native_release_namespace }}"
+      register: job_status
+      until: >
+        job_status.resources[0].status.conditions is defined and
+        (job_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Complete') | list | length > 0)
+      retries: 120
+      delay: 15
+      loop: "{{ post_migration_jobs.resources }}"
+      loop_control:
+        label: "{{ item.metadata.name }}"
+  tags: zero-downtime-post-deployment-migrations
+  when: >
+    (not cloud_native_hybrid_geo) or
+    (cloud_native_hybrid_geo and gitlab_charts_zero_downtime_geo_post_deployment_migrations)

@@ -7,6 +7,7 @@
     - charts_values
     - kube-prometheus-stack
     - kubeconfig
+    - zero-downtime-post-deployment-migrations
 
 - name: Create GitLab Cloud Native namespace
   kubernetes.core.k8s:
@@ -191,6 +192,7 @@
     - charts
     - charts_values
     - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
 
 - name: Add GitLab Helm repo
   kubernetes.core.helm_repository:
@@ -234,6 +236,7 @@
     - reconfigure
     - charts
     - charts_version
+    - zero-downtime-post-deployment-migrations
 
 - name: Lookup GitLab Chart values
   set_fact:
@@ -243,6 +246,7 @@
     - charts
     - charts_values
     - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
 
 - name: Check if custom GitLab Chart values are provided
   stat:
@@ -253,6 +257,7 @@
     - charts
     - charts_values
     - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
 
 - name: Merge in custom GitLab Chart values if provided
   set_fact:
@@ -263,6 +268,18 @@
     - charts
     - charts_values
     - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
+
+- name: Merge in Zero downtime values if enabled
+  set_fact:
+    gitlab_charts_values: "{{ gitlab_charts_values | combine(lookup('template', 'templates/zero_downtime.yml.j2') | from_yaml, recursive=True) }}"
+  when: gitlab_charts_zero_downtime_update
+  tags:
+    - reconfigure
+    - charts
+    - charts_values
+    - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
 
 - name: Show charts values if configured
   debug:
@@ -273,6 +290,7 @@
     - charts
     - charts_values
     - kube-prometheus-stack
+    - zero-downtime-post-deployment-migrations
 
 - name: Install GitLab Charts
   import_tasks: 'gitlab_charts.yml'

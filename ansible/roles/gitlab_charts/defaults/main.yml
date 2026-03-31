@@ -34,6 +34,12 @@ gitlab_charts_sidekiq_node_selector: sidekiq
 gitlab_charts_supporting_node_selector: support
 gitlab_charts_gitaly_node_selector: gitaly
 
+## Zero Downtime Settings
+gitlab_charts_zero_downtime_maxSurge: "10%"
+gitlab_charts_zero_downtime_maxUnavailable: 0
+gitlab_charts_zero_downtime_terminationGracePeriodSeconds: 600
+gitlab_charts_zero_downtime_nginx_minReadySeconds: "10"
+
 ## Webservice
 gitlab_charts_webservice_requests_memory_gb: 5
 gitlab_charts_webservice_limits_memory_gb: 7

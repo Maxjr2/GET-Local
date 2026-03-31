@@ -127,3 +127,4 @@
   when:
     - "'gitlab_rails_primary' in group_names"
     - zdu_update_order.index('post_migrations') >= zdu_update_order.index(zdu_start_point)
+    - gitlab_charts_zero_downtime_geo_post_deployment_migrations
