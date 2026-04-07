@@ -163,6 +163,12 @@ openbao_unseal_key: "{{ lookup('file', openbao_unseal_key_file) if openbao_unsea
 openbao_unseal_key_file: ""
 openbao_unseal_key_current_id: "static-unseal-0"
 
+## OpenBao KMS (AWS) - mutually exclusive with static unseal key
+openbao_unseal_awskms_key_id: ""
+openbao_unseal_awskms_role_arn: ""
+openbao_unseal_awskms_region: "{{ aws_region }}"
+openbao_unseal_awskms_enable: "{{ openbao_unseal_awskms_key_id != '' and openbao_unseal_awskms_role_arn != '' and openbao_unseal_awskms_region != '' }}"
+
 ## OpenBao Database
 openbao_database_host: "{{ postgres_host }}"
 openbao_database_port: "{{ postgres_port }}"

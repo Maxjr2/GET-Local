@@ -584,6 +584,11 @@ certmanager-issuer:
 {% if openbao_enable %}
 openbao:
   install: true
+{% if openbao_unseal_awskms_enable %}
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: "{{ openbao_unseal_awskms_role_arn }}"
+{% endif %}
   ingress:
     enabled: true
     hostname: "{{ openbao_host }}"
@@ -608,12 +613,20 @@ openbao:
           password:
             secret: gitlab-openbao-db-password
             key: password
-{% if openbao_unseal_key != '' %}
+{% if openbao_unseal_awskms_enable %}
+    unseal:
+      static:
+        enabled: false
+      awskms:
+        enabled: true
+        kmsKeyId: "{{ openbao_unseal_awskms_key_id }}"
+        region: "{{ openbao_unseal_awskms_region }}"
+{% elif openbao_unseal_key != '' %}
     unseal:
       static:
         currentKeyId: "{{ openbao_unseal_key_current_id }}"
 {% endif %}
-{% if openbao_unseal_key != '' %}
+{% if openbao_unseal_key != '' and not openbao_unseal_awskms_enable %}
   staticUnsealSecret:
     generate: false
 {% endif %}
