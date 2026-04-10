@@ -78,7 +78,7 @@ resource "aws_db_instance" "gitlab" {
 
   storage_type          = var.rds_postgres_storage_type
   iops                  = var.rds_postgres_storage_type == "io1" && var.rds_postgres_iops == null ? 1000 : var.rds_postgres_iops
-  allocated_storage     = local.rds_postgres_is_primary ? var.rds_postgres_allocated_storage : null
+  allocated_storage     = var.rds_postgres_allocated_storage
   max_allocated_storage = var.rds_postgres_max_allocated_storage
   storage_encrypted     = true
   kms_key_id            = coalesce(var.rds_postgres_kms_key_arn, var.default_kms_key_arn, try(data.aws_kms_key.aws_rds[0].arn, null))
