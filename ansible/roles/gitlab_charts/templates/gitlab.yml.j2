@@ -24,8 +24,10 @@ gitlab:
       tls:
         secretName: gitlab-webservice-ssl
 {% endif %}
+{% if gitlab_charts_node_selector_enable %}
     nodeSelector:
       workload: "{{ gitlab_charts_webservice_node_selector }}"
+{% endif %}      
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -85,8 +87,10 @@ gitlab:
       requests:
         cpu: "{{ gitlab_charts_sidekiq_requests_cpu }}"
         memory: "{{ gitlab_charts_sidekiq_requests_memory_gb }}G"
+{% if gitlab_charts_node_selector_enable %}
     nodeSelector:
       workload: "{{ gitlab_charts_sidekiq_node_selector }}"
+{% endif %}
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -185,8 +189,10 @@ gitlab:
 {% if gitlab_charts_gitaly_setup %}
 ## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
   gitaly:
+{% if gitlab_charts_node_selector_enable %}
     nodeSelector:
       workload: "{{ gitlab_charts_gitaly_node_selector }}"
+{% endif %}
     resources:
       limits:
         cpu: "{{ gitlab_charts_gitaly_limits_cpu }}"
@@ -225,8 +231,10 @@ gitlab:
 
 global:
   # Deploy pods to Supporting node pool by default unless otherwise configured
+{% if gitlab_charts_node_selector_enable %}
   nodeSelector:
     workload: "{{ gitlab_charts_supporting_node_selector }}"
+{% endif %}
   serviceAccount:
     enabled: true
 {% if cloud_provider != 'none' %}
@@ -548,8 +556,10 @@ nginx-ingress-geo:
 nginx-ingress:
   controller:
     kind: DaemonSet
+{% if gitlab_charts_node_selector_enable %}
     nodeSelector:
       workload: "{{ gitlab_charts_webservice_node_selector }}"
+{% endif %}
     scope:
       enabled: false
     metrics:
@@ -642,8 +652,10 @@ openbao:
   autoscaling:
     minReplicas: {{ gitlab_charts_openbao_min_replicas }}
     maxReplicas: {{ gitlab_charts_openbao_max_replicas }}
+{% if gitlab_charts_node_selector_enable %}
   nodeSelector:
     workload: "{{ gitlab_charts_supporting_node_selector }}"
+{% endif %}
 {% endif %}
 
 # Run outside of cluster

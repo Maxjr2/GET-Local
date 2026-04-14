@@ -4,8 +4,10 @@ prometheus:
   prometheusSpec:
     replicas: 1
     walCompression: true
+{% if gitlab_charts_node_selector_enable %}
     nodeSelector:
-      workload: support
+      workload: "{{ gitlab_charts_supporting_node_selector }}"
+{% endif %}
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -37,13 +39,17 @@ prometheus:
       - {{ custom }}
 {% endfor %}
 
+{% if gitlab_charts_node_selector_enable %}
 kube-state-metrics:
   nodeSelector:
-    workload: support
+    workload: "{{ gitlab_charts_supporting_node_selector }}"
+{% endif %}
 
+{% if gitlab_charts_node_selector_enable %}
 prometheusOperator:
   nodeSelector:
-    workload: support
+    workload: "{{ gitlab_charts_supporting_node_selector }}"
+{% endif %}
 
 grafana:
   enabled: false

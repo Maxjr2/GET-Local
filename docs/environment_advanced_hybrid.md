@@ -622,6 +622,16 @@ Charts are installed directly from a packaged `.tgz` file.
 
 - `gitlab_charts_ref` - File path/URL to GitLab Charts `.tgz` package, accessible to the Ansible control node
 
+**Node Selectors:**
+
+By default, the Toolkit adds `workload` [node selectors](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to the Chart values. When using Toolkit provisioned infrastructure, the Kubernetes nodes will have appropriate `workload` labels to help distribute pods. When providing your own infrastructure, you may want to set your own node selectors, or turn them off entirely.
+
+- `gitlab_charts_node_selector_enable` - Used to enable or disable `workload` node selectors across the chart. Default is set to `true`.
+- `gitlab_charts_webservice_node_selector` - Used to specify `workload` node selector to use for Webservice pods. Default is set to `webservice`
+- `gitlab_charts_sidekiq_node_selector` - Used to specify `workload` node selector to use for Sidekiq pods. Default is set to `sidekiq`
+- `gitlab_charts_supporting_node_selector` - Used to specify `workload` node selector to use for supporting components. Default is set to `support`
+- `gitlab_charts_gitaly_node_selector` - Used to specify `workload` node selector to use for Gitaly pods. Default is set to `gitaly`
+
 ### Google Cloud Platform (GCP)
 
 For environments using GKE the following additional settings are available:
