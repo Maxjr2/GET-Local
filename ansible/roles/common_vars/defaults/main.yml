@@ -375,6 +375,7 @@ gitlab_cloud_native_release_namespace: "{{ gitlab_charts_release_namespace }}"
 gitlab_charts_release_namespace: default
 kubectl_custom_context: ""
 
+gitlab_charts_node_selector_enable: true
 gitlab_charts_webservice_node_selector: webservice
 gitlab_charts_sidekiq_node_selector: sidekiq
 gitlab_charts_supporting_node_selector: support

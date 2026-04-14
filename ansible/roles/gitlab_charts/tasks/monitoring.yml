@@ -38,8 +38,7 @@
           client:
             enabled: true
             join: "{{ consul_int_addrs }}"
-            nodeSelector: |
-              workload: support
+            nodeSelector: "{{ {'workload': gitlab_charts_supporting_node_selector} if gitlab_charts_node_selector_enable else omit }}"
           connectInject:
             enabled: false
 

@@ -131,7 +131,7 @@
                         name: gitlab-geo-tracking-postgres-password
                         key: password
             nodeSelector:
-              workload: "{{ gitlab_charts_supporting_node_selector }}"
+              workload: "{{ {'workload': gitlab_charts_supporting_node_selector} if gitlab_charts_node_selector_enable else omit }}"
       no_log: true
       diff: true
 
