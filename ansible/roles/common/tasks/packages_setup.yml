@@ -14,13 +14,12 @@
 - name: Setup EPEL Repo (RHEL)
   block:
     - name: Setup EPEL GPG key (RHEL)
-      rpm_key:
-        key: "{{ epel_gpg_key_url }}"
-        state: present
+      command: rpm --import {{ epel_gpg_key_url }}
       register: result
       retries: 5
       delay: 5
       until: result is success
+      changed_when: false
 
     - name: Setup EPEL Repo (RHEL)
       yum:
