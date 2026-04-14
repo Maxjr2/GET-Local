@@ -37,14 +37,29 @@
         update_cache: true
   when: ansible_facts['os_family'] == "Debian"
 
-- name: Remove GitLab repository (RHEL)
-  yum_repository:
-    name: "{{ item }}"
-    file: "gitlab_{{ gitlab_edition }}"
-    state: absent
-  loop:
-    - "gitlab_{{ gitlab_edition }}"
-    - "gitlab_{{ gitlab_edition }}-source"
+- name: Remove GitLab repository and keys (RHEL)
+  block:
+    - name: Remove GitLab yum repository (RHEL)
+      yum_repository:
+        name: "{{ item }}"
+        file: "gitlab_{{ gitlab_edition }}"
+        state: absent
+      loop:
+        - "gitlab_{{ gitlab_edition }}"
+        - "gitlab_{{ gitlab_edition }}-source"
+
+    - name: Find GitLab GPG key in RPM keyring (RHEL)
+      ansible.builtin.shell: >
+        rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' |
+        awk '/[Gg]it[Ll]ab/{print $1}'
+      register: gitlab_gpg_key_pkg
+      changed_when: false
+      failed_when: false
+
+    - name: Remove GitLab GPG key from RPM keyring (RHEL)
+      ansible.builtin.command: rpm -e {{ item }}
+      loop: "{{ gitlab_gpg_key_pkg.stdout_lines }}"
+      when: gitlab_gpg_key_pkg.stdout_lines | length > 0
   when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Remove the repository script file

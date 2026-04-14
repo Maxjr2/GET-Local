@@ -32,44 +32,11 @@
       command: sudo apt-get update
   when: ansible_facts['os_family'] == "Debian"
 
-# Install the key on every run to ensure content changes (e.g. expiry extensions) are picked up.
 - name: Update GitLab repository GPG key (RHEL)
-  block:
-    - name: Create temporary file for GitLab GPG key (RHEL)
-      tempfile:
-        suffix: .key
-      register: gitlab_gpg_key_tmp
-
-    - name: Download GitLab GPG key (RHEL)
-      get_url:
-        url: "{{ gitlab_gpg_key_url }}"
-        dest: "{{ gitlab_gpg_key_tmp.path }}"
-        mode: '0644'
-      register: result
-      retries: 2
-      delay: 3
-      until: result is success
-
-    - name: Remove existing GitLab GPG key if present (RHEL)
-      rpm_key:
-        key: "{{ gitlab_gpg_key_tmp.path }}"
-        state: absent
-      ignore_errors: true
-
-    - name: Import GitLab GPG key (RHEL)
-      rpm_key:
-        key: "{{ gitlab_gpg_key_tmp.path }}"
-        state: present
-      register: result
-      retries: 2
-      delay: 3
-      until: result is success
-
-  always:
-    - name: Remove temporary GitLab GPG key file (RHEL)
-      file:
-        path: "{{ gitlab_gpg_key_tmp.path }}"
-        state: absent
-      when: gitlab_gpg_key_tmp.path is defined
-
+  command: rpm --import {{ gitlab_gpg_key_url }}
+  register: result
+  retries: 2
+  delay: 3
+  until: result is success
+  changed_when: false
   when: ansible_facts['os_family'] == 'RedHat'
