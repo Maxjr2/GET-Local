@@ -634,9 +634,10 @@ By default, the Toolkit adds `workload` [node selectors](https://kubernetes.io/d
 
 ### Google Cloud Platform (GCP)
 
-For environments using GKE the following additional settings are available:
+For environments using GKE the following additional settings are available. Note that the external IP settings differ depending on whether NGINX Ingress (default) or [Envoy Gateway](#advanced-configuration) is used:
 
-- `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups. **Required.**
+- `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups when using NGINX Ingress (default). Not used when [Envoy Gateway is enabled](#advanced-configuration) — use `gitlab_charts_gateway_api_gcp_ip_resource_names` instead. **Required (NGINX Ingress).**
+- `gitlab_charts_gateway_api_gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. Replaces `external_ip` when [Envoy Gateway is enabled](#advanced-configuration). **Required (Envoy Gateway).**
 - `gcp_gke_location` - Name of Region or Zone the GCP Kubernetes cluster is in, depending on if it's Regional or Zonal respectively. Only required for Cloud Native Hybrid installs when `kubeconfig_setup` is set to true.
 - `gcp_gke_workload_identity_setup` - Sets up deployments to use [GKE Workload Identity](#gke-workload-identity) for authentication via Service Account annotations. This must be set to `true` if the equivalent Terraform `gke_enable_workload_identity` setting has been enabled.
   - `gcp_service_account_prefix` - If `gcp_gke_workload_identity_setup` has been set to `true` and the [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) was changed in Terraform from the default of `gl` this needs to also be set in Ansible to ensure the correct setup.
@@ -793,6 +794,22 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 > When Gitaly in Kubernetes has been enabled, `gitlab_charts_webservice_max_replicas` and `gitlab_charts_sidekiq_max_replicas` must be explicitly set as automatic pod count calculations are not possible.
 
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
+
+**Gateway API ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)):**
+
+> [!important]
+> Envoy Gateway and Gateway API is currently in Beta and the migration from NGINX Ingress involves downtime.
+> For known limitations with Gateway API and Envoy Gateway, see [work item 5](https://gitlab.com/groups/gitlab-com/gl-infra/software-delivery/operate/-/work_items/5).
+
+> [!note]
+> If you have an existing environment running NGINX Ingress and want to migrate, refer to the
+> [Envoy Gateway migration guide](https://docs.gitlab.com/charts/installation/migration/envoy_gateway_migration/)
+> in the GitLab Charts documentation before enabling this feature.
+
+- `gitlab_charts_gateway_api_setup` - Enables Gateway API and [Envoy Gateway](https://docs.gitlab.com/charts/charts/envoygateway/) deployment. When enabled on existing environments, this replaces NGINX Ingress with Gateway API resources. Defaults to `false`.
+- `gitlab_charts_envoy_gateway_crd_repo_ref` - Reference to the Helm chart used to render the Gateway API custom resource definitions and the
+  Envoy Gateway specific Gateway API extensions. Optional, default is `oci://docker.io/envoyproxy/gateway-crds-helm`.
+- `gitlab_charts_gateway_api_gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. **Required on GCP.**
 
 #### Persistent Volume Configuration (StorageClass)
 

@@ -244,6 +244,53 @@
     - charts_version
     - zero-downtime-post-deployment-migrations
 
+- name: Prepare Gateway API and Envoy Gateway CRDs
+  block:
+  - name: Get latest GitLab chart details
+    command: helm search repo "{{ gitlab_charts_repo_name }}/gitlab" -o json
+    register: latest_gitlab_chart_version
+    when: not offline_setup
+
+  - name: Fetch GitLab Chart.yaml
+    ansible.builtin.uri:
+      url: "https://gitlab.com/gitlab-org/charts/gitlab/-/raw/v{{ gitlab_charts_version | default((latest_gitlab_chart_version.stdout | from_json)[0].version) }}/Chart.yaml"
+      return_content: yes
+    register: gitlab_chart_yaml
+    when: not offline_setup
+
+  - name: Extract Envoy Gateway version
+    set_fact:
+      envoy_gateway_version: "{{ (gitlab_chart_yaml.content | from_yaml).dependencies | selectattr('alias', 'defined') | selectattr('alias', 'equalto', 'envoy-gateway') | map(attribute='version') | first }}"
+    when: not offline_setup
+
+  - name: Template Gateway API and Envoy Gateway CRDs
+    kubernetes.core.helm_template:
+      chart_ref: "{{ gitlab_charts_envoy_gateway_crd_repo_ref }}"
+      chart_version: "{{ envoy_gateway_version | default(omit) }}"
+      release_name: eg-crds
+      values:
+        crds:
+          gatewayAPI:
+            enabled: true
+          envoyGateway:
+            enabled: true
+    register: envoy_crds
+
+  - name: Apply Gateway API and Envoy Gateway CRDs
+    kubernetes.core.k8s:
+      state: present
+      definition: "{{ envoy_crds.stdout | from_yaml_all }}"
+      namespace: "{{ gitlab_cloud_native_release_namespace }}"
+      server_side_apply:
+        field_manager: ansible_GET
+  tags:
+    - reconfigure
+    - charts
+    - gateway_api
+    - crds
+  when:
+    - gitlab_charts_gateway_api_setup
+
 - name: Lookup GitLab Chart values
   set_fact:
     gitlab_charts_values: "{{ lookup('template', 'templates/gitlab.yml.j2') | from_yaml }}"

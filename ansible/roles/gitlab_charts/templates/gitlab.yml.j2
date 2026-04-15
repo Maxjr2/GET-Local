@@ -154,8 +154,13 @@ gitlab:
       username: "{{ postgres_username }}"
       database: "{{ postgres_database_name }}"
 {% endif %}
+{% set use_envoy = gitlab_charts_gateway_api_setup and (gitlab_version == '' or gitlab_version is version('18.11', '>=')) %}
 {% if pages_enable %}
   gitlab-pages:
+{% if use_envoy %}
+    ingress:
+      enabled: false
+{% else %}
     ingress:
       enabled: true
       tls:
@@ -164,6 +169,7 @@ gitlab:
         secretName: gitlab-pages-ssl
 {% else %}
         enabled: false
+{% endif %}
 {% endif %}
     metrics:
       enabled: true
@@ -237,6 +243,12 @@ global:
 {% endif %}
   serviceAccount:
     enabled: true
+{% if use_envoy %}
+  gatewayApi:
+    enabled: true
+    installEnvoy: true
+    configureCertmanager: {{ external_url_ssl and external_ssl_source == 'letsencrypt' }}
+{% endif %}
 {% if cloud_provider != 'none' %}
   appConfig:
     object_store:
@@ -363,10 +375,10 @@ global:
     enabled: false # Gitaly runs outside of cluster
 {% endif %}
   hosts:
-{% if cloud_provider != 'aws' %}
+{% if cloud_provider != 'aws' and not (cloud_provider == 'gcp' and use_envoy) %}
     externalIP: "{{ external_ip }}"
 {% endif %}
-{% if cloud_native_hybrid_geo_unified_url %}
+{% if cloud_native_hybrid_geo_unified_url and not use_envoy %}
     externalGeoIP: "{{ external_geo_ip }}"
 {% endif %}
     domain: "{{ external_host }}"
@@ -376,7 +388,9 @@ global:
     registry:
       name: "{{ container_registry_external_host }}"
   ingress:
-{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
+{% if use_envoy %}
+    enabled: false
+{% elif external_url_ssl and external_ssl_source == 'letsencrypt' %}
     configureCertmanager: true
 {% elif external_url_ssl and external_ssl_source == 'user' %}
     configureCertmanager: false
@@ -547,13 +561,19 @@ global:
 {% if cloud_native_hybrid_geo_role == 'secondary' %}
         primaryApiUrl: "{{ geo_primary_registry_url }}"
 {% endif %}
+{% if cloud_native_hybrid_geo_unified_url and use_envoy %}
+    gatewayApi:
+      addionalHostname: "{{ (geo_primary_internal_url if cloud_native_hybrid_geo_role == 'primary' else geo_secondary_internal_url) | regex_replace('^https?:\/\/') }}"
+{% endif %}
 {% endif %}
 {% endif %}
 
 nginx-ingress-geo:
-  enabled: {{ cloud_native_hybrid_geo_unified_url }}
+  enabled: {{ (not use_envoy) and cloud_native_hybrid_geo_unified_url | lower }}
 
 nginx-ingress:
+  enabled: {{ not use_envoy | lower }}
+{% if not use_envoy %}
   controller:
     kind: DaemonSet
 {% if gitlab_charts_node_selector_enable %}
@@ -578,12 +598,20 @@ nginx-ingress:
     config:
       use-forwarded-headers: true
 {% endif %}
+{% endif %}
 
-{% if gitlab_version != '' and gitlab_version is version('18.3', '<') %}
+{% set install_certmanager = external_url_ssl and external_ssl_source == 'letsencrypt' %}
+{% if not install_certmanager and gitlab_version != '' and gitlab_version is version('18.3', '<') %}
 certmanager:
-  install: {{ (external_url_ssl and external_ssl_source == 'letsencrypt') | lower }}
-{% else %}
-installCertmanager: {{ (external_url_ssl and external_ssl_source == 'letsencrypt') | lower }}
+  install: false
+{% elif not install_certmanager %}
+installCertmanager: false
+{% endif %}
+
+{% if install_certmanager and use_envoy %}
+certmanager:
+  config:
+    enableGatewayAPI: true
 {% endif %}
 
 {% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
@@ -594,6 +622,10 @@ certmanager-issuer:
 {% if openbao_enable %}
 openbao:
   install: true
+{% if use_envoy %}
+  ingress:
+    enabled: false
+{% endif %}
 {% if openbao_unseal_awskms_enable %}
   serviceAccount:
     annotations:
@@ -710,3 +742,81 @@ prometheus:
 # https://docs.gitlab.com/ee/ci/runners/#configuring-runners-in-gitlab
 gitlab-runner:
   install: false
+
+{% if use_envoy %}
+gatewayApiResources:
+  gateway:
+{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
+    protocol: "HTTPS"
+{% elif external_url_ssl and external_ssl_source == 'user' %}
+    protocol: "HTTPS"
+{% else %}
+    protocol: "HTTP"
+{% endif %}
+    listeners:
+      gitlab-web:
+        certificateRefs:
+          - name: gitlab-webservice-ssl
+{% if cloud_native_hybrid_geo_unified_url %}
+      gitlab-web-geo:
+        certificateRefs:
+          - name: gitlab-webservice-ssl
+{% endif %}
+{% if container_registry_enable %}
+      registry-web:
+        certificateRefs:
+          - name: gitlab-webservice-ssl
+{% endif %}
+{% if pages_enable %}
+      pages-web:
+{% if pages_ssl_enable and pages_ssl_cert != '' and pages_ssl_key != '' %}
+        protocol: "HTTPS"
+        certificateRefs:
+          - name: gitlab-pages-ssl
+{% else %}
+        protocol: "HTTP"
+{% endif %}
+
+{% endif %}
+{% if openbao_enable %}
+      openbao-web:
+{% if openbao_ssl_enable %}
+        protocol: "HTTPS"
+        certificateRefs:
+          - name: gitlab-openbao-tls
+{% else %}
+        protocol: "HTTP"
+{% endif %}
+{% endif %}
+{% if aws_allocation_ids != "" %}
+    infrastructure:
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: nlb
+        service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "{{ aws_allocation_ids | replace(' ', '') }}"
+        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: workload=webservice
+{% elif gitlab_charts_gateway_api_gcp_ip_resource_names != "" %}
+    infrastructure:
+      annotations:
+        networking.gke.io/load-balancer-type: External
+        networking.gke.io/load-balancer-ip-addresses: "{{ gitlab_charts_gateway_api_gcp_ip_resource_names | replace(' ', '') }}"
+        cloud.google.com/l4-rbs: enabled
+{% endif %}
+{% if gitlab_charts_node_selector_enable %}
+  envoy:
+    proxySpec:
+      provider:
+        kubernetes:
+          envoyDaemonSet:
+            pod:
+              nodeSelector:
+                workload: "{{ gitlab_charts_webservice_node_selector }}"
+{% endif %}
+    metrics:
+      envoyGateway:
+        serviceMonitor:
+          enabled: true
+      envoyProxy:
+        podMonitor:
+          enabled: true
+{% endif %}

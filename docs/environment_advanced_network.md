@@ -472,6 +472,8 @@ By default, the Toolkit will deploy the latest [GitLab Chart](https://gitlab.com
 When `offline_setup` is enabled, the Toolkit won't automatically fetch the GitLab Charts repository from a Helm Charts server. As such, you should first prepare your Ansible control node to have the repository available locally to Helm or install the GitLab Charts package directly. Once prepared, configure the Toolkit by setting the following setting depending on the approach:
 
 - `gitlab_charts_ref`: The [ref](https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#parameter-chart_ref) for a GitLab Charts repository locally available to Helm or the direct path / URL to a GitLab Charts package file in the `.tgz` format.
+- `gitlab_charts_envoy_gateway_crd_repo_ref` - Reference to the [Envoy Gateway CRD Helm chart](https://github.com/envoyproxy/gateway/tree/main/charts/gateway-crds-helm). Version of the reference should
+match the version of the Envoy Gateway bundled with GitLab chart. Only needed if [Gateway API](./environment_advanced_hybrid.md#advanced-configuration) is enabled.
 
 ### Version Check and Service Ping
 
