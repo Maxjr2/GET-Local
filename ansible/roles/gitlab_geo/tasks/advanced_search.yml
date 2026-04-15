@@ -22,6 +22,7 @@
           - app=toolbox
         field_selectors:
           - status.phase=Running
+        namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
       register: toolbox_pod_list
       until: toolbox_pod_list.resources | length > 0
       retries: 30
