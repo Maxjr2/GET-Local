@@ -89,6 +89,11 @@ gitlab_charts_gitaly_storage_size: '50Gi'
 gitlab_charts_gitaly_storage_class: ''
 gitlab_charts_gitaly_storage_names: ['default']
 
+## [Toolkit Beta] Deploy Envoy Gateway and Gateway API instead of NGINX Ingress, see https://docs.gitlab.com/charts/charts/globals/#gateway-api
+gitlab_charts_gateway_api_setup: false
+gitlab_charts_gateway_api_gcp_ip_resource_names: ""
+gitlab_charts_envoy_gateway_crd_repo_ref: 'oci://docker.io/envoyproxy/gateway-crds-helm'
+
 # Gitaly cgroups defaults
 ## Memory - Gitaly cgroups are allocated the larger of: 90% of total memory, or total memory minus 6GB. This ensures at least 10% or 6GB (whichever is larger) is available for other processes not covered in cgroups. (gitaly, gitaly-logger, etc...)
 gitlab_charts_gitaly_cgroups_memory_scaler: 0.9
