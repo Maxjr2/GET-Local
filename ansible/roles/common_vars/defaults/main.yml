@@ -435,6 +435,7 @@ gitlab_charts_secrets_tasks_file: "{{ custom_tasks_folder }}/gitlab_charts_secre
 gitlab_rails_custom_tasks_file: "{{ custom_tasks_folder }}/gitlab_rails.yml"
 haproxy_custom_tasks_file: "{{ custom_tasks_folder }}/haproxy.yml"
 monitor_custom_tasks_file: "{{ custom_tasks_folder }}/monitor.yml"
+opensearch_custom_tasks_file: "{{ custom_tasks_folder }}/opensearch.yml"
 pgbouncer_custom_tasks_file: "{{ custom_tasks_folder }}/pgbouncer.yml"
 post_configure_custom_tasks_file: "{{ custom_tasks_folder }}/post_configure.yml"
 postgres_custom_tasks_file: "{{ custom_tasks_folder }}/postgres.yml"

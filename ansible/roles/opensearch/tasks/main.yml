@@ -78,3 +78,20 @@
     timeout: 180
   when: opensearch_docker_prune
   tags: reconfigure
+
+- name: Run Custom Tasks
+  block:
+    - name: Check if Custom Tasks file exists
+      stat:
+        path: "{{ opensearch_custom_tasks_file }}"
+      register: opensearch_custom_tasks_file_path
+      delegate_to: localhost
+      become: false
+
+    - name: Run Custom Tasks
+      include_tasks:
+        file: "{{ opensearch_custom_tasks_file }}"
+        apply:
+          tags: custom_tasks
+      when: opensearch_custom_tasks_file_path.stat.exists
+  tags: custom_tasks
