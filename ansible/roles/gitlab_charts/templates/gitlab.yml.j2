@@ -27,7 +27,7 @@ gitlab:
 {% if gitlab_charts_node_selector_enable %}
     nodeSelector:
       workload: "{{ gitlab_charts_webservice_node_selector }}"
-{% endif %}      
+{% endif %}
 {% if cloud_provider == 'aws' %}
     serviceAccount:
       annotations:
@@ -802,8 +802,8 @@ gatewayApiResources:
         networking.gke.io/load-balancer-ip-addresses: "{{ gitlab_charts_gateway_api_gcp_ip_resource_names | replace(' ', '') }}"
         cloud.google.com/l4-rbs: enabled
 {% endif %}
-{% if gitlab_charts_node_selector_enable %}
   envoy:
+{% if gitlab_charts_node_selector_enable %}
     proxySpec:
       provider:
         kubernetes:
