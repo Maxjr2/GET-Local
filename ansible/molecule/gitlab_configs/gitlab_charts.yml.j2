@@ -25,16 +25,17 @@ global:
       enabled: true
       proxy_download: true
       bucket: gitlab
+    dependencyProxy:
+      enabled: true
+      proxy_download: true
+      bucket: gitlab
   ingress:
     configureCertmanager: false
-    class: traefik
   shell:
     port: 32022
   registry:
     bucket: gitlab
 installCertmanager: false
-nginx-ingress:
-  enabled: false
 gitlab:
   gitlab-shell:
     service:

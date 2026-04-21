@@ -569,10 +569,10 @@ global:
 {% endif %}
 
 nginx-ingress-geo:
-  enabled: {{ (not use_envoy) and cloud_native_hybrid_geo_unified_url | lower }}
+  enabled: {{ ((not use_envoy) and cloud_native_hybrid_geo_unified_url) | lower }}
 
 nginx-ingress:
-  enabled: {{ not use_envoy | lower }}
+  enabled: {{ (not use_envoy) | lower }}
 {% if not use_envoy %}
   controller:
     kind: DaemonSet
