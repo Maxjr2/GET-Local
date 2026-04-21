@@ -4,6 +4,7 @@
   command: |
     k3d cluster create {{ cluster_name }} \
       --network {{ network_name }} \
+      --k3s-arg '--disable=traefik@server:0' \
       {{ cluster_options }}
 
 - name: Add workload label
