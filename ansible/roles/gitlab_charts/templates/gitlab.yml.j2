@@ -375,7 +375,7 @@ global:
     enabled: false # Gitaly runs outside of cluster
 {% endif %}
   hosts:
-{% if cloud_provider != 'aws' and not (cloud_provider == 'gcp' and use_envoy) %}
+{% if cloud_provider != 'aws' and not use_envoy %}
     externalIP: "{{ external_ip }}"
 {% endif %}
 {% if cloud_native_hybrid_geo_unified_url and not use_envoy %}
@@ -755,17 +755,32 @@ gatewayApiResources:
 {% endif %}
     listeners:
       gitlab-web:
+{% if external_url_ssl %}
+        protocol: "HTTPS"
         certificateRefs:
           - name: gitlab-webservice-ssl
+{% else %}
+        protocol: "HTTP"
+{% endif %}
 {% if cloud_native_hybrid_geo_unified_url %}
       gitlab-web-geo:
+{% if external_url_ssl %}
+        protocol: "HTTPS"
         certificateRefs:
           - name: gitlab-webservice-ssl
+{% else %}
+        protocol: "HTTP"
+{% endif %}
 {% endif %}
 {% if container_registry_enable %}
       registry-web:
+{% if external_url_ssl %}
+        protocol: "HTTPS"
         certificateRefs:
           - name: gitlab-webservice-ssl
+{% else %}
+        protocol: "HTTP"
+{% endif %}
 {% endif %}
 {% if pages_enable %}
       pages-web:
