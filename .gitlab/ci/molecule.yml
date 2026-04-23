@@ -151,6 +151,7 @@ cloud-native:
   extends: .molecule
   variables:
     MOLECULE_SCENARIO: cloud-native
+    MOLECULE_CHARTS_USE_ENVOY_GATEWAY: true
   rules:
     - !reference [.molecule-skip-jobs, rules]
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
