@@ -7,7 +7,7 @@
   image: docker:29
   services:
     - name: docker:29-dind
-      command: ["--mtu=1400"] # https://gitlab.com/gitlab-org/gitlab/-/issues/473739#workaround
+      command: ["--mtu=1400"] # https://gitlab.com/gitlab-org/gitlab/-/work_items/473739#workaround
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2376

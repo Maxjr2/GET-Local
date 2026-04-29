@@ -1,5 +1,5 @@
 ---
-# Workaround for https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/9429
+# Workaround for https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/9429
 - name: Prepare Omnibus tasks
   hosts: all
   tasks:

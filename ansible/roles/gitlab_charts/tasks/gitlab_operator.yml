@@ -1,4 +1,4 @@
-# Requires issues https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1734, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1089, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1568
+# Requires issues https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/work_items/1734, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/work_items/1089, https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/work_items/1568
 - name: Fail if using unsupported GitLab version for Operator in GET
   fail:
     msg: "GET requires 17.6 and up for Operator setup. {{ gitlab_version }} is not compatible. Exiting..."
@@ -109,7 +109,7 @@
     msg: "Operator version for {{ gitlab_version }} could not be found. Exiting..."
   when: gitlab_operator_version == ''
 
-# https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/issues/1315#note_1796142040
+# https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/work_items/1315#note_1796142040
 - name: Create Service Accounts for sub-charts
   block:
     - name: Create Service Accounts for Workload Identity

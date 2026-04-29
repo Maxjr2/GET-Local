@@ -367,7 +367,7 @@ To lock down internal network access to particular CIDR blocks these _optional_ 
   >>> [!note]
   There are [additional considerations for this setting when using Geo](https://docs.gitlab.com/ee/administration/geo/setup/database.html#postgresql-replication).
 
-  Some known issues exist with this setting in certain setups - [gitlab-org/omnibus-gitlab#6594](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594) and [gitlab-org/omnibus-gitlab#6590](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6590).
+  Some known issues exist with this setting in certain setups - [gitlab-org/omnibus-gitlab#6594](https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/6594) and [gitlab-org/omnibus-gitlab#6590](https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/6590).
   >>>
 - `geo_tracking_postgres_md5_auth_cidr_blocks` - A list of CIDR blocks to be allowed access to [Geo Tracking Postgres (Omnibus)](https://docs.gitlab.com/ee/administration/geo/replication/multiple_servers.html#step-3-configure-the-geo-tracking-database-on-the-geo-secondary-site). Default is `['0.0.0.0/0']`.
 - `gitlab_rails_monitoring_cidr_blocks` - A list of CIDR blocks to be allowed access to [GitLab's Health Check endpoints](https://docs.gitlab.com/ee/administration/monitoring/health_check.html). Required for Load Balancers to perform Health Checks. Note, when changing this setting it should include any Load Balancers performing health checks, including any Toolkit provided HAProxy Load Balancers. Default is `['0.0.0.0/0']`.
