@@ -4,5 +4,5 @@ patroni_remove_data_directory_on_rewind_failure: false
 patroni_remove_data_directory_on_diverged_timelines: false
 
 # IP list for Patroni trust auth config
-# https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6594
+# https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/6594
 postgres_int_ips: "{{ (groups['postgres'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | list) if 'postgres' in groups else [] }}"

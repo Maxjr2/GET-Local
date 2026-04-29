@@ -1172,7 +1172,7 @@ The Toolkit will then apply this boundary on the next `terraform apply` run.
 ### Custom IAM Path (AWS)
 
 > [!caution]
-> This feature may be deprecated and removed in the future. It is specifically not known to work with AWS EKS at this time and as a result is not supported for Cloud Native Hybrid setups. For more information please refer to this [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues/746).
+> This feature may be deprecated and removed in the future. It is specifically not known to work with AWS EKS at this time and as a result is not supported for Cloud Native Hybrid setups. For more information please refer to this [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items/746).
 
 The Toolkit allows to configure a custom [Path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) for all IAM Roles and Policies it creates. As detailed in the AWS documentation, you can use a single path, or nest multiple paths as a folder structure. This allows to match your company organizational structure.
 

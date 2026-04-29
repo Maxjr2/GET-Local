@@ -33,7 +33,7 @@ Before contributing you should read and acknowledge our [Technical Design](TECHN
 
 We welcome merge requests with fixes and improvements to GitLab Environment Toolkit code and/or documentation. 
 The issues that are specifically suitable for community contributions are listed with the label
-[`Accepting Merge Requests` on our issue tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues?label_name%5B%5D=Accepting+merge+requests), but you are
+[`Accepting Merge Requests` on our issue tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items?label_name%5B%5D=Accepting+merge+requests), but you are
 free to contribute to any other issue you want.
 
 Please note that if an issue is marked for the current milestone either before

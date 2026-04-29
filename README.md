@@ -197,7 +197,7 @@ The Toolkit is opinionated by necessity, as there is a vast amount of options an
 
 Consequently, during our independent review of feature requests, we might determine that some are not feasible to implement according to Toolkit's opinionated approach. In some cases, it could be more straightforward and quicker for you to tackle it separately.
 
-However, we do welcome Feature Requests that could be valuable to add for other users. If you have such a request please raise it in [our tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues), but we do ask that you check beforehand to see if it's already been raised.
+However, we do welcome Feature Requests that could be valuable to add for other users. If you have such a request please raise it in [our tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items), but we do ask that you check beforehand to see if it's already been raised.
 
 ### Features that won't be covered
 

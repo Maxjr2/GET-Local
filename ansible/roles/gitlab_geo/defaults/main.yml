@@ -27,7 +27,7 @@ geo_secondary_health_check_url: "{{ geo_secondary_external_url }}/-/readiness"
 
 geo_secondary_force_initialize_patroni_cluster: false
 
-# GitLab Issue: https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/9126
+# GitLab Issue: https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/9126
 geo_remove_patroni_cluster_reconfigure_retries: 5
 geo_remove_patroni_cluster_reconfigure_delay: 30
 

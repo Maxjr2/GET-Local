@@ -81,7 +81,7 @@
         mode: "{{ item.mode }}"
         state: directory
       loop:
-        - { path: '/etc/gitlab', mode: '0775' }   # GitLab Issue: https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5814
+        - { path: '/etc/gitlab', mode: '0775' }   # GitLab Issue: https://gitlab.com/gitlab-org/omnibus-gitlab/-/work_items/5814
         - { path: '/etc/gitlab/ssl', mode: '0755' }
         - { path: '/etc/gitlab/trusted-certs', mode: '0755' }
       when: omnibus_node

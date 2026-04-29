@@ -65,7 +65,7 @@ gitlab:
         - "{{ cidr }}"
 {% endfor %}
 {% endif %}
-# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
+# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/work_items/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
       enabled: false
@@ -111,7 +111,7 @@ gitlab:
       enabled: true
       podMonitor:
         enabled: true
-# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
+# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/work_items/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
       enabled: false
@@ -138,7 +138,7 @@ gitlab:
 {% endif %}
 {% endif %}
 {% endif %}
-# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/issues/24110#note_729703160
+# Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/work_items/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
     registry:
       enabled: false

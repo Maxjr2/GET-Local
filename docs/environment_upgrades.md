@@ -71,7 +71,7 @@ Perform Terraform dry runs whenever you have updated the Toolkit to ensure no si
 
 This is done simply by running `terraform plan`.
 
-Once completed, the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, check these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect you can reach out via the standard [support channels](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support) or by creating an [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/issues).
+Once completed, the output will show what actions are to be performed. If any actions are listed to be performed, especially destroy actions, check these against the [release notes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/releases) where these should be called out to ensure they are intended. If any of the actions look suspect you can reach out via the standard [support channels](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support) or by creating an [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items).
 
 This is recommended as certain infrastructure changes can trigger large destroy actions that in turn can lead to the loss of the environment and data. While this is behaviour from the cloud providers, every effort is made with the Toolkit to ensure this is avoided but since the consequences can be significant it's always best to do the dry run as described above out an abundance of caution.
 

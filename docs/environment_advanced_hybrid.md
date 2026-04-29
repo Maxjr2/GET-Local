@@ -811,6 +811,46 @@ Once your config file is in place as desired you can proceed to [configure as no
   Envoy Gateway specific Gateway API extensions. Optional, default is `oci://docker.io/envoyproxy/gateway-crds-helm`.
 - `gitlab_charts_gateway_api_gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. **Required on GCP.**
 
+#### Migrating Gitaly from VMs to Kubernetes
+
+The Toolkit supports running VM-based Gitaly and Kubernetes-based Gitaly simultaneously to allow for migrations. When both the `gitaly` inventory group and `gitlab_charts_gitaly_setup: true` are configured together, the Helm values template renders both `external:` (VM) and `internal:` (Kubernetes) Gitaly stanzas, allowing GitLab to route to both during a migration.
+
+Two constraints shape the migration approach. First, GitLab [does not allow duplicate storage names across external and internal Gitaly](https://docs.gitlab.com/administration/gitaly/configure_gitaly/#configure-gitaly-clients), so `gitlab_charts_gitaly_storage_names` must use non-conflicting names while VM Gitaly is still active (for example `['k8s-storage1', 'k8s-storage2']`). Second, GitLab [requires a storage named `default` to exist at all times](https://docs.gitlab.com/administration/gitaly/configure_gitaly/#gitlab-requires-a-default-repository-storage). During the migration `default` remains on VM Gitaly and can only be reassigned to Kubernetes Gitaly once the VMs are removed.
+
+> [!warning]
+> **Take a full backup of your GitLab instance before starting this migration.** The cutover step permanently destroys VM infrastructure and cannot be undone. A backup is your only recovery option if something goes wrong. See [Backups](environment_post_considerations.md#backups) for guidance.
+
+> [!important]
+> **As a general rule for Gitaly on Kubernetes, never reorder or insert entries into `gitlab_charts_gitaly_storage_names`.** Each entry's position in the list maps directly to a Gitaly pod ordinal (`gitaly-0`, `gitaly-1`, and so on). Reordering or inserting entries causes existing pods to be assigned the wrong storage names, resulting in pods serving data under an incorrect name. **Always append new storage names to the end of the list.**
+
+The migration process is as follows:
+
+1. **Deploy Kubernetes Gitaly alongside VM Gitaly** - Enable `gitlab_charts_gitaly_setup: true` and set `gitlab_charts_gitaly_storage_names` to non-conflicting names (for example `['k8s-storage1']`). Keep the existing `gitaly` inventory group and `gitaly_node_count` in place. Run Terraform and Ansible as normal. GitLab will be configured with both VM and Kubernetes Gitaly storages available.
+
+   > [!note]
+   > Size the Gitaly node pool for your **final** storage count, not just the initial one. Each storage name in `gitlab_charts_gitaly_storage_names` schedules one pod, so adding `default` at cutover requires a free node to be available immediately. If the node pool has no spare capacity at that point, the new pod will remain pending until a node provisions, extending the maintenance window. The recommended approach is to configure the node pool for n nodes but start with n-1 storage names, leaving one node free to absorb the `default` pod at cutover.
+
+1. **Migrate repositories off VM storages** - Use GitLab's [repository storage move options](https://docs.gitlab.com/administration/operations/moving_repositories/) to move **all** repositories from the VM storages (`default`, `storage1`, and so on) onto the Kubernetes storages (`k8s-storage1`, and so on). This can be done live without downtime. Set the VM storages to a weight of `0` in the [Admin area](https://docs.gitlab.com/administration/repository_storage_paths/#configure-where-new-repositories-are-stored) to prevent new repositories being created there during the migration.
+
+   Before proceeding to cutover, confirm that no repositories remain on VM storages. You can verify this via the [repository storage Admin area](https://docs.gitlab.com/administration/repository_storage_paths/) or the [storage migrations API](https://docs.gitlab.com/api/project_repository_storage_moves/). Do not proceed until all moves have completed successfully.
+
+1. **Cutover (maintenance window required)** - Once all repositories have been moved off VM storages, a short maintenance window is required. **This step is irreversible.** The VM Gitaly nodes will be permanently destroyed. The `default` storage name cannot exist on both VM and Kubernetes Gitaly simultaneously, so the following steps must be performed together and without delay:
+
+   1. Enable [GitLab maintenance mode](https://docs.gitlab.com/administration/maintenance_mode/) to stop writes before making any infrastructure changes.
+   1. Append `default` to `gitlab_charts_gitaly_storage_names`, keeping any existing entries in place:
+
+      `['k8s-storage1', 'default']`
+
+      Remove the `gitaly` inventory group and set `gitaly_node_count` (and `gitaly_node_pool_count` if applicable) to `0` in Terraform variables.
+   1. Run Terraform to remove the VM Gitaly nodes.
+   1. Run Ansible as soon as Terraform completes to apply the updated Helm configuration. This removes the external Gitaly stanza and creates a new pod (`gitaly-1`, corresponding to the second item in the storage names array) to serve the empty `default` storage.
+   1. Disable maintenance mode once Ansible completes and GitLab is healthy.
+
+   > [!note]
+   > The new Kubernetes `default` pod starts with an empty disk. This is expected as all repositories should have been moved off VM `default` in step 2.
+
+1. **Post-cutover** - Verify GitLab is healthy and all repositories are accessible.
+
 #### Persistent Volume Configuration (StorageClass)
 
 Stateful workloads in Kubernetes require [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) backed by [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) to ensure data persists across pod restarts and cluster operations.
