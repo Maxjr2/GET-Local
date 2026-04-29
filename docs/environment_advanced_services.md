@@ -147,7 +147,7 @@ The variables for this service start with the prefix `rds_postgres_*` and should
 - `rds_postgres_password` - The password for the instance. **Required**.
 - `rds_postgres_username` - The username for the instance. Optional, default is `gitlab`.
 - `rds_postgres_database_name` - The name of the main database in the instance for use by GitLab. Optional, default is `gitlabhq_production`.
-- `rds_postgres_version` - The version of the PostgreSQL instance to set up. Optional, default is `16`.
+- `rds_postgres_version` - The version of the PostgreSQL instance to set up. Optional, default is `17`.
 - `rds_postgres_port` - The port for the instance. Should only be changed if desired. Optional, default is `5432`.
 - `rds_postgres_multi_az` - Specifies if the RDS instance is multi-AZ. Should only be disabled when HA isn't required. Optional, default is `true`.
 - `rds_postgres_auto_minor_version_upgrade` - Whether automated upgrades to minor versions should occur during maintenance window. Optional, default is `false`.
@@ -211,7 +211,7 @@ Configure multiple PostgreSQL databases using the `rds_databases` map variable i
 - `password_wo` - The password for the instance write-only arguments (not stored in state). **Required**.
 - `password_wo_version` - Version number for password rotation. Increment to update the password. Optional, default is `1`.
 - `db_name` - The name of the database in the instance for use by the application. Optional, default is `null`.
-- `version` - The PostgreSQL version to use. Optional, default is `16`.
+- `version` - The PostgreSQL version to use. Optional, default is `17`.
 - `port` - The port for the instance. Optional, default is `5432`.
 
 **Storage:**
@@ -392,7 +392,7 @@ Additionally when the database has been upgraded it's recommended to run the [`A
 
 GCP Cloud SQL Postgres version can be configured via the following variable:
 
-- [`cloud_sql_postgres_version`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#database_version-1) - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `POSTGRES_16`.
+- [`cloud_sql_postgres_version`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#database_version-1) - The version of the PostgreSQL instance to set up. This should be set to the [recommended version for the version of GitLab being deployed](https://docs.gitlab.com/ee/administration/package_information/postgresql_versions.html) or latest minor version if not available. Changing this value to a newer version will trigger an upgrade during the next run. Optional, default is `POSTGRES_17`.
 
 ##### GCP Cloud SQL - Parameters
 

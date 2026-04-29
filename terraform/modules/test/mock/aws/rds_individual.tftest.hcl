@@ -69,8 +69,8 @@ run "main_database_basic" {
   }
 
   assert {
-    condition     = aws_db_instance.gitlab[0].engine_version == "16"
-    error_message = "Should default to version 16"
+    condition     = aws_db_instance.gitlab[0].engine_version == "17"
+    error_message = "Should default to version 17"
   }
 
   assert {
@@ -520,8 +520,8 @@ run "backup_maintenance" {
     prefix = "gitlab-rds-backup"
 
     rds_postgres_instance_type            = "m5.large"
-    rds_postgres_password                 = "password"
-    rds_postgres_version                  = "16"
+    rds_postgres_password                 = "supersecret"
+    rds_postgres_version                  = "17"
     rds_postgres_backup_retention_period  = 30
     rds_postgres_backup_window            = "03:00-04:00"
     rds_postgres_maintenance_window       = "sun:04:00-sun:05:00"

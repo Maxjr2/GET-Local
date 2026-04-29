@@ -75,8 +75,8 @@ run "single_database" {
   }
 
   assert {
-    condition     = aws_db_instance.gitlab_rds_database["main"].engine_version == "16"
-    error_message = "Should default to version 16"
+    condition     = aws_db_instance.gitlab_rds_database["main"].engine_version == "17"
+    error_message = "Should default to version 17"
   }
 }
 
@@ -682,8 +682,8 @@ run "backup_maintenance" {
       main = {
         instance_type            = "m6g.large"
         username                 = "gitlab"
-        password_wo              = "password"
-        version                  = 16
+        password_wo              = "supersecret"
+        version                  = 17
         backup_retention_period  = 30
         backup_window            = "03:00-04:00"
         maintenance_window       = "sun:04:00-sun:05:00"

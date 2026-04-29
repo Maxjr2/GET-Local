@@ -91,7 +91,7 @@ module "gitlab_ref_arch_gcp" {
   # 10k Hybrid - Cloud SQL & Memorystore
   cloud_sql_postgres_machine_tier = "custom-8-30720"
   cloud_sql_postgres_root_password = <PASSWORD>
-  cloud_sql_postgres_version = "POSTGRES_16"
+  cloud_sql_postgres_version = "POSTGRES_17"
   cloud_sql_postgres_params = {
     "max_connections" = "3000"
   }
@@ -282,7 +282,7 @@ module "gitlab_ref_arch_aws" {
   # 10k Hybrid - AWS RDS & ElastiCache
   rds_postgres_instance_type = "m5.2xlarge"
   rds_postgres_password = <PASSWORD>
-  rds_postgres_version = "16"
+  rds_postgres_version = "17"
 
   elasticache_redis_cache_node_count = 1
   elasticache_redis_cache_instance_type = "m5.xlarge"

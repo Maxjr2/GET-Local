@@ -1166,7 +1166,7 @@ variable "rds_postgres_database_name" {
 }
 variable "rds_postgres_version" {
   type    = string
-  default = "16"
+  default = "17"
 }
 variable "rds_postgres_auto_minor_version_upgrade" {
   type    = bool
@@ -1331,7 +1331,7 @@ variable "rds_praefect_postgres_database_name" {
 }
 variable "rds_praefect_postgres_version" {
   type    = string
-  default = "16"
+  default = "17"
 }
 variable "rds_praefect_postgres_auto_minor_version_upgrade" {
   type    = bool
@@ -1475,7 +1475,7 @@ variable "rds_geo_tracking_postgres_database_name" {
 }
 variable "rds_geo_tracking_postgres_version" {
   type    = string
-  default = "16"
+  default = "17"
 }
 variable "rds_geo_tracking_postgres_auto_minor_version_upgrade" {
   type    = bool
@@ -1607,7 +1607,7 @@ variable "rds_databases" {
     username            = optional(string, "postgres")
     password_wo         = optional(string, null)
     password_wo_version = optional(number, 1)
-    version             = optional(string, "16")
+    version             = optional(string, "17")
     db_name             = optional(string, null)
     port                = optional(number, 5432)
 
