@@ -481,7 +481,7 @@ The below settings are required when using an externally managed database:
 - `container_registry_maintenance_database` - The initial database that GET connects to when creating the new database. Defaults to `postgres`.
 - `container_registry_database_username` - Username for the user to be created and used for authentication by GitLab with the metadata database. Defaults to `registry`.
 - `container_registry_database_password` - Password for the metadata database user being created for authentication by GitLab with the metadata database.
-- `container_registry_database_ssl_mode` - See the PostgreSQL documentation for additional information https://www.postgresql.org/docs/16/libpq-ssl.html. Defaults to `prefer`. If certificates need to be provided this should be done via [custom config](environment_advanced.md#custom-config).
+- `container_registry_database_ssl_mode` - See the PostgreSQL documentation for additional information https://www.postgresql.org/docs/17/libpq-ssl.html. Defaults to `prefer`. If certificates need to be provided this should be done via [custom config](environment_advanced.md#custom-config).
 
 > [!note]
 > When deploying the metadata database for a new deployment the the database can be enabled straight away. For existing deployments, the database should be disabled initially so that the required import process can be followed, once complete the database can be enabled.
