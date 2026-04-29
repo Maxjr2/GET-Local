@@ -538,7 +538,7 @@ resource "aws_eks_node_group" "gitlab_supporting_pool" {
   }
 }
 
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 resource "aws_launch_template" "gitlab_gitaly" {
   count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
 

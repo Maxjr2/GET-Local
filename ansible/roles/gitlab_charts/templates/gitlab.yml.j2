@@ -193,7 +193,7 @@ gitlab:
       serviceMonitor:
         enabled: true
 {% if gitlab_charts_gitaly_setup %}
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
   gitaly:
 {% if gitlab_charts_node_selector_enable %}
     nodeSelector:
@@ -364,7 +364,7 @@ global:
 {% endif %}
 {% endfor %}
 {% endif %}
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 {% if gitlab_charts_gitaly_setup %}
     internal:
       names:
