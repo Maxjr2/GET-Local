@@ -691,7 +691,7 @@ variable "supporting_node_pool_min_count" {
   default = 0
 }
 
-### [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+### Gitaly on Kubernetes
 variable "gitaly_node_pool_count" {
   type    = number
   default = 0

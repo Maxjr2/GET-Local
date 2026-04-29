@@ -80,7 +80,7 @@ module "gitlab_ref_arch_gcp" {
   supporting_node_pool_min_count    = 1
   supporting_node_pool_machine_type = "n1-standard-4"
 
-  # Gitaly on Kubernetes (Toolkit Beta) - Uncomment to use instead of VMs
+  # Gitaly on Kubernetes - Uncomment to use instead of VMs
   # gitaly_node_pool_count = 0
   # gitaly_node_pool_machine_type = "n1-standard-16"
 
@@ -270,7 +270,7 @@ module "gitlab_ref_arch_aws" {
   supporting_node_pool_min_count = 1
   supporting_node_pool_instance_type = "m5.xlarge"
 
-  # Gitaly on Kubernetes (Toolkit Beta) - Uncomment to use instead of VMs
+  # Gitaly on Kubernetes - Uncomment to use instead of VMs
   # gitaly_node_pool_count = 3
   # gitaly_node_pool_instance_type = "m5.4xlarge"
   # gitaly_node_pool_az_distribution = "per-az"  # Recommended for stateful workloads
@@ -538,7 +538,7 @@ This can be configured in Terraform via the [module's environment config file](e
 
 - `eks_default_disk_kms_key_arn` - The AWS KMS key ARN for [CMEK storage encryption](environment_provision.md#customer-managed-encryption-keys-cmek-aws). If not set AWS provided keys will be used instead. Optional, default is `null`.
   - `*_node_pool_disk_kms_key_arn` - The AWS KMS key ARN to be used for specific EKS Node Group VM disks. Will override `eks_default_disk_kms_key_arn` if specified. Default is `null`.
-    - Available component options: `webservice`, `sidekiq`, `supporting` and `gitaly` ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)).
+    - Available component options: `webservice`, `sidekiq`, `supporting` and `gitaly`.
 
 ##### EKS Secrets Envelope Encryption (CMEK)
 
@@ -664,7 +664,7 @@ all:
     cloud_native_hybrid_environment: true
     kubeconfig_setup: true
 
-    # Gitaly on Kubernetes (Toolkit Beta)
+    # Gitaly on Kubernetes
     # Webservice, Sidekiq and Gitaly pod sizings required in this setup
     # gitlab_charts_webservice_max_replicas: 20
     # gitlab_charts_sidekiq_max_replicas: 14
@@ -722,7 +722,7 @@ all:
     cloud_native_hybrid_environment: true
     kubeconfig_setup: true
 
-    # Gitaly on Kubernetes (Toolkit Beta)
+    # Gitaly on Kubernetes
     # Webservice, Sidekiq and Gitaly pod sizings required in this setup
     # gitlab_charts_webservice_max_replicas: 20
     # gitlab_charts_sidekiq_max_replicas: 14
@@ -779,9 +779,9 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 - `gitlab_charts_sidekiq_min_replicas`: Override for the number of min Sidekiq replicas instead of them being automatically calculated. Defaults to `''`.
 - `gitlab_charts_sidekiq_max_unavailable`: Override for the number of max Sidekiq replicas that can be unavailable at any time instead of being automatically calculated. Defaults to `''`.
 
-**Gitaly Configuration ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)):**
+**Gitaly Configuration:**
 
-- `gitlab_charts_gitaly_setup` - Enables running Gitaly in Kubernetes instead of VMs.
+- `gitlab_charts_gitaly_setup` - Enables running Gitaly in Kubernetes instead of VMs. Defaults to `false`.
 - `gitlab_charts_gitaly_requests_memory_gb` - Memory [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Gitaly pod in GB. Default is `''`.
 - `gitlab_charts_gitaly_limits_memory_gb` - Memory [limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for each Gitaly pod in GB. By default, this matches `gitlab_charts_gitaly_requests_memory_gb` to ensure Guaranteed QoS. Changing this should only be done in advanced scenarios.
 - `gitlab_charts_gitaly_requests_cpu` - CPU [request](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) for Gitaly pods. Default is `''`.

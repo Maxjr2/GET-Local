@@ -355,7 +355,7 @@ resource "google_container_node_pool" "gitlab_supporting_pool" {
   }
 }
 
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 resource "google_container_node_pool" "gitlab_gitaly_pool" {
   count = min(var.gitaly_node_pool_count + var.gitaly_node_pool_max_count, 1)
 

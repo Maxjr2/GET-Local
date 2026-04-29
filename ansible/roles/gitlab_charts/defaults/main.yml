@@ -78,7 +78,7 @@ sidekiq_default_replica_counts:
   '12': 8
   '4': 4
 
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 gitlab_charts_gitaly_setup: false
 
 gitlab_charts_gitaly_requests_memory_gb: ''

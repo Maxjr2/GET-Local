@@ -149,6 +149,20 @@
     - postgres_external_prep
     - cloud_native_hybrid_geo_role != 'secondary'  # Same as above: secondary inherits from primary
 
+- name: Fail if Gitaly on Kubernetes resource sizing has not been configured
+  fail:
+    msg: |
+      Gitaly on Kubernetes is enabled but resource sizing has not been configured.
+      Ensure 'gitlab_charts_gitaly_requests_memory_gb' and 'gitlab_charts_gitaly_requests_cpu' have been set and re-run.
+      See https://docs.gitlab.com/administration/gitaly/kubernetes/ for guidance.
+  when:
+    - gitlab_charts_gitaly_setup
+    - gitlab_charts_gitaly_requests_memory_gb == '' or gitlab_charts_gitaly_requests_cpu == ''
+  tags:
+    - reconfigure
+    - charts
+    - charts_values
+
 - name: Calculate Webservice / Sidekiq pod replica counts as required
   block:
     - name: Calculate Webservice / Sidekiq max replica counts based on Linux Package (Omnibus) Gitaly deployment size if not configured

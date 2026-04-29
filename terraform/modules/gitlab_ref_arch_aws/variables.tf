@@ -1099,7 +1099,7 @@ variable "supporting_node_pool_az_distribution" {
   }
 }
 
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 variable "gitaly_node_pool_count" {
   type    = number
   default = 0
@@ -2239,7 +2239,7 @@ variable "supporting_node_pool_custom_tags" {
   type    = map(string)
   default = {}
 }
-## [Toolkit Beta] Gitaly on Kubernetes. Known limitations, see https://docs.gitlab.com/administration/gitaly/kubernetes/
+## Gitaly on Kubernetes
 variable "gitaly_node_pool_custom_tags" {
   type    = map(string)
   default = {}
