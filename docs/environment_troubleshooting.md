@@ -284,6 +284,24 @@ If you're unable to upgrade or for some reason the certs still have not renewed,
 /opt/acme.sh/acme.sh --renew --domain <external_host>
 ```
 
+### HAProxy fails to restart after changing the External URL with Let's Encrypt
+
+If the `external_url` of an existing environment is changed when using the built-in Let's Encrypt integration, manual cleanup of the old domain's certificates on the HAProxy nodes is required. 
+
+If HAProxy fails to start after an `external_url` change, it is typically because `acme.sh` does not automatically prune old domains from its renewal list or remove the old files. Since the Toolkit configures HAProxy to load the entire `/opt/haproxy/ssl/` directory for SNI routing, any orphaned certificates left behind will cause HAProxy to fail on restart. To prevent destructive operations during routine updates, the Toolkit does not automatically delete these files.
+
+To fix the deployment and clean up the old domain safely, the provided maintenance playbook can be used by passing the old domain via the `old_domain` variable:
+
+```bash
+ansible-playbook -i environments/<env>/inventory playbooks/maintenance/acme_sh_remove_domain.yml -e old_domain=<old_domain>
+```
+
+Alternatively, the cleanup commands can be run manually via Ansible ad-hoc commands:
+
+```bash
+ansible haproxy_external -i environments/<env>/inventory -b -m shell -a "/opt/acme.sh/acme.sh --remove -d <old_domain> && rm -rf /opt/haproxy/ssl/<old_domain>.pem* /opt/acme.sh/<old_domain> /opt/acme.sh/<old_domain>_ecc && docker restart haproxy"
+```
+
 ### OS Deprecation Failures
 
 The following errors presented on systems where upstream deprecations has occurred:
