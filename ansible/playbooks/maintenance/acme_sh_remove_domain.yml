@@ -1,0 +1,51 @@
+---
+# Removes orphaned Let's Encrypt domains and certificates from acme.sh on HAProxy nodes.
+# Useful when the external_url has changed and the old domain is no longer managed.
+#
+# Usage: ansible-playbook -i environments/<env>/inventory playbooks/maintenance/acme_sh_remove_domain.yml -e old_domain=<old_domain>
+
+- name: Remove orphaned Let's Encrypt certificates
+  hosts: haproxy_external
+  become: true
+  tasks:
+    - name: Ensure old_domain variable is provided and valid
+      fail:
+        msg: "You must provide a valid 'old_domain' variable containing only alphanumeric characters, dots, and hyphens (e.g., -e old_domain=old.example.com)."
+      when: old_domain is not defined or not old_domain is match("^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)*[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$")
+
+    - name: Check if acme.sh is installed
+      stat:
+        path: /opt/acme.sh/acme.sh
+      register: acme_sh_file
+
+    - name: Remove old domain from acme.sh renewal list
+      command: "/opt/acme.sh/acme.sh --remove -d {{ old_domain | quote }}"
+      register: acme_sh_remove
+      failed_when: false
+      changed_when: acme_sh_remove.rc == 0
+      when: acme_sh_file.stat.exists
+
+    - name: Remove acme.sh config directory (RSA)
+      file:
+        path: "/opt/acme.sh/{{ old_domain }}"
+        state: absent
+
+    - name: Remove acme.sh config directory (ECC)
+      file:
+        path: "/opt/acme.sh/{{ old_domain }}_ecc"
+        state: absent
+
+    - name: Remove orphaned certificate file
+      file:
+        path: "/opt/haproxy/ssl/{{ old_domain }}.pem"
+        state: absent
+
+    - name: Remove orphaned key file
+      file:
+        path: "/opt/haproxy/ssl/{{ old_domain }}.pem.key"
+        state: absent
+
+    - name: Restart HAProxy
+      command: docker restart haproxy
+      register: haproxy_restart
+      changed_when: haproxy_restart.rc == 0

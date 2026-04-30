@@ -149,6 +149,9 @@ all:
 
 Once the config is in place you're ready to [configure the environment](#configure-the-environment).
 
+> [!note]
+> If the `external_url` of an existing environment is changed when using Let's Encrypt, manual cleanup of the old certificates on the HAProxy nodes is required to prevent restart failures. Further details and steps can be found in the [Troubleshooting Guide](environment_troubleshooting.md#haproxy-fails-to-restart-after-changing-the-external-url-with-lets-encrypt).
+
 ### Configure the environment
 
 With the files and config in place all that's left is to update the environment. This can be done [the same as a normal environment update](environment_configure.md#4-configure).
