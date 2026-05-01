@@ -120,9 +120,9 @@ gitlab_object_storage_bucket_names:
 
 gitlab_object_storage_registry_chunksize_mb: "{{ '10' if cloud_provider == 'aws' else '5' }}"
 
-# AWS S3 storage driver to use for GitLab container registry https://gitlab.com/gitlab-org/gitlab/-/work_items/523095
+# AWS S3 storage driver to use for GitLab container registry
 # https://docs.gitlab.com/update/deprecations/#s3-storage-driver-aws-sdk-v1-for-the-container-registry
-container_registry_aws_storage_driver: 's3'
+container_registry_aws_storage_driver: "{{ 's3' if gitlab_version != '' and gitlab_version is version('18.3.0', '<') else 's3_v2' }}"
 
 # Container Registry Settings
 container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gcp') and external_url_ssl and external_ssl_source != '' and 'registry' in gitlab_object_storage_list }}"
