@@ -1,4 +1,4 @@
-zdu_start_point: 'consul'
+zdu_start_point: "{{ lookup('env','ZDU_START_POINT') | default('consul', true) }}"
 zdu_update_order:
   - consul
   - postgres
