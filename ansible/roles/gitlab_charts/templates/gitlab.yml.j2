@@ -154,10 +154,9 @@ gitlab:
       username: "{{ postgres_username }}"
       database: "{{ postgres_database_name }}"
 {% endif %}
-{% set use_envoy = gitlab_charts_gateway_api_setup and (gitlab_version == '' or gitlab_version is version('18.11', '>=')) %}
 {% if pages_enable %}
   gitlab-pages:
-{% if use_envoy %}
+{% if not nginx_ingress_setup %}
     ingress:
       enabled: false
 {% else %}
@@ -243,7 +242,7 @@ global:
 {% endif %}
   serviceAccount:
     enabled: true
-{% if use_envoy %}
+{% if envoy_gateway_setup %}
   gatewayApi:
     enabled: true
     installEnvoy: true
@@ -375,10 +374,10 @@ global:
     enabled: false # Gitaly runs outside of cluster
 {% endif %}
   hosts:
-{% if cloud_provider != 'aws' and not use_envoy %}
+{% if cloud_provider != 'aws' and nginx_ingress_setup %}
     externalIP: "{{ external_ip }}"
 {% endif %}
-{% if cloud_native_hybrid_geo_unified_url and not use_envoy %}
+{% if cloud_native_hybrid_geo_unified_url and nginx_ingress_setup %}
     externalGeoIP: "{{ external_geo_ip }}"
 {% endif %}
     domain: "{{ external_host }}"
@@ -388,7 +387,7 @@ global:
     registry:
       name: "{{ container_registry_external_host }}"
   ingress:
-{% if use_envoy %}
+{% if not nginx_ingress_setup %}
     enabled: false
 {% elif external_url_ssl and external_ssl_source == 'letsencrypt' %}
     configureCertmanager: true
@@ -561,7 +560,7 @@ global:
 {% if cloud_native_hybrid_geo_role == 'secondary' %}
         primaryApiUrl: "{{ geo_primary_registry_url }}"
 {% endif %}
-{% if cloud_native_hybrid_geo_unified_url and use_envoy %}
+{% if cloud_native_hybrid_geo_unified_url and envoy_gateway_setup %}
     gatewayApi:
       addionalHostname: "{{ (geo_primary_internal_url if cloud_native_hybrid_geo_role == 'primary' else geo_secondary_internal_url) | regex_replace('^https?:\/\/') }}"
 {% endif %}
@@ -569,11 +568,11 @@ global:
 {% endif %}
 
 nginx-ingress-geo:
-  enabled: {{ ((not use_envoy) and cloud_native_hybrid_geo_unified_url) | lower }}
+  enabled: {{ (nginx_ingress_setup and cloud_native_hybrid_geo_unified_url) | lower }}
 
 nginx-ingress:
-  enabled: {{ (not use_envoy) | lower }}
-{% if not use_envoy %}
+  enabled: {{ nginx_ingress_setup | lower }}
+{% if nginx_ingress_setup %}
   controller:
     kind: DaemonSet
 {% if gitlab_charts_node_selector_enable %}
@@ -608,7 +607,7 @@ certmanager:
 installCertmanager: false
 {% endif %}
 
-{% if install_certmanager and use_envoy %}
+{% if install_certmanager and envoy_gateway_setup %}
 certmanager:
   config:
     enableGatewayAPI: true
@@ -622,15 +621,12 @@ certmanager-issuer:
 {% if openbao_enable %}
 openbao:
   install: true
-{% if use_envoy %}
-  ingress:
-    enabled: false
-{% endif %}
 {% if openbao_unseal_awskms_enable %}
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: "{{ openbao_unseal_awskms_role_arn }}"
 {% endif %}
+{% if nginx_ingress_setup %}
   ingress:
     enabled: true
     hostname: "{{ openbao_host }}"
@@ -643,6 +639,10 @@ openbao:
 {% endif %}
 {% else %}
       enabled: false
+{% endif %}
+{% else %}
+  ingress:
+    enabled: false
 {% endif %}
   config:
     storage:
@@ -743,7 +743,7 @@ prometheus:
 gitlab-runner:
   install: false
 
-{% if use_envoy %}
+{% if envoy_gateway_setup %}
 gatewayApiResources:
   gateway:
 {% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
@@ -810,11 +810,11 @@ gatewayApiResources:
         service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "{{ aws_allocation_ids | replace(' ', '') }}"
         service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: workload=webservice
-{% elif gitlab_charts_gateway_api_gcp_ip_resource_names != "" %}
+{% elif gcp_ip_resource_names != "" %}
     infrastructure:
       annotations:
         networking.gke.io/load-balancer-type: External
-        networking.gke.io/load-balancer-ip-addresses: "{{ gitlab_charts_gateway_api_gcp_ip_resource_names | replace(' ', '') }}"
+        networking.gke.io/load-balancer-ip-addresses: "{{ gcp_ip_resource_names | replace(' ', '') }}"
         cloud.google.com/l4-rbs: enabled
 {% endif %}
   envoy:

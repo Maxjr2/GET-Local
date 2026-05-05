@@ -18,6 +18,8 @@ all:
     gitlab_charts_sidekiq_max_replicas: 1
     gitlab_charts_webservice_requests_cpu: 1
 
+    gitlab_charts_nginx_ingress_enable: true
+
     gitlab_charts_gitaly_setup: true
     gitlab_charts_gitaly_requests_memory_gb: 1
     gitlab_charts_gitaly_limits_memory_gb: 1

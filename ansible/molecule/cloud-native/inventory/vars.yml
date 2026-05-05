@@ -33,8 +33,6 @@ all:
     gitlab_charts_gitaly_cgroups_memory_bytes: 8589934592
     gitlab_charts_gitaly_storage_names: ['default']
 
-    gitlab_charts_gateway_api_setup: "{{ lookup('env', 'MOLECULE_CHARTS_USE_ENVOY_GATEWAY') | default(false, true) | bool }}"
-
     molecule_scenario: cloud-native
     molecule_network_name: "molecule_{{ molecule_scenario | replace('-', '_') }}_network"
     molecule_cluster_name: "molecule-{{ molecule_scenario }}"
