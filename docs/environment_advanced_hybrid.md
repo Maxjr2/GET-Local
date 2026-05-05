@@ -634,10 +634,10 @@ By default, the Toolkit adds `workload` [node selectors](https://kubernetes.io/d
 
 ### Google Cloud Platform (GCP)
 
-For environments using GKE the following additional settings are available. Note that the external IP settings differ depending on whether NGINX Ingress (default) or [Envoy Gateway](#advanced-configuration) is used:
+For environments using GKE the following additional settings are available. Note that the external IP settings differ depending on whether NGINX Ingress or [Envoy Gateway](#ingress-configuration-envoy-gateway-and-nginx-ingress) (default from GitLab 19.0) is used:
 
-- `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups when using NGINX Ingress (default). Not used when [Envoy Gateway is enabled](#advanced-configuration) — use `gitlab_charts_gateway_api_gcp_ip_resource_names` instead. **Required (NGINX Ingress).**
-- `gitlab_charts_gateway_api_gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. Replaces `external_ip` when [Envoy Gateway is enabled](#advanced-configuration). **Required (Envoy Gateway).**
+- `gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. Replaces `external_ip` when using Envoy Gateway. **Required (Envoy Gateway, GCP).**
+- `external_ip` - External IP the environment will run on. Required along with `external_url` for Cloud Native Hybrid setups when using NGINX Ingress. Not used with Envoy Gateway — use `gcp_ip_resource_names` instead. **Required (NGINX Ingress).**
 - `gcp_gke_location` - Name of Region or Zone the GCP Kubernetes cluster is in, depending on if it's Regional or Zonal respectively. Only required for Cloud Native Hybrid installs when `kubeconfig_setup` is set to true.
 - `gcp_gke_workload_identity_setup` - Sets up deployments to use [GKE Workload Identity](#gke-workload-identity) for authentication via Service Account annotations. This must be set to `true` if the equivalent Terraform `gke_enable_workload_identity` setting has been enabled.
   - `gcp_service_account_prefix` - If `gcp_gke_workload_identity_setup` has been set to `true` and the [GCP Service Account prefix](environment_provision.md#service-account-prefix-gcp) was changed in Terraform from the default of `gl` this needs to also be set in Ansible to ensure the correct setup.
@@ -795,21 +795,23 @@ The Toolkit provides several other settings that can customize a Cloud Native Hy
 
 Once your config file is in place as desired you can proceed to [configure as normal](environment_configure.md#4-configure).
 
-**Gateway API ([Toolkit Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support)):**
+#### Ingress Configuration (Envoy Gateway and NGINX Ingress)
+
+From GitLab 19.0, [Envoy Gateway](https://docs.gitlab.com/charts/advanced/gateway-api/) is the default ingress for all GitLab Helm chart deployments. Installs on earlier versions continue to use NGINX Ingress.
 
 > [!important]
-> Envoy Gateway and Gateway API is currently in Beta and the migration from NGINX Ingress involves downtime.
-> For known limitations with Gateway API and Envoy Gateway, see [work item 5](https://gitlab.com/groups/gitlab-com/gl-infra/software-delivery/operate/-/work_items/5).
+> Switching from NGINX Ingress to Envoy Gateway on an existing environment involves downtime.
+> If you are upgrading an existing environment to GitLab 19.0, refer to the
+> [Envoy Gateway migration guide](https://docs.gitlab.com/charts/installation/migration/envoy_gateway_migration/)
+> in the GitLab Charts documentation before upgrading.
+
+- `gitlab_charts_envoy_gateway_enable` - Set to `false` to skip installing the bundled Envoy Gateway controller and CRDs. Use this when your tooling manages the Envoy Gateway controller separately. Gateway API chart values are still configured. Defaults to `true`.
+- `gitlab_charts_envoy_gateway_crd_repo_ref` - Reference to the Helm chart used to render the Gateway API and Envoy Gateway CRDs. Optional, default is `oci://docker.io/envoyproxy/gateway-crds-helm`.
+- `gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer, e.g. `"gitlab-lb-ip-1, gitlab-lb-ip-2"`. **Required on GCP.**
+- `gitlab_charts_nginx_ingress_enable` - Set to `true` to use NGINX Ingress instead of Envoy Gateway on any GitLab version. NGINX Ingress is supported as an opt-in path and will be removed in a future release. Defaults to `false`.
 
 > [!note]
-> If you have an existing environment running NGINX Ingress and want to migrate, refer to the
-> [Envoy Gateway migration guide](https://docs.gitlab.com/charts/installation/migration/envoy_gateway_migration/)
-> in the GitLab Charts documentation before enabling this feature.
-
-- `gitlab_charts_gateway_api_setup` - Enables Gateway API and [Envoy Gateway](https://docs.gitlab.com/charts/charts/envoygateway/) deployment. When enabled on existing environments, this replaces NGINX Ingress with Gateway API resources. Defaults to `false`.
-- `gitlab_charts_envoy_gateway_crd_repo_ref` - Reference to the Helm chart used to render the Gateway API custom resource definitions and the
-  Envoy Gateway specific Gateway API extensions. Optional, default is `oci://docker.io/envoyproxy/gateway-crds-helm`.
-- `gitlab_charts_gateway_api_gcp_ip_resource_names` - Comma separated list of the external IP resource name(s) in GCP to assign to the Envoy Gateway load balancer. **Required on GCP.**
+> Setting `gitlab_charts_envoy_gateway_enable` to `false` with `gitlab_charts_nginx_ingress_enable` left as `false` means GET will not configure ingress or Gateway API in any way. The chart defaults apply and you are fully responsible for ingress configuration. Use [Custom Config](environment_advanced.md#custom-config) to pass the required chart values, referring to the [GitLab Charts Gateway API documentation](https://docs.gitlab.com/charts/advanced/gateway-api/) for the available options.
 
 #### Migrating Gitaly from VMs to Kubernetes
 

@@ -258,6 +258,21 @@
     - charts_version
     - zero-downtime-post-deployment-migrations
 
+- name: Determine ingress type
+  set_fact:
+    envoy_gateway_setup: >-
+      {{ not gitlab_charts_nginx_ingress_enable and
+         gitlab_charts_envoy_gateway_enable and
+         (gitlab_version == '' or gitlab_version is version('19.0', '>=')) }}
+    # True when nginx ingress should be configured with either explicitly enabled or pre-19.0 versions
+    nginx_ingress_setup: >-
+      {{ gitlab_charts_nginx_ingress_enable or
+         (gitlab_charts_envoy_gateway_enable and
+          gitlab_version != '' and gitlab_version is version('19.0', '<')) }}
+  tags:
+    - reconfigure
+    - charts
+
 - name: Prepare Gateway API and Envoy Gateway CRDs
   block:
   - name: Get latest GitLab chart details
@@ -303,7 +318,7 @@
     - gateway_api
     - crds
   when:
-    - gitlab_charts_gateway_api_setup
+    - envoy_gateway_setup
 
 - name: Lookup GitLab Chart values
   set_fact:
