@@ -129,7 +129,7 @@
       import_tasks: advanced_search.yml
       when:
         - ('opensearch' in groups or advanced_search_external)
-        - gitlab_environment_settings.current_license_plan in ['premium', 'ultimate']
+        - (gitlab_environment_settings.current_license_plan in ['premium', 'ultimate'] or (gitlab_environment_settings.usage_ping_features_enabled | default(false) | bool))
         - gitlab_edition != 'gitlab-ce'
       tags: opensearch
 
