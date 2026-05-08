@@ -477,8 +477,8 @@ The below settings are required when using an externally managed database:
 - `container_registry_database_name` - Name of the database to be created and used for the metadata database. Defaults to `registry`.
 - `container_registry_database_admin_username` - The admin user to authenticate with the PostgreSQL instance. Required when using a different instance than the main GitLab database.
 - `container_registry_database_admin_password` - The admin users password for authentication with the PostgreSQL instance. Required when using a different instance than the main GitLab database.
-- `container_registry_login_database` - The initial database that GET connects to when creating the new user. Defaults to `template1`.
-- `container_registry_maintenance_database` - The initial database that GET connects to when creating the new database. Defaults to `postgres`.
+- `container_registry_login_database` - The initial database that the Toolkit connects to when creating the new user. Defaults to `template1`.
+- `container_registry_maintenance_database` - The initial database that the Toolkit connects to when creating the new database. Defaults to `postgres`.
 - `container_registry_database_username` - Username for the user to be created and used for authentication by GitLab with the metadata database. Defaults to `registry`.
 - `container_registry_database_password` - Password for the metadata database user being created for authentication by GitLab with the metadata database.
 - `container_registry_database_ssl_mode` - See the PostgreSQL documentation for additional information https://www.postgresql.org/docs/17/libpq-ssl.html. Defaults to `prefer`. If certificates need to be provided this should be done via [custom config](environment_advanced.md#custom-config).
@@ -513,7 +513,7 @@ In particular, be aware of the following important callouts:
 - Terraform support is not available. VMs and services must be provisioned separately.
 - [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) config must be configured via [Custom Config](#custom-config) on any GitLab Rails or Sidekiq nodes as well as Helm Chart for Cloud Native Hybrid environments.
 - Data Disks configuration is not supported. These must be configured separately.
-- On Cloud Native Hybrid environments the Kubernetes cluster must be configured as per the [Reference Architectures](https://docs.gitlab.com/administration/reference_architectures/#cloud-native-hybrid) and `kubeconfig` file created separately.
+- On Cloud Native Hybrid environments the Kubernetes cluster should be reviewed against the [cluster assumptions](environment_advanced_hybrid.md#cluster-assumptions) and have a valid `kubeconfig` configured separately. In particular, note that object storage must be configured via [Custom Config](#custom-config) and StorageClasses must either already exist in the cluster or be set via the relevant variables.
 >>>
 
 To configure Custom Servers with Ansible the setup process involves the following:

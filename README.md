@@ -2,40 +2,49 @@
 
 ![alt text](https://gitlab.com/uploads/-/system/project/avatar/14292404/tanuki-blueprint.png "GitLab Environment Toolkit")
 
-The GitLab Environment Toolkit (`GET`) is a set of opinionated [Terraform](https://developer.hashicorp.com/terraform) and [Ansible](https://www.ansible.com/) scripts to assist with deploying scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures).
+The GitLab Environment Toolkit (`GET`) automates deploying and managing scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). Using Terraform for infrastructure provisioning and Ansible for configuration, the Toolkit handles the full lifecycle of a GitLab deployment, from initial setup through upgrades, across cloud providers, on-prem, or a mix of both.
 
-The Toolkit supports the following features:
-
-- Support for deploying all [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures) sizes dynamically from [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) to [50k](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html).
-- Support for deploying Cloud Native Hybrid variants of the Reference Architectures (AWS & GCP only at this time).
-- GCP, AWS and Azure (Linux package (Omnibus)) [cloud provider support](TECHNICAL_DESIGN.md#supported-cloud-providers)
-- Upgrades
-- Release and nightly Linux package (Omnibus) builds support
-- Advanced search with OpenSearch
-- Geo support
-- Container Registry support
-- Zero Downtime Upgrades support
-- Built-in optional Load Balancing and Monitoring (Prometheus) setup
-- SSL / TLS support (either direct or via hooks)
-- Alternative sources (Cloud Services, Custom Servers) for select components (Load Balancers, PostgreSQL, Redis)
-- On Prem Support (Ansible)
-- Custom Config / Tasks / Files support
+**New to the Toolkit?** Follow the [Quick Start Guide](docs/environment_quick_start_guide.md) for a complete walkthrough deploying a 10k environment on AWS.
 
 ## Before You Start
 
-The Toolkit can help you with the deployment and maintenance of a scaled GitLab environment. But please note it does not remove any of the underlying challenges that come with running large production applications and that ultimately environments are the responsibility of the user. Following the [Shared Responsibility Model](TECHNICAL_DESIGN.md#shared-responsibility), the Toolkit aims to configure best practices for the GitLab application and, when using supported cloud providers, base infrastructure provisioning and configuration. However, environmental responsibility, ongoing operations, and any custom infrastructure strictly remain the user's responsibility.
+The Toolkit can help with deploying and maintaining a scaled GitLab environment, but it does not remove the underlying challenges that come with running large production applications. Environments remain the responsibility of the user. Following the [Shared Responsibility Model](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md#shared-responsibility), the Toolkit aims to configure best practices for the GitLab application and, when using supported cloud providers, base infrastructure provisioning and configuration. Environmental responsibility, ongoing operations, and any custom infrastructure remain the user's responsibility.
 
-As such, users are recommended to have a good working knowledge of Terraform, Ansible, GitLab administration and Infrastructure management as well be aware of what running such an environment entails. For users who aren't in this position, our [Professional Services](https://about.gitlab.com/services/#implementation-services) team offers implementation services, but for those who want a more managed solution long term, it's recommended to instead explore our other offerings such as [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/).
+Users are recommended to have a good working knowledge of Terraform, Ansible, GitLab administration and infrastructure management, and to be aware of what running such an environment entails. For teams that need a more guided deployment experience, [Professional Services](https://about.gitlab.com/services/#implementation-services) is available. For teams that want a more managed solution long-term, [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/) may be a better fit.
 
-The Toolkit is designed to be flexible, and to follow best practices for GitLab. However, the scripts are opinionated, presented as-is, and may not be compatible with your specific environment build needs. There may be cases where you will need to extend or customize the Toolkit for your unique needs.
+The Toolkit is designed around the GitLab Reference Architectures and is opinionated by design. Deploying across cloud providers, on-prem, and hybrid environments involves a large surface area, and not every infrastructure design or use case can be supported. Where the Toolkit falls short of specific requirements, [Custom Config and Tasks](docs/environment_advanced.md#custom-config) provide extension points, but some use cases may fall outside of scope entirely.
 
-Review the Toolkit in full before any use, as it offers no guarantees on topics such as [security](docs/environment_post_considerations.md#security) or data integrity.
+Review the Toolkit in full before any use, as it offers no guarantees on topics such as security or data integrity. [Further manual setup](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_post_considerations.md) after deployment may also be required.
 
-[Further manual setup](docs/environment_post_considerations.md) after deployment may also be required.
+## How It Works
+
+The Toolkit deploys GitLab environments in two phases. In the **provisioning** phase, Terraform creates the required infrastructure per the target Reference Architecture: VMs and supporting cloud services for Linux Package environments, or a Kubernetes cluster and node pools for Cloud Native Hybrid. Resources are tagged and labelled during provisioning so that Ansible can identify each component automatically.
+
+In the **configuration** phase, Ansible takes those tagged resources and installs and configures each component in the correct order. For Linux Package (Omnibus) deployments this means configuring each VM for its designated role. For Cloud Native Hybrid deployments this means deploying GitLab via Helm Charts or the GitLab Operator onto the Kubernetes cluster alongside any VM-backed stateful components. Both paths handle environment sizing dynamically, so the same scripts serve a single-node setup and a fully distributed multi-node deployment.
+
+## Features
+
+**Deployment targets:**
+
+- All [Reference Architecture sizes](https://docs.gitlab.com/ee/administration/reference_architectures) from [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) to [50k](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html) users
+- Linux Package (Omnibus) deployments on GCP, AWS and Azure; on-prem and custom servers also supported via Ansible static inventory (see [supported providers](TECHNICAL_DESIGN.md#supported-cloud-providers))
+- Cloud Native Hybrid via Helm Charts or Operator; Kubernetes cluster provisioning on GCP (GKE) and AWS (EKS)
+
+**Architecture and operations:**
+
+- [Geo](docs/geo/README.md) multi-site deployments
+- Upgrades including [Zero Downtime Upgrades](docs/environment_upgrades.md)
+- Advanced Search with OpenSearch
+
+**Components:**
+
+- Container Registry
+- SSL/TLS support
+- Built-in Load Balancing and Monitoring (Prometheus)
+- Cloud Services for PostgreSQL, Redis and Load Balancers
+- Custom Config, Tasks and Files for extending beyond toolkit defaults
 
 ## Requirements
-
-The requirements for the Toolkit are as follows:
 
 **Control Node:**
 
@@ -51,157 +60,71 @@ The requirements for the Toolkit are as follows:
   - OS: Ubuntu 22.04/24.04, Debian 11/12/13, RHEL 9/10, Amazon Linux 2023
   - Deprecated OS versions supported with older Ansible versions - see [Target Operating System Support](docs/environment_configure.md#target-node-operating-system-support)
   - OS support depends on both [Linux Package (Omnibus)](https://docs.gitlab.com/administration/package_information/supported_os/) and Ansible compatibility
-  - Clean OS installations only
-  - Admin access required to install dependencies
+  - Clean OS installations only; admin access required to install dependencies
   - ARM-based hardware supported where upstream packages are available
-- Kubernetes (Cloud Native): [Supported versions as denoted by Kubernetes](https://endoflife.date/kubernetes) or the hosting service
+- Kubernetes (Cloud Native): any [currently supported Kubernetes version](https://endoflife.date/kubernetes)
 
 ## Documentation
 
-- [GitLab Environment Toolkit - Quick Start Guide](docs/environment_quick_start_guide.md)
-- [GitLab Environment Toolkit - Preparing the environment](docs/environment_prep.md)
-- [GitLab Environment Toolkit - Provisioning the environment with Terraform](docs/environment_provision.md)
-- [GitLab Environment Toolkit - Configuring the environment with Ansible](docs/environment_configure.md)
-- [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](docs/environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](docs/environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](docs/environment_advanced_services.md)
-- [GitLab Environment Toolkit - Advanced - SSL](docs/environment_advanced_ssl.md)
-- [GitLab Environment Toolkit - Advanced - Network Setup](docs/environment_advanced_network.md)
-- [GitLab Environment Toolkit - Advanced - Monitoring](docs/environment_advanced_monitoring.md)
-- [GitLab Environment Toolkit - Upgrades (Toolkit, Environment)](docs/environment_upgrades.md)
-- [GitLab Environment Toolkit - Considerations After Deployment - Backups, Security](docs/environment_post_considerations.md)
-- [GitLab Environment Toolkit - Geo](docs/geo/README.md)
-  - [GitLab Environment Toolkit - Geo - Provisioning the environment with Terraform](docs/geo/geo_provision.md)
-  - [GitLab Environment Toolkit - Geo - Configuring the environment with Ansible](docs/geo/geo_configure.md)
-  - [GitLab Environment Toolkit - Geo - Advanced](docs/geo/geo_advanced.md)
-- [GitLab Environment Toolkit - Troubleshooting](docs/environment_troubleshooting.md)
+**Getting started:**
 
-### Config Examples
+- [Quick Start Guide](docs/environment_quick_start_guide.md)
+- [Preparing the environment](docs/environment_prep.md)
+- [Provisioning with Terraform](docs/environment_provision.md)
+- [Configuring with Ansible](docs/environment_configure.md)
+
+**Advanced topics:**
+
+- [Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](docs/environment_advanced.md)
+- [Cloud Native Hybrid](docs/environment_advanced_hybrid.md)
+- [Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](docs/environment_advanced_services.md)
+- [SSL](docs/environment_advanced_ssl.md)
+- [Network Setup](docs/environment_advanced_network.md)
+- [Monitoring](docs/environment_advanced_monitoring.md)
+
+**Operations:**
+
+- [Upgrades](docs/environment_upgrades.md)
+- [Considerations After Deployment - Backups, Security](docs/environment_post_considerations.md)
+- [Troubleshooting](docs/environment_troubleshooting.md)
+
+**Geo:**
+
+- [Overview](docs/geo/README.md)
+- [Provisioning with Terraform](docs/geo/geo_provision.md)
+- [Configuring with Ansible](docs/geo/geo_configure.md)
+- [Advanced](docs/geo/geo_advanced.md)
+
+**Config Examples:**
 
 [Full config examples are available for select Reference Architectures](examples).
 
 ## How To Use
 
-The Toolkit's Terraform and Ansible scripts can be used in various ways depending on your requirements:
+The Toolkit's Terraform and Ansible components can be used in various ways depending on requirements:
 
 - Terraform - Source (git checkout), [Docker](docs/environment_provision.md#4-run-the-gitlab-environment-toolkits-docker-container-optional), [Module Registry](docs/environment_provision.md#terraform-module-registry)
 - Ansible - Source (git checkout), [Docker](docs/environment_configure.md#3-run-the-gitlab-environment-toolkits-docker-container-optional), [Collection](docs/environment_configure.md#running-with-ansible-collection-optional)
 
 Refer to the docs above for full instructions on each.
 
-## How It Works
-
-At a high level the Toolkit is designed to be as straightforward as possible. A high level overview of how it works is as follows:
-
-- Machines and associated infrastructure are _provisioned_ as per the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures) with Terraform. Part of this provisioning includes adding specific labels / tags to each machine for Ansible to then use to identify.
-- Machines are _configured_ with Ansible. Through identifying each machine by its labels / tags, Ansible will go through them in the correct installation order. On each it will install and configure the Linux package (Omnibus) to set up the intended component as required. The Ansible scripts have been designed to handle certain dynamic setups depending on what machines have been provisioned (e.g. an environment without OpenSearch, or a 2k environment with a smaller amount of nodes). Additional tasks are also performed as required such as setting GitLab config through Rails or Load Balancer / Monitoring setup.
-
-```plantuml
-@startuml 10k
-skinparam defaultTextAlignment center
-
-card omnibus #ffffff [
-  <img:https://gitlab.com/uploads/-/system/project/avatar/20699/Omnibus-refresh2.png?width=96>
-
-  Linux package (Omnibus) GitLab
-]
-
-card charts #ffffff [
-  <img:https://gitlab.com/uploads/-/system/project/avatar/3828396/docs-charts.png>
-
-  Charts
-]
-
-card get #ffffff [
-  <img:https://gitlab.com/uploads/-/system/project/avatar/14292404/tanuki-blueprint.png{scale=0.8}>
-
-  GitLab Environment Toolkit
-
-  ---
-  <img:https://gitlab.com/gitlab-org/gitlab-environment-toolkit/uploads/deba0320c95c26a31f333e4caaf475a2/terraform-ansible.png{scale=0.5}>
-]
-
-card aws #ffffff [
-  <img:https://gitlab.com/gitlab-org/gitlab-environment-toolkit/uploads/92666470f949c64af651b559fca18d24/aws.png{scale=0.5}>
-
-  AWS
-
-  ---
-
-  EC2
-  EKS
-  S3
-  Networking (For example VPCs, Subnets,
-  Gateways or IPs)
-  ELBs
-  RDS
-  ElastiCache
-  OpenSearch
-]
-
-card gcp #ffffff [
-  <img:https://gitlab.com/gitlab-org/gitlab-environment-toolkit/uploads/06f7ffc05f2a12ca669772073754eef0/gcp.png{scale=0.15}>
-
-  GCP
-
-  ---
-
-  Compute Engine
-  Kubernetes Engine
-  Cloud Storage
-  Networking (For example VPCs, Subnets,
-  Gateways or IPs)
-  Cloud Load Balancing (Planned)
-  Cloud SQL
-  Cloud Memorystore
-]
-
-card azure #ffffff [
-  <img:https://gitlab.com/gitlab-org/gitlab-environment-toolkit/uploads/080e0cad2b352a7b3b1101ac18e1227e/azure.png{scale=0.4}>
-
-  Azure
-
-  ---
-
-  Compute
-  Blob Storage
-  Networking (For example VPCs, Subnets
-  or IPs)
-]
-
-omnibus --> get
-charts --> get
-
-get --> aws
-get --> gcp
-get --> azure
-
-@enduml
-```
-
-## Troubleshooting
-
-Please refer to our [Troubleshooting guide](docs/environment_troubleshooting.md) if you are having issues deploying an environment with the Toolkit.
-
 ## Support
 
-Technical support is only available for the current Toolkit major version and requests should be raised via the [Support team](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support).
+Technical support is available for the current Toolkit major version and requests should be raised via the [Support team](https://support.gitlab.com/hc/en-us/articles/11626483177756-GitLab-Support). For detailed information about what is supported, refer to the [Statement of Support](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit).
 
-For detailed information about what is supported, please refer to the [Statement of Support](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit).
+Toolkit-specific bugs and issues can be raised in the [issue tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items).
 
-Issues specific to the Toolkit code can also be raised in our tracker.
+For troubleshooting help, refer to the [Troubleshooting guide](docs/environment_troubleshooting.md).
 
 ## Feature Requests
 
-The Toolkit is opinionated by necessity, as there is a vast amount of options and permutations available when deploying infrastructure across various Cloud Providers or on-prem.
+The Toolkit is opinionated by design: deploying across cloud providers and on-prem involves a large surface area, and not all feature requests fit the approach. Where requests fall outside scope, [Custom Config](docs/environment_advanced.md#custom-config) is often the right path.
 
-Consequently, during our independent review of feature requests, we might determine that some are not feasible to implement according to Toolkit's opinionated approach. In some cases, it could be more straightforward and quicker for you to tackle it separately.
+Feature requests that would benefit a broad set of users are welcome in the [issue tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items). Please check whether the request has already been raised before opening a new one.
 
-However, we do welcome Feature Requests that could be valuable to add for other users. If you have such a request please raise it in [our tracker](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items), but we do ask that you check beforehand to see if it's already been raised.
+### Out of Scope
 
-### Features that won't be covered
-
-Due to complexities, permutations or areas best left to be configured directly we do not plan to include the following:
+Due to complexity, permutations, or areas better left to direct configuration, the following are out of scope:
 
 - Cloud accounts management
 - Observability stack beyond Prometheus
@@ -211,17 +134,13 @@ Due to complexities, permutations or areas best left to be configured directly w
 - On Prem HA Load Balancers
 - [Downgrades](docs/environment_upgrades.md#environment-downgrades)
 
-Some of the above areas are better tackled via [Custom Config](docs/environment_advanced.md#custom-config).
-
 ## Contributions
 
-This project accepts contributions to existing features. Refer to the [Contributing guide](CONTRIBUTING.md) for more information.
+Contributions to existing features are welcome. Refer to the [Contributing guide](CONTRIBUTING.md) for more information.
 
 ## Testing
 
-If you wish to test the GitLab Environment Toolkit or use it for testing a scaled GitLab deployment it must be noted this can incur notable costs.
-
-Refer to the [Testing document](TESTING.md) for more information.
+Running the Toolkit for testing purposes can incur notable costs. Refer to the [Testing document](TESTING.md) for more information.
 
 ## Licensing
 

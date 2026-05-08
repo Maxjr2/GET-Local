@@ -23,13 +23,57 @@ The Toolkit can be used to deploy the [Cloud Native Hybrid Reference Architectur
 On this page we'll detail how to deploy a Cloud Native Hybrid Reference Architecture with the Toolkit. **It's worth noting this guide is supplementary to the rest of the docs, and it will assume this throughout.**
 
 > [!note]
-> With Terraform, GET supports deploying Kubernetes clusters on AWS and GCP. With Ansible, it is possible to build Cloud Native Hybrid from other providers following [Custom Servers (On Prem)](environment_advanced.md#custom-servers-on-prem) documentation.
+> With Terraform, the Toolkit supports deploying Kubernetes clusters on AWS and GCP. With Ansible, it is possible to build Cloud Native Hybrid from other providers following [Custom Servers (On Prem)](environment_advanced.md#custom-servers-on-prem) documentation.
 
 [TOC]
 
 ## Overview
 
 A Cloud Native Hybrid Reference Architecture is where select GitLab components are deployed in Kubernetes via Helm Charts or Operator. This primarily includes running the equivalent of GitLab Rails and Sidekiq nodes, named Webservice and Sidekiq respectively, along with some supporting services such as Shell and Registry.
+
+## Cluster Assumptions
+
+> [!note]
+> This section describes the technical assumptions the Toolkit makes about any Kubernetes cluster. For information on supported configurations, refer to the [Statement of Support](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit).
+
+The following describes what the Toolkit assumes about a Kubernetes cluster by default, whether provisioned via Terraform (supported on AWS and GCP) or provided separately. Where these assumptions can be adjusted for your setup, configuration options are linked inline or covered in full in [Configuring the Cloud Native deployment with Ansible](#4-configuring-the-cloud-native-deployment-with-ansible).
+
+**kubeconfig access:**
+
+A valid `kubeconfig` entry for the target cluster must be present on the machine running Ansible, with the cluster set as the current context. The Toolkit does not manage credentials for custom clusters; you must configure this before running Ansible. For Toolkit-provisioned GKE or EKS clusters, this can be automated via `kubeconfig_setup: true` as detailed in [Setting up authentication for the provisioned Kubernetes Cluster](#3-setting-up-authentication-for-the-provisioned-kubernetes-cluster). When `cloud_provider: none` and `kubeconfig_setup: true`, setting `kubectl_custom_context` will switch to that named context before running; if unset the current context is used.
+
+**Node labels:**
+
+By default, the Toolkit applies `workload` [node selectors](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to Chart pods to distribute workloads across appropriately labeled nodes:
+
+| Component | Default node selector value |
+| --- | --- |
+| Webservice | `webservice` |
+| Sidekiq | `sidekiq` |
+| Supporting (Shell, Registry or more) | `support` |
+| Gitaly | `gitaly` |
+
+The label key used is `workload`, so for example Webservice pods will expect nodes with the label `workload: webservice`.
+
+For Toolkit-provisioned clusters (GKE and EKS), these labels are applied automatically to the respective node pools.
+
+> [!note]
+> For custom clusters, nodes must be labelled accordingly before running Ansible, or node selectors must be disabled or reconfigured. See [Chart Install Options](#chart-install-options).
+
+**StorageClasses:**
+
+Stateful workloads such as Gitaly and monitoring require [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) backed by [StorageClasses](https://kubernetes.io/docs/concepts/storage/storage-classes/). For GKE and EKS, the Toolkit creates appropriate StorageClasses automatically when none are configured.
+
+> [!note]
+> For custom clusters (`cloud_provider: none`), no StorageClasses are created. They must either already exist in the cluster or be specified via the relevant variables. See [Persistent Volume Configuration](#persistent-volume-configuration-storageclass).
+
+**Pod-level cloud authentication:**
+
+For GKE and EKS, the Toolkit configures cloud-native pod authentication automatically using [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) on GKE and [IAM Roles for Service Accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) on EKS. This is used for object storage and any other cloud services that deployed pods need to reach. For custom clusters, no equivalent is configured; authentication to external services must be configured separately via [Custom Config](environment_advanced.md#custom-config).
+
+**Cluster API access and RBAC:**
+
+Ansible must be able to reach the cluster API from the machine it runs on. For private clusters, ensure the Ansible host has network access to the API endpoint. The `kubeconfig` context in use must also have sufficient permissions to create namespaces, manage Helm releases, and deploy cluster-scoped resources (cluster-admin or equivalent).
 
 ## 1. Install Kubernetes Tools
 
@@ -520,7 +564,7 @@ In some cases you may prefer to restrict who can connect to the Public endpoint 
 Amazon EKS control plane logging provides audit and diagnostic logs directly from the Amazon EKS control plane to CloudWatch Logs. You can select the exact log types you need by configuring the `eks_enabled_cluster_log_types` variable as an array of string values. Possible values are described in [Amazon EKS control plane logging documentation](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html). Logs are sent as log streams to AWS CloudWatch.
 
 > [!note]
-> There are additional costs to enable this feature. Refer to the above docs for more info.
+> There are additional costs to enable this feature. Refer to the [Amazon EKS control plane logging documentation](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html) for more info.
 
 #### EKS Storage Encryption
 
@@ -587,7 +631,7 @@ The easiest way to do this is via the selected cloud providers tooling after the
   - Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.
 - Amazon Web Services (AWS) can be setup and selected via the `aws update-kubeconfig` command, e.g. `aws eks --region <AWS REGION NAME> update-kubeconfig --name <CLUSTER NAME>`. Where `<CLUSTER NAME>` will be the same as the `prefix` variable set in Terraform.
 
-As a convenience, the Toolkit can automatically run these commands for you in its configuration stage when the variable `kubeconfig_setup` is set to `true`, but it expects that you have configured authentication beforehand. This will be detailed more in the next section.
+As a convenience, the Toolkit can automatically run these commands for you in its configuration stage when the variable `kubeconfig_setup` is set to `true`, but it expects that you have configured authentication beforehand. This will be detailed more in [Configuring the Cloud Native deployment with Ansible](#4-configuring-the-cloud-native-deployment-with-ansible).
 
 ## 4. Configuring the Cloud Native deployment with Ansible
 
@@ -930,7 +974,7 @@ With the above done, the file will be run before the Cloud Native deployment to 
 
 ## Geo
 
-More information on setting up Geo within GET can be found in our [GitLab Environment Toolkit - Advanced - Geo](geo/README.md) documentation.
+More information on setting up Geo can be found in our [GitLab Environment Toolkit - Advanced - Geo](geo/README.md) documentation.
 
 ## Monitoring
 
