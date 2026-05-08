@@ -33,7 +33,7 @@ This template covers all of the steps required to do a release of the GitLab Env
 Update at least annually or when security fixes are available. All updates require testing before release.
 
 - [ ] HAProxy - Set to [latest **LTS** version](https://www.haproxy.org/#latest-versions) in [role defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/haproxy/defaults/main.yml) (`haproxy_version`)
-- [ ] OpenSearch - Set to latest `2.x` version in [role defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/opensearch/defaults/main.yml) (`opensearch_version`)
+- [ ] OpenSearch - Set to latest [GitLab supported](https://docs.gitlab.com/integration/advanced_search/elasticsearch/#opensearch) version in [role defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/opensearch/defaults/main.yml) (`opensearch_version`)
 - [ ] Node Exporter - Set `node_exporter_version` to the [latest version](https://github.com/prometheus/node_exporter/releases) in `group_vars/all.yml`
 - [ ] Kube Prometheus Stack Operator - Set to latest app version in [chart defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/gitlab_charts/defaults/main.yml) (`kube_prometheus_stack_charts_app_version`)
 - [ ] Consul Operator - Set app version to match [Linux package default](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/config/software/consul.rb?ref_type=heads#L21) if newer in [chart defaults](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/ansible/roles/gitlab_charts/defaults/main.yml) (`consul_charts_app_version`)
