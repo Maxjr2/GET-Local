@@ -393,7 +393,7 @@ In select circumstances it may be preferable to disable this behaviour. However 
 The Toolkit supports automatically setting up GitLab's [Advanced Search](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html) functionality. This includes optionally provisioning and configuring [OpenSearch](https://opensearch.org/) nodes as a convenience to be a cluster as well as configuring GitLab to use it.
 
 > [!note]
-> To be able to enable Advanced Search you'll require at least a GitLab Premium License.
+> To be able to enable Advanced Search you'll require at least a GitLab Premium License, or a Free tier instance enrolled in the [Registration Features program](https://docs.gitlab.com/ee/administration/settings/usage_statistics.html#registration-features-program).
 
 Due to the nature of OpenSearch it's not possible to give specific guidance on what size and shape the cluster should take as it's heavily dependent on aspects such as data or expected usage. That being said [some guidance for Elasticsearch that also applies to OpenSearch can be found in our Advanced Search documentation](https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html#guidance-on-choosing-optimal-cluster-configuration).
 
