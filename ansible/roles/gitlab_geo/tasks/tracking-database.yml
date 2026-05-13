@@ -164,7 +164,7 @@
         pod: "gitlab-psql-geo-tracking"
         namespace: "{{ geo_secondary_cloud_native_release_namespace }}"
         command: |
-          psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql;"
+          psql -c "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS plpgsql; CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
   always:
     - name: Tracking Database - Remove psql pod
       kubernetes.core.k8s:

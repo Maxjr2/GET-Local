@@ -104,7 +104,7 @@
     database_user: "{{ postgres_username.split('@')[0] }}"
     database_password_secret: gitlab-postgres-password
     database_name: "{{ postgres_database_name }}"
-    database_extensions: ["amcheck", "pg_trgm", "btree_gist", "plpgsql"]
+    database_extensions: ["amcheck", "pg_trgm", "btree_gist", "plpgsql", "pg_stat_statements"]
   tags:
     - reconfigure
     - db_migrate
