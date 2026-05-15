@@ -159,7 +159,7 @@ The upgrade process can take a couple of hours to complete, and the full runtime
 In advanced cases where the playbook fails for any reason but you're confident that you can start again from where it stopped, you can configure the process to start from a different point via the following variable:
 
 - `zdu_start_point` - The starting point for the Zero Downtime Upgrade process. Defaults to the first component, which is `consul`. Can also be specified via the environment variable `ZDU_START_POINT`.
-  - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migration`
+  - Can be set to `consul`, `postgres`, `pgbouncer`, `redis`, `gitaly`, `praefect`, `gitlab_rails`, `sidekiq`, `geo`, `post_migrations`
 
 If you only need to run the zero downtime upgrade process for just the Helm Charts you can run the GitLab charts playbook with the environment var `gitlab_charts_zero_downtime_update` set to `true`.
 
