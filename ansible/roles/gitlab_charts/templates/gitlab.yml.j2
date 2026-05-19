@@ -389,6 +389,7 @@ global:
   ingress:
 {% if not nginx_ingress_setup %}
     enabled: false
+    configureCertmanager: false
 {% elif external_url_ssl and external_ssl_source == 'letsencrypt' %}
     configureCertmanager: true
 {% elif external_url_ssl and external_ssl_source == 'user' %}
@@ -746,48 +747,44 @@ gitlab-runner:
 {% if envoy_gateway_setup %}
 gatewayApiResources:
   gateway:
-{% if external_url_ssl and external_ssl_source == 'letsencrypt' %}
-    protocol: "HTTPS"
-{% elif external_url_ssl and external_ssl_source == 'user' %}
-    protocol: "HTTPS"
-{% else %}
-    protocol: "HTTP"
-{% endif %}
+    protocol: "{{ 'HTTPS' if external_url_ssl else 'HTTP' }}"
     listeners:
       gitlab-web:
-{% if external_url_ssl %}
-        protocol: "HTTPS"
-        certificateRefs:
-          - name: gitlab-webservice-ssl
-{% else %}
-        protocol: "HTTP"
+        protocol: "{{ 'HTTPS' if external_url_ssl else 'HTTP' }}"
+{% if external_url_ssl and external_ssl_source == 'user' %}
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: gitlab-webservice-ssl
 {% endif %}
 {% if cloud_native_hybrid_geo_unified_url %}
       gitlab-web-geo:
-{% if external_url_ssl %}
-        protocol: "HTTPS"
-        certificateRefs:
-          - name: gitlab-webservice-ssl
-{% else %}
-        protocol: "HTTP"
+        protocol: "{{ 'HTTPS' if external_url_ssl else 'HTTP' }}"
+{% if external_url_ssl and external_ssl_source == 'user' %}
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: gitlab-webservice-ssl
 {% endif %}
 {% endif %}
 {% if container_registry_enable %}
       registry-web:
-{% if external_url_ssl %}
-        protocol: "HTTPS"
-        certificateRefs:
-          - name: gitlab-webservice-ssl
-{% else %}
-        protocol: "HTTP"
+        protocol: "{{ 'HTTPS' if external_url_ssl else 'HTTP' }}"
+{% if external_url_ssl and external_ssl_source == 'user' %}
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: gitlab-webservice-ssl
 {% endif %}
 {% endif %}
 {% if pages_enable %}
       pages-web:
 {% if pages_ssl_enable and pages_ssl_cert != '' and pages_ssl_key != '' %}
         protocol: "HTTPS"
-        certificateRefs:
-          - name: gitlab-pages-ssl
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: gitlab-pages-ssl
 {% else %}
         protocol: "HTTP"
 {% endif %}
@@ -797,8 +794,10 @@ gatewayApiResources:
       openbao-web:
 {% if openbao_ssl_enable %}
         protocol: "HTTPS"
-        certificateRefs:
-          - name: gitlab-openbao-tls
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: gitlab-openbao-tls
 {% else %}
         protocol: "HTTP"
 {% endif %}
