@@ -83,7 +83,7 @@
         pod: "{{ database_label }}"
         namespace: "{{ gitlab_cloud_native_release_namespace }}"
         command: |
-          psql -c "CREATE EXTENSION IF NOT EXISTS {{ item }};"
+          psql -d {{ database_name }} -c "CREATE EXTENSION IF NOT EXISTS {{ item }};"
       loop: "{{ database_extensions }}"
       loop_control:
         loop_var: item
@@ -106,4 +106,3 @@
         state: absent
       no_log: true
       diff: false
-
