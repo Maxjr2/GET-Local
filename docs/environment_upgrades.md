@@ -184,13 +184,13 @@ For Geo environments, the zero downtime upgrade process largely remains the same
 Linux Package:
 
 ```sh
-ansible-playbook -i <Primary Site Inventory Path> playbooks/zero_downtime_update.yml -e '{"zdu_start_point": "post_migrations", "gitlab_charts_zero_downtime_geo_post_deployment_migrations": true}'
+ansible-playbook -i <Primary Site Inventory Path> playbooks/zero_downtime_update.yml -e '{"zdu_start_point": "post_migrations", "geo_zero_downtime_run_post_deployment_migrations": true}'
 ```
 
 Helm Chart:
 
 ```sh
-ansible-playbook -i <Primary Site Inventory Path> playbooks/gitlab_charts.yml -e '{"gitlab_charts_zero_downtime_update": true, "gitlab_charts_zero_downtime_geo_post_deployment_migrations": true}'
+ansible-playbook -i <Primary Site Inventory Path> playbooks/gitlab_charts.yml -t zero-downtime-post-deployment-migrations -e '{"gitlab_charts_zero_downtime_update": true, "geo_zero_downtime_run_post_deployment_migrations": true}'
 ```
 
 ### Environment Downgrades

@@ -201,4 +201,4 @@
   tags: zero-downtime-post-deployment-migrations
   when: >
     (not cloud_native_hybrid_geo) or
-    (cloud_native_hybrid_geo and gitlab_charts_zero_downtime_geo_post_deployment_migrations)
+    (cloud_native_hybrid_geo and geo_zero_downtime_run_post_deployment_migrations)

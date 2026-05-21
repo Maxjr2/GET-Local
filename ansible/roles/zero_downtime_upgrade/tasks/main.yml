@@ -130,7 +130,12 @@
 
 - name: Run post-deployment migrations via GitLab Rails deploy node
   include_tasks: post-deployment-migrations.yml
+  # Non-Geo: neither site group present, always runs.
+  # Geo primary (initial upgrade): primary site group present, geo_zero_downtime_run_post_deployment_migrations defaults false, skips until secondaries are upgraded.
+  # Geo primary (post-migration re-run): primary site group present, geo_zero_downtime_run_post_deployment_migrations set true, runs.
+  # Geo secondary: secondary site group present, always skips as migrations cannot run on a secondary site.
   when:
     - "'gitlab_rails_primary' in group_names"
     - zdu_update_order.index('post_migrations') >= zdu_update_order.index(zdu_start_point)
-    - gitlab_charts_zero_downtime_geo_post_deployment_migrations
+    - geo_secondary_site_group_name not in groups
+    - (geo_primary_site_group_name not in groups) or geo_zero_downtime_run_post_deployment_migrations

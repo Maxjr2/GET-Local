@@ -393,7 +393,7 @@ cloud_native_hybrid_geo_unified_url: false
 
 # Zero Downtime
 gitlab_charts_zero_downtime_update: false
-gitlab_charts_zero_downtime_geo_post_deployment_migrations: false
+geo_zero_downtime_run_post_deployment_migrations: false
 
 geo_primary_cloud_native_release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
 geo_secondary_cloud_native_release_namespace: "{{ gitlab_cloud_native_release_namespace }}"
