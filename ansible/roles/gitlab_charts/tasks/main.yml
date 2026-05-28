@@ -304,6 +304,7 @@
           envoyGateway:
             enabled: true
     register: envoy_crds
+    no_log: true
 
   - name: Apply Gateway API and Envoy Gateway CRDs
     kubernetes.core.k8s:
@@ -312,6 +313,7 @@
       namespace: "{{ gitlab_cloud_native_release_namespace }}"
       server_side_apply:
         field_manager: ansible_GET
+    no_log: true
   tags:
     - reconfigure
     - charts
