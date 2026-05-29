@@ -247,6 +247,11 @@ global:
     enabled: true
     installEnvoy: true
     configureCertmanager: {{ external_url_ssl and external_ssl_source == 'letsencrypt' }}
+{% else %}
+  gatewayApi:
+    enabled: false
+    installEnvoy: false
+    configureCertmanager: false
 {% endif %}
 {% if cloud_provider != 'none' %}
   appConfig:
@@ -391,12 +396,15 @@ global:
     enabled: false
     configureCertmanager: false
 {% elif external_url_ssl and external_ssl_source == 'letsencrypt' %}
+    enabled: true
     configureCertmanager: true
 {% elif external_url_ssl and external_ssl_source == 'user' %}
+    enabled: true
     configureCertmanager: false
     tls:
       secretName: gitlab-webservice-ssl
 {% else %}
+    enabled: true
     configureCertmanager: false
     tls:
       enabled: false
