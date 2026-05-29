@@ -43,9 +43,10 @@ gitlab:
       nodePort: 32022
   toolbox:
     backups:
-      backend: s3
-      config:
-        secret: gitlab-backup-bucket-secret
+      objectStorage:
+        backend: s3
+        config:
+          secret: gitlab-backup-bucket-secret
   gitaly:
     cgroups:
       enabled: false

@@ -207,7 +207,13 @@
     namespace: default
     definition:
       type: Opaque
-      data:
-        accesskey: "{{ garage_access_key | b64encode }}"
-        secretkey: "{{ garage_secret_key | b64encode }}"
+      stringData:
+        config: |-
+          [default]
+          access_key = {{ garage_access_key }}
+          secret_key = {{ garage_secret_key }}
+          host_base = garage.default.svc.cluster.local:3900
+          host_bucket = garage.default.svc.cluster.local:3900
+          bucket_location = us-east-1
+          use_https = False
     state: present
