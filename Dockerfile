@@ -34,8 +34,9 @@ SHELL ["/bin/bash", "-c"]
 
 ENV PATH="/root/.local/share/mise/shims:/root/.local/bin:$PATH"
 
-ENV GCP_AUTH_KIND="application"
-ENV USE_GKE_GCLOUD_AUTH_PLUGIN="True"
+# check=skip=SecretsUsedInArgOrEnv
+ENV GCP_AUTH_KIND="application" \
+    USE_GKE_GCLOUD_AUTH_PLUGIN="True"
 
 RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip nano git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
 
@@ -56,7 +57,7 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-$(arch).zip" -o "/tmp/awscliv2.zip" && unzip /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/aws
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/64bit/) && curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_${arch}/session-manager-plugin.deb" -o "/tmp/session-manager-plugin.deb" && dpkg -i /tmp/session-manager-plugin.deb && rm /tmp/session-manager-plugin.deb
 ### azure cli
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+RUN curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | bash
 ### kubectl / helm
 RUN apt-get install -y --no-install-recommends kubectl && rm -rf /var/lib/apt/lists/*
 RUN curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash

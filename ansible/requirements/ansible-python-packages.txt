@@ -4,7 +4,7 @@ requests
 netaddr
 boto3
 botocore
-kubernetes
+kubernetes~=35.0 # https://github.com/kubernetes-client/python/issues/2595
 
 # Azure collection Python requirements - https://github.com/ansible-collections/azure/blob/dev/requirements.txt
 packaging
