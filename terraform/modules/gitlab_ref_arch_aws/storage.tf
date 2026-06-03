@@ -73,6 +73,9 @@ resource "aws_iam_policy" "gitlab_s3_policy" {
           "s3:PutObject",
           "s3:GetObject",
           "s3:DeleteObject",
+          # Required for CopyObject when source objects have tags
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging",
         ]
         Effect   = "Allow"
         Resource = [for k, v in aws_s3_bucket.gitlab_object_storage_buckets : "${v.arn}/*" if !contains(["registry", "backups"], k)]
@@ -103,6 +106,9 @@ resource "aws_iam_policy" "gitlab_s3_backups_policy" {
           "s3:PutObject",
           "s3:GetObject",
           "s3:DeleteObject",
+          # Required for CopyObject when source objects have tags
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging",
         ]
         Effect   = "Allow"
         Resource = ["${aws_s3_bucket.gitlab_object_storage_buckets["backups"].arn}/*"]
