@@ -32,6 +32,7 @@
     - ansible_facts['os_family'] == 'RedHat'
     - ansible_facts['distribution'] != 'Amazon'
     - not offline_setup
+    - epel_setup
 
 - name: Install system packages (RHEL)
   yum:
@@ -51,6 +52,7 @@
     - ansible_facts['distribution'] == 'Amazon'
     - ansible_facts['distribution_major_version'] == '2'
     - not offline_setup
+    - epel_setup
 
 # For more recent PG Client Libraries on Amazon Linux 2 only. Version doesn't need to match PG Server.
 - name: Enable PostgreSQL Client Repo (Amazon Linux 2)

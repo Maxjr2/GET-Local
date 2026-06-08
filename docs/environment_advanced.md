@@ -1096,12 +1096,14 @@ The Toolkit can also optionally upgrade all packages and clean up unneeded packa
 
 ### Extra Packages for Enterprise Linux (EPEL)
 
-The toolkit installs packages that are hosted in EPEL for all distributions where the [Ansible `os_family` is RedHat](https://github.com/ansible/ansible/blob/devel/lib/ansible/module_utils/facts/system/distribution.py#L525). By default, the toolkit installs the EPEL GPG Key and enables/configures the EPEL repository from the public [Fedora Project release URL](https://docs.fedoraproject.org/en-US/epel/getting-started/#_release_package_permalinks) for the proper distribution major version.
+EPEL setup can optionally be configured on RHEL-family hosts via `vars.yml` for deployments that require it for packages outside of the toolkit's own package list:
 
-If you do not have direct access to the internet, the default settings may not work for you. You will need to update the `epel_*_url` variables to point to the proper URLs to install the EPEL GPG Key and the EPEL Repository. The following variables can be set in your Ansible environment config file (`vars.yml`):
+- `epel_setup`: Configures the toolkit to install the EPEL GPG Key and repository. Default is `false`.
 
-- `epel_gpg_key_url`: Configures the toolkit to install the EPEL GPG Key from the location you provide. Default is `https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}`.
-- `epel_rpm_url`: Configures the toolkit to install the EPEL Repository from the location you provide. Default is `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm`.
+When `epel_setup` is `true` the toolkit installs from the public [Fedora Project release URLs](https://docs.fedoraproject.org/en-US/epel/getting-started/#_release_package_permalinks) for the appropriate distribution major version. If those URLs are not reachable the following variables can be used to override them:
+
+- `epel_gpg_key_url`: URL to install the EPEL GPG Key from. Default is `https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}`.
+- `epel_rpm_url`: URL to install the EPEL repository from. Default is `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm`.
 
 ## NFS for Object Data
 
