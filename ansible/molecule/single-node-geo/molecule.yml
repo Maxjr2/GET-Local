@@ -31,6 +31,16 @@ platforms:
       - name: molecule_network
   - <<: *default_platform
     name: site2-gitlab-rails-1
+  - name: registry-db
+    image: postgres:latest
+    pre_build_image: true
+    command: ["docker-entrypoint.sh", "postgres"]
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${MOLECULE_POSTGRES_ADMIN_PASSWORD}"
   - name: geo-lb
     image: haproxy:latest
     pre_build_image: true

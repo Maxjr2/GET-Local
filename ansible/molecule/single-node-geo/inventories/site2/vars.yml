@@ -12,6 +12,17 @@ all:
     postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
 
     container_registry_enable: true
+    container_registry_database_configure: true
+    container_registry_database_enabled: true
+    container_registry_database_host: "registry-db"
+    container_registry_database_port: 5432
+    container_registry_database_admin_username: "postgres"
+    container_registry_database_admin_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+    container_registry_login_database: "postgres"
+    container_registry_database_name: "site2_registry"
+    container_registry_database_username: "site2_registry"
+    container_registry_database_password: "{{ lookup('env','MOLECULE_CONTAINER_REGISTRY_DATABASE_PASSWORD') }}"
+
     gitlab_rails_nginx_external_ssl_user: false
 
     geo_secondary_external_url: "https://site2.docker"
