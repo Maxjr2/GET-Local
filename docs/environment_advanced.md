@@ -1128,6 +1128,8 @@ Then in Ansible you need to configure the `gitlab_object_storage_type` variable 
 gitlab_object_storage_type: 'nfs'
 ```
 
+The NFS export is restricted to exactly the nodes in the `gitlab_rails` and `sidekiq` inventory groups, which are the only nodes that mount the share. No other nodes are granted access.
+
 ### NFS User and Group IDs
 
 When using NFS for shared storage in a Linux Package HA environment, consistent user UIDs/GIDs are required to ensure correct file permissions across nodes. The Toolkit configures this automatically for core accounts, with the following options available:

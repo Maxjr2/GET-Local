@@ -6,7 +6,6 @@
 ansible_python_interpreter: auto_silent
 
 swap_file_state: absent
-internal_cidr_16: "{{ (ansible_facts['default_ipv4']['address'] + '/16') | ansible.utils.ipaddr('network/prefix') }}"
 inventory_dir_failsafe: "{{ (ansible_inventory_sources[0] | dirname) if ansible_inventory_sources[0] is search('.ini|.yml|.yaml') else ansible_inventory_sources[0] }}"
 inventory_path: "{{ inventory_dir | default(inventory_dir_failsafe, true) }}"
 

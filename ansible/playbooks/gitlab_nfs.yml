@@ -1,4 +1,6 @@
 ---
+- import_playbook: playbook_prep.yml
+
 - hosts: gitlab_nfs
   become: true
   gather_facts: false

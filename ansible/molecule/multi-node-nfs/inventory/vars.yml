@@ -1,0 +1,13 @@
+all:
+  vars:
+    external_url: "http://docker"
+    cloud_provider: none
+
+    gitlab_nfs_path: /var/opt/gitlab/git-data
+
+    consul_password: "{{ lookup('env','MOLECULE_CONSUL_PASSWORD') }}"
+    gitlab_root_password: "{{ lookup('env','MOLECULE_GITLAB_ROOT_PASSWORD') }}"
+    gitaly_token: "{{ lookup('env','MOLECULE_GITALY_TOKEN') }}"
+    pgbouncer_password: "{{ lookup('env','MOLECULE_PGBOUNCER_PASSWORD') }}"
+    postgres_password: "{{ lookup('env','MOLECULE_POSTGRES_PASSWORD') }}"
+    redis_password: "{{ lookup('env','MOLECULE_REDIS_PASSWORD') }}"
