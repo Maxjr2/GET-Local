@@ -3,7 +3,7 @@
     - name: Get latest PostgreSQL leader
       command: gitlab-ctl get-postgresql-primary
       register: zdu_postgres_migrations_leader_result
-      delegate_to: "{{ groups['postgres'][0] }}"
+      delegate_to: "{{ groups['postgres'][0] | default(omit) }}"
       become: true
       run_once: true
 
