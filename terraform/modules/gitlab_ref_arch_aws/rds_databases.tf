@@ -156,6 +156,7 @@ resource "aws_db_instance" "gitlab_rds_database" {
   # Storage configuration
   storage_type          = each.value.storage_type
   iops                  = each.value.storage_type == "io1" && each.value.iops == null ? 1000 : each.value.iops
+  storage_throughput    = each.value.storage_type == "gp3" ? each.value.storage_throughput : null
   allocated_storage     = each.value.replicate_source_arn == null ? each.value.allocated_storage : null
   max_allocated_storage = each.value.max_allocated_storage
   storage_encrypted     = true
@@ -228,6 +229,7 @@ resource "aws_db_instance" "gitlab_rds_database_read_replicas" {
   # Storage inherited from primary DATABASE
   storage_type          = aws_db_instance.gitlab_rds_database[each.value.source_db].storage_type
   iops                  = aws_db_instance.gitlab_rds_database[each.value.source_db].iops
+  storage_throughput    = aws_db_instance.gitlab_rds_database[each.value.source_db].storage_type == "gp3" ? aws_db_instance.gitlab_rds_database[each.value.source_db].storage_throughput : null
   max_allocated_storage = aws_db_instance.gitlab_rds_database[each.value.source_db].max_allocated_storage
   storage_encrypted     = true
   kms_key_id            = aws_db_instance.gitlab_rds_database[each.value.source_db].kms_key_id

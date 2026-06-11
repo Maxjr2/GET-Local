@@ -65,6 +65,10 @@ variable "disk_iops" {
   type    = number
   default = null
 }
+variable "disk_throughput" {
+  type    = number
+  default = null
+}
 
 variable "disk_encrypt" {
   type    = bool
@@ -78,7 +82,7 @@ variable "disk_kms_key_arn" {
 
 variable "data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }

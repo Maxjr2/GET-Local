@@ -13,6 +13,8 @@ module "praefect_postgres" {
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id
   disk_size                  = coalesce(var.praefect_postgres_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.praefect_postgres_disk_type, var.default_disk_type)
+  disk_iops                  = var.praefect_postgres_disk_iops
+  disk_throughput            = var.praefect_postgres_disk_throughput
   disk_encrypt               = coalesce(var.praefect_postgres_disk_encrypt, var.default_disk_encrypt)
   disk_kms_key_arn           = var.praefect_postgres_disk_kms_key_arn != null ? var.praefect_postgres_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.praefect_postgres_disk_delete_on_termination != null ? var.praefect_postgres_disk_delete_on_termination : var.default_disk_delete_on_termination

@@ -70,7 +70,8 @@ resource "aws_db_instance" "gitlab_praefect" {
   ca_cert_identifier = var.rds_praefect_postgres_ca_cert_identifier
 
   storage_type          = var.rds_praefect_postgres_storage_type
-  iops                  = var.rds_praefect_postgres_storage_type == "io1" && var.rds_praefect_postgres_iops == null ? 1000 : var.rds_postgres_iops
+  iops                  = var.rds_praefect_postgres_storage_type == "io1" && var.rds_praefect_postgres_iops == null ? 1000 : var.rds_praefect_postgres_iops
+  storage_throughput    = var.rds_praefect_postgres_storage_type == "gp3" ? var.rds_praefect_postgres_storage_throughput : null
   allocated_storage     = var.rds_praefect_postgres_allocated_storage
   max_allocated_storage = var.rds_praefect_postgres_max_allocated_storage
   storage_encrypted     = true

@@ -152,6 +152,14 @@ variable "consul_disk_size" {
   type    = string
   default = null
 }
+variable "consul_disk_iops" {
+  type    = number
+  default = null
+}
+variable "consul_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "consul_disk_encrypt" {
   type    = bool
   default = null
@@ -166,7 +174,7 @@ variable "consul_disk_kms_key_arn" {
 }
 variable "consul_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -200,6 +208,10 @@ variable "gitaly_disk_iops" {
   type    = number
   default = 8000
 }
+variable "gitaly_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "gitaly_disk_encrypt" {
   type    = bool
   default = null
@@ -214,7 +226,7 @@ variable "gitaly_disk_kms_key_arn" {
 }
 variable "gitaly_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -248,6 +260,14 @@ variable "gitlab_nfs_disk_size" {
   type    = string
   default = null
 }
+variable "gitlab_nfs_disk_iops" {
+  type    = number
+  default = null
+}
+variable "gitlab_nfs_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "gitlab_nfs_disk_encrypt" {
   type    = bool
   default = null
@@ -262,7 +282,7 @@ variable "gitlab_nfs_disk_kms_key_arn" {
 }
 variable "gitlab_nfs_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -292,6 +312,14 @@ variable "gitlab_rails_disk_size" {
   type    = string
   default = null
 }
+variable "gitlab_rails_disk_iops" {
+  type    = number
+  default = null
+}
+variable "gitlab_rails_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "gitlab_rails_disk_encrypt" {
   type    = bool
   default = null
@@ -306,7 +334,7 @@ variable "gitlab_rails_disk_kms_key_arn" {
 }
 variable "gitlab_rails_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -341,6 +369,14 @@ variable "haproxy_external_disk_size" {
   type    = string
   default = null
 }
+variable "haproxy_external_disk_iops" {
+  type    = number
+  default = null
+}
+variable "haproxy_external_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "haproxy_external_disk_encrypt" {
   type    = bool
   default = null
@@ -355,7 +391,7 @@ variable "haproxy_external_disk_kms_key_arn" {
 }
 variable "haproxy_external_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -389,6 +425,14 @@ variable "haproxy_internal_disk_size" {
   type    = string
   default = null
 }
+variable "haproxy_internal_disk_iops" {
+  type    = number
+  default = null
+}
+variable "haproxy_internal_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "haproxy_internal_disk_encrypt" {
   type    = bool
   default = null
@@ -403,7 +447,7 @@ variable "haproxy_internal_disk_kms_key_arn" {
 }
 variable "haproxy_internal_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -433,6 +477,14 @@ variable "monitor_disk_size" {
   type    = string
   default = null
 }
+variable "monitor_disk_iops" {
+  type    = number
+  default = null
+}
+variable "monitor_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "monitor_disk_encrypt" {
   type    = bool
   default = null
@@ -447,7 +499,7 @@ variable "monitor_disk_kms_key_arn" {
 }
 variable "monitor_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -478,6 +530,14 @@ variable "opensearch_vm_disk_size" {
   type    = string
   default = "500"
 }
+variable "opensearch_vm_disk_iops" {
+  type    = number
+  default = null
+}
+variable "opensearch_vm_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "opensearch_vm_disk_encrypt" {
   type    = bool
   default = null
@@ -492,7 +552,7 @@ variable "opensearch_vm_disk_kms_key_arn" {
 }
 variable "opensearch_vm_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -522,6 +582,14 @@ variable "pgbouncer_disk_size" {
   type    = string
   default = null
 }
+variable "pgbouncer_disk_iops" {
+  type    = number
+  default = null
+}
+variable "pgbouncer_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "pgbouncer_disk_encrypt" {
   type    = bool
   default = null
@@ -536,7 +604,7 @@ variable "pgbouncer_disk_kms_key_arn" {
 }
 variable "pgbouncer_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -566,6 +634,14 @@ variable "postgres_disk_size" {
   type    = string
   default = null
 }
+variable "postgres_disk_iops" {
+  type    = number
+  default = null
+}
+variable "postgres_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "postgres_disk_encrypt" {
   type    = bool
   default = null
@@ -580,7 +656,7 @@ variable "postgres_disk_kms_key_arn" {
 }
 variable "postgres_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -610,6 +686,14 @@ variable "praefect_disk_size" {
   type    = string
   default = null
 }
+variable "praefect_disk_iops" {
+  type    = number
+  default = null
+}
+variable "praefect_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "praefect_disk_encrypt" {
   type    = bool
   default = null
@@ -624,7 +708,7 @@ variable "praefect_disk_kms_key_arn" {
 }
 variable "praefect_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -654,6 +738,14 @@ variable "praefect_postgres_disk_size" {
   type    = string
   default = null
 }
+variable "praefect_postgres_disk_iops" {
+  type    = number
+  default = null
+}
+variable "praefect_postgres_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "praefect_postgres_disk_encrypt" {
   type    = bool
   default = null
@@ -668,7 +760,7 @@ variable "praefect_postgres_disk_kms_key_arn" {
 }
 variable "praefect_postgres_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -698,6 +790,14 @@ variable "redis_disk_size" {
   type    = string
   default = null
 }
+variable "redis_disk_iops" {
+  type    = number
+  default = null
+}
+variable "redis_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "redis_disk_encrypt" {
   type    = bool
   default = null
@@ -712,7 +812,7 @@ variable "redis_disk_kms_key_arn" {
 }
 variable "redis_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -742,6 +842,14 @@ variable "redis_cache_disk_size" {
   type    = string
   default = null
 }
+variable "redis_cache_disk_iops" {
+  type    = number
+  default = null
+}
+variable "redis_cache_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "redis_cache_disk_encrypt" {
   type    = bool
   default = null
@@ -756,7 +864,7 @@ variable "redis_cache_disk_kms_key_arn" {
 }
 variable "redis_cache_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -786,6 +894,14 @@ variable "redis_persistent_disk_size" {
   type    = string
   default = null
 }
+variable "redis_persistent_disk_iops" {
+  type    = number
+  default = null
+}
+variable "redis_persistent_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "redis_persistent_disk_encrypt" {
   type    = bool
   default = null
@@ -800,7 +916,7 @@ variable "redis_persistent_disk_kms_key_arn" {
 }
 variable "redis_persistent_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -830,6 +946,14 @@ variable "sidekiq_disk_size" {
   type    = string
   default = null
 }
+variable "sidekiq_disk_iops" {
+  type    = number
+  default = null
+}
+variable "sidekiq_disk_throughput" {
+  type    = number
+  default = null
+}
 variable "sidekiq_disk_encrypt" {
   type    = bool
   default = null
@@ -844,7 +968,7 @@ variable "sidekiq_disk_kms_key_arn" {
 }
 variable "sidekiq_data_disks" {
   type = list(
-    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
+    object({ name = string, device_name = string, type = optional(string), size = optional(number), iops = optional(number), throughput = optional(number), skip_destroy = optional(bool), source_snapshots = optional(map(string)), snapshots = optional(map(string)) })
   )
   default = []
 }
@@ -1197,6 +1321,10 @@ variable "rds_postgres_iops" {
   type    = number
   default = null
 }
+variable "rds_postgres_storage_throughput" {
+  type    = number
+  default = null
+}
 variable "rds_postgres_storage_type" {
   type    = string
   default = "io1"
@@ -1362,6 +1490,10 @@ variable "rds_praefect_postgres_iops" {
   type    = number
   default = null
 }
+variable "rds_praefect_postgres_storage_throughput" {
+  type    = number
+  default = null
+}
 variable "rds_praefect_postgres_storage_type" {
   type    = string
   default = "io1"
@@ -1506,6 +1638,10 @@ variable "rds_geo_tracking_postgres_iops" {
   type    = number
   default = null
 }
+variable "rds_geo_tracking_postgres_storage_throughput" {
+  type    = number
+  default = null
+}
 variable "rds_geo_tracking_postgres_storage_type" {
   type    = string
   default = "io1"
@@ -1616,6 +1752,7 @@ variable "rds_databases" {
     max_allocated_storage = optional(number, 1000)
     storage_type          = optional(string, "gp3")
     iops                  = optional(number, null)
+    storage_throughput    = optional(number, null)
 
     # High availability & reliability
     multi_az            = optional(bool, null)

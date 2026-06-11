@@ -218,6 +218,13 @@ run "custom_storage" {
         iops              = 3000
         allocated_storage = 500
       }
+      gp3-throughput = {
+        instance_type      = "r6g.xlarge"
+        username           = "gitlab"
+        password_wo        = "password"
+        storage_type       = "gp3"
+        storage_throughput = 250
+      }
     }
   }
 
@@ -229,6 +236,11 @@ run "custom_storage" {
   assert {
     condition     = aws_db_instance.gitlab_rds_database["high-perf"].iops == 3000
     error_message = "Should use custom IOPS"
+  }
+
+  assert {
+    condition     = aws_db_instance.gitlab_rds_database["gp3-throughput"].storage_throughput == 250
+    error_message = "Should use custom throughput of 250 MiB/s"
   }
 }
 

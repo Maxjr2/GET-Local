@@ -79,6 +79,7 @@ resource "aws_db_instance" "gitlab" {
 
   storage_type          = var.rds_postgres_storage_type
   iops                  = var.rds_postgres_storage_type == "io1" && var.rds_postgres_iops == null ? 1000 : var.rds_postgres_iops
+  storage_throughput    = var.rds_postgres_storage_type == "gp3" ? var.rds_postgres_storage_throughput : null
   allocated_storage     = var.rds_postgres_allocated_storage
   max_allocated_storage = var.rds_postgres_max_allocated_storage
   storage_encrypted     = true
@@ -145,6 +146,7 @@ resource "aws_db_instance" "gitlab_read_replica" {
 
   storage_type          = aws_db_instance.gitlab[0].storage_type
   iops                  = aws_db_instance.gitlab[0].iops
+  storage_throughput    = aws_db_instance.gitlab[0].storage_type == "gp3" ? aws_db_instance.gitlab[0].storage_throughput : null
   max_allocated_storage = aws_db_instance.gitlab[0].max_allocated_storage
   storage_encrypted     = true
   kms_key_id            = aws_db_instance.gitlab[0].kms_key_id

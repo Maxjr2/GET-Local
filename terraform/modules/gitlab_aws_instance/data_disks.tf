@@ -12,6 +12,7 @@ locals {
         type                           = coalesce(data_disk.type, var.disk_type)
         size                           = coalesce(data_disk.size, var.disk_size)
         iops                           = try(data_disk.iops, null)
+        throughput                     = try(data_disk.throughput, null)
         availability_zone              = aws_instance.gitlab[i].availability_zone
         instance_id                    = aws_instance.gitlab[i].id
         instance_name                  = local.instance_names[i]
@@ -30,6 +31,7 @@ resource "aws_ebs_volume" "gitlab" {
   type              = each.value.type
   size              = each.value.size
   iops              = each.value.iops
+  throughput        = each.value.type == "gp3" ? each.value.throughput : null
   availability_zone = each.value.availability_zone
 
   encrypted  = true

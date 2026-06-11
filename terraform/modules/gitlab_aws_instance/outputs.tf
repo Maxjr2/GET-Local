@@ -40,3 +40,11 @@ output "instance_volume_type" {
 output "instance_volume_size" {
   value = try(aws_instance.gitlab[*].root_block_device[0].volume_size, 0)
 }
+
+output "instance_volume_iops" {
+  value = try(aws_instance.gitlab[*].root_block_device[0].iops, 0)
+}
+
+output "instance_volume_throughput" {
+  value = try(aws_instance.gitlab[*].root_block_device[0].throughput, 0)
+}
