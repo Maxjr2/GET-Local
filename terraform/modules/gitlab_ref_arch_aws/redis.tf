@@ -13,6 +13,8 @@ module "redis" {
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id
   disk_size                  = coalesce(var.redis_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_disk_type, var.default_disk_type)
+  disk_iops                  = var.redis_disk_iops
+  disk_throughput            = var.redis_disk_throughput
   disk_encrypt               = coalesce(var.redis_disk_encrypt, var.default_disk_encrypt)
   disk_kms_key_arn           = var.redis_disk_kms_key_arn != null ? var.redis_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_disk_delete_on_termination != null ? var.redis_disk_delete_on_termination : var.default_disk_delete_on_termination
@@ -63,6 +65,8 @@ module "redis_cache" {
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id
   disk_size                  = coalesce(var.redis_cache_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_cache_disk_type, var.default_disk_type)
+  disk_iops                  = var.redis_cache_disk_iops
+  disk_throughput            = var.redis_cache_disk_throughput
   disk_encrypt               = coalesce(var.redis_cache_disk_encrypt, var.default_disk_encrypt)
   disk_kms_key_arn           = var.redis_cache_disk_kms_key_arn != null ? var.redis_cache_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_cache_disk_delete_on_termination != null ? var.redis_cache_disk_delete_on_termination : var.default_disk_delete_on_termination
@@ -111,6 +115,8 @@ module "redis_persistent" {
   ami_id                     = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu_default[0].id
   disk_size                  = coalesce(var.redis_persistent_disk_size, var.default_disk_size)
   disk_type                  = coalesce(var.redis_persistent_disk_type, var.default_disk_type)
+  disk_iops                  = var.redis_persistent_disk_iops
+  disk_throughput            = var.redis_persistent_disk_throughput
   disk_encrypt               = coalesce(var.redis_persistent_disk_encrypt, var.default_disk_encrypt)
   disk_kms_key_arn           = var.redis_persistent_disk_kms_key_arn != null ? var.redis_persistent_disk_kms_key_arn : (var.default_disk_kms_key_arn != null ? var.default_disk_kms_key_arn : var.default_kms_key_arn)
   disk_delete_on_termination = var.redis_persistent_disk_delete_on_termination != null ? var.redis_persistent_disk_delete_on_termination : var.default_disk_delete_on_termination

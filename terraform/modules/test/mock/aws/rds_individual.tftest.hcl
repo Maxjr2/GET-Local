@@ -102,6 +102,7 @@ run "main_database_custom" {
     rds_postgres_allocated_storage     = 200
     rds_postgres_max_allocated_storage = 2000
     rds_postgres_storage_type          = "gp3"
+    rds_postgres_storage_throughput    = 250
     rds_postgres_multi_az              = false
     rds_postgres_deletion_protection   = true
   }
@@ -124,6 +125,11 @@ run "main_database_custom" {
   assert {
     condition     = aws_db_instance.gitlab[0].storage_type == "gp3"
     error_message = "Should use custom storage type"
+  }
+
+  assert {
+    condition     = aws_db_instance.gitlab[0].storage_throughput == 250
+    error_message = "Should use custom throughput of 250 MiB/s"
   }
 
   assert {
