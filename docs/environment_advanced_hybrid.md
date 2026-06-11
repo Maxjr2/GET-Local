@@ -277,6 +277,68 @@ This feature requires a [Cloud KMS key to be created separately](https://cloud.g
   > [!note]
   > The name must be given in its [full resource ID format](https://cloud.google.com/kms/docs/resource-hierarchy) (`projects/<project-id>/locations/<location>/keyRings/<keyring>/cryptoKeys/<key>`)
 
+#### GKE Extra Node Pools
+
+The Toolkit provisions four node pools (webservice, sidekiq, supporting, gitaly) and manages their IAM and service accounts. If you need an additional node pool - for example to dedicate capacity to a component such as AI Gateway - you can create it in your own Terraform alongside the Toolkit module call. No changes to the Toolkit module are required.
+
+The Toolkit exports the values you need via its `kubernetes` output:
+
+| Output key | Used for |
+| --- | --- |
+| `module.gitlab_ref_arch_gcp.kubernetes.kubernetes_cluster_id` | `cluster` on the new node pool |
+| `module.gitlab_ref_arch_gcp.kubernetes.kubernetes_node_group_service_account_email` | `service_account` in `node_config` |
+
+> [!note]
+> `kubernetes_node_group_service_account_email` is only populated when `gke_enable_workload_identity = true` (the recommended setting). If Workload Identity is disabled you must create and supply your own GCP service account for the node pool.
+
+The following example adds a dedicated node pool and a GCP service account with Workload Identity for a new component. Add this to your own `.tf` file alongside `environment.tf`. Refer to the [`google_container_node_pool`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool) and [`google_service_account_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_iam) Terraform docs for the full set of available fields:
+
+```hcl
+locals {
+  k8s = module.gitlab_ref_arch_gcp.kubernetes
+}
+
+resource "google_container_node_pool" "my_component" {
+  name    = "<prefix>-my-component"
+  cluster = local.k8s.kubernetes_cluster_id
+
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+
+  node_config {
+    machine_type    = "n1-standard-4"
+    service_account = local.k8s.kubernetes_node_group_service_account_email
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+
+    labels = {
+      workload = "my-component"
+    }
+  }
+}
+
+# Workload Identity - only needed if the workload's pods need to call GCP APIs directly.
+resource "google_service_account" "my_component" {
+  account_id   = "<prefix>-my-component"
+  display_name = "My Component Workload Identity"
+}
+
+resource "google_service_account_iam_member" "my_component_workload_identity" {
+  service_account_id = google_service_account.my_component.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:<project_id>.svc.id.goog[<namespace>/<service-account-name>]"
+}
+```
+
+> [!note]
+> Replace `<prefix>`, `<project_id>`, `<namespace>`, and `<service-account-name>` with values matching your environment. The `workload` label must match the `nodeSelector` configured in the component's Helm chart values.
+
+If the workload runs on an existing Toolkit-managed node pool and only needs GCP API access, you can omit the `google_container_node_pool` resource and use the Workload Identity blocks alone.
+
 ### Amazon Web Services (AWS)
 
 For AWS Elastic Kubernetes Service (EKS), the following main settings are available to configure a Kubernetes cluster and its associated Node Groups:
@@ -545,6 +607,106 @@ all:
 
     [...]
 ```
+
+#### EKS Extra Node Pools
+
+The Toolkit provisions four node pools (webservice, sidekiq, supporting, gitaly) and manages their IAM, security groups, and addons. If you need an additional node pool - for example to dedicate capacity to a component such as AI Gateway - you can create it in your own Terraform alongside the Toolkit module call. No changes to the Toolkit module are required.
+
+The Toolkit exports the values you need via its `kubernetes` and `network` outputs:
+
+| Output key | Used for |
+| --- | --- |
+| `module.gitlab_ref_arch_aws.kubernetes.kubernetes_cluster_name` | `cluster_name` on the new node group |
+| `module.gitlab_ref_arch_aws.kubernetes.kubernetes_eks_node_role_arn` | `node_role_arn` on the new node group |
+| `module.gitlab_ref_arch_aws.kubernetes.kubernetes_cluster_security_group_ids` | Security group attached to the launch template |
+| `module.gitlab_ref_arch_aws.network.vpc_subnet_priv_ids` | Private subnets for the node group |
+| `module.gitlab_ref_arch_aws.kubernetes.kubernetes_oidc_provider_arn` | IRSA trust policy (if the workload needs AWS API access) |
+| `module.gitlab_ref_arch_aws.kubernetes.kubernetes_oidc_provider` | OIDC issuer host (without `https://`) for IRSA condition |
+
+The following example adds a dedicated node pool and an IRSA role for a new component. Add this to your own `.tf` file alongside `environment.tf`. Refer to the [`aws_eks_node_group`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group) and [`aws_launch_template`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) Terraform docs for the full set of available fields:
+
+```hcl
+locals {
+  k8s = module.gitlab_ref_arch_aws.kubernetes
+  net = module.gitlab_ref_arch_aws.network
+}
+
+# Launch template enforces IMDSv2 and attaches the cluster security group.
+resource "aws_launch_template" "my_component" {
+  name = "<prefix>-eks-my-component-lt"
+
+  vpc_security_group_ids = [local.k8s.kubernetes_cluster_security_group_ids]
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name             = "<prefix>-eks-my-component-node"
+      gitlab_node_type = "gitlab-my-component-node-pool"
+    }
+  }
+}
+
+resource "aws_eks_node_group" "my_component" {
+  cluster_name    = local.k8s.kubernetes_cluster_name
+  node_group_name = "<prefix>-my-component"
+  node_role_arn   = local.k8s.kubernetes_eks_node_role_arn
+  subnet_ids      = local.net.vpc_subnet_priv_ids
+
+  launch_template {
+    id      = aws_launch_template.my_component.id
+    version = aws_launch_template.my_component.latest_version
+  }
+
+  instance_types = ["m5.large"]
+
+  scaling_config {
+    desired_size = 1
+    min_size     = 1
+    max_size     = 3
+  }
+
+  labels = {
+    workload = "my-component"
+  }
+}
+
+# IRSA role - only needed if the workload's pods need to call AWS APIs directly.
+data "aws_iam_policy_document" "my_component_irsa" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [local.k8s.kubernetes_oidc_provider_arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${local.k8s.kubernetes_oidc_provider}:sub"
+      values   = ["system:serviceaccount:<namespace>:<service-account-name>"]
+    }
+  }
+}
+
+resource "aws_iam_role" "my_component" {
+  name               = "<prefix>-eks-my-component-role"
+  assume_role_policy = data.aws_iam_policy_document.my_component_irsa.json
+}
+
+resource "aws_iam_role_policy_attachment" "my_component" {
+  role       = aws_iam_role.my_component.name
+  policy_arn = "<your-policy-arn>"
+}
+```
+
+> [!note]
+> Replace `<prefix>`, `<namespace>`, `<service-account-name>`, and `<your-policy-arn>` with values matching your environment. The `workload` label must match the `nodeSelector` configured in the component's Helm chart values.
+
+If the workload runs on an existing Toolkit-managed node pool and only needs AWS API access, you can omit the `aws_launch_template` and `aws_eks_node_group` resources and use the IRSA role blocks alone.
 
 #### EKS Endpoint Setup
 
