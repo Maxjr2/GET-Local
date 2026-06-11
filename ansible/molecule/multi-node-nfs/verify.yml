@@ -1,0 +1,38 @@
+---
+- name: Gather facts for NFS clients
+  hosts: gitlab_rails:sidekiq
+  gather_facts: true
+
+- name: Verify NFS exports
+  hosts: gitlab_nfs
+  tasks:
+    - name: Read /etc/exports
+      ansible.builtin.slurp:
+        src: /etc/exports
+      register: nfs_exports
+
+    - name: Decode exports content
+      ansible.builtin.set_fact:
+        exports_content: "{{ nfs_exports.content | b64decode }}"
+
+    - name: Display /etc/exports
+      ansible.builtin.debug:
+        msg: "{{ exports_content }}"
+
+    - name: Assert rails-1 IP is present in exports
+      ansible.builtin.assert:
+        that:
+          - hostvars['gitlab-rails-1']['ansible_facts']['default_ipv4']['address'] in exports_content
+        fail_msg: "gitlab-rails-1 IP not found in /etc/exports"
+
+    - name: Assert sidekiq-1 IP is present in exports
+      ansible.builtin.assert:
+        that:
+          - hostvars['sidekiq-1']['ansible_facts']['default_ipv4']['address'] in exports_content
+        fail_msg: "sidekiq-1 IP not found in /etc/exports"
+
+    - name: Assert no CIDR block present
+      ansible.builtin.assert:
+        that:
+          - "'/16' not in exports_content"
+        fail_msg: "/16 CIDR found in /etc/exports -- old behaviour not removed"

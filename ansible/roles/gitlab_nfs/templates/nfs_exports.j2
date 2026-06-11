@@ -8,5 +8,8 @@
 # /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)
 # /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)
 #
-
-{{ gitlab_nfs_path }} {{ internal_cidr_16 }}(rw,sync,no_root_squash,no_subtree_check)
+{% set nfs_clients = ((groups['gitlab_rails'] | default([])) + (groups['sidekiq'] | default([]))) | unique %}
+{% set nfs_client_addrs = nfs_clients | map('extract', hostvars, internal_addr_lookup) | list %}
+{% for addr in nfs_client_addrs %}
+{{ gitlab_nfs_path }} {{ addr }}(rw,sync,no_root_squash,no_subtree_check)
+{% endfor %}

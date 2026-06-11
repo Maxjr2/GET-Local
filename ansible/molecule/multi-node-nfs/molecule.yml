@@ -1,0 +1,45 @@
+---
+driver:
+  name: docker
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      hosts: ./inventory
+  env:
+    ANSIBLE_ROLES_PATH: ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:../../roles
+    ANSIBLE_CONFIG: ../../ansible.cfg
+    ANSIBLE_COLLECTIONS_DUPLICATE_WARNINGS: false
+    MOLECULE_DISPLAY_MISSING_SCHEMA: false
+    ANSIBLE_GALAXY_DISPLAY_SKIPPED: false
+platforms:
+  - &default_platform
+    name: gitlab-rails-1
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2404}-ansible:latest"
+    pre_build_image: true
+    privileged: true
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /tmp
+      - /run/lock
+    network_mode: "molecule_network"
+    networks:
+      - name: molecule_network
+  - <<: *default_platform
+    name: sidekiq-1
+  - <<: *default_platform
+    name: gitlab-nfs-1
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
