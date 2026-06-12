@@ -453,7 +453,7 @@ For all setups, the below settings configure how the service and dependents are 
 > [!note]
 > When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates), the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
 
-### Container Registry Metadata Database ([Beta](../TECHNICAL_DESIGN.md#beta-or-experimental-support))
+### Container Registry Metadata Database
 
 The Toolkit can be configured to deploy the [Container Registry Metadata Database](https://docs.gitlab.com/administration/packages/container_registry_metadata_database/).
 

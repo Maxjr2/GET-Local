@@ -129,7 +129,7 @@ container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gc
 container_registry_external_url: "https://registry.{{ external_host }}"
 container_registry_external_host: "{{ container_registry_external_url | regex_replace('^https?:\/\/') }}"
 
-## [Toolkit Beta] Container Registry Metadata Database. Known limitations, see https://docs.gitlab.com/administration/packages/container_registry_metadata_database/#known-limitations
+## Container Registry Metadata Database. Known limitations, see https://docs.gitlab.com/administration/packages/container_registry_metadata_database/#known-limitations
 # External when postgres is externally managed or the registry database is on a different host than the main GitLab postgres
 container_registry_database_external: "{{ postgres_external or (container_registry_database_host != '' and container_registry_database_host != postgres_host) }}"
 

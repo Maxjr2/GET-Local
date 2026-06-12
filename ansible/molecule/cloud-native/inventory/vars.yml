@@ -46,6 +46,16 @@ all:
     gitaly_token: "{{ lookup('env','MOLECULE_GITALY_TOKEN') }}"
     redis_password: "{{ lookup('env','MOLECULE_REDIS_PASSWORD') }}"
 
+    container_registry_enable: true
+    container_registry_database_configure: true
+    container_registry_database_enabled: true
+    container_registry_database_port: 5432
+    container_registry_database_admin_username: "postgres"
+    container_registry_database_admin_password: "{{ lookup('env','MOLECULE_POSTGRES_ADMIN_PASSWORD') }}"
+    container_registry_database_name: "registry"
+    container_registry_database_username: "registry"
+    container_registry_database_password: "{{ lookup('env','MOLECULE_CONTAINER_REGISTRY_DATABASE_PASSWORD') }}"
+
     # OpenBao configs
     openbao_external_url: "http://openbao.docker"
     openbao_database_password: "open8aot3st"
