@@ -17,6 +17,7 @@
     - name: Primary Database - Run gitlab-ctl reconfigure
       command: gitlab-ctl reconfigure
       retries: 3
+      delay: 30
 
     - name: Primary Database - Restart Postgres
       command: gitlab-ctl restart
@@ -37,6 +38,7 @@
   command: gitlab-ctl reconfigure
   register: result
   retries: 3
+  delay: 30
   until: result is success
 
 - name: Primary Database - Restart {{ 'patroni' if geo_primary_postgres_is_ha else 'postgresql' }}

@@ -418,9 +418,9 @@ Additionally, the Toolkit needs to be configured to run in offline mode to stop 
 
 The Toolkit installs several system packages, required for GitLab or itself, on each target OS via the official repos as follows:
 
-- Ubuntu / Debian _Main_ - `aptitude curl openssh-server ca-certificates tzdata python3-pip nfs-common postfix jq libpq-dev`
-- RHEL _Main, EPEL_ - `curl openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
-- Amazon Linux 2023 _Main_ - `openssh-server ca-certificates tzdata python3-pip python3-devel nfs-utils postfix jq gcc yum-plugin-versionlock libpq-devel`
+- Ubuntu / Debian _Main_ - `aptitude curl ca-certificates tzdata`
+- RHEL _Main_ - `curl ca-certificates tzdata yum-plugin-versionlock`
+- Amazon Linux 2023 _Main_ - `ca-certificates tzdata yum-plugin-versionlock`
 
 > [!tip]
 > For the most up-to-date list of packages it's recommend to check the `system_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
@@ -428,10 +428,12 @@ The Toolkit installs several system packages, required for GitLab or itself, on 
 Additionally the following packages may be installed depending on the functionality enabled:
 
 - `nvme-cli` - [Data Disks](environment_advanced.md#data-disks-gcp-aws-azure) (AWS)
-- `socat` - [Let's Encrypt SSL setup on HAProxy External nodes](environment_advanced_ssl.md#lets-encrypt-generated-certificates).
+- `openssh-server` - GitLab Rails nodes when `gitlab_shell_ssh_daemon` is `openssh` (default)
+- `python3-psycopg2 python3-pexpect` (Ubuntu / Debian) / `python3-psycopg2 python3-pexpect python3-requests` (RHEL, Amazon Linux 2023) - nodes with external database or Geo configurations
+- `socat` - [Let's Encrypt SSL setup on HAProxy External nodes](environment_advanced_ssl.md#lets-encrypt-generated-certificates)
 - `unattended-upgrades` (Ubuntu / Debian) / `dnf-automatic` (RHEL 9/10, Amazon Linux 2023) - [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades)
-- `nfs-kernel-server` (Ubuntu / Debian) / `nfs-utils` (RHEL 9/10, Amazon Linux 2023) - [NFS Server setup for Object Data](environment_advanced.md#nfs-for-object-data)
-- `cron` (Debian 12) - [Let's Encrypt SSL for HAProxy External](environment_advanced_ssl.md#lets-encrypt-generated-certificates)
+- `nfs-kernel-server` (Ubuntu / Debian) / `nfs-utils` (RHEL, Amazon Linux) - [NFS Server setup for Object Data](environment_advanced.md#nfs-for-object-data)
+- `cron` (Debian 12) / `cronie` (Amazon Linux 2023) - [Let's Encrypt SSL for HAProxy External](environment_advanced_ssl.md#lets-encrypt-generated-certificates)
 
 When `offline_setup` is configured the Toolkit will not attempt to set up any repos or install the required packages. As such, you are required to ensure the packages are present before running Ansible. Note this also disables any setup of [Automatic Security Upgrades](environment_advanced.md#automatic-security-upgrades).
 
@@ -439,12 +441,23 @@ There are various ways this can be tackled. While this is outside the scope of t
 
 ### Python Packages
 
-The Toolkit also installs several Python packages via PyPI onto the system to be used by Ansible as required - `pexpect<=4.9.0, psycopg2<=3.2.1`.
+The Toolkit installs `python3-psycopg2`, `python3-pexpect`, and (on RHEL) `python3-requests` as system packages on nodes that require them (external database and Geo configurations). These are installed from the standard OS repos and are covered by the distro's support and security backporting policy.
 
-When `offline_setup` is configured the Toolkit will not attempt to set up these packages. As such, you are required to ensure the packages are present before running Ansible. Similar to [System Packages](#system-packages) this can be done in [several ways](https://pip.pypa.io/en/stable/cli/pip_install/#pip-install-examples) such as installing the packages via an offline PyPI repo or directly.
+On Amazon Linux 2 only, `psycopg2` and `pexpect` are installed via pip as the equivalent system packages are not available.
 
 > [!tip]
-> For the most up-to-date list of Python packages it's recommend to check the `python_packages` variable [in this file](../ansible/roles/common/defaults/main.yml).
+> For the most up-to-date list of Python packages check the `system_python_packages_*` variables [in this file](../ansible/roles/common/defaults/main.yml).
+
+#### Customising the Python version for packages
+
+On RHEL, the Python packages default to the unversioned `python3-*` names which resolve to the system Python. Environments that manage a non-default Python version alongside the system Python and have configured `ansible_python_interpreter` accordingly can override the `system_python_packages_rhel` variable in `vars.yml` to use the corresponding versioned packages:
+
+```yaml
+ansible_python_interpreter: /usr/bin/python3.12
+system_python_packages_rhel: ['python3.12-psycopg2', 'python3.12-pexpect', 'python3.12-requests']
+```
+
+This ensures the Toolkit's Ansible module dependencies are installed into the correct Python environment. Note that package availability varies by RHEL version and the packages must be available in a configured repo.
 
 ### Ansible Galaxy Roles
 
