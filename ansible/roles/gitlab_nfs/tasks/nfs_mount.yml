@@ -1,4 +1,13 @@
 ---
+- name: Install NFS client
+  package:
+    name: "{{ 'nfs-common' if ansible_facts['os_family'] == 'Debian' else 'nfs-utils' }}"
+    state: present
+  register: result
+  retries: 60
+  delay: 5
+  until: result is success
+
 - name: Clear any previous mounts if not correct server
   block:
     - name: Get existing mount details

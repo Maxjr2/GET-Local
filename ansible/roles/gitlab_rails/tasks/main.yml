@@ -232,6 +232,16 @@
 
 - name: Configure SSH
   block:
+    - name: Install OpenSSH server
+      package:
+        name: openssh-server
+        state: present
+      register: result
+      retries: 60
+      delay: 5
+      until: result is success
+      when: gitlab_shell_ssh_daemon == 'openssh'
+
     - name: Configure SSH Fast Lookup if OpenSSH service being used
       blockinfile:
         path: /etc/ssh/sshd_config

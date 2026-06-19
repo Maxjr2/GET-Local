@@ -36,7 +36,7 @@
 
 - name: Install system packages (RHEL)
   yum:
-    name: "{{ system_packages_rhel }}"
+    name: "{{ system_packages_rpm }}"
     update_cache: true
   register: result
   retries: 60
@@ -72,43 +72,47 @@
   until: result is success
   when: ansible_facts['distribution'] == 'Amazon'
 
+# Python packages are only installed on nodes with external database or Geo configurations
 - name: Install Python packages
-  pip:
-    name: "{{ python_packages }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-    break_system_packages: true
-  when: not (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int >= 8)
+  block:
+    - name: Install Python packages (Debian/Ubuntu)
+      apt:
+        name: "{{ system_python_packages_deb }}"
+      register: result
+      retries: 60
+      delay: 5
+      until: result is success
+      when: ansible_facts['os_family'] == 'Debian'
 
-- name: Install python packages (Amazon Linux 2023)
-  pip:
-    name: "{{ python_packages }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-    break_system_packages: true
-  when:
-    - ansible_facts['distribution'] == 'Amazon'
-    - ansible_facts['distribution_major_version'] == '2023'
+    - name: Install Python packages (RHEL)
+      yum:
+        name: "{{ system_python_packages_rhel }}"
+      register: result
+      retries: 60
+      delay: 5
+      until: result is success
+      when:
+        - ansible_facts['os_family'] == 'RedHat'
+        - ansible_facts['distribution'] != 'Amazon'
 
-- name: Install Python packages (EL 9/10)
-  pip:
-    name: "{{ python_packages_rhel }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-    break_system_packages: true
-  when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] | int >= 9
-    - ansible_facts['distribution'] != 'Amazon'
+    - name: Install Python packages (Amazon Linux 2023)
+      yum:
+        name: "{{ system_python_packages_amazon }}"
+      register: result
+      retries: 60
+      delay: 5
+      until: result is success
+      when:
+        - ansible_facts['distribution'] == 'Amazon'
+        - ansible_facts['distribution_major_version'] == '2023'
 
-- name: Install Python packages (EL 8)
-  pip:
-    name: "{{ python_packages_rhel }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-  when:
-    - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] == '8'
-    - ansible_facts['distribution'] != 'Amazon'
+    # AL2 only - python3-psycopg2 and python3-pexpect not available as system packages
+    - name: Install Python packages (Amazon Linux 2)
+      pip:
+        name: "{{ python_packages_amazon_al2 }}"
+        extra_args: "--upgrade-strategy only-if-needed"
+      when:
+        - ansible_facts['distribution'] == 'Amazon'
+        - ansible_facts['distribution_major_version'] == '2'
+  when: postgres_external or praefect_postgres_external or geo_tracking_postgres_external or geo_secondary_site_group_name in groups or geo_primary_site_group_name in groups
 
-- name: Install python packages (Amazon Linux 2)
-  pip:
-    name: "{{ python_packages_amazon[ansible_facts['distribution_major_version']] }}"
-    extra_args: "--upgrade-strategy only-if-needed"
-  when: (ansible_facts['distribution'] == 'Amazon' and ansible_facts['distribution_major_version'] == '2')

@@ -6,6 +6,9 @@ all:
     custom_config_folder: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_configs"
     custom_tasks_folder: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | default(lookup('env', 'PWD'), true) }}/molecule/gitlab_tasks"
 
+    # Triggers the conditional Python package install block to verify system packages install correctly
+    postgres_external: true
+
     # Workaround: https://github.com/docker/cli/issues/6646
     docker_daemon_options: >-
       {{

@@ -1,12 +1,11 @@
 ---
 # Packages
-system_packages_deb: [aptitude, curl, openssh-server, ca-certificates, tzdata, python3-pip, nfs-common, postfix, jq, libpq-dev]
+system_packages_deb: [aptitude, curl, ca-certificates, tzdata]
 
-system_packages_rpm: ['curl', 'openssh-server', 'ca-certificates', 'tzdata', 'python3-pip', 'python3-devel', 'python3-libs', 'nfs-utils', 'postfix', 'jq', 'gcc', 'yum-plugin-versionlock']
-system_packages_rhel: "{{ system_packages_rpm + ['libpq-devel', 'python3-setuptools'] }}"
+system_packages_rpm: ['curl', 'ca-certificates', 'tzdata', 'yum-plugin-versionlock']
 system_packages_amazon:
-  '2': "{{ system_packages_rpm + ['postgresql-devel'] }}"
-  '2023': "{{ (system_packages_rpm + ['libpq-devel']) | difference(['curl']) }}"
+  '2': "{{ system_packages_rpm + ['python3-pip', 'postgresql-devel'] }}"
+  '2023': "{{ system_packages_rpm | difference(['curl']) }}"
 
 system_packages_upgrade: "{{ lookup('env','SYSTEM_PACKAGES_UPGRADE') | default(false, true) }}"
 system_packages_autoremove: "{{ lookup('env','SYSTEM_PACKAGES_AUTOREMOVE') | default(false, true) }}"
@@ -17,12 +16,14 @@ epel_setup: false
 epel_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
 epel_rpm_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
 
-# Python packages should target minimum active Python version (3.8) but also must allow for lower targets for Python 3.6 (RHEL 8) and 3.7 (AL2).
-python_packages: [pexpect<=4.9.0, psycopg2<=3.2.1]
-python_packages_rhel: "{{ python_packages + ['requests<=2.32.3'] }}"
-python_packages_amazon:
-  # Install requests and urllib3 1.x for Amazon Linux 2 - https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html#ssl-module-is-compiled-with-openssl-1-0-2-k-fips
-  '2': "{{ python_packages + ['requests<=2.32.3', 'urllib3<2.0.0'] }}"
+# Python packages - installed conditionally on nodes with external database or Geo configurations
+system_python_packages_deb: [python3-psycopg2, python3-pexpect]
+system_python_packages_rhel: ['python3-psycopg2', 'python3-pexpect', 'python3-requests']
+system_python_packages_amazon: ['python3-psycopg2', 'python3-pexpect']
+
+# AL2 only - python3-psycopg2/python3-pexpect not available as system packages, installed via pip
+# urllib3 pinned to 1.x: https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html#ssl-module-is-compiled-with-openssl-1-0-2-k-fips
+python_packages_amazon_al2: [psycopg2, pexpect, requests, 'urllib3<2.0.0']
 
 # GitLab Package
 ## Repo
