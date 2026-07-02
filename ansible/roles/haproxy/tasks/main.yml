@@ -19,6 +19,7 @@
   file:
     path: /opt/haproxy
     state: directory
+    owner: '99' # HAProxy Docker User ID
   tags: reconfigure
 
 - name: Create /opt/haproxy/haproxy.cfg file
@@ -58,6 +59,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    owner: '99' # HAProxy Docker User ID
   loop:
     - /opt/haproxy/ssl
     - /opt/haproxy/trusted-certs
