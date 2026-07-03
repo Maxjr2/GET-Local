@@ -19,17 +19,6 @@
           when: ansible_facts.packages is not defined
       tags: always
 
-    - name: Set Internal Hostname to match inventory
-      hostname:
-        name: "{{ inventory_hostname }}"
-      when:
-        - aws_set_hostnames
-        - cloud_provider == 'aws'
-        - ansible_facts['hostname'] != inventory_hostname
-      tags:
-        - hostname
-        - common_prep
-
     - name: Check if GitLab repository exists
       stat:
         path: "{{ gitlab_repo_list_path[ansible_facts['os_family']] }}"
@@ -63,7 +52,7 @@
         - sysctl
         - common_prep
 
-    - name: Mount data disks (GCP / AWS / Azure)
+    - name: Mount data disks
       import_tasks: data_disks.yml
       when:
         - group_data_disks | length > 0

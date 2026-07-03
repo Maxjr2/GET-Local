@@ -1,16 +1,4 @@
 ---
-- name: Identify NVMe devices (AWS)
-  block:
-    - name: Install nvme-cli package (AWS)
-      package:
-        name: nvme-cli
-        state: present
-
-    - name: Run NVMe to Block symlink script (AWS)
-      script: 'aws-data-disks/ebs-nvme-block-symlinks.sh'
-  when: cloud_provider == 'aws'
-  tags: nvme
-
 - name: Stat the disks
   stat:
     path: "{{ disk_device_prefix[cloud_provider] + item.device_name if '/' not in item.device_name else item.device_name }}"

@@ -132,38 +132,6 @@
         - cloud_provider != 'none'
         - kube_prometheus_stack_charts_existing_app_version is defined
 
-    - name: Configure kube-prometheus-stack StorageClass for new installs if required (AWS EKS)
-      # Set up new StorageClass if this is a new install and none has been configured
-      block:
-        - name: Configure kube-prometheus-stack StorageClass (AWS EKS)
-          kubernetes.core.k8s:
-            template: 'storage_classes/kube_prometheus_stack_gp3.aws.yml.j2'
-            state: present
-
-        - name: Set kube-prometheus-stack StorageClass (AWS EKS)
-          set_fact:
-            kube_prometheus_stack_charts_storage_class: "gitlab-kube-prometheus-stack-gp3"
-      when:
-        - cloud_provider == 'aws'
-        - kube_prometheus_stack_charts_existing_app_version is not defined
-        - kube_prometheus_stack_charts_storage_class == ''
-
-    - name: Configure default kube-prometheus-stack StorageClass for new installs if required (GCP GKE)
-      # Set up new StorageClass if this is a new install and none has been configured
-      block:
-        - name: Configure default kube-prometheus-stack StorageClass (GCP GKE)
-          kubernetes.core.k8s:
-            template: 'storage_classes/kube_prometheus_stack_balanced.gcp.yml.j2'
-            state: present
-
-        - name: Set default kube-prometheus-stack StorageClass (GCP GKE)
-          set_fact:
-            kube_prometheus_stack_charts_storage_class: "gitlab-kube-prometheus-stack-balanced"
-      when:
-        - cloud_provider == 'gcp'
-        - kube_prometheus_stack_charts_existing_app_version is not defined
-        - kube_prometheus_stack_charts_storage_class == ''
-
     - name: Lookup kube-prometheus-stack chart values values
       set_fact:
         kube_prometheus_stack_charts_values: "{{ lookup('template', 'templates/kube-prometheus-stack.yml.j2') | from_yaml }}"

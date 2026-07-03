@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](environment_provision.md)
 - [**GitLab Environment Toolkit - Configuring the environment with Ansible**](environment_configure.md)
 - [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
@@ -85,7 +83,7 @@ The Ansible control node is the machine where you run the Toolkit from. Requirem
 - Python: Latest version supported by your Ansible version (Ansible `13.x` requires Python `3.12`+)
 - Operating System: Any OS [supported by Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#control-node-requirements)
 - Location: Same or near region as your target environment to avoid network slowdown
-- Instance type: Avoid [burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html) as they can cause inconsistent behavior
+- Instance type: Avoid burstable/CPU-credit-limited instance types as they can cause inconsistent behavior
 -*SSH: Install a [recent version of `openssh`](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html#controlpersist-and-paramiko) for consistent connections
 
 ### Target Node Operating System Support
@@ -114,7 +112,7 @@ When using deprecated operating systems:
 - Best-effort support only, not guaranteed long-term
 - Install the corresponding older Ansible version on your **control node**
 - The Ansible ecosystem (collections, roles, modules) continues evolving independently and may introduce breaking changes
-- Older Ansible Galaxy collection versions may be required (e.g., `amazon.aws` <10.0.0 for Ansible 2.16) - check collection changelogs and install compatible versions accordingly
+- Older Ansible Galaxy collection versions may be required (e.g., an older `nutanix.ncp` release compatible with ansible-core 2.16) - check collection changelogs and install compatible versions accordingly
 
 ### Installation Methods
 
@@ -199,138 +197,53 @@ One of the first pieces of config you will need to configure is the Inventory. A
 
 Using the recommended structure the file should be saved in the `inventory` folder, e.g. `environments/<env_name>/inventory`.
 
-Each Dynamic Inventory is a plugin offered by Ansible themselves and are different depending on the host provider. As such, select the section for your host provider and move onto the next step.
+This fork uses the Nutanix Dynamic Inventory plugin below for Nutanix-provisioned environments. For on-prem/custom servers, use a [Static Inventory](environment_advanced.md#custom-servers-on-prem) instead.
 
-#### Google Cloud Platform (GCP)
+#### Nutanix
 
-The Google Dynamic Inventory plugin is called [`gcp_compute`](https://docs.ansible.com/ansible/latest/collections/google/cloud/gcp_compute_inventory.html). This will have been installed already during the Ansible install process via `ansible-galaxy install`.
+The Nutanix Dynamic Inventory plugin is called [`nutanix.ncp.ntnx_prism_vm_inventory_v2`](https://github.com/nutanix/nutanix.ansible), provided by the `nutanix.ncp` Ansible collection (`ansible-galaxy collection install nutanix.ncp`).
 
-The config file for this plugin which requires the naming convention `*.gcp.yml`, e.g. `10k.gcp.yml`. Here's an example of the file with all config and descriptions below. Items in `<>` brackets need to be replaced with your config:
+The config file for this plugin requires the naming convention `*.nutanix.yml`, e.g. `10k.nutanix.yml`. Here's an example of the file with all config and descriptions below. Items in `<>` brackets need to be replaced with your config:
 
 ```yaml
-plugin: gcp_compute
-projects:
-  - <gcp_project_id>
+plugin: nutanix.ncp.ntnx_prism_vm_inventory_v2
+
+pc_hostname: "<prism_central_endpoint>"
+pc_username: "<nutanix_username>"
+pc_password: "<nutanix_password>"
+pc_port: 9440
+validate_certs: false
+
 filters:
-  - labels.gitlab_node_prefix = <prefix> # Same prefix set in Terraform
-keyed_groups:
-  - key: labels.gitlab_node_type
-    separator: ''
-  - key: labels.gitlab_node_level
-    separator: ''
-scopes:
-  - https://www.googleapis.com/auth/compute
-hostnames:
-  # List host by name instead of the default public ip
-  - name
-compose:
-  # Set an inventory parameter to use the Public IP address to connect to the host
-  # For Private ip use "networkInterfaces[0].networkIP"
-  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
-```
-
-- `plugin` - The name of the Dynamic Inventory plugin. Must always be `gcp_compute`.
-- `projects` - The ID of the GCP project for the environment
-- `filters` - A label filter for Ansible to use. This ensures it only configures the machines we want on the project and not any others based on the machine label `gitlab_node_prefix` set automatically in Terraform. Should be set the same `prefix` value set in Terraform.
-- `keyed_groups` - Configures Ansible to look for the labels automatically set by Terraform and to set up its host groups based on them. This config block shouldn't be changed from what's shown.
-- `scopes` - A GCP specific setting for how to use its API. Should not be changed.
-- `hostnames` - Config block for how Ansible should show the hosts in its output. This block configures the use of hostnames rather than IPs for better readability. This config block should not be changed.
-- `compose`: As shown in the comment this sets what IPs Ansible should use. This config block shouldn't be changed unless private IPs are desired as mentioned in the comment.
-
-##### Configure Authentication (GCP)
-
-Finally, the last thing to configure is authentication. This is required to allow Ansible to access GCP to build its dynamic inventory.
-
-Ansible provides several ways to authenticate with [GCP](https://docs.ansible.com/ansible/9/scenario_guides/guide_gce.html#credentials), you can select any method that is desired.
-
-All the methods given involve the Service Account file you generated previously. We've found the authentication methods that work best with the Toolkit in terms of ease of use are as follows:
-
-- `GCP_SERVICE_ACCOUNT_FILE` environment variable - Particularly useful with CI pipelines, the variable should be set to the local path of the Service Account key file.
-  - Note that the `GCP_AUTH_KIND` environment variable also needs to be set to `serviceaccount` for this authentication method.
-- `gcloud` login - Authentication can also occur automatically through the [`gcloud`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) command line tool. To log in with the Service Account you created earlier the [`activate-service-account`](https://cloud.google.com/sdk/gcloud/reference/auth/activate-service-account) command is available.
-  - Note that the `GCP_AUTH_KIND` environment variable also needs to be set to `application` for this authentication method.
-
-Alternatively, instead of setting `GCP_AUTH_KIND`, you can add `auth_kind` to your Inventory config file to specify which authentication method you'd like to use.
-
-#### Amazon Web Services (AWS)
-
-The AWS Dynamic Inventory plugin is called [`aws_ec2`](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html). This will have been installed already during the Ansible install process via `ansible-galaxy install`.
-
-The config file for this plugin which requires the naming convention `*.aws_ec2.yml`, e.g. `10k.aws_ec2.yml`. Here's an example of the file with all config and descriptions below. Items in `<>` brackets need to be replaced with your config:
-
-```yaml
-plugin: aws_ec2
-regions:
-  - <region>
-filters:
-  tag:gitlab_node_prefix: <prefix> # Same prefix set in Terraform
-keyed_groups:
-  - key: tags.gitlab_node_type
-    separator: ''
-  - key: tags.gitlab_node_level
-    separator: ''
-hostnames:
-  # List host by name instead of the default public ip
-  - tag:gitlab_node_name
-compose:
-  # Set to 'public_ip_address' to make Ansible SSH via the public IP address of the hosts.
-  # Set to 'private_ip_address' to make Ansible SSH via the private (non-internet routable) IP addresses of the hosts.
-  # Set to 'instance_id' if Ansible is configured to connect via AWS System Manager sessions (AWS SSM)
-  ansible_host: public_ip_address
-```
-
-- `plugin` - The name of the Dynamic Inventory plugin. Must always be `aws_ec2`.
-- `regions` - AWS region the environment will run in.
-- `filters` - A label filter for Ansible to use. This ensures it only configures the machines we want on the project and not any others based on the machine tab `gitlab_node_prefix` that set automatically in Terraform. Should be set the same `prefix` value set in Terraform.
-- `keyed_groups` - Configures Ansible to look for the tags automatically set by Terraform and to set up its host groups based on them. This config block shouldn't be changed from what's shown.
-- `hostnames` - Config block for how Ansible should show the hosts in its output. This block configures the use of hostnames rather than IPs for better readability. This config block should not be changed.
-- `compose`: This sets what IP addresses Ansible should use. This config block should be changed when using private IP addresses.
-
-##### Configure Authentication (AWS)
-
-Finally, the last thing to configure is authentication. This is required to allow Ansible to access AWS to build its dynamic inventory.
-
-Ansible provides several ways to authenticate with [AWS](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html#parameters), you can select any method that is desired.
-
-All the methods given involve the AWS Access Key you generated previously. We've found that the easiest and secure way to do this is with the official [environment variables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables):
-
-- `AWS_ACCESS_KEY_ID` - Set to the AWS Access Key.
-- `AWS_SECRET_ACCESS_KEY` - Set to the AWS Secret Key.
-
-Once the two variables are either set locally or in your CI pipeline Ansible will be able to fully authenticate for both the provider and backend.
-
-#### Azure
-
-The Azure Dynamic Inventory plugin is called [`azure.azcollection.azure_rm`](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html). This will have been installed already during the Ansible install process via `ansible-galaxy install`.
-
-The config file for this plugin which requires the naming convention `*.azure_rm.yml`, e.g. `10k.azure_rm.yml`. Here's an example of the file with all config and descriptions below. Items in `<>` brackets need to be replaced with your config:
-
-```yaml
-plugin: azure.azcollection.azure_rm
-
-include_vm_resource_groups:
-  - "<resource_group_name>"
+  category_key: "gitlab_node_prefix"
+  category_value: "<environment_prefix>"
 
 keyed_groups:
   - prefix: ''
     separator: ''
-    key: tags.gitlab_node_type | default('ungrouped')
+    key: categories.gitlab_node_type | default('ungrouped')
   - prefix: ''
     separator: ''
-    key: tags.gitlab_node_level | default('ungrouped')
+    key: categories.gitlab_node_level | default('ungrouped')
+
+compose:
+  ansible_host: nics[0].ip_addresses[0]
 ```
 
-- `plugin` - The name of the Dynamic Inventory plugin. Must always be `azure.azcollection.azure_rm`.
-- `resource_group_name` - The name of the resource group previously created in the [Create Azure Resource Group](environment_prep.md#1-create-azure-resource-group) step.
-- `keyed_groups` - Configures Ansible to look for the tags automatically set by Terraform and to set up its host groups based on them. This config block shouldn't be changed from what's shown.
+- `plugin` - The name of the Dynamic Inventory plugin. Must always be `nutanix.ncp.ntnx_prism_vm_inventory_v2`.
+- `pc_hostname` / `pc_username` / `pc_password` / `pc_port` - Connection details for your Prism Central instance, matching the `nutanix_endpoint`/`nutanix_username`/`nutanix_password` values configured in Terraform.
+- `filters` - A category filter for Ansible to use. This ensures it only configures the machines we want and not any others, based on the `gitlab_node_prefix` category value set automatically in Terraform. Should be set to the same `prefix` value set in Terraform.
+- `keyed_groups` - Configures Ansible to look for the categories automatically set by Terraform and to set up its host groups based on them. This config block shouldn't be changed from what's shown.
+- `compose` - Sets what IP Ansible should use to connect. This config block shouldn't be changed unless your VMs have multiple NICs and a different NIC/IP should be used.
 
-##### Configure Authentication (Azure)
+> [!warning]
+> The exact host-var path Nutanix categories are exposed under depends on the installed `nutanix.ncp` collection version. Verify `categories.gitlab_node_type` / `categories.gitlab_node_level` and the NIC IP path above against your installed collection version (`ansible-doc -t inventory nutanix.ncp.ntnx_prism_vm_inventory_v2`) before relying on this in production.
 
-Finally, the last thing to configure is authentication. This is required to allow Ansible to access Azure to build its dynamic inventory.
+##### Configure Authentication (Nutanix)
 
-Ansible provides several ways to authenticate with [Azure](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html#parameter-auth_source), you can select any method that is desired.
+Finally, the last thing to configure is authentication. This is required to allow Ansible to access Prism Central to build its dynamic inventory.
 
-If you are planning to run the toolkit locally, use [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) authentication method; The credentials will be sourced from the Azure CLI profile. Otherwise, you can use either [Service Principal Credentials](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-service-principal) or [Active Directory Username/Password](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-active-directory-username-password). Refer to [Authenticating to Azure](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#authenticating-with-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as [Environment Variables](https://docs.ansible.com/ansible/9/scenario_guides/guide_azure.html#using-environment-variables) following the Ansible instructions for the specific authentication type.
+Authentication is configured directly via the `pc_username`/`pc_password` fields in the Inventory config file shown above (or the equivalent environment variables supported by the collection). See the [collection documentation](https://github.com/nutanix/nutanix.ansible) for other authentication options.
 
 ### Configure Variables
 
@@ -353,18 +266,8 @@ all:
     ansible_user: "<ssh_username>"
     ansible_ssh_private_key_file: "<private_ssh_key_path>"
 
-    # Cloud Settings, available options: gcp, aws, azure, none
-    cloud_provider: "gcp"
-
-    # GCP only settings
-    gcp_project: "<gcp_project_id>"
-
-    # AWS only settings
-    aws_region: "<aws_region>"
-
-    # Azure only settings
-    azure_storage_account_name: "<storage_account_name>"
-    azure_storage_access_key: "<storage_access_key>"
+    # Cloud Settings, available options: nutanix, none
+    cloud_provider: "nutanix"
 
     # General Settings
     prefix: "<environment_prefix>"
@@ -390,23 +293,17 @@ all:
 
 Ansible Settings are specific config for Ansible to be able to connect to the machines:
 
-- `ansible_user` - The SSH username that Ansible should use to SSH into the machines with. Previously created in the `Setup SSH Authentication` step ([GCP](environment_prep.md#4-setup-ssh-authentication-ssh-os-login-for-gcp-service-account), [AWS](environment_prep.md#2-setup-ssh-authentication-aws), [Azure](environment_prep.md#3-setup-ssh-authentication-azure)).
-- `ansible_ssh_private_key_file` - Path to the private SSH key file. Previously created in the `Setup SSH Authentication` step ([GCP](environment_prep.md#4-setup-ssh-authentication-ssh-os-login-for-gcp-service-account), [AWS](environment_prep.md#2-setup-ssh-authentication-aws), [Azure](environment_prep.md#3-setup-ssh-authentication-azure))
+- `ansible_user` - The SSH username that Ansible should use to SSH into the machines with. This is the `vm_admin_username` configured in Terraform's [Nutanix variables](environment_provision.md#nutanix).
+- `ansible_ssh_private_key_file` - Path to the private SSH key file. This is the key referenced by `ssh_public_key_file_path` in Terraform's [Nutanix variables](environment_provision.md#nutanix).
 
-Cloud settings are specific config relating to the cloud provider is running on. They're used primarily for the parts of the environment that require direct configuration on the provider, e.g. Object Storage.
+Cloud settings are specific config relating to the target the environment is running on. They're used primarily for the parts of the environment that require direct configuration on the provider, e.g. Object Storage.
 
-- `cloud_provider` - Toolkit specific variable, used to dynamically configure cloud provider specific areas such as Object Storage. Should be set to `gcp`, `aws` or `azure`.
-- `gcp_project` **_GCP only_** - ID of the GCP project. Note this must be the Project's unique ID and not just the name
-- `aws_region`  **_AWS only_** - AWS region the environment will run in.
-- `aws_s3_endpoint` **_AWS only_** - A specific service endpoint for S3 transactions. If not specified, AWS uses the default regional endpoint. See [AWS S3 endpoint documentation](https://docs.aws.amazon.com/general/latest/gr/rande.html) for more details.
-- `aws_set_hostnames` **_AWS only_** - When enabled, instance hostnames will be configured by Ansible to match their Inventory names for easier identification. Disable to keep original AWS give hostnames. Default is `true`.
-- `storage_account_name` **_Azure only_** - The name of the storage account previously created in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
-- `storage_access_key` **_Azure only_** - The access key of the storage account previously obtained in the [Setup Terraform State Storage - Azure Blob Storage](environment_prep.md#4-setup-terraform-state-storage-azure-blob-storage) step.
+- `cloud_provider` - Toolkit specific variable, used to dynamically configure provider specific areas such as Object Storage. Should be set to `nutanix` or `none` (for on-prem/static inventory).
 
 General settings are config used across the playbooks to configure GitLab:
 
 - `prefix` - The configured prefix for the environment as set in Terraform.
-- `external_url` - External URL that will be the main address for the environment. This can be a DNS hostname you've configured to point to the IP you created on the `Create Static External IP` step ([GCP](environment_prep.md#6-create-static-external-ip-gcp), [AWS](environment_prep.md#4-create-static-external-ip-aws-elastic-ip-allocation), [Azure](environment_prep.md#5-create-static-external-ip-azure)) step or the IP itself in URL form, e.g. `http://1.2.3.4`.
+- `external_url` - External URL that will be the main address for the environment. This can be a DNS hostname you've configured to point at the environment, or the IP itself in URL form, e.g. `http://1.2.3.4`. Since Nutanix AHV has no managed external/static IP resource in this fork, external access is routed via your existing network/VLAN - see the [Nutanix section of Provisioning with Terraform](environment_provision.md#nutanix).
 - `gitlab_license_file` - Local path to a valid GitLab License file. Toolkit will upload the license to the environment. Note that this is an optional setting.
   - If you purchased a GitLab subscription, use `gitlab_subscription_activation_code` instead of `gitlab_license_file` variable. An [activation code](https://docs.gitlab.com/ee/administration/license_file.html) can be obtained from the Customers Portal.
 - `gitlab_license_text` - An alternative to `gitlab_license_file` if the license is not stored in a local file, pass the license contents directly to Ansible. Either `gitlab_license_text`, or `gitlab_license_file`, or neither, should be set, but not both. This approach can be used to retrieve the license via a lookup. Note that this is an optional setting.
@@ -514,55 +411,19 @@ This option is particularly useful for usage in CI, where passing variables in v
 
 ##### Secret Managers
 
-There are several plugins available for well known Secret Managers such as [AWS Secret Manager](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_secret_lookup.html) or [HashiCorp Vault](https://docs.ansible.com/ansible/latest/collections/community/hashi_vault/hashi_vault_lookup.html).
+There are several plugins available for well known Secret Managers such as [HashiCorp Vault](https://docs.ansible.com/ansible/latest/collections/community/hashi_vault/hashi_vault_lookup.html). Any [Ansible Lookup plugin](https://docs.ansible.com/ansible/latest/collections/index_lookup.html) can be used similarly, see the Ansible docs for the full list of available options.
 
 These sorts of plugins will typically need authentication configured, which is usually done via environment variables (refer to each plugin's docs for more info).
 
-As an example - AWS Secret Manager can be favourable here for AWS environments as the same authentication is used as the one for the Dynamic Inventory, so no further authentication is required. If we had a secret configured in AWS Secret Manager for GitLab Rails Password called `gitlab_rails_password` this can be configured as follows:
+As an example - HashiCorp Vault can be favourable here since it's not tied to any particular cloud provider. If we had a secret configured in Vault for GitLab Rails Password called `gitlab_rails_password` this can be configured as follows:
 
 ```yaml
-gitlab_rails_password: "{{ lookup('amazon.aws.aws_secret', 'gitlab_rails_password', region=aws_region) }}"
+gitlab_rails_password: "{{ lookup('community.hashi_vault.hashi_vault', 'secret=secret/data/gitlab_rails_password:value') }}"
 ```
-
-Note that region is required here but since you've already configured it earlier in your `vars.yml` file as `aws_region` this can be reused.
 
 ### Ansible connection options
 
-The Toolkit has been designed and tested with the main Ansible connection option of SSH throughout. However, there are [other connection options](https://docs.ansible.com/ansible/latest/plugins/connection.html) available for Ansible directly or via community plugins.
-
-In this section we'll list connection options that have been known to work but please be aware that your milage may vary and any issues seen will need to be addressed to Ansible or the community responsible.
-
-#### AWS Systems Manager (AWS SSM)
-
-For AWS environments, one alternative to SSH is connecting via [AWS Systems Manager (AWS SSM)](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html) sessions.
-
-This setup is more complex than SSH and has several [additional requirements](https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#id2), notably the requirement of a separate S3 bucket to handle file transfers, but it comes with the benefits of working with machines that have no public access and is tied to IAM credentials.
-
-If the requirements have been met Ansible can be configured as follows to use this connection type:
-
-1. Switch the `compose.ansible_host` setting of the [Dynamic Inventory config](#amazon-web-services-aws) from `public_ip_address` to `instance_id`
-
-    ```yaml
-    plugin: aws_ec2
-    [...]
-    compose:
-      ansible_host: instance_id
-    ```
-
-1. Change the Ansible config in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml) to use the connection type:
-
-    ```yaml
-    ansible_user: "ubuntu"
-    ansible_connection: aws_ssm
-    ansible_aws_ssm_region: <region>
-    ansible_aws_ssm_bucket_name: <aws_ssm_bucket>
-    ansible_aws_ssm_timeout: 360
-    ansible_python_interpreter: "/usr/bin/python3" # Valid path to Python on the target machines
-    ansible_shell_executable: /bin/bash # Valid path to a shell executable on the target machines
-    ansible_remote_tmp: "/tmp" # Valid path to a temp folder on the target machines
-    ```
-
-Once in place you can use the same commands but Ansible will now connect over AWS SSM accordingly.
+The Toolkit has been designed and tested with the main Ansible connection option of SSH throughout. However, there are [other connection options](https://docs.ansible.com/ansible/latest/plugins/connection.html) available for Ansible directly or via community plugins, should your Nutanix or on-prem network topology require an alternative to direct SSH (e.g. a bastion/jump host configured via `ansible_ssh_common_args`).
 
 ### Ansible remote environment variables
 
@@ -596,11 +457,11 @@ To configure GitLab to have its own [custom environment variables](https://docs.
 
 Before running the [Docker container](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/container_registry/2697240) you will need to set up your environment files by following [2. Set up the Environment's Inventory and Config](#2-set-up-the-environments-inventory-and-config). The container can be started once the files have been configured. When starting the container it is important to pass in your environment files and keys, as well as set any authentication based environment variables.
 
-Below is an example of how to run the container when using a GCP service account:
+Below is an example of how to run the container, passing in Nutanix Prism Central authentication as environment variables:
 
 ```sh
 docker run -it \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/gitlab-environment-toolkit/keys/<service account file>" \
+  -e ANSIBLE_NUTANIX_PC_PASSWORD="<nutanix_password>" \
   -v <path to keys directory>:/gitlab-environment-toolkit/keys \
   -v <path to Ansible environment>:/gitlab-environment-toolkit/ansible/environments/<environment name> \
   registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:latest
@@ -614,7 +475,7 @@ get_environments
 └──<environment name>
 |  └──ansible
 |     └── inventory
-|     |   ├── <environment name>.gcp.yml
+|     |   ├── <environment name>.nutanix.yml
 |     |   └── vars.yml
 |     └── files
 └──<environment name>
@@ -624,7 +485,7 @@ get_environments
 
 ```sh
 docker run -it \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/gitlab-environment-toolkit/keys/<service account file>" \
+  -e ANSIBLE_NUTANIX_PC_PASSWORD="<nutanix_password>" \
   -v <path to `get_environments` directory>:/environments \
   registry.gitlab.com/gitlab-org/gitlab-environment-toolkit:latest
 ```

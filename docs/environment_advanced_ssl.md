@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](environment_provision.md)
 - [GitLab Environment Toolkit - Configuring the environment with Ansible](environment_configure.md)
 - [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [**GitLab Environment Toolkit - Advanced - SSL**](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
@@ -40,7 +38,6 @@ The Toolkit can set up [External SSL termination](https://docs.gitlab.com/ee/adm
 
 - Linux Package (Omnibus) - HAProxy
 - Linux Package (Omnibus) - GitLab Rails NGINX (Single Node with no Load Balancer only)
-- Cloud Native Hybrid - NGINX Ingress
 
 The Toolkit supports two sources of certificates for External SSL termination: **User provided** or automated via [**Let's Encrypt**](https://letsencrypt.org/). Below are the details on how to set this up with either source.
 
@@ -48,14 +45,14 @@ The Toolkit supports two sources of certificates for External SSL termination: *
 
 For users who already have certificates for their intended GitLab environment the Toolkit can use these as given to set up External SSL termination.
 
-At a high level the Toolkit will simply take the certificate and key and use them to configure HAProxy (Linux Package (Omnibus)), GitLab Rails (Linux Package (Omnibus)) or NGINX Ingress (Cloud Native Hybrid) respectively to use them. Below are the steps to configure this.
+At a high level the Toolkit will simply take the certificate and key and use them to configure HAProxy or GitLab Rails (Linux Package (Omnibus)) respectively to use them. Below are the steps to configure this.
 
 #### Setup user provided certificates for Toolkit use
 
 The first step is to prepare the certificates themselves for the Toolkit to use. By default, the certificates should meet the following conditions:
 
 - Certificates must contain [Subject Alternative Name(s) (SAN)](https://support.dnsimple.com/articles/what-is-ssl-san) as Common Name (CN) use only is deprecated.
-- SAN entries should cover any additional hostnames that are expected to be used with the environment. This includes additional features such as the [Container Registry](environment_advanced.md#container-registry-gcp-aws) (`registry.<external_host>`).
+- SAN entries should cover any additional hostnames that are expected to be used with the environment. This includes additional features such as the [Container Registry](environment_advanced.md#container-registry) (`registry.<external_host>`).
 - Certificate file contains the [full chain](https://www.digicert.com/kb/ssl-support/pem-ssl-creation.htm).
 
 The certificates can be provided to the Toolkit with two methods:
@@ -83,7 +80,7 @@ You can pass in the contents of the certificate and key files directly into Ansi
 - `external_ssl_files_host_certificate` - File contents of the main certificate file.
 - `external_ssl_files_host_key` - File contents of the main key file.
 
-An example of how this looks when loading the files from AWS Secrets Manager would be:
+An example of how this looks when loading the files from a Secrets Manager (via an [Ansible lookup plugin](https://docs.ansible.com/ansible/latest/plugins/lookup.html)) would be:
 
 ```yml
 all:
@@ -91,8 +88,8 @@ all:
     [...]
     external_url: "https://<hostname>"
     external_ssl_source: "user"
-    external_ssl_files_host_certificate: "{{ lookup('aws_secret', 'myapp/ssl/certificate') }}"
-    external_ssl_files_host_key: "{{ lookup('aws_secret', 'myapp/ssl/key') }}"
+    external_ssl_files_host_certificate: "{{ lookup('community.hashi_vault.hashi_vault', 'secret=myapp/ssl/certificate') }}"
+    external_ssl_files_host_key: "{{ lookup('community.hashi_vault.hashi_vault', 'secret=myapp/ssl/key') }}"
 ```
 
 **Custom Files Location**
@@ -124,7 +121,6 @@ At a high level the Toolkit will use differing methods to generate the files as 
 
 - Linux Package (Omnibus) - HAProxy External: [`acme.sh`](https://github.com/acmesh-official/acme.sh)
 - Linux Package (Omnibus) - GitLab Rails NGINX: [Internal](https://docs.gitlab.com/omnibus/settings/ssl/#enable-the-lets-encrypt-integration)
-- Cloud Native Hybrid - NGINX Ingress: [Internal `cert-manager`](https://docs.gitlab.com/charts/installation/tls.html#option-1-cert-manager-and-lets-encrypt)
 
 #### Configure Variables
 
@@ -160,7 +156,6 @@ As an alternative you can also just reconfigure the specific nodes, depending on
 
 - Linux Package (Omnibus) - HAProxy External: `ansible-playbook -i environments/10k/inventory playbooks/haproxy.yml playbooks/gitaly.yml playbooks/gitlab_rails.yml -t reconfigure`
 - Linux Package (Omnibus) - GitLab Rails NGINX: `ansible-playbook -i environments/10k/inventory playbooks/gitlab_rails.yml -t reconfigure`
-- Cloud Native Hybrid: `ansible-playbook -i environments/10k/inventory playbooks/gitaly.yml playbooks/gitlab_charts.yml -t reconfigure`
 
 ## Internal SSL
 
@@ -168,13 +163,13 @@ Unlike External SSL, Internal SSL is typically more complex. This is due to both
 
 Due to this, how the Toolkit approaches Internal SSL varies depending on the component, and it's implementation as follows:
 
-- [Custom Files](environment_advanced.md#custom-files) / [Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks) and [Custom Config](environment_advanced.md#custom-config) (Cloud Native Hybrid) - Where setup is best handled with full control via Custom Files and Custom Config to ensure the encryption meets your requirements. This applies to most components.
+- [Custom Files](environment_advanced.md#custom-files) and [Custom Config](environment_advanced.md#custom-config) - Where setup is best handled with full control via Custom Files and Custom Config to ensure the encryption meets your requirements. This applies to most components.
 - Direct - Where the Toolkit handles setup directly for components that have one approach to encryption and / or if it needs to manage additional configuration in areas such as network setup. At the time of writing this only applies to Gitaly / Gitaly Cluster.
 
 In this section we'll go through the process for each.
 
 > [!note]
-> Cloud Providers have default encryption options that may be suitable to your needs but as stated above this should be reviewed independently to verify. Refer to the [Cloud Provider default encryption](#cloud-provider-default-encryption) section below for more details.
+> Refer to the [Nutanix default encryption](#nutanix-default-encryption) section below for details on Nutanix's own encryption options outside of the Toolkit.
 
 ### Preparing Certificates
 
@@ -199,7 +194,7 @@ Once you have the certificates ready proceed to the relevant sections below to c
 
 ### Configuring Internal SSL via Custom Files and Custom Config
 
-For most components it's best to configure Internal SSL for each via [Custom Files](environment_advanced.md#custom-files) (or [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks) for Cloud Native Hybrids) and [Custom Config](environment_advanced.md#custom-config) to allow for full control over the various options each can have depending on your requirements. This applies to all components in the GitLab setup except for those specifically noted in the below [Configuring Internal SSL directly for select components](#configuring-internal-ssl-directly-for-select-components) section.
+For most components it's best to configure Internal SSL for each via [Custom Files](environment_advanced.md#custom-files) and [Custom Config](environment_advanced.md#custom-config) to allow for full control over the various options each can have depending on your requirements. This applies to all components in the GitLab setup except for those specifically noted in the below [Configuring Internal SSL directly for select components](#configuring-internal-ssl-directly-for-select-components) section.
 
 Some of the most common components to set up encryption for can be found in the below non-exhaustive table:
 
@@ -213,13 +208,9 @@ Some of the most common components to set up encryption for can be found in the 
 
 For each component the general steps to configure Internal SSL encryption is as follows, depending on your setup:
 
-- **For Omnibus Components** - Upload your certificates to the component node groups via [Custom Files](environment_advanced.md#custom-files), including any CA files to client nodes.
+- Upload your certificates to the component node groups via [Custom Files](environment_advanced.md#custom-files), including any CA files to client nodes.
   - Certificates and Keys should be uploaded to `/etc/gitlab/ssl` and CA files to `/etc/gitlab/trusted-certs` in mode `644` on every client. The Toolkit will create these folders as a convenience.
   - Set the desired config for each component and client node groups via [Custom Config](environment_advanced.md#linux-package-omnibus).
-- **For Cloud Native Hybrid components** - Upload your certificates as [Custom Secrets](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
-  - Typically, in this setup all that will be required is to upload [CA files](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities) as [Kubernetes secrets](https://kubernetes.io/docs/concepts/configuration/secret/). These can be with any name, but then these must match in the config. You can also choose to do this directly via `kubectl` if desired after initial deployment.
-  - Set the desired [config](https://docs.gitlab.com/charts/charts/globals.html#custom-certificate-authorities
-) via [Custom Config](environment_advanced.md#helm).
 - Run Ansible as normal to configure.
 
 ### Configuring Internal SSL directly for select components
@@ -297,49 +288,6 @@ Praefect (for Cluster):
 - `praefect_ssl_ca_file` - Path to the Praefect CA file to upload to relevant clients. Default is `''`.
 - `praefect_ssl_port` - The port Praefect will use for SSL connections. This shouldn't need to be changed in most circumstances. Default is `3305`.
 
-In addition to the above there are some other settings you may need to set depending on your setup as follows:
+### Nutanix default encryption
 
-###### ELB Port Config (AWS)
-
-If the environment is on AWS and [using ELB (NLB) for its internal load balancer](environment_advanced_services.md#internal-nlb) one additional piece of configuration is required when switching to use Internal SSL for Gitaly Cluster to set the correct port for load balancing as this is managed by Terraform.
-
-In this scenario you must set the `elb_internal_praefect_port` variable to the same port being used by Praefect for SSL connections in the Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf). This would be `3305` in most cases and would look as follows:
-
-```tf
-module "gitlab_ref_arch_aws" {
-  source = "../../modules/gitlab_ref_arch_aws"
-
-  [...]
-
-  elb_internal_create = true
-  elb_internal_praefect_port = 3305
-}
-```
-
-###### Cloud Native Hybrid Custom CA config
-
-Due to the way Custom Config on Cloud Native Hybrids works, if you're setting the `global.certificates.customCAs` variable to pass in your CA files this will need to be adjusted slightly for Gitaly / Gitaly Cluster due to the nature of config overriding.
-
-In this scenario you should add either `gitaly-ca` (Sharded) or `praefect-ca` (Cluster) to your `customCAs` list so that the correct CA file for either of those components is picked up along with your own.
-
-For example if you had a Postgres CA set in your config named `postgres-ca` on a Gitaly Cluster environment you would only need to adjust it as follows:
-
-```yml
-global:
-  certificates:
-    customCAs:
-      - secret: postgres-ca
-      - secret: praefect-ca
-```
-
-### Cloud Provider default encryption
-
-Cloud Providers do also offer various encryption options, by default in some cases:
-
-- Encryption at Rest - The Toolkit was always looks to enable any standard Encryption at Rest that's available from the Cloud Providers. Although as stated above it's recommend that you review this independently to ensure it meets your requirements.
-- Encryption in Transit - The Cloud Providers offer Encryption in Transit by default. Details for each can be found below:
-  - [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/data-protection.html#encryption-transit)
-  - [GCP](https://cloud.google.com/docs/security/encryption-in-transit#encryption-all-regions)
-  - [Azure](https://docs.microsoft.com/en-us/azure/security/fundamentals/encryption-overview#data-link-layer-encryption-in-azure)
-
-You may consider this enough for your needs, but this should be reviewed independently.
+Nutanix AHV/Prism Central deployments do not have a managed, Terraform-configured equivalent of cloud provider disk/transit encryption defaults. Encryption at rest and in transit should be reviewed and configured directly against your Nutanix cluster/Prism Central setup - refer to the [Nutanix Security Guide](https://portal.nutanix.com/page/documents/list?type=software&filterKey=software&filterVal=Security%20Guide) for available options such as cluster-level data-at-rest encryption.

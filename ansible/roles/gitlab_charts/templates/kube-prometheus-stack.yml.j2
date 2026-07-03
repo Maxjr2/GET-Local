@@ -59,13 +59,6 @@ crds:
     enabled: true
     forceConflicts: true
 
-{% if cloud_provider == 'gcp' %}
-coreDns:
-  enabled: false
-kubeDns:
-  enabled: true
-{% endif %}
-
 # Alertmanager
 alertmanager:
   enabled: false

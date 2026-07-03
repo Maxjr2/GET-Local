@@ -2,34 +2,35 @@
 
 ![alt text](https://gitlab.com/uploads/-/system/project/avatar/14292404/tanuki-blueprint.png "GitLab Environment Toolkit")
 
-The GitLab Environment Toolkit (`GET`) automates deploying and managing scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). Using Terraform for infrastructure provisioning and Ansible for configuration, the Toolkit handles the full lifecycle of a GitLab deployment, from initial setup through upgrades, across cloud providers, on-prem, or a mix of both.
+The GitLab Environment Toolkit (`GET`) automates deploying and managing scaled GitLab environments following the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures). Using Terraform for infrastructure provisioning and Ansible for configuration, the Toolkit handles the full lifecycle of a GitLab deployment, from initial setup through upgrades, on Nutanix AHV, on-prem, or a mix of both.
 
-**New to the Toolkit?** Follow the [Quick Start Guide](docs/environment_quick_start_guide.md) for a complete walkthrough deploying a 10k environment on AWS.
+> [!note]
+> This is a fork of the upstream [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit) that has diverged to focus exclusively on Nutanix AHV and on-prem/static inventory deployments. See [Supported Cloud Providers](TECHNICAL_DESIGN.md#supported-cloud-providers) for details.
+
+**New to the Toolkit?** Follow the [Quick Start Guide](docs/environment_quick_start_guide.md) for a complete walkthrough deploying a 1k environment on Nutanix AHV.
 
 ## Before You Start
 
-The Toolkit can help with deploying and maintaining a scaled GitLab environment, but it does not remove the underlying challenges that come with running large production applications. Environments remain the responsibility of the user. Following the [Shared Responsibility Model](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md#shared-responsibility), the Toolkit aims to configure best practices for the GitLab application and, when using supported cloud providers, base infrastructure provisioning and configuration. Environmental responsibility, ongoing operations, and any custom infrastructure remain the user's responsibility.
+The Toolkit can help with deploying and maintaining a scaled GitLab environment, but it does not remove the underlying challenges that come with running large production applications. Environments remain the responsibility of the user. Following the [Shared Responsibility Model](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/TECHNICAL_DESIGN.md#shared-responsibility), the Toolkit aims to configure best practices for the GitLab application and, when using Nutanix, base infrastructure provisioning and configuration. Environmental responsibility, ongoing operations, and any custom infrastructure remain the user's responsibility.
 
 Users are recommended to have a good working knowledge of Terraform, Ansible, GitLab administration and infrastructure management, and to be aware of what running such an environment entails. For teams that need a more guided deployment experience, [Professional Services](https://about.gitlab.com/services/#implementation-services) is available. For teams that want a more managed solution long-term, [GitLab SaaS](https://docs.gitlab.com/ee/subscriptions/gitlab_com/) or [GitLab Dedicated](https://about.gitlab.com/dedicated/) may be a better fit.
 
-The Toolkit is designed around the GitLab Reference Architectures and is opinionated by design. Deploying across cloud providers, on-prem, and hybrid environments involves a large surface area, and not every infrastructure design or use case can be supported. Where the Toolkit falls short of specific requirements, [Custom Config and Tasks](docs/environment_advanced.md#custom-config) provide extension points, but some use cases may fall outside of scope entirely.
+The Toolkit is designed around the GitLab Reference Architectures and is opinionated by design. Deploying across Nutanix and on-prem environments involves a large surface area, and not every infrastructure design or use case can be supported. Where the Toolkit falls short of specific requirements, [Custom Config and Tasks](docs/environment_advanced.md#custom-config) provide extension points, but some use cases may fall outside of scope entirely.
 
 Review the Toolkit in full before any use, as it offers no guarantees on topics such as security or data integrity. [Further manual setup](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_post_considerations.md) after deployment may also be required.
 
 ## How It Works
 
-The Toolkit deploys GitLab environments in two phases. In the **provisioning** phase, Terraform creates the required infrastructure per the target Reference Architecture: VMs and supporting cloud services for Linux Package environments, or a Kubernetes cluster and node pools for Cloud Native Hybrid. Resources are tagged and labelled during provisioning so that Ansible can identify each component automatically.
+The Toolkit deploys GitLab environments in two phases. In the **provisioning** phase, Terraform creates the required infrastructure per the target Reference Architecture: VMs on Nutanix AHV via the `gitlab_ref_arch_nutanix` module. Resources are tagged (via Nutanix categories) during provisioning so that Ansible can identify each component automatically. Alternatively, for on-prem/custom servers, this phase is skipped entirely and Ansible static inventory is configured directly.
 
-In the **configuration** phase, Ansible takes those tagged resources and installs and configures each component in the correct order. For Linux Package (Omnibus) deployments this means configuring each VM for its designated role. For Cloud Native Hybrid deployments this means deploying GitLab via Helm Charts or the GitLab Operator onto the Kubernetes cluster alongside any VM-backed stateful components. Both paths handle environment sizing dynamically, so the same scripts serve a single-node setup and a fully distributed multi-node deployment.
+In the **configuration** phase, Ansible takes those tagged resources (or the static inventory) and installs and configures each component in the correct order for its designated role. This handles environment sizing dynamically, so the same scripts serve a single-node setup and a fully distributed multi-node deployment.
 
 ## Features
 
 **Deployment targets:**
 
 - All [Reference Architecture sizes](https://docs.gitlab.com/ee/administration/reference_architectures) from [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) to [50k](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html) users
-- Linux Package (Omnibus) deployments on GCP, AWS and Azure; on-prem and custom servers also supported via Ansible static inventory (see [supported providers](TECHNICAL_DESIGN.md#supported-cloud-providers))
-- Experimental, self-maintained Terraform support for Nutanix AHV (Linux Package/Omnibus only) — see [Nutanix](docs/environment_provision.md#nutanix)
-- Cloud Native Hybrid via Helm Charts or Operator; Kubernetes cluster provisioning on GCP (GKE) and AWS (EKS)
+- Linux Package (Omnibus) deployments on Nutanix AHV via Terraform, or on-prem/custom servers via Ansible static inventory (see [Supported Cloud Providers](TECHNICAL_DESIGN.md#supported-cloud-providers) for this fork's scope) — see [Nutanix](docs/environment_provision.md#nutanix)
 
 **Architecture and operations:**
 
@@ -42,7 +43,6 @@ In the **configuration** phase, Ansible takes those tagged resources and install
 - Container Registry
 - SSL/TLS support
 - Built-in Load Balancing and Monitoring (Prometheus)
-- Cloud Services for PostgreSQL, Redis and Load Balancers
 - Custom Config, Tasks and Files for extending beyond toolkit defaults
 
 ## Requirements
@@ -63,7 +63,6 @@ In the **configuration** phase, Ansible takes those tagged resources and install
   - OS support depends on both [Linux Package (Omnibus)](https://docs.gitlab.com/administration/package_information/supported_os/) and Ansible compatibility
   - Clean OS installations only; admin access required to install dependencies
   - ARM-based hardware supported where upstream packages are available
-- Kubernetes (Cloud Native): any [currently supported Kubernetes version](https://endoflife.date/kubernetes)
 
 ## Documentation
 
@@ -77,8 +76,6 @@ In the **configuration** phase, Ansible takes those tagged resources and install
 **Advanced topics:**
 
 - [Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](docs/environment_advanced.md)
-- [Cloud Native Hybrid](docs/environment_advanced_hybrid.md)
-- [Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](docs/environment_advanced_services.md)
 - [SSL](docs/environment_advanced_ssl.md)
 - [Network Setup](docs/environment_advanced_network.md)
 - [Monitoring](docs/environment_advanced_monitoring.md)

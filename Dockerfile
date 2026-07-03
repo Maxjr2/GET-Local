@@ -34,10 +34,6 @@ SHELL ["/bin/bash", "-c"]
 
 ENV PATH="/root/.local/share/mise/shims:/root/.local/bin:$PATH"
 
-# check=skip=SecretsUsedInArgOrEnv
-ENV GCP_AUTH_KIND="application" \
-    USE_GKE_GCLOUD_AUTH_PLUGIN="True"
-
 RUN source ~/.bashrc && apt-get update -y && apt-get install --no-install-recommends -y curl unzip nano git-crypt gnupg openssh-client lsb-release && rm -rf /var/lib/apt/lists/*
 
 # Install Mise
@@ -48,17 +44,8 @@ RUN curl https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /usr/share/keyrings
 # Add Terraform plugin (via Mise)
 RUN mise plugins install terraform -y
 
-# Install cloud tools
-## gcloud cli
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    apt-get update && apt-get install -y --no-install-recommends google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin && rm -rf /var/lib/apt/lists/*
-## aws cli /w session manager (ssm)
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-$(arch).zip" -o "/tmp/awscliv2.zip" && unzip /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/aws
-RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/64bit/) && curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_${arch}/session-manager-plugin.deb" -o "/tmp/session-manager-plugin.deb" && dpkg -i /tmp/session-manager-plugin.deb && rm /tmp/session-manager-plugin.deb
-### azure cli
-RUN curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | bash
-### kubectl / helm
+# Install cloud/k8s tools
+### kubectl / helm - used for Cloud Native Hybrid (bring-your-own Kubernetes cluster, e.g. on-prem or self-managed)
 RUN apt-get install -y --no-install-recommends kubectl && rm -rf /var/lib/apt/lists/*
 RUN curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 

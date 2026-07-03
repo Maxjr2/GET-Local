@@ -4,6 +4,9 @@ Thank you for your interest in contributing to the GitLab Environment Toolkit! W
 all contributions. By participating in this project, you agree to abide by the
 [Code of Conduct](#code-of-conduct).
 
+> [!note]
+> This is a fork of the upstream [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit) that has diverged to focus exclusively on Nutanix AHV and on-prem/static inventory deployments - all AWS, GCP, Azure and Cloud Native Hybrid (Kubernetes) code has been removed. Contributions here should stay within that scope; for changes relating to AWS, GCP, Azure or Cloud Native Hybrid, please contribute to the upstream project instead.
+
 ## Contributor License Agreement
 
 Contributions to this repository are subject to the Individual or Corporate Contributor License Agreement, depending on whose behalf a contribution is made:

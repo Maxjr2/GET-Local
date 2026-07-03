@@ -13,8 +13,7 @@ The GitLab Environment Toolkit (`GET`) is a collection of opinionated [Terraform
 The Toolkit supports provisioning and configuring machines and other related infrastructure respectively:
 
 - Support for deploying all Reference Architectures sizes dynamically from 1k to 50k.
-- Support for deploying Cloud Native Hybrid variants of the Reference Architectures (AWS & GCP only at this time).
-- GCP, AWS and Azure cloud provider support
+- Nutanix AHV cloud provider support
 - Upgrades
 - Release and nightly Linux package (Omnibus) builds support
 - Advanced search with OpenSearch
@@ -22,7 +21,6 @@ The Toolkit supports provisioning and configuring machines and other related inf
 - Zero Downtime Upgrades support
 - Built in Load Balancing and Monitoring (Prometheus) setup
 - SSL / TLS (either direct or via hooks)
-- Alternative sources (Cloud Services, Custom Servers) for select components (Load Balancers, PostgreSQL, Redis)
 - On Prem Support (Ansible)
 
 ### What is it not?
@@ -113,31 +111,27 @@ The Toolkit integrates with many tools and services in an opinionated fashion, a
 - GitLab
   - Linux package (Omnibus)
   - Helm
-- Cloud Providers - AWS, GCP, Azure (Linux package (Omnibus) Only)
+- Cloud Providers - Nutanix AHV (Linux package (Omnibus) Only)
   - VMs
-  - Kubernetes (Helm)
   - Disks
-  - Networking (IPs, VPCs, Subnets, Gateways, Routing or Firewalls)
-  - Services (e.g. RDS)
+  - Networking (pre-existing subnets/VLANs only - no Terraform-managed network provisioning)
 
 #### Supported Cloud Providers
 
-The Toolkit primarily supports AWS and GCP as target Cloud Providers, [following the general GitLab guidance](https://docs.gitlab.com/ee/administration/reference_architectures/#recommended-cloud-providers-and-services), but we do also support Azure for Linux package (Omnibus) installs only. We also support On Prem setups for Configuration via Ansible.
+This is a fork of the upstream [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit) that has intentionally diverged in scope. All AWS, GCP and Azure Terraform code has been removed from this fork - **the only supported deployment targets are Nutanix AHV (via the `gitlab_nutanix_instance` and `gitlab_ref_arch_nutanix` Terraform modules) and on-prem/custom servers configured directly via Ansible static inventory.** Cloud Native Hybrid (Kubernetes/EKS/GKE) support has also been removed entirely.
 
-We're unable to support or accept any contributions for any additional Cloud Providers directly as this would come with a significant maintenance cost and would require access to them on our end for long term testing.
+The Nutanix modules are a self-maintained addition specific to this fork and are not held to the same support/testing guarantee the upstream project applies to its cloud providers - see [Nutanix](docs/environment_provision.md#nutanix) in the provisioning docs for details and current limitations.
 
-This fork additionally includes self-maintained Terraform modules (`gitlab_nutanix_instance`, `gitlab_ref_arch_nutanix`) for provisioning Linux Package (Omnibus) deployments on Nutanix AHV. These follow the same structure as the Azure modules but are not held to the same support/testing guarantee described above — see [Nutanix](docs/environment_provision.md#nutanix) in the provisioning docs.
+Anyone requiring AWS, GCP, Azure or Cloud Native Hybrid (Kubernetes/EKS/GKE) support should use the upstream project instead: [gitlab-org/gitlab-environment-toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit).
 
 ### Terraform
 
 Our Terraform code follows a simple encapsulation approach through [Terraform Modules](https://developer.hashicorp.com/terraform/language/modules/develop).
 
-There are modules created for each Cloud Provider (due to the numerous differences between them). Infrastructure code that can repeat often is a candidate to be moved into its own module.
+The Toolkit uses two modules for its supported provider (Nutanix):
 
-The Toolkit uses two modules per cloud provider:
-
-- `instance` - Contains all the code required to deploy a VM suitable for GitLab on the selected Cloud Provider.
-- `ref_arch` - An encompassing module - it deploys VMs via the `instance` module along with any other supporting infrastructure such as Kubernetes, networking or object storage. Variables are passed through to other modules/resources.
+- `instance` (`gitlab_nutanix_instance`) - Contains all the code required to deploy a VM suitable for GitLab on Nutanix AHV.
+- `ref_arch` (`gitlab_ref_arch_nutanix`) - An encompassing module - it deploys VMs via the `instance` module along with any other supporting infrastructure. Variables are passed through to other modules/resources.
   - This module is designed to be flexible allowing users to only build what they want. Supporting resources should only be built if their dependent is.
 
 In the future we might consider breaking select code down into more modules for further modularity. Overall the design though is to interface mainly through the relevant `ref_arch` module to give a consistent user experience.

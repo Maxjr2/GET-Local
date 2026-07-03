@@ -10,10 +10,7 @@ issues: "https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items"
 authors:
     - "GitLab Delivery: Operate team"
 dependencies:
-    "google.cloud": ">=1.1.2"
-    "azure.azcollection": ">=1.10"
-    "amazon.aws": ">=5.0"
-    "community.aws": ">=5.0"
+    "nutanix.ncp": ">=2.5"
     "kubernetes.core": ">=2.0"
     "community.postgresql": ">=2.0"
 license_file: '../LICENSE'

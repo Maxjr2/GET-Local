@@ -1,0 +1,41 @@
+name: Docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - run: |
+          npm add -g markdownlint markdownlint-cli
+          markdownlint *.md docs/*.md
+
+  external-link-check:
+    name: markdown external link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: "yes"
+          config-file: ".markdown-link-check.json"
+          folder-path: "docs"
+          file-path: "./README.md, ./TECHNICAL_DESIGN.md, ./CONTRIBUTING.md"
+
+  internal-link-check:
+    name: markdown internal link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress --include-fragments '**/*.md'
+          fail: true

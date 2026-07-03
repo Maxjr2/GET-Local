@@ -56,20 +56,6 @@
     - charts
     - secrets
 
-- name: Run any Cloud Provider prep tasks
-  block:
-    - name: Run AWS EKS prep tasks
-      import_tasks: cloud_provider_prep/aws_eks.yml
-      when: cloud_provider == 'aws'
-
-    - name: Run GCP GKE prep tasks
-      import_tasks: cloud_provider_prep/gcp_gke.yml
-      when: cloud_provider == 'gcp'
-  tags:
-    - reconfigure
-    - charts
-    - cloud_provider_prep
-
 - name: Gather facts for Omnibus PostgreSQL cluster
   # Only needed for HA Omnibus postgres (>1 node, non-external). The Helm chart must target the current
   # leader node for DB migrations, so we resolve it here before building chart values.

@@ -1,0 +1,131 @@
+name: Ansible Molecule
+
+on:
+  pull_request:
+  schedule:
+    # Weekly OS verification matrix - Monday 03:00 UTC
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Molecule scenario to run ad-hoc"
+        required: false
+        default: "single-node"
+        type: string
+
+jobs:
+  changes:
+    name: detect changed scenarios
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      single-node: ${{ steps.filter.outputs.single-node }}
+      single-node-with-haproxy: ${{ steps.filter.outputs.single-node-with-haproxy }}
+      single-node-geo: ${{ steps.filter.outputs.single-node-geo }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            single-node:
+              - 'ansible/playbooks/common.yml'
+              - 'ansible/playbooks/gitlab_rails.yml'
+              - 'ansible/roles/common/**'
+              - 'ansible/roles/gitlab_rails/**'
+              - 'ansible/molecule/single-node/**'
+            single-node-with-haproxy:
+              - 'ansible/playbooks/common.yml'
+              - 'ansible/playbooks/gitlab_rails.yml'
+              - 'ansible/playbooks/haproxy.yml'
+              - 'ansible/roles/common/**'
+              - 'ansible/roles/gitlab_rails/**'
+              - 'ansible/roles/haproxy/**'
+              - 'ansible/requirements/**'
+              - 'ansible/molecule/single-node-with-haproxy/**'
+            single-node-geo:
+              - 'ansible/playbooks/common.yml'
+              - 'ansible/playbooks/gitlab_rails.yml'
+              - 'ansible/playbooks/gitlab_geo.yml'
+              - 'ansible/roles/common/**'
+              - 'ansible/roles/gitlab_rails/**'
+              - 'ansible/roles/gitlab_geo/**'
+              - 'ansible/molecule/single-node-geo/**'
+
+  molecule:
+    name: molecule (${{ matrix.scenario }})
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs[matrix.scenario] == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - single-node
+          - single-node-with-haproxy
+          - single-node-geo
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Molecule and dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y rsync jq wget libnss3-tools
+          pip install molecule docker molecule-plugins[docker]
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+      - name: Set up mkcert and local TLS certs
+        env:
+          MOLECULE_SSL_DIR: ${{ github.workspace }}/ansible/ssl
+          MOLECULE_DOMAINS: "docker registry.docker site1.docker registry.site1.docker site2.docker registry.site2.docker"
+        run: |
+          curl -JLo mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+          chmod +x mkcert
+          ./mkcert -install
+          mkdir -p "$MOLECULE_SSL_DIR"
+          ./mkcert -cert-file "$MOLECULE_SSL_DIR/docker.pem" -key-file "$MOLECULE_SSL_DIR/docker-key.pem" $MOLECULE_DOMAINS
+          cat "$MOLECULE_SSL_DIR/docker.pem" "$MOLECULE_SSL_DIR/docker-key.pem" > "$MOLECULE_SSL_DIR/docker-combined.pem"
+          echo "127.0.0.1 $MOLECULE_DOMAINS" | sudo tee -a /etc/hosts
+
+      - name: Run molecule test
+        env:
+          MOLECULE_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || matrix.scenario }}
+        run: |
+          cd ansible
+          echo "Running molecule test --scenario-name $MOLECULE_SCENARIO"
+          molecule test --scenario-name "$MOLECULE_SCENARIO"
+
+  os-verification:
+    name: os-verification (${{ matrix.distro }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu2404
+          - ubuntu2204
+          - debian13
+          - debian12
+          - debian11
+          - amazonlinux2023
+          - rockylinux10
+          - rockylinux9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          sudo apt-get update && sudo apt-get install -y rsync jq wget libnss3-tools
+          pip install molecule docker molecule-plugins[docker]
+      - name: Run OS verification scenario
+        env:
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+        run: |
+          cd ansible
+          molecule test --scenario-name os-verification

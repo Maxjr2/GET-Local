@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](environment_provision.md)
 - [GitLab Environment Toolkit - Configuring the environment with Ansible](environment_configure.md)
 - [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
@@ -31,9 +29,7 @@ The Toolkit doesn't configure any automated backups for the various pieces of da
 For setting up backups, implement a strategy as per your requirements. Refer to the [main GitLab documentation](https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html) on this subject and how to implement. The following however should also be noted:
 
 - The Toolkit _does_ create a `backups` Object Storage bucket and configures GitLab to use it by default as a convenience with its Rake task. Automated backups aren't configured however so if using this Object Storage as the backup source the actual backup Rake process [should be configured as desired](https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#configuring-cron-to-make-daily-backups).
-  - The Toolkit _does_ support configuration for [Gitaly server-side backups](https://docs.gitlab.com/administration/gitaly/configure_gitaly/#configure-server-side-backups) to assist to [Back up and restore large reference architectures](https://docs.gitlab.com/administration/backup_restore/backup_large_reference_architectures). To implement the configurations:
-    - **AWS & GCP Only** - Add `gitaly_server_side_backups_enable = true` to the `environments.tf` terraform configuration file. This will create the required IAM configurations for the Gitaly nodes to be able to access the `backups` bucket.
-    - Add `gitaly_server_side_backups_enable: true` to the `vars.yaml` ansible configuration file in the `inventory` directory. This will add the configuration to the Gitaly nodes to direct them to the bucket.
+  - The Toolkit _does_ support configuration for [Gitaly server-side backups](https://docs.gitlab.com/administration/gitaly/configure_gitaly/#configure-server-side-backups) to assist to [Back up and restore large reference architectures](https://docs.gitlab.com/administration/backup_restore/backup_large_reference_architectures). To implement the configurations, add `gitaly_server_side_backups_enable: true` to the `vars.yaml` ansible configuration file in the `inventory` directory. This will add the configuration to the Gitaly nodes to direct them to the bucket. Since this fork does not provision managed Object Storage for Nutanix, the `backups` bucket and any required access credentials must be configured separately via [Custom Config](environment_advanced.md#custom-config).
 
 - Object Storage buckets such as `uploads` are **not** backed up with the GitLab provided Rake tasks. It's recommended to enable backups for these buckets as per the object storage provider used.
 
@@ -43,10 +39,10 @@ For setting up backups, implement a strategy as per your requirements. Refer to 
 
 When restoring a Toolkit-provisioned GitLab environment refer to the [main GitLab documentation](https://docs.gitlab.com/administration/backup_restore/restore_gitlab/) on this subject. The following however should also be noted:
 
-- When restoring a GitLab backup to a new Toolkit-provisioned environment the secrets from the source environment must be transferred to the restored environment. The Toolkit synchronizes secrets from the first Omnibus node to all other Omnibus nodes and, for a Hybrid deployment, to Kubernetes. To ensure the secrets from the source environment are fully deployed to the restored environment use one of the following methods: 
+- When restoring a GitLab backup to a new Toolkit-provisioned environment the secrets from the source environment must be transferred to the restored environment. The Toolkit synchronizes secrets from the first Omnibus node to all other Omnibus nodes. To ensure the secrets from the source environment are fully deployed to the restored environment use one of the following methods:
 
-  - Copy the `/etc/gitlab/gitlab-secrets.json` file from an Omnibus node in the source environment to _all_ Omnibus nodes in the target environment and run the Toolkit to propagate the secrets to Kubernetes (for a Hybrid deployment).
-  - Configure [custom GitLab secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) for the GitLab Rails and GitLab Shell secrets which are then deployed by the Toolkit to all Omnibus nodes and to Kubernetes, noting that any new keys added to a secret by an upgrade will by overwritten by the custom setting which will hence need to be updated as required.  
+  - Copy the `/etc/gitlab/gitlab-secrets.json` file from an Omnibus node in the source environment to _all_ Omnibus nodes in the target environment and run the Toolkit to propagate the secrets.
+  - Configure [custom GitLab secrets](environment_advanced.md#custom-gitlab-secrets---linux-package-omnibus) for the GitLab Rails and GitLab Shell secrets which are then deployed by the Toolkit to all Omnibus nodes, noting that any new keys added to a secret by an upgrade will by overwritten by the custom setting which will hence need to be updated as required.
 
 ## Security
 
@@ -66,7 +62,7 @@ However, do note this is optional and not required to be used. You can use a sep
 
 ### Logging
 
-By default, the Toolkit doesn't configure any additional logging monitoring outside what's provided by default in Omnibus, Kubernetes and the respective Cloud Providers.
+By default, the Toolkit doesn't configure any additional logging monitoring outside what's provided by default in Omnibus.
 
 This is due to there being various logging strategies that are available for you to consider based on requirements and cost that's best handled directly.
 

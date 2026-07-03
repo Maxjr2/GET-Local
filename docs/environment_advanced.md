@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](environment_provision.md)
 - [GitLab Environment Toolkit - Configuring the environment with Ansible](environment_configure.md)
 - [**GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more**](environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
@@ -63,28 +61,6 @@ gitaly['configuration']['logging']['level'] = 'warn'
 
 With the above done the file will be picked up by the Toolkit and used when configuring the Linux package (Omnibus).
 
-### Helm
-
-Providing custom config for components deployed via Helm charts or Operator in Cloud Native Hybrid environments is done as follows:
-
-1. Create a [GitLab Charts](https://docs.gitlab.com/charts/) yaml template file in the correct format with the specific custom settings you wish to apply
-1. By default, the Toolkit looks for a [Jinja2 template file](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) named `gitlab_charts.yml.j2` in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_configs` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_configs/gitlab_charts.yml.j2`. Save your file in this location with the same name.
-    - Files should be saved in Ansible template format - `.j2`.
-    - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via the `gitlab_charts_custom_config_file` inventory variable.
-
-With the above done the file will be picked up by the Toolkit and used when configuring the Helm charts or GitLab custom resource with Operator.
-
-### Operator
-
-Providing custom config for the GitLab Operator in Cloud Native Hybrid environments is done as follows:
-
-1. Create a [GitLab Operator chart](https://docs.gitlab.com/operator/installation.html?tab=Helm+Chart) yaml template file in the correct format with the specific custom settings you wish to apply
-1. By default, the Toolkit looks for a [Jinja2 template file](https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html) named `gitlab_operator.yml.j2` in the [environment's](environment_configure.md#2-set-up-the-environments-inventory-and-config) `files/gitlab_configs` folder path. E.G. `ansible/environments/<env_name>/files/gitlab_configs/gitlab_operator.yml.j2`. Save your file in this location with the same name.
-    - Files should be saved in Ansible template format - `.j2`.
-    - If you wish to store your file in a different location or use a different name the full path that Ansible should use can be set via the `gitlab_operator_custom_config_file` inventory variable.
-
-With the above done the file will be picked up by the Toolkit and used when installing the GitLab Operator.
-
 ## Custom Tasks
 
 The Toolkit allows for providing custom Ansible tasks that can be run at several points in the setup. This allows you to run tasks as required in addition to the main GitLab setup such as installing monitoring tools.
@@ -93,7 +69,6 @@ The Toolkit has hooks to allow tasks to be run at the following points during th
 
 - Common - Tasks to run on every VM **before** the component has deployed such as installing general monitoring tools.
 - Linux package (Omnibus) - Tasks to run on specific Linux package (Omnibus) VMs **after** the component has been set up via the Linux package (Omnibus) such as installing any specific tools for the component.
-- Helm - Tasks to run for the Kubernetes Cluster **after** the Charts have been deployed such as deploying additional components into the Cluster.
 - Post Configure - Tasks to run against the environment **after** setup from the Ansible runner.
 - Uninstall - Tasks to run as part of the uninstallation process such as uninstalling any additional tools.
 
@@ -110,7 +85,6 @@ Setting up common tasks is done in the same manner for each hook as follows:
     - `haproxy_custom_tasks_file` - Full path for the HAProxy tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/haproxy.yml`.
     - `<component>_custom_tasks_file` - Full path for Linux package (Omnibus) custom tasks files. Where `<component>` should be replaced with the one intended (options below). Defaults to `<inventory_dir>/../files/gitlab_tasks/<component>.yml`.
       - Available component options: `consul`, `postgres`, `pgbouncer`, `redis`, `redis_cache`, `redis_persistent`, `praefect_postgres`, `praefect`, `gitaly`, `gitlab_rails`, `sidekiq` and `monitor`.
-    - `gitlab_charts_custom_tasks_file` - Full path for the Helm custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/gitlab_charts.yml`.
     - `post_configure_custom_tasks_file` - Full path for the Post Configure custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/post_configure.yml`.
     - `uninstall_custom_tasks_file` - Full path for the uninstallation custom tasks file. Defaults to `<inventory_dir>/../files/gitlab_tasks/uninstall.yml`.
 
@@ -166,11 +140,8 @@ As an additional feature, it's possible for you to pass in your own GitLab secre
 > [!caution]
 > **This is an advanced feature, and it must be used with caution**. Adding custom GitLab secrets may lead to various unintended consequences or broken environments if not used carefully.
 
->>> [!note]
-This feature is designed for Linux package (Omnibus) setups. As a convenience however on Cloud Native Hybrid environments some secrets, such as the GitLab Rails and GitLab Shell secrets, [are also propagated from Linux package (Omnibus) VMs to Kubernetes](environment_advanced_hybrid.md#kubernetes-secrets) to ensure synchronisation.
-
-The equivalent full Cloud Native version of this feature is [Custom Kubernetes Secrets (via Custom Tasks)](environment_advanced_hybrid.md#custom-kubernetes-secrets-via-custom-tasks).
->>>
+> [!note]
+> This feature is designed for Linux package (Omnibus) setups.
 
 Custom GitLab secrets can be given as a JSON string via the following variable in your [`vars.yml`](environment_configure.md#environment-config-varsyml) file:
 
@@ -187,87 +158,33 @@ gitlab_custom_secrets_json: |
   }
 ```
 
-## Data Disks (GCP, AWS, Azure)
+## Data Disks (Nutanix)
 
 The Toolkit supports provisioning and configuring extra disks, AKA data disks, for each group of machines (i.e. for all Gitaly nodes). With this set up you can have additional disk volumes mounted for storing data for added resilience and flexibility.
 
 Like other resources the process here is similar - The disks are provisioned and attached via Terraform and then configured and mounted via Ansible. Below are sections detailing each step.
 
+> [!note]
+> Data Disks configuration only applies to Nutanix Terraform-provisioned environments. For Custom Servers (On Prem) via static inventory, disks must be configured separately - see [Custom Servers (On Prem)](#custom-servers-on-prem).
+
 ### Provisioning with Terraform
 
 Using Terraform, provision and attach the disks to the selected machine groups.
 
-Additional config is required in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file.
-
-The config is given per node type and is passed an array of hashes (each hash represents a disk). Additionally, config differs between cloud providers; below are examples and descriptions for each provider:
-
-**GCP**
-
-```tf
-gitaly_disks = [
-  { device_name = "data", size = 500, type = "pd-ssd", source_snapshots = { "gitlab-gitaly-data-0": "<snapshot_0_id>", "gitlab-gitaly-data-1": "<snapshot_1_id>" }, source_snapshot_kms_key = "<key_id>" },
-  { device_name = "logs", size = 50 }
-]
-```
-
-- `*_disks` - The data disk configuration that will be used for every node in the group.
-  - `device_name` - The name _and_ block device identifier for each disk attached. Must be unique per machine. **Required**.
-  - `size` - The size of the disk in GB. **Optional**, default is `100`.
-  - `type` - The [type](https://cloud.google.com/compute/docs/disks) of the disk. **Optional**, default is `pd-standard`.
-  - `source_snapshots` - A map that defines which snapshot should be used for the initial creation of each node's specific data disk, designated by the target disk name. **Optional**, default is `null`.
-    - Target disk names follow the format: `<prefix>-<node_type>-<data_disk_device_name>-<node_number>`. For example, with a `prefix` of `gitlab`, target disk names for a three-node Gitaly group would be `gitlab-gitaly-data-0`, `gitlab-gitaly-data-1`, and `gitlab-gitaly-data-2` (node numbers start at 0).
-    - Snapshot IDs can be passed in various formats, [refer to the Terraform GCP documentation for more information](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk#snapshot).
-  - `source_snapshot_kms_key` - KMS Key ID if snapshots have been encrypted by a Customer Managed Encryption Key (CMEK). **Optional**, default is `null`.
-
-**AWS**
+Additional config is required in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file. The config is given per node type and is passed an array of hashes (each hash represents a disk):
 
 ```tf
 gitaly_data_disks = [
-  { name = "data", device_name = "/dev/sdf", size = 500, iops = 8000, source_snapshots = { "gitlab-gitaly-1-data": "<snapshot_1_id>", "gitlab-gitaly-2-data": "<snapshot_2_id>" } },
-  { name = "logs", device_name = "/dev/sdg", snapshots = { start_time = "01:00", interval = "24", retain_count = "14" } }
+  { name = "data", size = 500, storage_container_uuid = "<storage_container_uuid>", index = 0 },
+  { name = "logs", size = 50, storage_container_uuid = "<storage_container_uuid>", index = 1 }
 ]
 ```
 
 - `*_data_disks` - The data disk configuration that will be used for every node in the group.
   - `name` - The name for each disk attached. Must be unique per machine. **Required**.
-  - `device_name` = The block device name for each disk attached. For AWS, due to its design, this must be in the format `/dev/sd[f-p]` and unique for each disk (more info [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html)). Additionally, each block device name must be available on all machines in the target group (e.g. `gitaly-1` or `gitaly-2`). **Required**.
   - `size` - The size of the disk in GB. **Optional**, default is `100`.
-  - `type` - The [type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html) of the disk. **Optional**, default is `gp3`.
-  - `iops` - The amount of IOPS to provision for the disk. Only valid for types of `io1`, `io2` or `gp3`. **Optional**, default is `null`.
-  - `skip_destroy` - Set this to `true` if you do not wish to detach the volume from the instance to which it is attached at destroy time, and instead just remove the attachment from Terraform state. This is useful when destroying an instance which has volumes created by some other means attached. **Optional**, defaults to `false`.
-  - `source_snapshots` - A map that defines which snapshot should be used for the initial creation of each node's specific data disk. Specified in the format `<target_data_disk_name>: <snapshot_id>`. **Optional**, default is `null`.
-    - Target disk names follow the format: `<prefix>-<node_type>-<node_number>-<data_disk_name>`. For example, with a `prefix` of `gitlab`, target disk names for a three-node Gitaly group would be `gitlab-gitaly-1-data`, `gitlab-gitaly-2-data`, and `gitlab-gitaly-3-data`.
-    - Snapshot IDs should be passed in the expected AWS format of `snap-<ID>`. Refer to the [AWS documentation](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-describing-snapshots.html) on how to retrieve the IDs.
-  - `snapshots` - Configuration to schedule backup snapshots of the disk via AWS Data Lifecycle Manager. **Optional**
-    - `start_time` - The time to start the schedule from.
-    - `interval` - The interval in hours between snapshots e.g. `24`. Possible values are `1`, `2`, `3`, `4`, `6`, `8`, `12` or `24`.
-    - `retain_count` - Number of snapshots that should be retained.
-
-**Azure**
-
-```tf
-gitaly_data_disks = [
-  { name = "data", size = 500, storage_account_type = "Premium_LRS", lun = 0, caching = "ReadWrite", tier = "P20" },
-  { name = "logs", size = 100, storage_account_type = "StandardSSD_LRS", lun = 1, caching = "ReadOnly" }
-]
-```
-
-- `*_data_disks` - The data disk configuration that will be used for every node in the group.
-  - `name` - The name for each disk attached. Must be unique per machine. **Required**.
-  - `size` - The size of the disk in GB. **Optional**, default is inherited from the instance's `disk_size`.
-  - `storage_account_type` - The [type of storage account](https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types) for the disk. **Optional**, default is inherited from the instance's `storage_account_type`.
-    - `Standard_LRS` - Standard locally redundant storage
-    - `StandardSSD_LRS` - Standard SSD locally redundant storage
-    - `Premium_LRS` - Premium SSD locally redundant storage
-    - `UltraSSD_LRS` - Ultra SSD storage (requires specific VM sizes)
-  - `lun` - The Logical Unit Number of the data disk, which needs to be unique within the VM. **Required**.
-  - `caching` - Specifies the caching requirements for the data disk. **Optional**, default is `ReadWrite`.
-    - `None` - No caching
-    - `ReadOnly` - Read-only caching
-    - `ReadWrite` - Read and write caching
-  - `tier` - The performance tier of the data disk. Only applicable for Premium SSD storage. **Optional**, default is `null`.
-    - [Available tiers](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#premium-ssd-size)
-    - Each tier provides different IOPS and throughput capabilities
+  - `storage_container_uuid` - UUID of the Nutanix storage container to create the disk in. **Optional**, defaults to the same storage container used for the boot disk.
+  - `index` - The disk index used to identify the device on the VM. Must be unique per machine. **Required**.
 
 ### Configuring with Ansible
 
@@ -277,9 +194,7 @@ This is done with Ansible and as such will require additional config in your [`v
 
 It's worth noting that the Toolkit will always mount disks via UUID to ensure the correct disks are always mounted in the same way through reboots.
 
-The config for this area is given per node type and is passed an array of dictionaries, where each dictionary represents a disk. The config has been designed to be platform-agnostic, but the actual values may differ, in such a case the difference will be called out clearly. Below is an example of this config with full details after:
-
-**GCP**
+The config for this area is given per node type and is passed an array of dictionaries, where each dictionary represents a disk:
 
 ```yaml
 gitaly_data_disks:
@@ -287,30 +202,9 @@ gitaly_data_disks:
   - { device_name: 'logs', mount_dir: '/var/log/gitlab' }
 ```
 
-**AWS**
-
-```yaml
-gitaly_data_disks:
-  - { device_name: '/dev/sdf', mount_dir: '/var/opt/gitlab' }
-  - { device_name: '/dev/sdg', mount_dir: '/var/log/gitlab' }
-```
-
-**Azure**
-
-```yaml
-gitaly_data_disks:
-  - { device_name: '0', mount_dir: '/var/opt/gitlab' }
-  - { device_name: '1', mount_dir: '/var/log/gitlab' }
-```
-
 - `*_disks` - The main setting for each node group.
-  - `device_name` - The block device name of the disk. Differs depending on Cloud Provider (see below). **Required**.
-    - GCP - Device name is the same as its main name. Can be either the short name of the attached disks, e.g. `data`, or the full path, e.g. `/dev/disk/by-id/google-data`.
-    - AWS - Must be the block device name you provisioned with Terraform (i.e. `/dev/sd[f-p]`). Can be either the short name of device name, e.g. `sdf`, or the full path, e.g. `/dev/sdf`.
-    - Azure - Device name should be the LUN number configured in Terraform, e.g. `0`, `1`, etc., or the full path, e.g. `/dev/disk/azure/scsi1/lun0`.
+  - `device_name` - The block device name of the disk, matching the `name` set for the disk in Terraform's `environment.tf`. **Required**.
   - `mount_dir` - The path on the machine to mount the disk on.
-
-Note that for AWS, the Toolkit will create symlinks to [match the block device name to the attached NVMe path](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html#identify-nvme-ebs-device).
 
 ### Suggested disk mount paths for GitLab
 
@@ -341,14 +235,11 @@ The Toolkit supports setting up both of these setups. This is controlled simply 
 
 [Gitaly requires to make an API call to GitLab Shell](https://docs.gitlab.com/ee/administration/gitaly/praefect.html#gitaly), which is deployed alongside Rails, when any Git Push is made to complete the action. This is known as the Internal API Callback.
 
-The Toolkit configures this for you automatically depending on the setup type as follows:
-
-- Linux Package (Omnibus) - By using the Internal Load Balancer. If using the Toolkit provided HAProxy option this is configured automatically.
-- Cloud Native Hybrid - By using the External URL to reach the Charts as required.
+The Toolkit configures this for you automatically by using the Internal Load Balancer. If using the Toolkit provided HAProxy option this is configured automatically.
 
 In some advanced cases you may need to configure this URL directly, such is when using a custom Internal Load Balancer. This can be done via the following Ansible variable in [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
 
-- `gitaly_callback_internal_api_url` - Specifies the URL Gitaly uses for internal API callbacks to GitLab Shell. This should point to a reachable URL for the Gitaly nodes that resolves to either the GitLab Rails nodes (Linux package (Omnibus)) or Webservice deployment (Cloud Native Hybrid) where Shell is deployed.
+- `gitaly_callback_internal_api_url` - Specifies the URL Gitaly uses for internal API callbacks to GitLab Shell. This should point to a reachable URL for the Gitaly nodes that resolves to the GitLab Rails nodes where Shell is deployed.
 
 ## GitLab SSH
 
@@ -366,8 +257,8 @@ By default, `openssh` will be used, but you can switch over to `gitlab-sshd` via
 
 The Toolkit allows you to configure the External and Internal ports used for serving Git operations over SSH, where external is the port users will use and internal is the port that the selected SSH daemon runs on. These can be configured via the following Ansible variables in the [Environment `vars.yml` file](environment_configure.md#environment-config-varsyml):
 
-- `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure all parts of the external connection - HAProxy (Linux installs) or Kubernetes Ingress. Optional, default is `2222` (Linux - HAProxy External) / `22` (Cloud Native Hybrid, Linux - Single Node).
-- `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for [`gitlab-sshd`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd) this will change whatever port the service is running on. Optional, default is `22` (Linux `openssh`) / `2222` (Linux `gitlab-sshd`, Cloud Native Hybrid).
+- `gitlab_shell_ssh_port` - The external port to be used for serving Git operations over SSH. This port will be used to configure the HAProxy external connection. Optional, default is `2222` (HAProxy External) / `22` (Single Node).
+- `gitlab_shell_ssh_internal_port` - The internal port the GitLab SSH daemon is running on. This port depends on the environmental type as well as the SSH Daemon being used. For `openssh` this port should match what the system SSH is running on and for [`gitlab-sshd`](https://docs.gitlab.com/ee/administration/operations/gitlab_sshd.html#enable-gitlab-sshd) this will change whatever port the service is running on. Optional, default is `22` (`openssh`) / `2222` (`gitlab-sshd`).
 
 >>> [!note]
 When using the Toolkit's optional HAProxy External load balancer, GitLab SSH traffic runs on port `2222` by default to avoid conflicts with the system SSH service (port `22`) that Ansible requires.
@@ -437,18 +328,17 @@ When enabled, this will reset and reapply the Advanced Search config, including 
 > [!warning]
 This operation will delete the existing search index and search functionality will be unavailable during re-indexing, which can take significant time depending on your data size.
 
-## Container Registry (GCP, AWS)
+## Container Registry
 
-The Toolkit configures the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) by default on GCP and AWS environments when [External SSL](environment_advanced_ssl.md#external-ssl) is enabled in a best practice fashion, including the management of Object Storage.
+The Toolkit can configure the [GitLab Container Registry](https://docs.gitlab.com/ee/user/packages/container_registry/) when [External SSL](environment_advanced_ssl.md#external-ssl) is enabled. Since this fork does not provision managed Object Storage (Nutanix has no equivalent module support for this), Object Storage for the registry must be configured separately via [Custom Config](#custom-config), the same as other object storage buckets - see [Custom Servers (On Prem)](#custom-servers-on-prem) for the pattern this follows.
 
-With both Omnibus and Cloud Native Hybrid setups the registry is configured to run on the subdomain `registry.<external_host>` by default, where `external_host` is the hostname configured via the `external_url` setting. For example, if an environment was configured with `external_url` set to `https://gitlab.test.com` the registry will be made available on `https://registry.gitlab.test.com`.
+The registry is configured to run on the subdomain `registry.<external_host>` by default, where `external_host` is the hostname configured via the `external_url` setting. For example, if an environment was configured with `external_url` set to `https://gitlab.test.com` the registry will be made available on `https://registry.gitlab.test.com`.
 
-For all setups, the below settings configure how the service and dependents are set up:
+The below settings configure how the service and dependents are set up:
 
-- `container_registry_enable` - Controls whether the container registry and dependents are enabled. Optional, default is `true` when using [External SSL](environment_advanced_ssl.md#external-ssl) on AWS or GCP and if a `registry` Object Storage bucket has been configured.
+- `container_registry_enable` - Controls whether the container registry and dependents are enabled. Optional, default is `false` - must be explicitly enabled since Object Storage isn't managed by Terraform on Nutanix.
 - `container_registry_external_url` - The URL registry will be available on. Optional, default is `https://registry.<external_host>`.
-- `gitlab_object_storage_registry_chunksize_mb` - The registry chunksize for multi-part uploads. Note this only applies when using Registry with Object Storage on either AWS or GCP. Consider increasing it somewhere between 25 and 50 if experiencing failures with large images, see [GitLab documentation](https://docs.gitlab.com/ee/administration/packages/container_registry.html#aws-s3-with-the-gitlab-registry-error-when-pushing-large-images) for more information. Optional, default is `10` on AWS and `5` on GCP.
-- `container_registry_aws_storage_driver` - **_AWS only_** Specifies which AWS S3 storage driver to use for the Container Registry. Default is `s3_v2`. Values can be either `s3_v2` (uses AWS SDK v2) or `s3` (uses AWS SDK v1). Note that the `s3` driver is [removed in GitLab 19.0](https://docs.gitlab.com/update/deprecations/#s3-storage-driver-aws-sdk-v1-for-the-container-registry), and AWS SDK v1 reached end-of-life on July 31, 2025. For more information about the storage driver configuration, see [Use object storage](https://docs.gitlab.com/administration/packages/container_registry/#use-object-storage) documentation.
+- `gitlab_object_storage_registry_chunksize_mb` - The registry chunksize for multi-part uploads. Consider increasing it somewhere between 25 and 50 if experiencing failures with large images, see [GitLab documentation](https://docs.gitlab.com/ee/administration/packages/container_registry.html#aws-s3-with-the-gitlab-registry-error-when-pushing-large-images) for more information. Optional, default is `5`.
 
 > [!note]
 > When configuring [External SSL with user provided certificates](environment_advanced_ssl.md#user-provided-certificates), the URL configured via `container_registry_external_url` must be included as a Subject Alternative Name (SAN) name.
@@ -488,7 +378,7 @@ The below settings are required when using an externally managed database:
 
 ## GitLab Pages
 
-The Toolkit can configure [GitLab Pages](https://docs.gitlab.com/administration/pages/) with wildcard domains for both Linux Package (Omnibus) and Cloud Native environments. The settings to configure this are as follows:
+The Toolkit can configure [GitLab Pages](https://docs.gitlab.com/administration/pages/) with wildcard domains for Linux Package (Omnibus) environments. The settings to configure this are as follows:
 
 - `pages_external_url` -  [Wildcard URL root](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains) that will be used to serve Pages content for this instance. Provided as a URL format including protocol, e.g. `https://pages.example.io`. Specifying HTTPS protocol will enable wildcard SSL, and require `pages_ssl_cert_file` and `pages_ssl_key_file` to be specified. **Required**.
 - `pages_ssl_cert_file` - Path to SSL certificate file for the Pages daemon to serve. Must be specified with `pages_ssl_key_file`. Required if `pages_external_url` protocol is HTTPS. Certificate must meet [the following requirements](https://docs.gitlab.com/ee/administration/pages/index.html#wildcard-domains-with-tls-support).
@@ -501,7 +391,7 @@ For additional Pages settings such as access control, single-domain setup, or ot
 
 ## Custom Servers (On Prem)
 
-While the Toolkit has primarily been designed to support Cloud Providers, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
+In addition to Nutanix, there is partial support for configuring Custom Servers (e.g. On prem servers running locally in your network) with Ansible via a [Static Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html).
 
 >>> [!important]
 [Support for this feature is limited](https://support.gitlab.com/hc/en-us/articles/11625911285404-Statement-of-Support#gitlab-environment-toolkit) due to the vast potential number of permutations.
@@ -511,9 +401,8 @@ In particular, be aware of the following important callouts:
 - Custom servers must follow the basic [requirements](../README.md#requirements).
 - **Custom servers must have basic security hardening in place throughout**. The GitLab configuration generated by Ansible assumes that this hardening is in place, such as host firewalls configured to only allow standard external facing ports (22 for SSH, 80/443 for HTTP/HTTPS) with all other ports blocked by default. Additionally, you should review all [security considerations](environment_post_considerations.md) as per your requirements.
 - Terraform support is not available. VMs and services must be provisioned separately.
-- [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) config must be configured via [Custom Config](#custom-config) on any GitLab Rails or Sidekiq nodes as well as Helm Chart for Cloud Native Hybrid environments.
+- [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) config must be configured via [Custom Config](#custom-config) on any GitLab Rails or Sidekiq nodes.
 - Data Disks configuration is not supported. These must be configured separately.
-- On Cloud Native Hybrid environments the Kubernetes cluster should be reviewed against the [cluster assumptions](environment_advanced_hybrid.md#cluster-assumptions) and have a valid `kubeconfig` configured separately. In particular, note that object storage must be configured via [Custom Config](#custom-config) and StorageClasses must either already exist in the cluster or be set via the relevant variables.
 >>>
 
 To configure Custom Servers with Ansible the setup process involves the following:
@@ -535,7 +424,7 @@ Using the same recommended structure the Static Inventory file should be saved i
 Configuring the environment config `vars.yml` file is [much the same as it would be normally](environment_configure.md#environment-config-varsyml) with the following differences:
 
 - `cloud_provider` **must** be set to `none`. This should be set when running with any static inventory.
-- Any Cloud Provider specific variables, such as `gcp_project` should be removed.
+- Any Nutanix-specific variables, such as `cluster_uuid`, should be removed.
 - `prefix` can also be removed.
 
 #### Inventory Examples
@@ -941,112 +830,6 @@ all:
 
 </details>
 
-For Cloud Native Hybrid environments, the Ansible static inventory file only needs to include details for component VMs that it is expected to set up directly. For this setup this would be for any stateful backend components that are to be set up with the Linux package (Omnibus).
-
-For components that are to be deployed in Kubernetes, Ansible will handle this through the Cluster API in a similar approach to `kubectl`, as such [`kubeconfig` authentication](environment_advanced_hybrid.md#3-setting-up-authentication-for-the-provisioned-kubernetes-cluster) needs to be configured beforehand for Ansible to run correctly.
-
-As such, in this set up the following components would typically not be part of the Ansible inventory unless specified otherwise
-
-- GitLab Rails / Sidekiq
-- HAProxy External - Handled by Kubernetes
-- HAProxy Internal - Unless you sought to use this as the Internal Load Balancer for Linux package (Omnibus) backends in HA form (Postgres HA, Gitaly Cluster)
-
-<details><summary>10k Cloud Native Hybrid Static Inventory</summary>
-
-```yml
-all:
-  children:
-    consul:
-      hosts:
-        gitlab-consul-1:
-          ansible_host: <CONSUL-1-ADDRESS>
-        gitlab-consul-2:
-          ansible_host: <CONSUL-2-ADDRESS>
-        gitlab-consul-3:
-          ansible_host: <CONSUL-3-ADDRESS>
-    gitaly:
-      children:
-        gitaly_primary:
-          hosts:
-            gitlab-gitaly-1:
-              ansible_host: <GITALY-1-ADDRESS>
-        gitaly_secondary:
-          hosts:
-            gitlab-gitaly-2:
-              ansible_host: <GITALY-2-ADDRESS>
-            gitlab-gitaly-3:
-              ansible_host: <GITALY-3-ADDRESS>
-    haproxy_internal:
-      hosts:
-        gitlab-haproxy-internal-1:
-          ansible_host: <HAPROXY-INTERNAL-1-ADDRESS>
-    pgbouncer:
-      hosts:
-        gitlab-pgbouncer-1:
-          ansible_host: <PGBOUNCER-1-ADDRESS>
-        gitlab-pgbouncer-2:
-          ansible_host: <PGBOUNCER-2-ADDRESS>
-        gitlab-pgbouncer-3:
-          ansible_host: <PGBOUNCER-3-ADDRESS>
-    postgres:
-      children:
-        postgres_primary:
-          hosts:
-            gitlab-postgres-1:
-              ansible_host: <POSTGRES-1-ADDRESS>
-        postgres_secondary:
-          hosts:
-            gitlab-postgres-2:
-              ansible_host: <POSTGRES-2-ADDRESS>
-            gitlab-postgres-3:
-              ansible_host: <POSTGRES-3-ADDRESS>
-    praefect:
-      children:
-        praefect_primary:
-          hosts:
-            gitlab-praefect-1:
-              ansible_host: <PRAEFECT-1-ADDRESS>
-        praefect_secondary:
-          hosts:
-            gitlab-praefect-2:
-              ansible_host: <PRAEFECT-2-ADDRESS>
-            gitlab-praefect-3:
-              ansible_host: <PRAEFECT-3-ADDRESS>
-    praefect_postgres:
-      children:
-        praefect_postgres_primary:
-          hosts:
-            gitlab-praefect-postgres-1:
-              ansible_host: <PRAEFECT-POSTGRES-1-ADDRESS>
-    redis_cache:
-      children:
-        redis_cache_primary:
-          hosts:
-            gitlab-redis-cache-1:
-              ansible_host: <REDIS-CACHE-1-ADDRESS>
-        redis_cache_secondary:
-          hosts:
-            gitlab-redis-cache-2:
-              ansible_host: <REDIS-CACHE-2-ADDRESS>
-            gitlab-redis-cache-3:
-              ansible_host: <REDIS-CACHE-3-ADDRESS>
-    redis_persistent:
-      children:
-        redis_persistent_primary:
-          hosts:
-            gitlab-redis-persistent-1:
-              ansible_host: <REDIS-PERSISTENT-1-ADDRESS>
-        redis_persistent_secondary:
-          hosts:
-            gitlab-redis-persistent-2:
-              ansible_host: <REDIS-PERSISTENT-2-ADDRESS>
-            gitlab-redis-persistent-3:
-              ansible_host: <REDIS-PERSISTENT-3-ADDRESS>
-    ungrouped:
-```
-
-</details>
-
 For any hosts you explicitly wish for the Toolkit to ignore you can place them in the `get_ignored` group, which the Toolkit will then proceed to ignore:
 
 <details><summary>Inventory with explicitly ignored <code>get_ignored</code> group</summary>
@@ -1109,16 +892,20 @@ When `epel_setup` is `true` the toolkit installs from the public [Fedora Project
 
 You can optionally provision and configure a [NFS server if desired to handle Object Data](https://docs.gitlab.com/ee/administration/nfs.html). This is not recommended however with [Object Storage](https://docs.gitlab.com/ee/administration/object_storage.html) instead preferable in all cases. To configure this some steps are required in Terraform and Ansible.
 
-In Terraform, you'll need to provision a `gitlab_nfs` node in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file. For example in AWS:
+In Terraform, you'll need to provision a `gitlab_nfs` node in your [`environment.tf`](environment_provision.md#configure-module-settings-environmenttf) file. For example:
 
 ```tf
-module "gitlab_ref_arch_aws" {
-  source = "../../modules/gitlab_ref_arch_aws"
+module "gitlab_ref_arch_nutanix" {
+  source = "../../modules/gitlab_ref_arch_nutanix"
 
   [...]
 
-  gitlab_nfs_node_count    = 1
-  gitlab_nfs_instance_type = "c5.xlarge"
+  gitlab_nfs_node_count = 1
+  gitlab_nfs_size = {
+    num_sockets          = 4
+    num_vcpus_per_socket = 1
+    memory_size_mib      = 8192
+  }
 }
 ```
 
@@ -1141,177 +928,8 @@ When using NFS for shared storage in a Linux Package HA environment, consistent 
 > [!caution]
 > Changing these values on an existing environment requires [manual actions to propagate the changes](https://docs.gitlab.com/omnibus/settings/configuration/#specify-numeric-user-and-group-identifiers).
 
-## Custom IAM options (AWS)
+## Tags/Labels (Nutanix Categories)
 
-The Toolkit provides several customization options for configuring AWS IAM.
+Nutanix has no direct equivalent of free-form cloud provider tags/labels. Instead, the Toolkit uses Nutanix [categories](https://www.nutanix.com/) to group and identify VMs for Ansible's dynamic inventory - see the [Nutanix section](environment_provision.md#nutanix) of the Provisioning guide for details on the `gitlab_node_prefix`, `gitlab_node_type` and `gitlab_node_level` categories the module creates and applies automatically.
 
-### Custom IAM Instance Policies (AWS)
-
-[In AWS, you can attach IAM Instance Profiles / Roles to EC2 Instances](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html). These Roles can then contain [Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) (AKA permissions) that are attached to the instance to allow it to perform actions against AWS APIs, e.g. accessing Object Storage.
-
-The Toolkit uses this functionality in several places to ensure the needed permissions for GitLab are set on the right instances.
-
-As a convenience, you can also pass in additional Policies to either all instances or specific component instances as required (AWS Managed or custom). The Toolkit will manage the Role and attach these policies for you.
-
-Passing in your policies is done in Terraform via the following variables in your `environment.tf` file. Note that for individual component instances the same variable suffix is used throughout, for readability this is defined once only:
-
-- `default_iam_instance_policy_arns` - List of IAM Policy [ARNs](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) to attach on all Instances, for example `["arn:aws:iam::aws:policy/AmazonS3FullAccess"]`. Defaults to `[]`.
-- `*_iam_instance_policy_arns` - List of IAM Policy [ARNs](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) to attach on all Instances. For example if `gitaly_iam_instance_policy_arns` was set to `["arn:aws:iam::aws:policy/AmazonS3FullAccess"]` then this Policy would be applied to all Gitaly instances via a new Role. Defaults to `[]`.
-
-### Custom IAM Permissions Boundary (AWS)
-
-The Toolkit also allows for there to be a [Permissions Boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) to be set for all IAM Roles it creates.
-
-> [!caution]
-> **This is an advanced feature, and it must be used with caution**. Boundaries must allow for all Policies the Toolkit uses to be allowed, or your environment will become unstable. [The latest list of policies used by the Toolkit is shown here](https://gitlab.com/search?search=2012-10-17&nav_source=navbar&project_id=14292404&group_id=9970&search_code=true&repository_ref=main).
-
-While the Toolkit will be designed in line with least privilege and ensuring all such IAM entities only have the access they require to do their role you may have a general policy to always apply a "global" permissions boundary as an additional security measure.
-
-To do this you first create the boundary policy separately in AWS and take note of its ARN. Then you should pass the ARN to the Toolkit via the following variable in the Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf):
-
-- `default_iam_permissions_boundary_arn` - The IAM ARN of a [Permissions Boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) policy to be applied to all IAM Roles the Toolkit creates. Defaults to `null`.
-
-The Toolkit will then apply this boundary on the next `terraform apply` run.
-
-### Custom IAM Path (AWS)
-
-> [!caution]
-> This feature may be deprecated and removed in the future. It is specifically not known to work with AWS EKS at this time and as a result is not supported for Cloud Native Hybrid setups. For more information please refer to this [issue](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/work_items/746).
-
-The Toolkit allows to configure a custom [Path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) for all IAM Roles and Policies it creates. As detailed in the AWS documentation, you can use a single path, or nest multiple paths as a folder structure. This allows to match your company organizational structure.
-
-To configure custom Path add the following variable in the Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf):
-
-- `default_iam_identifier_path` - The IAM [Path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) to be applied to all IAM Policies and Roles the Toolkit creates. Defaults to `null` which in turn results in `/` default path in AWS.
-
-The Toolkit will then apply the path on the next `terraform apply` run.
-
-## Tags/Labels
-
-Tags and labels are key-value pairs used to organize, identify, and manage cloud resources. The Toolkit automatically applies operational tags for internal automation and allows you to add custom tags for your organization's needs.
-
-### Custom Tags/Labels
-
-You can add custom tags to resources using the following variables. Each expects a map of key-value pairs:
-
-- `custom_(tags/labels)`: These tags/labels will be applied to all instances, clusters, cloud services, data disks and buckets created by the Toolkit.
-- `object_storage_custom_(tags/labels)`: Will be applied to all object storage buckets. **AWS and GCP only**.
-- `object_storage_buckets_custom_(tags/labels)`: A map of different tags/labels to apply to specific buckets. **AWS and GCP only**.
-- `(instance type)_custom_(tags/labels)`: Will be applied to the specific instance type and any associated data disks.
-- `(cloud service)_custom_(tags/labels)`: Will be applied to the specific Cloud Service resources and any associated disks if applicable.
-
-```tf
-# Global tags applied to all resources
-custom_tags = { Owner = "platform-team", CostCenter = "engineering" }
-
-# Omnibus instance types
-consul_custom_tags            = { <key-name> : <value> }
-gitaly_custom_tags            = { <key-name> : <value> }
-gitlab_rails_custom_tags      = { <key-name> : <value> }
-haproxy_external_custom_tags  = { <key-name> : <value> }
-haproxy_internal_custom_tags  = { <key-name> : <value> }
-monitor_custom_tags           = { <key-name> : <value> }
-opensearch_custom_tags        = { <key-name> : <value> }
-pgbouncer_custom_tags         = { <key-name> : <value> }
-postgres_custom_tags          = { <key-name> : <value> }
-praefect_custom_tags          = { <key-name> : <value> }
-praefect_postgres_custom_tags = { <key-name> : <value> }
-redis_cache_custom_tags       = { <key-name> : <value> }
-redis_custom_tags             = { <key-name> : <value> }
-redis_persistent_custom_tags  = { <key-name> : <value> }
-sidekiq_custom_tags           = { <key-name> : <value> }
-
-# AWS managed services
-eks_custom_tags                           = { <key-name> : <value> }
-webservice_node_pool_custom_tags          = { <key-name> : <value> }
-sidekiq_node_pool_custom_tags             = { <key-name> : <value> }
-supporting_node_pool_custom_tags          = { <key-name> : <value> }
-rds_postgres_custom_tags                  = { <key-name> : <value> }
-rds_praefect_postgres_custom_tags         = { <key-name> : <value> }
-rds_geo_tracking_postgres_custom_tags     = { <key-name> : <value> }
-elasticache_redis_custom_tags             = { <key-name> : <value> }
-elasticache_redis_cache_custom_tags       = { <key-name> : <value> }
-elasticache_redis_persistent_custom_tags  = { <key-name> : <value> }
-opensearch_vm_custom_tags                 = { <key-name> : <value> }
-opensearch_service_custom_tags            = { <key-name> : <value> }
-elb_internal_custom_tags                  = { <key-name> : <value> }
-
-# GCP managed services (use _labels suffix)
-gke_custom_labels                                 = { <key-name> : <value> }
-webservice_node_pool_custom_labels                = { <key-name> : <value> }
-sidekiq_node_pool_custom_labels                   = { <key-name> : <value> }
-supporting_node_pool_custom_labels                = { <key-name> : <value> }
-cloud_sql_postgres_custom_labels                  = { <key-name> : <value> }
-cloud_sql_praefect_postgres_custom_labels         = { <key-name> : <value> }
-cloud_sql_geo_tracking_postgres_custom_labels     = { <key-name> : <value> }
-memorystore_redis_custom_labels                   = { <key-name> : <value> }
-memorystore_redis_cache_custom_labels             = { <key-name> : <value> }
-memorystore_redis_persistent_custom_labels        = { <key-name> : <value> }
-
-# Object storage buckets (AWS and GCP)
-object_storage_custom_tags = { <key-name> : <value> }
-object_storage_buckets_custom_tags = {
-  "artifacts"        = { <key-name> : <value> }
-  "backups"          = { <key-name> : <value> }
-  "dependency-proxy" = { <key-name> : <value> }
-  "lfs"              = { <key-name> : <value> }
-  "mr-diffs"         = { <key-name> : <value> }
-  "packages"         = { <key-name> : <value> }
-  "terraform-state"  = { <key-name> : <value> }
-  "uploads"          = { <key-name> : <value> }
-  "registry"         = { <key-name> : <value> }
-  "ci-secure-files"  = { <key-name> : <value> }
-  "pages"            = { <key-name> : <value> }
-}
-```
-
-### AWS Tag Management
-
-AWS has specific tag management behaviors that differ from other cloud providers. The Toolkit provides options to control the `Name` tag and supports the [Terraform AWS Provider's tag handling functionality](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging).
-
-#### Name Tag
-
-The AWS [`Name` tag](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html) is displayed in the AWS Console for resource identification. By default, the Toolkit sets this tag on all AWS resources (instances, volumes, network resources, security groups and more).
-
-To configure the `Name` tag behavior, set the following variable in your Terraform [Environment config file](environment_provision.md#configure-module-settings-environmenttf):
-
-- `default_set_name_tags` - Controls whether the Toolkit sets the `Name` tag on AWS resources. Defaults to `true`.
-
-```tf
-default_set_name_tags = false
-```
-
-> [!note]
-> If disabling Name tags, update Ansible inventory to use `tag:gitlab_node_name` instead of `tag:Name` ([configuration guide](environment_configure.md#amazon-web-services-aws)).
-
-#### Provider-Level Tag Configuration
-
-The AWS provider supports [default_tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags-1) to apply tags globally and [ignore_tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging#ignoring-changes-in-all-resources) to prevent Terraform from removing externally-managed tags.
-
-**Apply tags to all resources:**
-
-```hcl
-provider "aws" {
-  default_tags {
-    tags = {
-      Environment = "Production"
-      ManagedBy   = "Terraform"
-    }
-  }
-}
-```
-
-**Prevent removal of external tags:**
-
-By Terraform's design, `terraform apply` removes tags applied outside of Terraform. Use `ignore_tags` to prevent this:
-
-```hcl
-provider "aws" {
-  ignore_tags {
-    keys         = ["cost_center", "billing_owner"]
-    key_prefixes = ["patch-", "compliance-"]
-  }
-}
-```
-
-Use `key_prefixes` for tags with dynamic suffixes, for example `"patch-"` would match `patch-1-2-3`.
+Custom, free-form tagging of resources beyond these categories is not currently supported by the `gitlab_ref_arch_nutanix` module.

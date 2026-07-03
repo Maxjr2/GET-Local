@@ -1,7 +1,0 @@
-[default]
-use_iam_profile = true
-bucket_location = {{ aws_region }}
-multipart_chunk_size_mb = 128
-{% if aws_s3_endpoint != '' %}
-host_base = {{ aws_s3_endpoint }}
-{% endif %}

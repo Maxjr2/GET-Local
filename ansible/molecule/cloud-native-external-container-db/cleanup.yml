@@ -1,2 +1,0 @@
----
-- import_playbook: ../molecule_tasks/k3d/cleanup.yml
