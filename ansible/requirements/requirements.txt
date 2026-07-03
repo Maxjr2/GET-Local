@@ -5,7 +5,7 @@
 #    pip-compile --no-annotate --output-file=/requirements.txt --strip-extras ansible-python-packages.txt
 #
 aiohappyeyeballs==2.6.2
-aiohttp==3.13.5
+aiohttp==3.14.1
 aiosignal==1.4.0
 ansible==13.7.0
 ansible-core==2.20.6
