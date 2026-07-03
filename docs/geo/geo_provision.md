@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](../environment_provision.md)
 - [GitLab Environment Toolkit - Configuring the environment with Ansible](../environment_configure.md)
 - [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](../environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](../environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](../environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](../environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](../environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](../environment_advanced_monitoring.md)
@@ -58,13 +56,16 @@ module "gitlab_ref_arch_*" {
 Next you need to add some new labels to every site within you deployment. These labels are used to identify each site as belonging to your Geo deployment:
 
 - `geo_site` - used to identify each site with unique identifier. This should be a unique way to identify a site e.g. `london-office`. We recommend avoiding terms like primary and secondary in these site names, this is because the primary and secondary sites can change when performing failover.
-- `geo_deployment` - used to identify that primary and secondary sites belong to the same Geo deployment. This must be unique across all Geo deployments that will be stored alongside each other e.g. within the same GCP project.
+- `geo_deployment` - used to identify that primary and secondary sites belong to the same Geo deployment. This must be unique across all Geo deployments that will be stored alongside each other.
+
+> [!note]
+> `gitlab_ref_arch_nutanix` already exposes both `geo_site` and `geo_deployment` variables, following the same pattern as the other `ref_arch` modules.
 
 You will need to add them into your `environment.tf` file:
 
 ```tf
-module "gitlab_ref_arch_*" {
-  source = "../../modules/gitlab_ref_arch_*"
+module "gitlab_ref_arch_nutanix" {
+  source = "../../modules/gitlab_ref_arch_nutanix"
 
   geo_site = "geo-site-london"
   geo_deployment = "my-geo-deployment"
@@ -72,187 +73,12 @@ module "gitlab_ref_arch_*" {
   [...]
 ```
 
-Once the configuration has been updated, you may need to add some additional configuration settings depending on your setup. If you are using cloud provided [object storage replication](./geo_provision.md#object-storage-replication) or [VPC Peering](./geo_provision.md#vpc-peering) then you should read the corresponding sections below.
-
-> [!tip]
-> If you are deploying two Geo environments on GCP and into the same Project you'll need to configure unique [Service Account Prefixes](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_provision.md#service-account-prefix-gcp) for each.
-
 Once all settings are in place we can run the `terraform apply` command against the primary site followed by any secondary sites.
 
 ## Object Storage Replication
 
-By default, object storage replication will be handled by GitLab, if required, object storage replication can be configured to be handled by the cloud provider instead. To do so you will first need to disable Ansible from enabling replication by adding `geo_enable_object_storage_replication: false` into your primary site's Ansible inventory.
-Next you will need to follow the below steps for your cloud provider.
+By default, object storage replication will be handled by GitLab. This fork does not provision managed Object Storage or offer a provider-managed replication option (Nutanix has no equivalent module support for this) - Object Storage for each site must be configured separately via [Custom Config](../environment_advanced.md#custom-config), and cross-site replication of the underlying buckets (e.g. via Nutanix Objects replication policies, or your S3-compatible store's own replication feature) should be set up directly against that storage layer rather than through Terraform.
 
-### AWS S3 Bucket Replication
+## Network Connectivity Between Sites
 
-Enabling [AWS Object Storage Replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html) will automatically copy new items from your current primary's S3 storage buckets to your secondaries. To enable this you will first need to create the buckets for your primary and secondary sites. Once the secondary site is created. You will be able to take the object storage buckets information from the Terraform output.
-
-> [!caution]
-> Ensure you copy over all the values listed below in full. Failure to do so will cause Geo Replication to fail.
-
-```json
-  "object_storage_buckets": {
-    "artifacts" = "<artifacts_bucket_arn>"
-    "backups" = "<backups_bucket_arn>"
-    "dependency-proxy" = "<dependency-proxy_bucket_arn>"
-    "lfs" = "<lfs_bucket_arn>"
-    "mr-diffs" = "<mr-diffs_bucket_arn>"
-    "packages" = "<packages_bucket_arn>"
-    "registry" = "<registry_bucket_arn>"
-    "terraform-state" = "<terraform-state_bucket_arn>"
-    "uploads" = "<uploads_bucket_arn>"
-    "ci_secure_files" = "<ci_secure_files_bucket_arn>"
-  },
-  "object_storage_kms_key_arn": "<object_storage_kms_key_arn>"
-```
-
-Using this output, add the below values to the primary sites `environment.tf` file. These values are used so that the primary can setup replication rules with the secondaries buckets.
-
-- `object_storage_destination_buckets` - A map of each destination buckets name and ARN. For example:
-
-  ```yml
-  object_storage_destination_buckets = tomap({
-      "artifacts"        = "<artifacts_bucket_arn>"
-      "backups"          = "<backups_bucket_arn>"
-      "dependency-proxy" = "<dependency-proxy_bucket_arn>"
-      "lfs"              = "<lfs_bucket_arn>"
-      "mr-diffs"         = "<mr-diffs_bucket_arn>"
-      "packages"         = "<packages_bucket_arn>"
-      "registry"         = "<registry_bucket_arn>"
-      "terraform-state"  = "<terraform-state_bucket_arn>"
-      "uploads"          = "<uploads_bucket_arn>"
-      "ci_secure_files"  = "<ci_secure_files_bucket_arn>"
-    })
-  ```
-
-- `object_storage_replica_kms_key_id` - The ARN used to encrypt the secondaries object storage buckets.
-
-In addition to the above, the following optional settings are also available to be configured:
-
-- `object_storage_replication_delete_marker_status` - Sets if [deletion markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-marker-replication.html) are replicated. Can be set to `Enabled` or `Disabled`. Optional, default is `Enabled`.
-- `object_storage_replication_metrics_status` - Sets if [replication metrics](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-metrics.html) should be enabled. Can be set to `Enabled` or `Disabled`. Optional, default is `Disabled`.
-
-Once the settings have been added you will need to rerun `terraform apply` for the primary site. This will create the replication rules from the primary's source buckets to the secondaries.
-
-> [!note]
-> Once replication is enabled AWS will only replicate new objects. AWS recommends using [batch replication](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html) to copy any existing items.
-
-## VPC Peering
-
-The Toolkit can configure VPC peering which allows traffic to flow in both directions from a primary and secondary site just like a normal internal connection. Depending on the Geo setup being used, this could be required if the Geo sites are located on different VPC networks. Peering will be required when using GitLab managed PostgreSQL or when the [internal URLs](https://docs.gitlab.com/ee/administration/geo/#internal-url) being used resolve to private IP addresses.
-
-When setting up VPC peering it is always required to have different subnet CIDR blocks on each network.
-
-> [!note]
-> Peering is only available, within the toolkit, when using a single secondary site.
-
-### VPC Peering (AWS)
-
-> [!note]
-> Peering can only be configured directly by the Toolkit when using a [created network](../environment_advanced_network.md#created-aws) with `create_network = true` on all Geo sites. For existing networks, peering should be configured separately.
-
-AWS VPC peering requires a handshake, a VPC must first request the peering and the other has to then accept it. As such, this requires Terraform to be executed a couple of times to go through this process.
-
-To set up VPC peering:
-
-1. On the primary site, provision it by running `terraform apply`. This will output some values that are required by the secondary site to set up peering.
-
-   ```json
-   "network" = {
-     "peer_connection_id" = "<peer_connection_id>"
-     "vpc_cidr_block" = "<vpc_cidr_block>"
-     "vpc_id" = "<vpc_id>"
-     "vpc_subnet_priv_ids" =["vpc_subnet_priv_id1", "vpc_subnet_priv_id2"]
-     "vpc_subnet_pub_ids" = ["vpc_subnet_pub_id1", "vpc_subnet_pub_id2"]
-   }
-   ```
-
-1. Using the Terraform output in the last step, add the below values to the secondary site's `environment.tf` file. These values are used so that the secondary site is able to set up a peering connection with the primary site's VPC.
-
-   - `peer_region` - The AWS region used for the primary site. This won't be in the output for Terraform but is something that is defined as part of the environment config.
-   - `peer_vpc_id` - The VPC ID of the primary site.
-   - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC.
-
-   > [!note]
-   > When setting up VPC peering, the CIDR used for each VPC must be different and cannot overlap.
-
-1. On the secondary site, provision it by running `terraform apply`. This will output some values that are required by the primary site to complete the peering setup.
-
-   ```json
-   "network" = {
-     "peer_connection_id" = "<peer_connection_id>"
-     "vpc_cidr_block" = "<vpc_cidr_block>"
-     "vpc_id" = "<vpc_id>"
-     "vpc_subnet_priv_ids" =["vpc_subnet_priv_id1", "vpc_subnet_priv_id2"]
-     "vpc_subnet_pub_ids" = ["vpc_subnet_pub_id1", "vpc_subnet_pub_id2"]
-   }
-   ```
-
-1. Using the Terraform output in the last step, add the below values to the primary site's `environment.tf` file.
-
-   - `peer_connection_id` - The ID of the peer connection created.
-   - `peer_vpc_cidr` - The CIDR used for the internal network as part of the VPC on the secondary site.
-
-1. On the primary site, rerun `terraform apply`. This will accept the peering request created by the secondary site as well as create routing and firewall rules to allow traffic from the secondary VPC. After this, peering will now be configured and allow your Geo sites to communicate internally.
-
-### VPC Peering (GCP)
-
-The Toolkit can set up peering for networks it creates in GCP. This can be used for certain Geo setups to allow traffic to flow in both directions.
-
-> [!important]
-> [GCP Cloud SQL does not support setting up replicas directly in a different VPC network or a different project](../environment_advanced_services.md#gcp-cloud-sql---geo). VPC Peering in turn is not applicable to that service as a result.
-
-Setting up peering for created networks is done as follows:
-
-1. Provision the two environments via Terraform as normal with created networks. For one site the create network's subnetwork CIDR block will need to be changed to ensure there's no clashes across the environments. An example of configuring the network for each site would be:
-
-   ```tf
-   # Site 1
-   create_network = true
-   
-   # Site 2
-   create_network                        = true
-   create_network_subnet_cidr_block      = "<site-2-subnet-cidr-block>" # Set to a valid CIDR block that's different from Site 1
-   ```
-
-1. Once the environments have been provisioned, you will need to get some information from the output for each site.
-
-   ```tf
-   # Site 1
-   "network" = {
-     "vpc_name" = "<site-1-vpc-name>"
-     "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-1-vpc-name>"
-     "vpc_subnet_name" = "<site-1-subnet-name>"
-     "vpc_subnet_cidr_block" = "<site-1-subnet-cidr-block>"
-   }
-
-   # Site 2
-   "network" = {
-     "vpc_name" = "<site-2-vpc-name>"
-     "vpc_self_link" = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-2-vpc-name>"
-     "vpc_subnet_name" = "<site-2-subnet-name>"
-     "vpc_subnet_cidr_block" = "<site-2-subnet-cidr-block>"
-   }
-   ```
-
-1. With the information gathered in the previous step, the following settings need to be configured on each site to configure peering:
-
-   - `create_network_peer` - The Self Link of the target VPC to peer to.
-   - `create_network_peer_subnet_cidr_block` - The subnet block of the target VPC to peer to. This only needs to be configured if the target VPC has had it's subnet CIDR block changed via the `create_network_subnet_cidr_block` setting.
-
-   An example of how this is configured is as follows:
-   
-   ```tf
-   # Site 1
-   create_network                        = true
-   create_network_peer                   = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-2-vpc-name>"
-   create_network_peer_subnet_cidr_block = "<site-2-subnet-cidr-block>"
-   
-   # Site 2
-   create_network                        = true
-   create_network_subnet_cidr_block      = "<site-2-subnet-cidr-block>"
-   create_network_peer                   = "https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/<site-1-vpc-name>"
-   ```
-
-   Once set run `terraform apply` on each site to configure the peering and the required firewall rules. After this has completed peering will now be active.
+Geo sites need bidirectional network connectivity for PostgreSQL streaming replication and the [internal URLs](https://docs.gitlab.com/ee/administration/geo/#internal-url) used between them. This fork's Nutanix module does not manage network peering/VPN infrastructure between sites (Nutanix AHV has no Terraform-managed equivalent of cloud provider VPC peering in this fork) - if your Geo sites live on separate subnets/VLANs or Nutanix clusters, connectivity between them (VPN, routing, firewall rules) needs to be established at the network level before provisioning.

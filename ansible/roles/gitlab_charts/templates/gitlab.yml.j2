@@ -28,22 +28,6 @@ gitlab:
     nodeSelector:
       workload: "{{ gitlab_charts_webservice_node_selector }}"
 {% endif %}
-{% if cloud_provider == 'aws' %}
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
-{% if gitlab_operator %}
-      name: "gitlab-webservice"
-{% endif %}
-{% endif %}
-{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
-    serviceAccount:
-      annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-webservice@{{ gcp_project }}.iam.gserviceaccount.com"
-{% if gitlab_operator %}
-      name: "gitlab-webservice"
-{% endif %}
-{% endif %}
     metrics:
       enabled: true
       serviceMonitor:
@@ -91,22 +75,6 @@ gitlab:
     nodeSelector:
       workload: "{{ gitlab_charts_sidekiq_node_selector }}"
 {% endif %}
-{% if cloud_provider == 'aws' %}
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
-{% if gitlab_operator %}
-      name: "gitlab-sidekiq"
-{% endif %}
-{% endif %}
-{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
-    serviceAccount:
-      annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com"
-{% if gitlab_operator %}
-      name: "gitlab-sidekiq"
-{% endif %}
-{% endif %}
     metrics:
       enabled: true
       podMonitor:
@@ -121,22 +89,6 @@ gitlab:
     backups:
       objectStorage:
         {{ lookup('template', 'object_storage/toolbox_backups_object_storage.' + cloud_provider + '.yml.j2') | indent(width=8) }}
-{% if cloud_provider == 'aws' %}
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
-{% if gitlab_operator %}
-      name: "gitlab-toolbox"
-{% endif %}
-{% endif %}
-{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
-    serviceAccount:
-      annotations:
-        iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
-{% if gitlab_operator %}
-      name: "gitlab-toolbox"
-{% endif %}
-{% endif %}
 {% endif %}
 # Workaround for project deletion bug https://gitlab.com/gitlab-org/gitlab/-/work_items/24110#note_729703160
 {% if not container_registry_enable and gitlab_version != '' and gitlab_version is version('16.0', '<') %}
@@ -379,7 +331,7 @@ global:
     enabled: false # Gitaly runs outside of cluster
 {% endif %}
   hosts:
-{% if cloud_provider != 'aws' and nginx_ingress_setup %}
+{% if nginx_ingress_setup %}
     externalIP: "{{ external_ip }}"
 {% endif %}
 {% if cloud_native_hybrid_geo_unified_url and nginx_ingress_setup %}
@@ -594,14 +546,6 @@ nginx-ingress:
       enabled: true
       serviceMonitor:
         enabled: true
-{% if aws_allocation_ids != "" %}
-    service:
-      annotations:
-        service.beta.kubernetes.io/aws-load-balancer-type: nlb
-        service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "{{ aws_allocation_ids | replace(' ', '') }}"
-        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: workload=webservice
-{% endif %}
 {% if cloud_native_hybrid_geo_role == 'primary' %}
     config:
       use-forwarded-headers: true
@@ -721,22 +665,6 @@ registry:
   storage:
     secret: gitlab-container-registry-object-storage-key
     key: config
-{% if cloud_provider == 'aws' %}
-  serviceAccount:
-    annotations:
-      eks.amazonaws.com/role-arn: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
-{% if gitlab_operator %}
-    name: "gitlab-registry"
-{% endif %}
-{% endif %}
-{% if cloud_provider == 'gcp' and gcp_gke_workload_identity_setup %}
-  serviceAccount:
-    annotations:
-      iam.gke.io/gcp-service-account: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com"
-{% if gitlab_operator %}
-    name: "gitlab-registry"
-{% endif %}
-{% endif %}
   metrics:
     enabled: true
     serviceMonitor:
@@ -809,20 +737,6 @@ gatewayApiResources:
 {% else %}
         protocol: "HTTP"
 {% endif %}
-{% endif %}
-{% if aws_allocation_ids != "" %}
-    infrastructure:
-      annotations:
-        service.beta.kubernetes.io/aws-load-balancer-type: nlb
-        service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "{{ aws_allocation_ids | replace(' ', '') }}"
-        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: workload=webservice
-{% elif gcp_ip_resource_names != "" %}
-    infrastructure:
-      annotations:
-        networking.gke.io/load-balancer-type: External
-        networking.gke.io/load-balancer-ip-addresses: "{{ gcp_ip_resource_names | replace(' ', '') }}"
-        cloud.google.com/l4-rbs: enabled
 {% endif %}
   envoy:
 {% if gitlab_charts_node_selector_enable %}

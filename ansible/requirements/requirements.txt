@@ -4,6 +4,11 @@
 #
 #    pip-compile --no-annotate --output-file=/requirements.txt --strip-extras ansible-python-packages.txt
 #
+# NOTE: ansible-python-packages.txt was trimmed (Azure/AWS/GCP SDK deps removed, no
+# longer needed once the aws.*/gcp.*/azure.* Ansible collections were dropped) but this
+# lockfile could not be regenerated in this environment (pip-compile unavailable).
+# Regenerate with the command above before the next release.
+#
 aiohappyeyeballs==2.6.2
 aiohttp==3.13.5
 aiosignal==1.4.0

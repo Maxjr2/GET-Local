@@ -135,51 +135,11 @@ registry['enable'] = false
 
 # Storage Config
 ## Object Storage - consolidated object storage configuration
+## Note: cloud-provider object storage connection templates have been removed (Nutanix/on-prem
+## has no built-in provider template). Configure object storage via Custom Config instead
+## (see gitlab_rails_custom_config_file).
 
-{% if gitlab_object_storage_type == 'object_storage' and cloud_provider != 'none' %}
-gitlab_rails['object_store']['enabled'] = true
-
-### Provider-specific connection settings
-gitlab_rails['object_store']['connection'] = {
-  {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
-}
-
-{% for obj_stor_name in (gitlab_object_storage_list | reject('equalto', 'backups|registry|ci_secure_files|external_diffs')) %}
-gitlab_rails['object_store']['objects']['{{ obj_stor_name }}']['bucket'] = '{{ gitlab_object_storage_bucket_names[obj_stor_name] }}'
-{% endfor %}
-
-## Object Storage - External Diffs (Outdated)
-{% if 'external_diffs' in gitlab_object_storage_list %}
-gitlab_rails['external_diffs_enabled'] = true
-gitlab_rails['external_diffs_when'] = 'outdated'
-gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "{{ gitlab_object_storage_bucket_names['external_diffs'] }}"
-{% endif %}
-
-## Object Storage - CI Secure Files (15.7+)
-{% if 'ci_secure_files' in gitlab_object_storage_list %}
-gitlab_rails['ci_secure_files_object_store_enabled'] = true
-gitlab_rails['ci_secure_files_object_store_remote_directory'] = "{{ gitlab_object_storage_bucket_names['ci_secure_files'] }}"
-gitlab_rails['ci_secure_files_object_store_connection'] = {
-  {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
-}
-{% endif %}
-
-## Object Storage - Container Registry
-{% if container_registry_enable %}
-registry['storage'] = {
-  {{ lookup('template', 'object_storage/registry.' + cloud_provider + '.rb.j2') | indent(width=2) }}
-}
-{% endif %}
-
-## Object Storage - Backups
-{% if 'backups' in gitlab_object_storage_list %}
-gitlab_rails['backup_upload_connection'] = {
-  {{ lookup('template', 'object_storage/' + cloud_provider + '.rb.j2') | indent(width=2) }}
-}
-gitlab_rails['backup_upload_remote_directory'] = "{{ gitlab_object_storage_bucket_names['backups'] }}"
-{% endif %}
-
-{% elif 'gitlab_nfs' in groups and gitlab_object_storage_type == 'nfs' %}
+{% if 'gitlab_nfs' in groups and gitlab_object_storage_type == 'nfs' %}
 
 ## NFS - Objects
 gitlab_rails['uploads_directory'] = '{{ gitlab_nfs_path }}/uploads'

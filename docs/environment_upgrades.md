@@ -5,8 +5,6 @@
 - [GitLab Environment Toolkit - Provisioning the environment with Terraform](environment_provision.md)
 - [GitLab Environment Toolkit - Configuring the environment with Ansible](environment_configure.md)
 - [GitLab Environment Toolkit - Advanced - Custom Config / Tasks / Files, Data Disks, Advanced Search, Container Registry and more](environment_advanced.md)
-- [GitLab Environment Toolkit - Advanced - Cloud Native Hybrid](environment_advanced_hybrid.md)
-- [GitLab Environment Toolkit - Advanced - Component Cloud Services / Custom (Load Balancers, PostgreSQL, Redis)](environment_advanced_services.md)
 - [GitLab Environment Toolkit - Advanced - SSL](environment_advanced_ssl.md)
 - [GitLab Environment Toolkit - Advanced - Network Setup](environment_advanced_network.md)
 - [GitLab Environment Toolkit - Advanced - Monitoring](environment_advanced_monitoring.md)
@@ -101,10 +99,7 @@ However, the [standard GitLab Upgrade rules still apply](https://docs.gitlab.com
 
 ### Database Upgrades
 
-Upgrades to Postgres version differ depending on the source as follows:
-
-- Cloud Providers ([RDS](environment_advanced_services.md#aws-rds---version), [Cloud SQL](environment_advanced_services.md#gcp-cloud-sql)) - Version handling and upgrades can differ notably depending on the provider. The Toolkit exposes the relevant variable to change what version should be used by the provider, but it's recommended to refer to the provider's documentation for what values are available and how upgrades are processed.
-- Linux package (Omnibus) - Upgrades to the database can be done by following the [documentation](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
+Upgrades to the Postgres version can be done by following the Linux package (Omnibus) [documentation](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server), as this fork always uses self-managed Postgres VMs (Nutanix has no managed database service equivalent).
 
 ### Upgrades with Downtime
 
@@ -222,6 +217,6 @@ The Toolkit can't handle OS upgrades for you as they typically involve inputs an
 
 ### Avoid Changing Machine OS Image
 
-For VMs on Cloud Providers, **{- you should not change the Machine OS Image in Terraform -}** ([GCP](environment_provision.md#configure-machine-os-image-gcp), [AWS](environment_provision.md#configure-machine-os-image-aws), [Azure](https://gitlab.com/gitlab-org/gitlab-environment-toolkit/-/blob/main/docs/environment_provision.md#configure-machine-os-image-azure)) to try and upgrade the OS on the machine.
+For VMs provisioned via Terraform, **you should not change the `image_uuid` setting** (see the [Nutanix section](environment_provision.md#nutanix) of the Provisioning guide) to try and upgrade the OS on the machine.
 
-In Cloud Providers selecting a Machine OS image is effectively the same as selecting the base disk of a VM and making a change to this will trigger the Cloud Provider to remove the VM and create it anew with the new base this leading to potential data loss.
+Changing the base image UUID is effectively the same as selecting a new base disk for a VM, and making this change will trigger Nutanix to remove the VM and create it anew with the new base, leading to potential data loss.

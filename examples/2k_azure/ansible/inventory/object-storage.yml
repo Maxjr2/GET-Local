@@ -1,4 +1,0 @@
-all:
-  vars:
-    azure_storage_account_name: "<azure_storage_account_name>"
-    azure_storage_access_key: "<azure_storage_access_key>"

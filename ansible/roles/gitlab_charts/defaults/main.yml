@@ -2,22 +2,6 @@
 # Cloud Provider specific
 kubeconfig_setup: false
 
-gcp_backups_service_account_key_file: ""
-gcp_backups_service_account_key_json: "{{ (lookup('file', gcp_backups_service_account_key_file) | string) if gcp_backups_service_account_key_file != '' else '' }}"
-gcp_zone: ""
-gcp_gke_location: "{{ gcp_zone }}"
-gcp_gke_workload_identity_setup: false
-gcp_service_account_prefix: "gl"
-gcp_ip_resource_names: ""
-
-aws_partition: ""
-aws_account: ""
-aws_profile: ""
-
-aws_eks_metrics_server_setup: true
-aws_eks_metrics_server_version: ""
-aws_eks_metrics_server_manifest_url: "https://github.com/kubernetes-sigs/metrics-server/releases/{{ 'latest/download' if aws_eks_metrics_server_version == '' else 'download/' + aws_eks_metrics_server_version }}/components.yaml"
-
 # Operator settings
 gitlab_operator_cert_manager_version: "{{ lookup('env','CERT_MANAGER_VERSION') | default('v1.19.2', true) }}" # https://cert-manager.io/docs/installation/
 gitlab_operator_cert_manager_manifest_url: "https://github.com/cert-manager/cert-manager/releases/download/{{ gitlab_operator_cert_manager_version }}/cert-manager.yaml"
@@ -101,10 +85,6 @@ gitlab_charts_nginx_ingress_enable: false
 ## Memory - Gitaly cgroups are allocated the larger of: 90% of total memory, or total memory minus 6GB. This ensures at least 10% or 6GB (whichever is larger) is available for other processes not covered in cgroups. (gitaly, gitaly-logger, etc...)
 gitlab_charts_gitaly_cgroups_memory_scaler: 0.9
 gitlab_charts_gitaly_cgroups_memory_bytes: "{{ ((([gitlab_charts_gitaly_limits_memory_gb * gitlab_charts_gitaly_cgroups_memory_scaler, gitlab_charts_gitaly_limits_memory_gb - 6] | max) * 1000 * 1000 * 1000) | round | int) if gitlab_charts_gitaly_limits_memory_gb != '' else '' }}"
-
-# Cluster Autoscaler (AWS)
-cluster_autoscaler_charts_namespace: "kube-system"
-cluster_autoscaler_image_tag: # Specific overrides for Cluster Autoscaler image tag if default .0 image has issues
 
 ## OpenBao
 gitlab_charts_openbao_requests_memory: ''

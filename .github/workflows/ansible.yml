@@ -1,0 +1,22 @@
+name: Ansible
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ansible-lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          chmod 700 ansible
+          cd ansible
+          pip install ansible-lint jmespath
+          ansible-galaxy install -r requirements/ansible-galaxy-requirements.yml
+          ansible-lint

@@ -1,7 +1,0 @@
-backend: gcs
-{% if gcp_backups_service_account_key_json != '' %}
-config:
-  gcpProject: "{{ gcp_project }}"
-  secret: gitlab-backups-object-storage-key
-  key: key
-{% endif %}

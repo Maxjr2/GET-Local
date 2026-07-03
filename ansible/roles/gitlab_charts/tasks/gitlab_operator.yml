@@ -109,51 +109,6 @@
     msg: "Operator version for {{ gitlab_version }} could not be found. Exiting..."
   when: gitlab_operator_version == ''
 
-# https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/work_items/1315#note_1796142040
-- name: Create Service Accounts for sub-charts
-  block:
-    - name: Create Service Accounts for Workload Identity
-      k8s:
-        definition:
-          apiVersion: v1
-          kind: ServiceAccount
-          metadata:
-            name: "{{ item.name }}"
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
-            annotations:
-              iam.gke.io/gcp-service-account: "{{ item.gcp_sa }}"
-      loop:
-        - name: "gitlab-sidekiq"
-          gcp_sa: "{{ gcp_service_account_prefix }}-gke-sidekiq@{{ gcp_project }}.iam.gserviceaccount.com"
-        - name: "gitlab-toolbox"
-          gcp_sa: "{{ gcp_service_account_prefix }}-gke-toolbox@{{ gcp_project }}.iam.gserviceaccount.com"
-        - name: "gitlab-webservice"
-          gcp_sa: "{{ gcp_service_account_prefix }}-gke-webservice@{{ gcp_project }}.iam.gserviceaccount.com"
-        - name: "gitlab-registry"
-          gcp_sa: "{{ gcp_service_account_prefix }}-gke-registry@{{ gcp_project }}.iam.gserviceaccount.com"
-      when: gcp_gke_workload_identity_setup
-
-    - name: Create Service Accounts for IRSA
-      k8s:
-        definition:
-          apiVersion: v1
-          kind: ServiceAccount
-          metadata:
-            name: "{{ item.name }}"
-            namespace: "{{ gitlab_cloud_native_release_namespace }}"
-            annotations:
-              eks.amazonaws.com/role-arn: "{{ item.aws_sa }}"
-      loop:
-        - name: "gitlab-sidekiq"
-          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-sidekiq-role"
-        - name: "gitlab-toolbox"
-          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-toolbox-role"
-        - name: "gitlab-webservice"
-          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-webservice-role"
-        - name: "gitlab-registry"
-          aws_sa: "{{ aws_iam_arn_prefix }}:role/{{ prefix }}-eks-registry-role"
-      when: cloud_provider == 'aws'
-
 - name: Lookup GitLab Operator values
   set_fact:
     gitlab_operator_values: "{{ lookup('template', 'templates/operator.yml.j2') | from_yaml | default({}, true) }}"

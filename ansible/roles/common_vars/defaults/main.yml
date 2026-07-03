@@ -18,17 +18,9 @@ ansible_facts_gathered: false
 cloud_provider: ''
 
 internal_addr_use_hostnames: false
-internal_ip_lookup: {gcp: ['networkInterfaces', 0, 'networkIP'], aws: ['private_ip_address'], azure: ['private_ipv4_addresses', 0], none: ['ansible_facts', 'default_ipv4', 'address']}
-internal_hostname_lookup: {gcp: ['ansible_facts', 'fqdn'], aws: ['private_dns_name'], azure: ['ansible_facts', 'fqdn'], none: ['ansible_facts', 'fqdn']}
-internal_addr_lookup: "{{ internal_hostname_lookup[cloud_provider] if internal_addr_use_hostnames else internal_ip_lookup[cloud_provider] }}"
-
-## GCP
-gcp_project: "{{ project_name | default('', true) }}"
-
-## AWS
-aws_region: ""
-aws_allocation_ids: ""
-aws_s3_endpoint: ""
+internal_ip_lookup: {none: ['ansible_facts', 'default_ipv4', 'address']}
+internal_hostname_lookup: {none: ['ansible_facts', 'fqdn']}
+internal_addr_lookup: "{{ internal_hostname_lookup['none'] if internal_addr_use_hostnames else internal_ip_lookup['none'] }}"
 
 ################################################################################
 ## Network Settings
@@ -62,8 +54,8 @@ haproxy_internal_primary_site_group_name: "{% if geo_primary_site_group_name + '
 haproxy_internal_int_addr: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if haproxy_internal_primary_site_group_name in groups else ''}}"
 haproxy_external_int_addr: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'haproxy_external' in groups else '' }}"
 # HAProxy IPs for NGinx real_ip trust configuration
-haproxy_internal_int_ip: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if haproxy_internal_primary_site_group_name in groups else '' }}"
-haproxy_external_int_ip: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if 'haproxy_external' in groups else '' }}"
+haproxy_internal_int_ip: "{{ (groups[haproxy_internal_primary_site_group_name] | sort | map('extract', hostvars, internal_ip_lookup['none']) | join('')) if haproxy_internal_primary_site_group_name in groups else '' }}"
+haproxy_external_int_ip: "{{ (groups['haproxy_external'] | sort | map('extract', hostvars, internal_ip_lookup['none']) | join('')) if 'haproxy_external' in groups else '' }}"
 
 ### Internal Load Balancer
 internal_lb_host: "{{ haproxy_internal_int_addr }}"
@@ -117,14 +109,14 @@ gitlab_object_storage_bucket_names:
   ci_secure_files: "{{ gitlab_object_storage_prefix }}-ci-secure-files"
   pages: "{{ gitlab_object_storage_prefix }}-pages"
 
-gitlab_object_storage_registry_chunksize_mb: "{{ '10' if cloud_provider == 'aws' else '5' }}"
+gitlab_object_storage_registry_chunksize_mb: "5"
 
 # AWS S3 storage driver to use for GitLab container registry
 # https://docs.gitlab.com/update/deprecations/#s3-storage-driver-aws-sdk-v1-for-the-container-registry
 container_registry_aws_storage_driver: "{{ 's3' if gitlab_version != '' and gitlab_version is version('18.3.0', '<') else 's3_v2' }}"
 
 # Container Registry Settings
-container_registry_enable: "{{ (cloud_provider == 'aws' or cloud_provider == 'gcp') and external_url_ssl and external_ssl_source != '' and 'registry' in gitlab_object_storage_list }}"
+container_registry_enable: "{{ external_url_ssl and external_ssl_source != '' and 'registry' in gitlab_object_storage_list }}"
 
 container_registry_external_url: "https://registry.{{ external_host }}"
 container_registry_external_host: "{{ container_registry_external_url | regex_replace('^https?:\/\/') }}"
@@ -166,7 +158,7 @@ openbao_unseal_key_current_id: "static-unseal-0"
 ## OpenBao KMS (AWS) - mutually exclusive with static unseal key
 openbao_unseal_awskms_key_id: ""
 openbao_unseal_awskms_role_arn: ""
-openbao_unseal_awskms_region: "{{ aws_region }}"
+openbao_unseal_awskms_region: ""
 openbao_unseal_awskms_enable: "{{ openbao_unseal_awskms_key_id != '' and openbao_unseal_awskms_role_arn != '' and openbao_unseal_awskms_region != '' }}"
 
 ## OpenBao Database
@@ -294,7 +286,7 @@ praefect_postgres_md5_auth_cidr_blocks: ['0.0.0.0/0']
 
 # GitLab Monitor
 monitor_int_addr: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'monitor' in groups else '' }}"
-monitor_int_ip: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if 'monitor' in groups else '' }}"
+monitor_int_ip: "{{ (groups['monitor'] | sort | map('extract', hostvars, internal_ip_lookup['none']) | join('')) if 'monitor' in groups else '' }}"
 monitor_prometheus_scrape_config_setup: true
 monitor_custom_prometheus_scrape_config: ''
 monitor_custom_rules: []
@@ -309,9 +301,8 @@ redis_host: "{{ redis_primary_int_addr }}"
 redis_password: ""
 redis_port: 6379
 redis_external: "{{ 'redis' not in groups and redis_host != '' }}"
-redis_external_ssl: "{{ cloud_provider == 'aws' }}"
-# https://docs.gitlab.com/omnibus/settings/redis.html#using-google-cloud-memorystore
-redis_external_enable_client: "{{ cloud_provider != 'gcp' }}"
+redis_external_ssl: false
+redis_external_enable_client: true
 
 ## Cache
 redis_cache_primary_int_addr: "{{ (groups['redis_cache_primary'] | sort | map('extract', hostvars, internal_addr_lookup) | join('')) if 'redis_cache' in groups else '' }}"
@@ -344,7 +335,7 @@ sidekiq_int_addrs: "{{ (groups['sidekiq'] | sort | map('extract', hostvars, inte
 
 # GitLab NFS
 gitlab_nfs_int_addr: "{{ groups['gitlab_nfs'] | sort | map('extract', hostvars, internal_addr_lookup) | join('') }}"
-gitlab_nfs_path: "{{ '/mnt/gitlab-nfs' if cloud_provider != 'azure' else '/srv/gitlab-nfs' }}"
+gitlab_nfs_path: "/mnt/gitlab-nfs"
 
 # Search
 opensearch_int_addrs: "{{ (groups['opensearch'] | sort | map('extract', hostvars, internal_addr_lookup) | list) if 'opensearch' in groups else [] }}"
@@ -366,7 +357,6 @@ advanced_search_custom_config: {}
 cloud_native_hybrid_environment: false
 
 cloud_native_hybrid_monitoring_setup: false
-cloud_native_hybrid_cluster_autoscaler_setup: false
 
 # CNG
 gitlab_cloud_native_release_namespace: "{{ gitlab_charts_release_namespace }}"
@@ -494,9 +484,9 @@ geo_primary_site_custom_kubectl_context: ""
 geo_secondary_site_custom_kubectl_context: ""
 
 geo_primary_site_postgres_group_name: "{% if geo_primary_site_group_name + '_postgres_primary' in groups %}{{ geo_primary_site_group_name }}_postgres_primary{% elif geo_primary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_primary_site_group_name }}_gitlab_rails_primary{% elif 'postgres_primary' in groups%}postgres_primary{% else %}gitlab_rails_primary{% endif %}"
-geo_primary_site_postgres_int_ip: "{{ (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) }}"
+geo_primary_site_postgres_int_ip: "{{ (groups[geo_primary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup['none']) | join('')) }}"
 geo_secondary_site_postgres_group_name: "{% if geo_secondary_site_group_name + '_postgres_primary' in groups %}{{ geo_secondary_site_group_name }}_postgres_primary{% elif geo_secondary_site_group_name + '_gitlab_rails_primary' in groups %}{{ geo_secondary_site_group_name }}_gitlab_rails_primary{% else %}{{ '' }}{% endif %}"
-geo_secondary_site_postgres_int_ip: "{{ (groups[geo_secondary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup[cloud_provider]) | join('')) if geo_secondary_site_postgres_group_name != '' else '' }}"
+geo_secondary_site_postgres_int_ip: "{{ (groups[geo_secondary_site_postgres_group_name] | sort | map('extract', hostvars, internal_ip_lookup['none']) | join('')) if geo_secondary_site_postgres_group_name != '' else '' }}"
 
 geo_secondary_postgres_host: ""
 geo_secondary_praefect_postgres_host: ""
