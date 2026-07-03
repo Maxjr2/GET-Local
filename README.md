@@ -28,6 +28,7 @@ In the **configuration** phase, Ansible takes those tagged resources and install
 
 - All [Reference Architecture sizes](https://docs.gitlab.com/ee/administration/reference_architectures) from [1k](https://docs.gitlab.com/ee/administration/reference_architectures/1k_users.html) to [50k](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html) users
 - Linux Package (Omnibus) deployments on GCP, AWS and Azure; on-prem and custom servers also supported via Ansible static inventory (see [supported providers](TECHNICAL_DESIGN.md#supported-cloud-providers))
+- Experimental, self-maintained Terraform support for Nutanix AHV (Linux Package/Omnibus only) — see [Nutanix](docs/environment_provision.md#nutanix)
 - Cloud Native Hybrid via Helm Charts or Operator; Kubernetes cluster provisioning on GCP (GKE) and AWS (EKS)
 
 **Architecture and operations:**

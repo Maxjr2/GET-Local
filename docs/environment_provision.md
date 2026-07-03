@@ -987,6 +987,137 @@ Terraform provides multiple ways to authenticate with the [provider](https://reg
 
 If you are planning to run the toolkit locally, use [Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) authentication method. Otherwise, you can use either a Service Principal or Managed Service Identity when running Terraform non-interactively. Refer to [Authenticating to Azure](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure) documentation for details. Once you have selected the authentication method and obtained the credentials you may export them as Environment Variables following the Terraform instructions for the specific authentication type to fully authenticate for both the provider and backend.
 
+### Nutanix
+
+> [!warning]
+> Nutanix support is an experimental, self-maintained addition to this fork of the Toolkit and is not covered by the same [support policy](../TECHNICAL_DESIGN.md#supported-cloud-providers) as AWS, GCP and Azure. It has not been validated end-to-end against a live Nutanix cluster.
+
+The module for setting up a full GitLab Reference architecture on Nutanix AHV is **`gitlab_ref_arch_nutanix`** (`terraform/modules/gitlab_ref_arch_nutanix`). It follows the same structure as `gitlab_ref_arch_azure`, provisioning VMs via the [`nutanix/nutanix`](https://registry.terraform.io/providers/nutanix/nutanix/latest) provider against a Prism Central endpoint.
+
+Unlike the AWS/GCP/Azure modules, this module does not create the underlying cluster, subnet, storage container or base OS image — these are expected to already exist in Prism Central, and are passed in as UUIDs. It also does not manage external/public IPs (Nutanix AHV has no equivalent resource); external access to HAProxy/GitLab Rails nodes must be handled by your existing network/VLAN routing.
+
+#### Configure Variables (`variables.tf`)
+
+```tf
+variable "prefix" {
+  default = "<environment_prefix>"
+}
+
+variable "nutanix_endpoint" {
+  default = "<prism_central_endpoint>"
+}
+
+variable "nutanix_username" {
+  default = "<nutanix_username>"
+}
+
+variable "nutanix_password" {
+  default = "<nutanix_password>"
+}
+
+variable "cluster_uuid" {
+  default = "<nutanix_cluster_uuid>"
+}
+
+variable "subnet_uuid" {
+  default = "<nutanix_subnet_uuid>"
+}
+
+variable "image_uuid" {
+  default = "<nutanix_image_uuid>"
+}
+
+variable "storage_container_uuid" {
+  default = "<nutanix_storage_container_uuid>"
+}
+
+variable "vm_admin_username" {
+  default = "<vm_admin_username>"
+}
+
+variable "ssh_public_key_file_path" {
+  default = "<ssh_public_key_file_path>"
+}
+```
+
+- `prefix` - Used to set the names and Nutanix categories of the VMs consistently. Once set, do not change.
+- `nutanix_endpoint` / `nutanix_username` / `nutanix_password` - Connection details for your Prism Central instance.
+- `cluster_uuid` - UUID of the target Nutanix AHV cluster.
+- `subnet_uuid` - UUID of the pre-existing subnet/VLAN the VMs should attach to.
+- `image_uuid` - UUID of the pre-existing base OS image (e.g. an Ubuntu 24.04 cloud image) VMs should be cloned from.
+- `storage_container_uuid` - UUID of the storage container used for boot and data disks.
+- `vm_admin_username` / `ssh_public_key_file_path` - The admin user and SSH public key injected into VMs via cloud-init.
+
+#### Configure Terraform settings (`main.tf`)
+
+```tf
+terraform {
+  backend "local" {}
+
+  required_providers {
+    nutanix = {
+      source  = "nutanix/nutanix"
+      version = "~> 2.4"
+    }
+  }
+}
+
+provider "nutanix" {
+  endpoint = var.nutanix_endpoint
+  username = var.nutanix_username
+  password = var.nutanix_password
+  insecure = false
+}
+```
+
+Swap the `local` backend for a remote one (e.g. `s3`, `azurerm`, `gcs`) for anything beyond a single local trial.
+
+#### Configure Module settings (`environment.tf`)
+
+As with the other providers, sizing follows the [Reference Architectures](https://docs.gitlab.com/ee/administration/reference_architectures/) — set the `*_node_count` and `*_size` variables for the components you need. `*_size` is an object instead of a named SKU string, since Nutanix has no named machine sizes:
+
+```tf
+module "gitlab_ref_arch_nutanix" {
+  source = "../../modules/gitlab_ref_arch_nutanix"
+
+  prefix                  = var.prefix
+  cluster_uuid            = var.cluster_uuid
+  subnet_uuid             = var.subnet_uuid
+  image_uuid              = var.image_uuid
+  storage_container_uuid  = var.storage_container_uuid
+  vm_admin_username       = var.vm_admin_username
+  ssh_public_key          = file(var.ssh_public_key_file_path)
+
+  # 1k
+  gitlab_rails_node_count = 1
+  gitlab_rails_size = {
+    num_sockets          = 4
+    num_vcpus_per_socket = 2
+    memory_size_mib      = 8192
+  }
+}
+
+output "gitlab_ref_arch_nutanix" {
+  value = module.gitlab_ref_arch_nutanix
+}
+```
+
+- `*_node_count` - The number of machines to set up for that component.
+- `*_size` - Object with `num_sockets`, `num_vcpus_per_socket` and `memory_size_mib`. Falls back to `default_size` if unset.
+- `*_disk_size` - Boot disk size in GB. For Gitaly this defaults to `4095`; other components fall back to `default_disk_size` (`100`).
+- `*_data_disks` - Optional list of extra disks (`name`, `size`, `storage_container_uuid`, `index`).
+
+> [!note]
+> Redis prefixes depend on the target Reference Architecture - set `redis_*` for combined Redis, `redis_cache_*` and `redis_persistent_*` for separated Redis setup.
+
+Object Storage is not provisioned by this module - Nutanix Objects buckets (or any S3-compatible store) must be created out of band and configured via [Custom Config](environment_advanced.md#custom-config), the same fallback documented for [Custom Servers (On Prem)](environment_advanced.md#custom-servers-on-prem).
+
+Tagging for Ansible dynamic inventory grouping is done via Nutanix categories (`gitlab_node_prefix`, `gitlab_node_type`, `gitlab_node_level`) rather than free-form tags — the module creates the required category keys/values itself, since Nutanix requires category values to be pre-registered before they can be attached to a VM.
+
+#### Configure Authentication (Nutanix)
+
+Authentication to Prism Central is via `username`/`password` on the `nutanix` provider block (or the `NUTANIX_USERNAME`/`NUTANIX_PASSWORD`/`NUTANIX_ENDPOINT` environment variables). See the [provider documentation](https://registry.terraform.io/providers/nutanix/nutanix/latest/docs) for other authentication options (e.g. `api_key`).
+
 ### Sensitive variable handling in Terraform
 
 There may be times when you have to pass in sensitive variables in the Terraform modules, such as passwords for [Cloud Services](environment_advanced_services.md).

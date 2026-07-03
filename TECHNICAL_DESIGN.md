@@ -126,6 +126,8 @@ The Toolkit primarily supports AWS and GCP as target Cloud Providers, [following
 
 We're unable to support or accept any contributions for any additional Cloud Providers directly as this would come with a significant maintenance cost and would require access to them on our end for long term testing.
 
+This fork additionally includes self-maintained Terraform modules (`gitlab_nutanix_instance`, `gitlab_ref_arch_nutanix`) for provisioning Linux Package (Omnibus) deployments on Nutanix AHV. These follow the same structure as the Azure modules but are not held to the same support/testing guarantee described above — see [Nutanix](docs/environment_provision.md#nutanix) in the provisioning docs.
+
 ### Terraform
 
 Our Terraform code follows a simple encapsulation approach through [Terraform Modules](https://developer.hashicorp.com/terraform/language/modules/develop).
