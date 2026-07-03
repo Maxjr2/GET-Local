@@ -1,0 +1,29 @@
+# Requires the `nutanix.ncp` Ansible collection (`ansible-galaxy collection install nutanix.ncp`).
+#
+# NOTE: the exact host-var path Nutanix categories are exposed under depends on the
+# installed nutanix.ncp collection version. Verify `categories.gitlab_node_type` /
+# `categories.gitlab_node_level` and the NIC IP path below against your installed
+# collection version (`ansible-doc -t inventory nutanix.ncp.ntnx_prism_vm_inventory_v2`)
+# before relying on this in production.
+plugin: nutanix.ncp.ntnx_prism_vm_inventory_v2
+
+pc_hostname: "<prism_central_endpoint>"
+pc_username: "<nutanix_username>"
+pc_password: "<nutanix_password>"
+pc_port: 9440
+validate_certs: false
+
+filters:
+  category_key: "gitlab_node_prefix"
+  category_value: "<environment_prefix>"
+
+keyed_groups:
+  - prefix: ''
+    separator: ''
+    key: categories.gitlab_node_type | default('ungrouped')
+  - prefix: ''
+    separator: ''
+    key: categories.gitlab_node_level | default('ungrouped')
+
+compose:
+  ansible_host: nics[0].ip_addresses[0]
