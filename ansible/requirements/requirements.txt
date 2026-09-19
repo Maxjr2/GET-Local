@@ -9,7 +9,7 @@ aiohttp==3.13.5
 aiosignal==1.4.0
 ansible==13.7.0
 ansible-core==2.20.6
-anyio==4.13.0
+anyio==4.14.2
 applicationinsights==0.11.10
 argcomplete==3.5.3
 attrs==26.1.0
